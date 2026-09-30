@@ -15,7 +15,10 @@
       ],
       "notes": "임대차 계약 조건은 확정. 시공 일정은 협력업체 회신 후 다시 조정 필요.",
       "links": [
-        { "title": "쏘플파티룸 홈페이지", "url": "https://example.com" }
+        {
+          "title": "쏘플파티룸 홈페이지",
+          "url": "https://example.com"
+        }
       ],
       "tasks": [
         {
@@ -98,6 +101,53 @@
           "status": "대기",
           "due": "2026-10-17",
           "priority": "높음"
+        }
+      ]
+    }
+  ],
+  "stores": [
+    {
+      "name": "신촌점",
+      "brand": "쏘플파티룸",
+      "region": "서울 서대문",
+      "address": "",
+      "status": "운영중",
+      "manager": "최시준",
+      "openDate": "2025-03-14",
+      "notes": "주말 예약률 높은 지점. 소모품은 월 1회 일괄 발주.",
+      "tasks": [
+        {
+          "title": "에어컨 필터 교체",
+          "status": "대기",
+          "due": "2026-10-04"
+        },
+        {
+          "title": "소파 쿠션 커버 세탁 발주",
+          "status": "진행중",
+          "assignee": "최시준",
+          "due": "2026-10-02"
+        }
+      ]
+    },
+    {
+      "name": "성수점",
+      "brand": "쏘플파티룸",
+      "region": "서울 성동",
+      "address": "",
+      "status": "오픈준비",
+      "manager": "최시준",
+      "openDate": "",
+      "notes": "10월 오픈 목표. 시공 완료 후 가구 반입 예정.",
+      "tasks": [
+        {
+          "title": "도어락·CCTV 설치 확인",
+          "status": "대기",
+          "due": "2026-10-20"
+        },
+        {
+          "title": "예약 채널 등록",
+          "status": "대기",
+          "due": "2026-10-25"
         }
       ]
     }

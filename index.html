@@ -392,21 +392,27 @@ function download(name,text){const b=new Blob([text],{type:"application/json;cha
 const KEY="mw_data_v1",SKEY="mw_session_v1";
 const TASK_ST=["대기","진행중","검토","완료"];
 const PROJ_ST=["대기","진행중","보류","완료"];
+const STORE_ST=["운영중","오픈준비","휴업","종료"];
 const PRIO=["높음","보통","낮음"];
 const ROLES={admin:"관리자",staff:"직원",partner:"협력사"};
 const DEFAULT_BRANDS=["쏘플파티룸","코어무드","TGRZ SPACE","지유코퍼레이션","㈜블랭크","플레이션","밍글","오르비스","신사업","기타"];
-const ST_CLS={"대기":"s-wait","진행중":"s-run","검토":"s-review","완료":"s-done","보류":"s-hold"};
+const ST_CLS={"대기":"s-wait","진행중":"s-run","검토":"s-review","완료":"s-done","보류":"s-hold","운영중":"s-done","오픈준비":"s-review","휴업":"s-hold","종료":"s-wait"};
 const PRIO_CLS={"높음":"prio-high","보통":"prio-mid","낮음":"prio-low"};
 
 /* ═══════════ 저장소 ═══════════ */
 let DB=null,ME=null;
-function loadDB(){try{const r=localStorage.getItem(KEY);DB=r?JSON.parse(r):null;}catch(e){DB=null;}}
+function loadDB(){try{const r=localStorage.getItem(KEY);DB=r?JSON.parse(r):null;}catch(e){DB=null;}if(DB&&!Array.isArray(DB.stores))DB.stores=[];}
 function saveDB(){if(!DB)return;DB.meta.updatedAt=new Date().toISOString();try{localStorage.setItem(KEY,JSON.stringify(DB));}catch(e){toast("저장 공간이 부족합니다. 백업 후 오래된 데이터를 정리하세요.");}}
 function logAct(text){DB.activity.unshift({id:uid("a"),ts:nowHM(),who:ME?ME.name:"시스템",text});if(DB.activity.length>300)DB.activity.length=300;}
 function memberById(id){return DB.members.find(m=>m.id===id)||null;}
 function memberName(id){const m=memberById(id);return m?m.name:"미배정";}
 function projectById(id){return DB.projects.find(p=>p.id===id)||null;}
 function projectTasks(pid){return DB.tasks.filter(t=>t.projectId===pid);}
+function storeById(id){return DB.stores.find(s=>s.id===id)||null;}
+function storeTasks(sid){return DB.tasks.filter(t=>t.storeId===sid);}
+function storeOpenCnt(sid){return DB.tasks.filter(t=>t.storeId===sid&&t.status!=="완료").length;}
+function lastCheckDate(s){return(s.checks&&s.checks.length)?s.checks[0].date:"";}
+function checkOver(s){if(s.status!=="운영중")return 0;const cyc=Number(s.checkCycleDays||7);const last=lastCheckDate(s);if(!last)return cyc;const d=-dday(last);return d>cyc?d-cyc:0;}
 function progressOf(pid){const ts=projectTasks(pid);if(!ts.length)return{d:0,n:0,pct:0};const d=ts.filter(t=>t.status==="완료").length;return{d,n:ts.length,pct:Math.round(d/ts.length*100)};}
 
 /* ═══════════ 권한 ═══════════ */
@@ -415,15 +421,24 @@ function visibleProjects(){if(isAdmin())return DB.projects.slice();const myTasks
 function canSeeProject(p){return isAdmin()||p.ownerId===ME.id||(p.memberIds||[]).includes(ME.id)||DB.tasks.some(t=>t.projectId===p.id&&t.assigneeId===ME.id);}
 function canEditProject(p){return isAdmin()||p.ownerId===ME.id;}
 function canWorkProject(p){return isAdmin()||p.ownerId===ME.id||(p.memberIds||[]).includes(ME.id);}
-function canTouchTask(t,p){if(ME.role==="partner")return t.assigneeId===ME.id;return canWorkProject(p)||t.assigneeId===ME.id;}
+function canTouchTask(t,p){
+  if(t&&t.storeId){const s=storeById(t.storeId);if(!s)return isAdmin();if(ME.role==="partner")return t.assigneeId===ME.id;return canWorkStore(s)||t.assigneeId===ME.id;}
+  if(ME.role==="partner")return t.assigneeId===ME.id;return canWorkProject(p)||t.assigneeId===ME.id;}
+function visibleStores(){if(isAdmin()||ME.role==="staff")return DB.stores.slice();return DB.stores.filter(s=>s.managerId===ME.id||(s.memberIds||[]).includes(ME.id));}
+function canSeeStore(s){return isAdmin()||ME.role==="staff"||s.managerId===ME.id||(s.memberIds||[]).includes(ME.id);}
+function canEditStore(s){return isAdmin()||ME.role==="staff";}
+function canWorkStore(s){return canSeeStore(s);}
 
 /* ═══════════ 초기 데이터 ═══════════ */
-function newDB(ws){return{meta:{app:"myworks",ver:1,workspace:ws,createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()},members:[],brands:DEFAULT_BRANDS.slice(),projects:[],tasks:[],comments:[],activity:[]};}
+function newDB(ws){return{meta:{app:"myworks",ver:1,workspace:ws,createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()},members:[],brands:DEFAULT_BRANDS.slice(),projects:[],stores:[],tasks:[],comments:[],activity:[]};}
 function seedSample(adminId){
   const p1=uid("p");
   DB.projects.push({id:p1,name:"마이웍스 도입·정착",brand:"㈜블랭크",status:"진행중",priority:"높음",ownerId:adminId,memberIds:[],startDate:todayStr(),dueDate:"",summary:"팀·협력사 업무를 마이웍스 한 곳으로 모으고, 클로드 파일 연동 흐름을 정착시키는 온보딩 프로젝트입니다.",goals:["구성원 전원 아이디 발급","클로드 파일 가져오기 1회 이상 실행","주 1회 전체 백업 습관화"],notes:"이 프로젝트는 샘플이자 실제 온보딩 체크리스트입니다. 완료 후 삭제해도 됩니다.",links:[],createdAt:new Date().toISOString(),updatedAt:new Date().toISOString(),source:"직접"});
   const seedTasks=[["구성원 메뉴에서 직원·협력사 아이디 발급","구성원 → 구성원 추가. 역할(직원/협력사)에 따라 보이는 범위가 달라집니다.","진행중"],["첫 프로젝트 직접 만들어 보기","프로젝트 → 새 프로젝트. 브랜드·마감일·참여 구성원을 지정하세요.","대기"],["클로드 대화에서 업무 파일 만들기","연동·데이터 메뉴의 프롬프트를 복사해 클로드 대화에 붙여넣으면 .json 파일을 만들어 줍니다.","대기"],["만든 파일을 연동·데이터에서 가져오기","파일을 올리면 미리보기 후 새 프로젝트 생성 또는 기존 프로젝트 업데이트를 선택할 수 있습니다.","대기"],["전체 백업 파일 내려받기","연동·데이터 → 전체 백업. 데이터는 브라우저에 저장되므로 주 1회 백업을 권장합니다.","대기"],["협력사에 공유 파일 보내 보기","공유할 프로젝트만 골라 파일로 내보내고, 상대는 자기 화면에서 가져오기로 반영합니다.","대기"]];
   seedTasks.forEach((s,i)=>DB.tasks.push({id:uid("t"),projectId:p1,title:s[0],detail:s[1],status:s[2],assigneeId:adminId,assigneeName:"",due:"",priority:i<2?"높음":"보통",createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()}));
+  const s1=uid("s");
+  DB.stores.push({id:s1,name:"샘플 지점 (연습용)",brand:DB.brands[0]||"기타",region:"서울",address:"",status:"운영중",managerId:adminId,memberIds:[],openDate:"",checkCycleDays:7,checks:[],notes:"매장 메뉴 사용법을 익히는 예시입니다. 실제 지점 정보로 바꾸거나 삭제하세요.",links:[],createdAt:new Date().toISOString(),updatedAt:new Date().toISOString(),source:"직접"});
+  [["매장 정보를 실제 지점으로 바꿔 보기","매장 상세의 수정 버튼에서 지역·담당·점검주기를 지정할 수 있습니다."],["\u201c오늘 점검 완료\u201d 버튼 눌러 보기","점검 주기가 지나면 목록에서 경고로 표시됩니다."]].forEach((x,i)=>DB.tasks.push({id:uid("t"),projectId:"",storeId:s1,title:x[0],detail:x[1],status:"대기",assigneeId:adminId,assigneeName:"",due:"",priority:"보통",createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()}));
 }
 
 /* ═══════════ 세션·게이트 ═══════════ */
@@ -453,14 +468,14 @@ function doLogin(){
 function doLogout(){localStorage.removeItem(SKEY);ME=null;location.hash="";showGate("login");}
 
 /* ═══════════ 앱 셸·라우터 ═══════════ */
-const NAV=[["dashboard","홈","⌂"],["projects","프로젝트","▤"],["board","업무보드","☰"],["members","구성원","◉"],["data","연동·데이터","⇅"]];
+const NAV=[["dashboard","홈","⌂"],["projects","프로젝트","▤"],["stores","매장","▣"],["board","업무보드","☰","보드"],["members","구성원","◉"],["data","연동·데이터","⇅","연동"]];
 function enterApp(){
   showGate("app");
   $("#side-ws").textContent=DB.meta.workspace;
   $("#side-uname").textContent=ME.name;
   $("#side-urole").textContent=ROLES[ME.role]+" · "+ME.loginId;
   $("#nav-side").innerHTML=NAV.map(n=>`<button data-nav="${n[0]}"><span class="n-ico">${n[2]}</span>${n[1]}</button>`).join("");
-  $("#tabbar").innerHTML=NAV.map(n=>`<button data-nav="${n[0]}"><span class="n-ico">${n[2]}</span>${n[1]}</button>`).join("");
+  $("#tabbar").innerHTML=NAV.map(n=>`<button data-nav="${n[0]}"><span class="n-ico">${n[2]}</span>${n[3]||n[1]}</button>`).join("");
   if(!location.hash||location.hash==="#")location.hash="#/dashboard";
   route();
 }
@@ -472,8 +487,9 @@ function route(){
   const [page,arg]=h.split("/");
   const v=$("#view");
   if(page==="project"&&arg){const p=projectById(arg);if(p&&canSeeProject(p)){setNav("projects");v.innerHTML=vProjectDetail(p);return;}location.hash="#/projects";return;}
-  const fn={dashboard:vDashboard,projects:vProjects,board:vBoard,members:vMembers,data:vData}[page]||vDashboard;
-  setNav(page in {dashboard:1,projects:1,board:1,members:1,data:1}?page:"dashboard");
+  if(page==="store"&&arg){const st=storeById(arg);if(st&&canSeeStore(st)){setNav("stores");v.innerHTML=vStoreDetail(st);return;}location.hash="#/stores";return;}
+  const fn={dashboard:vDashboard,projects:vProjects,stores:vStores,board:vBoard,members:vMembers,data:vData}[page]||vDashboard;
+  setNav(page in {dashboard:1,projects:1,stores:1,board:1,members:1,data:1}?page:"dashboard");
   v.innerHTML=fn();
   if(page==="data")wireDropzone();
 }
@@ -491,6 +507,8 @@ function stOpts(list,sel){return list.map(s=>`<option ${s===sel?"selected":""}>$
 /* ═══════════ 대시보드 ═══════════ */
 function vDashboard(){
   const vis=visibleProjects();
+  const visStores=visibleStores();
+  const chkNeed=visStores.filter(x=>checkOver(x)>0).length;
   const visIds=new Set(vis.map(p=>p.id));
   const myTasks=DB.tasks.filter(t=>visIds.has(t.projectId)&&(isAdmin()?true:(t.assigneeId===ME.id||t.assigneeId==="")));
   const running=vis.filter(p=>p.status==="진행중").length;
@@ -508,7 +526,7 @@ function vDashboard(){
   <div class="hello">
     <div class="h-date">${dateStr}</div>
     <h1>${esc(ME.name)} 님, 오늘도 굴러갑니다.</h1>
-    <div class="h-line">진행중 프로젝트 ${running}개 · 이번 주 마감 ${week}건${late?` · <span class="d-late">지연 ${late}건</span>`:""}</div>
+    <div class="h-line">진행중 프로젝트 ${running}개${visStores.length?` · 운영 매장 ${visStores.filter(x=>x.status==="운영중").length}곳`:""} · 이번 주 마감 ${week}건${late?` · <span class="d-late">지연 ${late}건</span>`:""}${chkNeed?` · <span class="d-late">점검 필요 ${chkNeed}곳</span>`:""}</div>
   </div>
   <div class="stats">
     <div class="stat"><div class="s-num">${running}<em>개</em></div><div class="s-lb">진행중 프로젝트</div></div>
@@ -520,12 +538,12 @@ function vDashboard(){
     <div>
       <div class="card">
         <h2><span class="bars"></span>오늘의 추진 <span class="cnt">${todays.length}건</span></h2>
-        ${todays.length?todays.map(t=>{const p=projectById(t.projectId);return`
+        ${todays.length?todays.map(t=>{const p=projectById(t.projectId);const st=t.storeId?storeById(t.storeId):null;return`
           <div class="today-item">
             <input type="checkbox" data-act="quick-done" data-id="${t.id}" aria-label="완료 처리">
             <span class="t-title">${esc(t.title)}</span>
             ${dueTag(t.due)}
-            <span class="t-proj" data-act="open-project" data-id="${t.projectId}" style="cursor:pointer">${esc(p?p.name:"")}</span>
+            ${st?`<span class="t-proj" data-act="open-store" data-id="${st.id}" style="cursor:pointer">▣ ${esc(st.name)}</span>`:`<span class="t-proj" data-act="open-project" data-id="${t.projectId}" style="cursor:pointer">${esc(p?p.name:"")}</span>`}
           </div>`;}).join(""):`<div class="empty"><b>오늘 예정된 업무가 없습니다</b>업무보드에서 오늘 할 일을 정해 보세요.</div>`}
       </div>
       <div class="card">
@@ -539,6 +557,17 @@ function vDashboard(){
           </div>`;}).join(""):`<div class="empty"><b>진행중 프로젝트가 없습니다</b>프로젝트 메뉴에서 새로 시작하세요.</div>`}
       </div>
     </div>
+    ${visStores.length?`<div class="card">
+      <h2><span class="bars"></span>매장 한눈에 <span class="cnt">${visStores.length}곳</span></h2>
+      ${visStores.slice().sort((a,b)=>checkOver(b)-checkOver(a)).slice(0,5).map(x=>{const ov=checkOver(x);const oc=storeOpenCnt(x.id);return`
+        <div class="pj-line" data-act="open-store" data-id="${x.id}">
+          <span class="pj-nm">${esc(x.name)}</span>
+          <span class="tag">${esc(x.region||"미지정")}</span>
+          ${ov?`<span class="d-late" style="font-size:12px;white-space:nowrap">점검 +${ov}일</span>`:pill(x.status)}
+          <span class="pj-fr">${oc?oc+"건":""}</span>
+        </div>`;}).join("")}
+      <div style="margin-top:10px;text-align:right"><button class="btn btn-sm btn-ghost" data-act="go-stores">매장 전체 보기 →</button></div>
+    </div>`:""}
     <div class="card">
       <h2>최근 활동</h2>
       ${DB.activity.slice(0,10).map(a=>`<div class="act-line"><span class="a-ts">${esc(a.ts)}</span><span class="a-tx"><b>${esc(a.who)}</b> ${esc(a.text)}</span></div>`).join("")||`<div class="empty">아직 활동 기록이 없습니다.</div>`}
@@ -547,7 +576,7 @@ function vDashboard(){
 }
 
 /* ═══════════ 프로젝트 목록 ═══════════ */
-const F={pjStatus:"전체",pjBrand:"전체",pjQ:"",bdProject:"전체",bdAssignee:"전체"};
+const F={pjStatus:"전체",pjBrand:"전체",pjQ:"",bdProject:"전체",bdAssignee:"전체",stStatus:"전체",stBrand:"전체",stRegion:"전체",stQ:""};
 function vProjects(){
   let list=visibleProjects();
   if(F.pjStatus!=="전체")list=list.filter(p=>p.status===F.pjStatus);
@@ -640,12 +669,121 @@ function vProjectDetail(p){
   </div>`;
 }
 
+/* ═══════════ 매장 목록 ═══════════ */
+function vStores(){
+  let list=visibleStores();
+  const regions=["전체",...new Set(DB.stores.map(x=>x.region||"미지정"))];
+  const brands=["전체",...new Set(DB.stores.map(x=>x.brand||"기타"))];
+  if(F.stStatus!=="전체")list=list.filter(x=>x.status===F.stStatus);
+  if(F.stBrand!=="전체")list=list.filter(x=>(x.brand||"기타")===F.stBrand);
+  if(F.stRegion!=="전체")list=list.filter(x=>(x.region||"미지정")===F.stRegion);
+  if(F.stQ){const q=norm(F.stQ);list=list.filter(x=>norm(x.name+(x.region||"")+(x.brand||"")+(x.address||"")).includes(q));}
+  list.sort((a,b)=>checkOver(b)-checkOver(a)||(a.region||"").localeCompare(b.region||"")||a.name.localeCompare(b.name));
+  const all=visibleStores();
+  const runN=all.filter(x=>x.status==="운영중").length,prepN=all.filter(x=>x.status==="오픈준비").length,chk=all.filter(x=>checkOver(x)>0).length;
+  const canCreate=ME.role!=="partner";
+  return `
+  <div class="page-head">
+    <div><h1><span class="bars"></span>매장</h1><div class="desc">운영중 ${runN} · 오픈준비 ${prepN}${chk?` · <span class="d-late">점검 필요 ${chk}</span>`:""} · 전체 ${all.length}곳</div></div>
+    ${canCreate?`<button class="btn btn-pri" data-act="new-store">＋ 새 매장</button>`:""}
+  </div>
+  <div class="filters">
+    ${["전체",...STORE_ST].map(x=>`<button class="fchip ${F.stStatus===x?"on":""}" data-act="f-st-status" data-v="${x}">${x}</button>`).join("")}
+    <select data-act="f-st-brand">${brands.map(b=>`<option ${F.stBrand===b?"selected":""}>${esc(b)}</option>`).join("")}</select>
+    <select data-act="f-st-region">${regions.map(r=>`<option ${F.stRegion===r?"selected":""}>${esc(r)}</option>`).join("")}</select>
+    <input type="search" placeholder="매장 검색" value="${esc(F.stQ)}" data-act="f-st-q">
+  </div>
+  ${list.length?`<div class="pj-grid">${list.map(x=>{const ov=checkOver(x);const oc=storeOpenCnt(x.id);const lc=lastCheckDate(x);return`
+    <div class="pj-card" data-act="open-store" data-id="${x.id}">
+      <div class="pc-top"><span class="tag">${esc(x.brand||"기타")}</span>${pill(x.status)}</div>
+      <h3>${esc(x.name)}</h3>
+      <div class="pc-sum">${esc(x.region||"지역 미지정")}${x.managerId?` · 담당 ${esc(memberName(x.managerId))}`:""}</div>
+      <div class="pc-bot">
+        <span>${oc?`열린 업무 ${oc}건`:"열린 업무 없음"}</span>
+        ${x.status==="운영중"?(ov?`<span class="d-late" style="font-size:12px">점검 +${ov}일 지남</span>`:`<span class="mono" style="font-size:12px;color:var(--faint)">${lc?"점검 "+fmtD(lc):"점검 기록 없음"}</span>`):"<span></span>"}
+      </div>
+    </div>`;}).join("")}</div>`
+  :`<div class="card"><div class="empty"><b>표시할 매장이 없습니다</b>${canCreate?"새 매장을 등록하거나, 클로드 파일로 지점 목록을 한 번에 가져오세요.":"배정된 매장이 생기면 여기에 표시됩니다."}</div></div>`}`;
+}
+
+/* ═══════════ 매장 상세 ═══════════ */
+function vStoreDetail(st){
+  const ts=storeTasks(st.id).sort((a,b)=>TASK_ST.indexOf(a.status)-TASK_ST.indexOf(b.status)||(a.due||"9999").localeCompare(b.due||"9999"));
+  const cmts=DB.comments.filter(c=>c.storeId===st.id);
+  const editable=canEditStore(st),workable=canWorkStore(st);
+  const ov=checkOver(st),lc=lastCheckDate(st);
+  return `
+  <button class="back" data-act="back-stores">← 매장 목록</button>
+  <div class="card">
+    <div class="pd-head">
+      <div style="min-width:0">
+        <div style="display:flex;gap:7px;align-items:center;flex-wrap:wrap"><span class="tag">${esc(st.brand||"기타")}</span><span class="tag">${esc(st.region||"지역 미지정")}</span>${st.source==="claude"?`<span class="tag" style="color:var(--accent-deep);border-color:#F6C9B8">클로드 연동</span>`:""}</div>
+        <h1>${esc(st.name)}</h1>
+        <div class="pd-meta">
+          <span>담당 <b>${esc(memberName(st.managerId))}</b></span>
+          ${st.openDate?`<span>오픈 <b class="mono" style="font-size:12.5px">${fmtD(st.openDate)}</b></span>`:""}
+          ${st.address?`<span>${esc(st.address)}</span>`:""}
+        </div>
+        ${(st.memberIds||[]).length?`<div class="pd-members">${st.memberIds.map(memChip).join("")}</div>`:""}
+        ${(st.links||[]).length?`<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">${st.links.map(l=>`<a class="tag" href="${esc(l.url)}" target="_blank" rel="noopener" style="text-decoration:none;color:var(--accent-deep)">${esc(l.title||l.url)} ↗</a>`).join("")}</div>`:""}
+      </div>
+      <div class="pd-ctl">
+        ${editable?`<select data-act="store-status" data-id="${st.id}" aria-label="매장 상태">${stOpts(STORE_ST,st.status)}</select>`:pill(st.status)}
+        ${editable?`<button class="btn btn-sm" data-act="edit-store" data-id="${st.id}">수정</button>`:""}
+        ${isAdmin()?`<button class="btn btn-sm btn-danger" data-act="del-store" data-id="${st.id}">삭제</button>`:""}
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <h2><span class="bars"></span>정기 점검 ${st.status==="운영중"?(ov?`<span class="cnt" style="color:var(--late)">주기 +${ov}일 지남</span>`:`<span class="cnt">주기 ${Number(st.checkCycleDays||7)}일</span>`):""}</h2>
+    <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+      <span style="font-size:13.5px;color:var(--sub)">마지막 점검 <b class="mono" style="color:var(--ink)">${lc?fmtD(lc):"기록 없음"}</b></span>
+      ${editable?`<span style="font-size:13px;color:var(--faint)">점검 주기</span><input type="number" min="1" max="90" value="${Number(st.checkCycleDays||7)}" data-act="store-cycle" data-id="${st.id}" style="width:64px;padding:6px 8px" aria-label="점검 주기(일)"><span style="font-size:13px;color:var(--faint)">일</span>`:""}
+      ${workable?`<button class="btn btn-pri btn-sm" data-act="check-done" data-id="${st.id}" style="margin-left:auto">오늘 점검 완료</button>`:""}
+    </div>
+    ${(st.checks||[]).length?`<div style="margin-top:12px;display:flex;gap:7px;flex-wrap:wrap">${st.checks.slice(0,6).map(c=>`<span class="tag">${fmtD(c.date)} · ${esc(memberName(c.byId))}</span>`).join("")}</div>`:""}
+  </div>
+  <div class="card">
+    <h2><span class="bars"></span>매장 업무 <span class="cnt">${ts.filter(t=>t.status!=="완료").length}건 진행</span></h2>
+    ${ts.length?ts.map(t=>{const mine=canTouchTask(t,null);return`
+      <div class="task-row">
+        ${mine?`<select class="tk-st" data-act="task-status" data-id="${t.id}">${stOpts(TASK_ST,t.status)}</select>`:`<span>${pill(t.status)}</span>`}
+        <div class="tk-t"><div class="tt ${t.status==="완료"?"done":""}">${esc(t.title)} ${t.priority==="높음"?`<span class="prio-high" style="font-size:11.5px">중요</span>`:""}</div>${t.detail?`<div class="td">${esc(t.detail)}</div>`:""}${!t.assigneeId&&t.assigneeName?`<div class="td">담당 후보: ${esc(t.assigneeName)}</div>`:""}</div>
+        ${workable&&ME.role!=="partner"?`<select class="tk-as" data-act="task-assignee" data-id="${t.id}">${assigneeOpts(t.assigneeId)}</select>`:`<span style="font-size:12.5px;color:var(--sub)">${esc(memberName(t.assigneeId))}</span>`}
+        ${mine?`<input class="tk-due" type="date" value="${esc(t.due||"")}" data-act="task-due" data-id="${t.id}" aria-label="마감일">`:`<span>${dueTag(t.due,t.status==="완료")}</span>`}
+        ${workable&&ME.role!=="partner"?`<button class="tk-x btn-ghost" data-act="task-del" data-id="${t.id}" aria-label="업무 삭제" style="color:var(--faint)">✕</button>`:"<span></span>"}
+      </div>`;}).join(""):`<div class="empty"><b>등록된 업무가 없습니다</b>점검·수리·비품 등 이 매장의 할 일을 추가하세요.</div>`}
+    ${workable?`<div class="task-add">
+      <input class="ta-title" id="sta-title" placeholder="새 매장 업무 입력 후 추가" maxlength="120">
+      <select id="sta-assignee">${assigneeOpts(ME.id)}</select>
+      <input id="sta-due" type="date">
+      <button class="btn btn-pri ta-btn" data-act="st-task-add" data-id="${st.id}">추가</button>
+    </div>`:""}
+  </div>
+  <div class="card">
+    <h2>메모</h2>
+    ${editable?`<textarea id="st-notes" placeholder="비밀번호 위치, 관리 포인트, 임대 조건 메모 등 이 매장에 대해 남겨 둘 것">${esc(st.notes||"")}</textarea>
+    <div style="display:flex;justify-content:flex-end;margin-top:10px"><button class="btn btn-sm" data-act="save-store-notes" data-id="${st.id}">메모 저장</button></div>`
+    :`<div class="notes-view">${esc(st.notes||"메모가 없습니다.")}</div>`}
+  </div>
+  <div class="card">
+    <h2>의견 <span class="cnt">${cmts.length}</span></h2>
+    ${cmts.map(c=>`<div class="cmt">${av(memberName(c.memberId))}<div style="min-width:0"><div class="c-h"><b>${esc(memberName(c.memberId))}</b>${esc(c.ts)}</div><div class="c-b">${esc(c.text)}</div></div></div>`).join("")||`<div class="empty">현장 특이사항, 고객 문의 등을 남겨 보세요.</div>`}
+    <div class="cmt-add"><input id="scmt-in" placeholder="의견 입력 후 Enter 또는 등록" maxlength="500" data-enter="scmt-add" data-id="${st.id}"><button class="btn" data-act="scmt-add" data-id="${st.id}">등록</button></div>
+  </div>`;
+}
+
 /* ═══════════ 업무보드 ═══════════ */
 function vBoard(){
   const vis=visibleProjects();
   const visIds=new Set(vis.map(p=>p.id));
-  let ts=DB.tasks.filter(t=>visIds.has(t.projectId));
-  if(F.bdProject!=="전체")ts=ts.filter(t=>t.projectId===F.bdProject);
+  const visS=visibleStores();
+  const sIds=new Set(visS.map(x=>x.id));
+  let ts=DB.tasks.filter(t=>t.storeId?sIds.has(t.storeId):visIds.has(t.projectId));
+  if(F.bdProject==="__p")ts=ts.filter(t=>!t.storeId);
+  else if(F.bdProject==="__s")ts=ts.filter(t=>t.storeId);
+  else if(F.bdProject.startsWith("s:"))ts=ts.filter(t=>t.storeId===F.bdProject.slice(2));
+  else if(F.bdProject!=="전체")ts=ts.filter(t=>t.projectId===F.bdProject);
   if(F.bdAssignee==="나")ts=ts.filter(t=>t.assigneeId===ME.id);
   else if(F.bdAssignee!=="전체")ts=ts.filter(t=>t.assigneeId===F.bdAssignee);
   return `
@@ -653,17 +791,17 @@ function vBoard(){
     <div><h1><span class="bars"></span>업무보드</h1><div class="desc">끌어다 놓거나 이동 버튼으로 단계를 옮길 수 있습니다.</div></div>
   </div>
   <div class="filters">
-    <select data-act="f-bd-project"><option value="전체">모든 프로젝트</option>${vis.map(p=>`<option value="${p.id}" ${F.bdProject===p.id?"selected":""}>${esc(p.name)}</option>`).join("")}</select>
+    <select data-act="f-bd-project"><option value="전체">모든 항목</option><option value="__p" ${F.bdProject==="__p"?"selected":""}>프로젝트 업무만</option><option value="__s" ${F.bdProject==="__s"?"selected":""}>매장 업무만</option>${vis.length?`<optgroup label="프로젝트">${vis.map(p=>`<option value="${p.id}" ${F.bdProject===p.id?"selected":""}>${esc(p.name)}</option>`).join("")}</optgroup>`:""}${visS.length?`<optgroup label="매장">${visS.map(x=>`<option value="s:${x.id}" ${F.bdProject==="s:"+x.id?"selected":""}>▣ ${esc(x.name)}</option>`).join("")}</optgroup>`:""}</select>
     <select data-act="f-bd-assignee"><option value="전체">모든 담당</option><option value="나" ${F.bdAssignee==="나"?"selected":""}>내 업무만</option>${DB.members.filter(m=>m.active&&m.id!==ME.id).map(m=>`<option value="${m.id}" ${F.bdAssignee===m.id?"selected":""}>${esc(m.name)}</option>`).join("")}</select>
   </div>
   <div class="kwrap">
     ${TASK_ST.map(st=>{const col=ts.filter(t=>t.status===st).sort((a,b)=>(a.due||"9999").localeCompare(b.due||"9999"));return`
     <div class="kcol" data-col="${st}">
       <div class="kcol-h">${pill(st)}<span class="kc">${col.length}</span></div>
-      ${col.map(t=>{const p=projectById(t.projectId);const i=TASK_ST.indexOf(st);const mv=canTouchTask(t,p);return`
+      ${col.map(t=>{const p=projectById(t.projectId);const sto=t.storeId?storeById(t.storeId):null;const i=TASK_ST.indexOf(st);const mv=canTouchTask(t,p);return`
       <div class="kcard" draggable="${mv}" data-task="${t.id}">
         <div class="kt">${esc(t.title)}</div>
-        <div class="km"><span class="kp" data-act="open-project" data-id="${t.projectId}">${esc(p?p.name:"")}</span>${t.due?dueTag(t.due,st==="완료"):`<span></span>`}</div>
+        <div class="km">${sto?`<span class="kp" data-act="open-store" data-id="${sto.id}">▣ ${esc(sto.name)}</span>`:`<span class="kp" data-act="open-project" data-id="${t.projectId}">${esc(p?p.name:"")}</span>`}${t.due?dueTag(t.due,st==="완료"):`<span></span>`}</div>
         <div class="km" style="margin-top:5px"><span>${esc(memberName(t.assigneeId))}</span>${t.priority==="높음"?`<span class="prio-high" style="font-size:11px">중요</span>`:"<span></span>"}</div>
         ${mv?`<div class="kmv"><button data-act="task-move" data-id="${t.id}" data-dir="-1" ${i===0?"disabled":""}>◀ ${i>0?TASK_ST[i-1]:""}</button><button data-act="task-move" data-id="${t.id}" data-dir="1" ${i===TASK_ST.length-1?"disabled":""}>${i<TASK_ST.length-1?TASK_ST[i+1]:""} ▶</button></div>`:""}
       </div>`;}).join("")||`<div class="empty" style="padding:18px 8px;font-size:13px">비어 있음</div>`}
@@ -695,7 +833,7 @@ function vMembers(){
       </div>`:""}
     </div>`;}).join("")}
   </div>
-  ${isAdmin()?`<div class="card"><h2>운영 안내</h2><div style="font-size:13.5px;color:var(--sub);line-height:1.8">역할에 따라 보이는 범위가 다릅니다. 직원은 참여하거나 담당 업무가 있는 프로젝트를 보고, 협력사는 참여자로 지정된 프로젝트만 봅니다. 관리자는 전체를 봅니다. 데이터는 각자의 브라우저에 저장되므로, 구성원과 실제로 내용을 맞추려면 연동·데이터의 공유 파일 내보내기·가져오기를 사용하세요.</div></div>`:""}`;
+  ${isAdmin()?`<div class="card"><h2>운영 안내</h2><div style="font-size:13.5px;color:var(--sub);line-height:1.8">역할에 따라 보이는 범위가 다릅니다. 직원은 참여하거나 담당 업무가 있는 프로젝트를 보고, 협력사는 참여자로 지정된 프로젝트만 봅니다. 매장도 같습니다 — 직원은 전체 매장을, 협력사는 담당·배정된 매장만 봅니다. 관리자는 전체를 봅니다. 데이터는 각자의 브라우저에 저장되므로, 구성원과 실제로 내용을 맞추려면 연동·데이터의 공유 파일 내보내기·가져오기를 사용하세요.</div></div>`:""}`;
 }
 
 /* ═══════════ 연동·데이터 ═══════════ */
@@ -709,6 +847,8 @@ const CLAUDE_PROMPT=`지금까지 이 대화에서 논의한 내용을 마이웍
 - priority는 "높음" "보통" "낮음" 중 하나만 사용
 - 날짜는 YYYY-MM-DD 형식, 확실하지 않으면 빈 문자열로 둬
 - summary는 2~3문장으로, notes에는 결정된 사항과 참고할 맥락을 정리해줘
+- 오프라인 매장·지점 이야기가 있으면 stores 배열에 담아줘. 매장 status는 "운영중" "오픈준비" "휴업" "종료" 중 하나
+- projects와 stores는 해당되는 것만 넣으면 돼 (하나만 있어도 됨)
 - 대화에 없는 내용을 지어내지 마
 
 형식:
@@ -728,6 +868,21 @@ const CLAUDE_PROMPT=`지금까지 이 대화에서 논의한 내용을 마이웍
       "links": [{ "title": "", "url": "" }],
       "tasks": [
         { "title": "업무 이름(필수)", "detail": "", "status": "대기", "assignee": "", "due": "", "priority": "보통" }
+      ]
+    }
+  ],
+  "stores": [
+    {
+      "name": "매장 이름(필수)",
+      "brand": "브랜드(선택)",
+      "region": "지역 예: 서울 마포(선택)",
+      "address": "",
+      "status": "운영중",
+      "manager": "담당자 이름(선택)",
+      "openDate": "",
+      "notes": "",
+      "tasks": [
+        { "title": "매장 할 일(선택)", "status": "대기", "assignee": "", "due": "" }
       ]
     }
   ]
@@ -773,22 +928,25 @@ function vData(){
     <div style="font-size:13.5px;color:var(--sub);margin-bottom:10px">공유할 프로젝트만 골라 파일로 내보내고, 받은 사람은 자기 화면에서 가져오기로 반영합니다. 같은 프로젝트는 겹치지 않게 합쳐집니다.</div>
     <div style="max-height:220px;overflow:auto;margin-bottom:12px">
       ${vis.map(p=>`<label class="share-pj"><input type="checkbox" class="share-ck" value="${p.id}">${esc(p.name)}<span class="tag" style="margin-left:auto">${esc(p.brand||"기타")}</span></label>`).join("")||`<div class="empty">공유할 프로젝트가 없습니다.</div>`}
+      ${visibleStores().map(x=>`<label class="share-pj"><input type="checkbox" class="share-st" value="${x.id}">▣ ${esc(x.name)}<span class="tag" style="margin-left:auto">${esc(x.region||x.brand||"매장")}</span></label>`).join("")}
     </div>
     <div style="display:flex;gap:8px;flex-wrap:wrap">
-      <button class="btn" data-act="share-export">선택한 프로젝트 내보내기</button>
+      <button class="btn" data-act="share-export">선택 항목 내보내기</button>
       <button class="btn" data-act="share-import">공유 파일 가져오기</button>
     </div>
   </div>
   <details class="schema"><summary>파일 형식 안내 (myworks/v1)</summary>
-    <pre class="code">필수: projects[].name, projects[].tasks[].title
-선택: brand, status(대기·진행중·보류·완료), priority(높음·보통·낮음),
-      startDate·dueDate·due(YYYY-MM-DD), summary, goals[], notes,
-      links[{title,url}], tasks[].detail·status·assignee·priority
+    <pre class="code">projects[] — 필수: name, tasks[].title
+  선택: brand, status(대기·진행중·보류·완료), priority(높음·보통·낮음),
+        startDate·dueDate·due(YYYY-MM-DD), summary, goals[], notes, links[{title,url}]
+stores[] — 필수: name
+  선택: brand, region, address, status(운영중·오픈준비·휴업·종료),
+        manager, openDate, notes, links[], tasks[](프로젝트 업무와 동일)
 
 가져오기 규칙:
-· 이름이 같은 프로젝트가 있으면 "업데이트"를 기본 제안 (새로 만들기 선택 가능)
+· 프로젝트는 이름, 매장은 브랜드+이름이 같으면 "업데이트"를 기본 제안
 · 업무는 제목 기준으로 합쳐지며, 기존 업무는 상태·내용만 갱신 (삭제되지 않음)
-· assignee는 구성원 이름과 일치하면 자동 배정, 아니면 "담당 후보"로 표시</pre>
+· assignee/manager는 구성원 이름과 일치하면 자동 배정, 아니면 "담당 후보"로 표시</pre>
   </details>`;
 }
 
@@ -801,23 +959,24 @@ function parseImportText(text){
   try{data=JSON.parse(s.slice(a,b+1));}catch(e){return{err:"JSON을 읽는 중 오류가 났습니다. 파일이 손상되지 않았는지 확인하세요."};}
   if(data&&data.meta&&data.meta.app==="myworks"&&Array.isArray(data.members))return{backup:data};
   if(data&&data.format==="myworks/share/v1")return{share:data};
-  let projects=Array.isArray(data.projects)?data.projects:(data.project?[data.project]:null);
-  if(!projects||!projects.length)return{err:"projects 항목이 비어 있습니다."};
-  projects=projects.filter(p=>p&&String(p.name||"").trim());
-  if(!projects.length)return{err:"이름이 있는 프로젝트가 없습니다."};
-  return{projects};
+  let projects=Array.isArray(data.projects)?data.projects:(data.project?[data.project]:[]);
+  projects=(projects||[]).filter(p=>p&&String(p.name||"").trim());
+  let stores=Array.isArray(data.stores)?data.stores.filter(x=>x&&String(x.name||"").trim()):[];
+  if(!projects.length&&!stores.length)return{err:"projects 또는 stores 항목이 비어 있습니다."};
+  return{projects,stores};
 }
 function cleanDate(s){return/^\d{4}-\d{2}-\d{2}$/.test(String(s||""))?s:"";}
 function pickSt(v,list,def){return list.includes(v)?v:def;}
-function showPreview(projects){
-  PREVIEW=projects;
+function showPreview(projects,stores){
+  projects=projects||[];stores=stores||[];
+  PREVIEW={projects,stores};
   const wrap=$("#preview-wrap");
   wrap.innerHTML=`
-  <div style="font-weight:700;font-size:14.5px;margin:4px 0 10px">가져올 내용 미리보기 · 프로젝트 ${projects.length}개</div>
+  <div style="font-weight:700;font-size:14.5px;margin:4px 0 10px">가져올 내용 미리보기${projects.length?` · 프로젝트 ${projects.length}개`:""}${stores.length?` · 매장 ${stores.length}곳`:""}</div>
   ${projects.map((p,i)=>{const ex=DB.projects.find(x=>norm(x.name)===norm(p.name)&&canSeeProject(x));const tks=(Array.isArray(p.tasks)?p.tasks:[]).filter(t=>t&&String(t.title||"").trim());return`
   <div class="prev-item">
     <div class="pv-h"><b>${esc(p.name)}</b>
-      <select class="pv-mode" data-i="${i}">
+      <select class="pv-mode" data-kind="p" data-i="${i}">
         <option value="new" ${ex?"":"selected"}>새 프로젝트로 만들기</option>
         ${ex?`<option value="${ex.id}" selected>기존 "${esc(ex.name)}"에 업데이트</option>`:""}
         <option value="skip">건너뛰기</option>
@@ -825,6 +984,18 @@ function showPreview(projects){
     </div>
     <div class="pv-meta">${esc(p.brand||"브랜드 미지정")} · ${esc(pickSt(p.status,PROJ_ST,"진행중"))} · 업무 ${tks.length}건${ex?` · 같은 이름의 프로젝트가 이미 있습니다`:""}</div>
     <ul>${tks.slice(0,6).map(t=>`<li>${esc(t.title)}</li>`).join("")}${tks.length>6?`<li>외 ${tks.length-6}건</li>`:""}</ul>
+  </div>`;}).join("")}
+  ${stores.map((x,i)=>{const ex=DB.stores.find(y=>norm(y.name)===norm(x.name)&&norm(y.brand||"")===norm(x.brand||""));const tks=(Array.isArray(x.tasks)?x.tasks:[]).filter(t=>t&&String(t.title||"").trim());return`
+  <div class="prev-item">
+    <div class="pv-h"><b>▣ ${esc(x.name)}</b>
+      <select class="pv-mode" data-kind="s" data-i="${i}">
+        <option value="new" ${ex?"":"selected"}>새 매장으로 등록</option>
+        ${ex?`<option value="${ex.id}" selected>기존 "${esc(ex.name)}"에 업데이트</option>`:""}
+        <option value="skip">건너뛰기</option>
+      </select>
+    </div>
+    <div class="pv-meta">${esc(x.brand||"브랜드 미지정")} · ${esc(x.region||"지역 미지정")} · ${esc(pickSt(x.status,STORE_ST,"운영중"))}${tks.length?` · 할 일 ${tks.length}건`:""}${ex?` · 같은 매장이 이미 있습니다`:""}</div>
+    ${tks.length?`<ul>${tks.slice(0,4).map(t=>`<li>${esc(t.title)}</li>`).join("")}${tks.length>4?`<li>외 ${tks.length-4}건</li>`:""}</ul>`:""}
   </div>`;}).join("")}
   <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:12px">
     <button class="btn btn-ghost" data-act="cancel-import">취소</button>
@@ -834,9 +1005,9 @@ function showPreview(projects){
 }
 function applyImport(){
   if(!PREVIEW)return;
-  let nP=0,nT=0,uT=0;
-  $$(".pv-mode").forEach(sel=>{
-    const p=PREVIEW[Number(sel.dataset.i)];if(!p)return;
+  let nP=0,nT=0,uT=0,nS=0,uS=0;
+  $$('.pv-mode[data-kind="p"]').forEach(sel=>{
+    const p=PREVIEW.projects[Number(sel.dataset.i)];if(!p)return;
     const mode=sel.value;if(mode==="skip")return;
     const tks=(Array.isArray(p.tasks)?p.tasks:[]).filter(t=>t&&String(t.title||"").trim());
     let target;
@@ -872,16 +1043,60 @@ function applyImport(){
       }
     });
   });
-  logAct(`클로드 파일을 반영했습니다. (프로젝트 ${nP}개 생성, 업무 ${nT}건 추가·${uT}건 갱신)`);
+  $$('.pv-mode[data-kind="s"]').forEach(sel=>{
+    const x=PREVIEW.stores[Number(sel.dataset.i)];if(!x)return;
+    const mode=sel.value;if(mode==="skip")return;
+    const tks=(Array.isArray(x.tasks)?x.tasks:[]).filter(t=>t&&String(t.title||"").trim());
+    const mgr=DB.members.find(m=>x.manager&&norm(m.name)===norm(x.manager));
+    let target;
+    if(mode==="new"){
+      const bn=x.brand?String(x.brand).trim():"기타";
+      if(bn&&!DB.brands.includes(bn))DB.brands.push(bn);
+      target={id:uid("s"),name:String(x.name).trim(),brand:bn,region:String(x.region||"").trim(),address:String(x.address||"").trim(),status:pickSt(x.status,STORE_ST,"운영중"),managerId:mgr?mgr.id:"",managerName:mgr?"":String(x.manager||"").trim(),memberIds:[],openDate:cleanDate(x.openDate),checkCycleDays:7,checks:[],notes:String(x.notes||"").trim(),links:(Array.isArray(x.links)?x.links:[]).filter(l=>l&&l.url).map(l=>({title:String(l.title||"").trim(),url:String(l.url).trim()})),createdAt:new Date().toISOString(),updatedAt:new Date().toISOString(),source:"claude"};
+      DB.stores.push(target);nS++;
+    }else{
+      target=storeById(mode);if(!target)return;
+      if(x.status&&STORE_ST.includes(x.status))target.status=x.status;
+      if(String(x.region||"").trim())target.region=String(x.region).trim();
+      if(String(x.address||"").trim())target.address=String(x.address).trim();
+      if(cleanDate(x.openDate)&&!target.openDate)target.openDate=cleanDate(x.openDate);
+      if(mgr&&!target.managerId)target.managerId=mgr.id;
+      const nn=String(x.notes||"").trim();
+      if(nn&&!String(target.notes||"").includes(nn))target.notes=(target.notes?target.notes+"\n\n":"")+"[클로드 가져오기 "+todayStr()+"]\n"+nn;
+      target.updatedAt=new Date().toISOString();uS++;
+    }
+    tks.forEach(t=>{
+      const title=String(t.title).trim();
+      const exT=DB.tasks.find(y=>y.storeId===target.id&&norm(y.title)===norm(title));
+      const mem=DB.members.find(m=>t.assignee&&norm(m.name)===norm(t.assignee));
+      if(exT){
+        let ch=false;
+        if(t.status&&TASK_ST.includes(t.status)&&exT.status!==t.status){exT.status=t.status;ch=true;}
+        if(String(t.detail||"").trim()&&exT.detail!==String(t.detail).trim()){exT.detail=String(t.detail).trim();ch=true;}
+        if(cleanDate(t.due)&&exT.due!==cleanDate(t.due)){exT.due=cleanDate(t.due);ch=true;}
+        if(mem&&!exT.assigneeId){exT.assigneeId=mem.id;ch=true;}
+        if(ch){exT.updatedAt=new Date().toISOString();uT++;}
+      }else{
+        DB.tasks.push({id:uid("t"),projectId:"",storeId:target.id,title,detail:String(t.detail||"").trim(),status:pickSt(t.status,TASK_ST,"대기"),assigneeId:mem?mem.id:"",assigneeName:mem?"":String(t.assignee||"").trim(),due:cleanDate(t.due),priority:pickSt(t.priority,PRIO,"보통"),createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()});nT++;
+      }
+    });
+  });
+  const parts=[];
+  if(nP)parts.push(`프로젝트 ${nP}개 생성`);
+  if(nS)parts.push(`매장 ${nS}곳 등록`);
+  if(uS)parts.push(`매장 ${uS}곳 갱신`);
+  parts.push(`업무 ${nT}건 추가`);
+  if(uT)parts.push(`${uT}건 갱신`);
+  logAct(`클로드 파일을 반영했습니다. (${parts.join(", ")})`);
   saveDB();PREVIEW=null;route();
-  toast(`반영 완료 — 프로젝트 ${nP}개 생성, 업무 ${nT}건 추가, ${uT}건 갱신`);
+  toast(`반영 완료 — ${parts.join(", ")}`);
 }
 function handleImportedText(text){
   const r=parseImportText(text);
   if(r.err)return toast(r.err);
   if(r.backup)return restoreBackup(r.backup);
   if(r.share)return applyShare(r.share);
-  showPreview(r.projects);
+  showPreview(r.projects,r.stores);
 }
 function readFileThen(fn){
   const fp=$("#fpick");
@@ -900,21 +1115,26 @@ function doBackup(){download(`마이웍스_백업_${todayStr()}.json`,JSON.strin
 function restoreBackup(data){
   if(!isAdmin())return toast("복원은 관리자만 할 수 있습니다.");
   if(!confirm("현재 데이터를 모두 지우고 백업 파일 내용으로 바꿉니다. 계속할까요?"))return;
-  DB=data;saveDB();
+  DB=data;if(!Array.isArray(DB.stores))DB.stores=[];saveDB();
   const meAgain=DB.members.find(m=>m.loginId===ME.loginId)||DB.members.find(m=>m.role==="admin");
   if(meAgain){ME=meAgain;localStorage.setItem(SKEY,ME.id);enterApp();toast("백업을 복원했습니다.");}
   else{doLogout();toast("백업을 복원했습니다. 다시 로그인하세요.");}
 }
 function doShareExport(){
   const ids=$$(".share-ck:checked").map(c=>c.value);
-  if(!ids.length)return toast("내보낼 프로젝트를 선택하세요.");
+  const sids=$$(".share-st:checked").map(c=>c.value);
+  if(!ids.length&&!sids.length)return toast("내보낼 프로젝트나 매장을 선택하세요.");
   const projects=DB.projects.filter(p=>ids.includes(p.id));
-  const tasks=DB.tasks.filter(t=>ids.includes(t.projectId));
-  const comments=DB.comments.filter(c=>ids.includes(c.projectId));
-  const memberIds=new Set();projects.forEach(p=>{memberIds.add(p.ownerId);(p.memberIds||[]).forEach(m=>memberIds.add(m));});tasks.forEach(t=>t.assigneeId&&memberIds.add(t.assigneeId));
+  const stores=DB.stores.filter(x=>sids.includes(x.id));
+  const tasks=DB.tasks.filter(t=>ids.includes(t.projectId)||(t.storeId&&sids.includes(t.storeId)));
+  const comments=DB.comments.filter(c=>ids.includes(c.projectId)||(c.storeId&&sids.includes(c.storeId)));
+  const memberIds=new Set();
+  projects.forEach(p=>{memberIds.add(p.ownerId);(p.memberIds||[]).forEach(m=>memberIds.add(m));});
+  stores.forEach(x=>{if(x.managerId)memberIds.add(x.managerId);(x.memberIds||[]).forEach(m=>memberIds.add(m));});
+  tasks.forEach(t=>t.assigneeId&&memberIds.add(t.assigneeId));
   const memberNames={};[...memberIds].forEach(id=>{const m=memberById(id);if(m)memberNames[id]=m.name;});
-  download(`마이웍스_공유_${projects.length}건_${todayStr()}.json`,JSON.stringify({format:"myworks/share/v1",exportedAt:new Date().toISOString(),from:ME.name,memberNames,projects,tasks,comments},null,2));
-  logAct(`프로젝트 ${projects.length}개를 공유 파일로 내보냈습니다.`);saveDB();
+  download(`마이웍스_공유_${projects.length+stores.length}건_${todayStr()}.json`,JSON.stringify({format:"myworks/share/v1",exportedAt:new Date().toISOString(),from:ME.name,memberNames,projects,stores,tasks,comments},null,2));
+  logAct(`프로젝트 ${projects.length}개·매장 ${stores.length}곳을 공유 파일로 내보냈습니다.`);saveDB();
   toast("공유 파일을 내려받았습니다. 상대에게 전달하세요.");
 }
 function applyShare(data){
@@ -938,14 +1158,36 @@ function applyShare(data){
     });
     (data.comments||[]).filter(c=>c.projectId===sp.id).forEach(sc=>{if(!DB.comments.some(x=>x.id===sc.id))DB.comments.push({...sc,projectId:targetId,memberId:memberById(sc.memberId)?sc.memberId:""});});
   });
+  let nS=0,uS=0;
+  (data.stores||[]).forEach(ss=>{
+    let ex=storeById(ss.id)||DB.stores.find(y=>norm(y.name)===norm(ss.name)&&norm(y.brand||"")===norm(ss.brand||""));
+    if(ex){
+      if((ss.updatedAt||"")>(ex.updatedAt||"")){ex.status=ss.status;ex.region=ss.region;ex.address=ss.address;ex.notes=ss.notes;ex.openDate=ss.openDate;ex.checkCycleDays=ss.checkCycleDays||ex.checkCycleDays;ex.links=ss.links||[];if(Array.isArray(ss.checks)&&ss.checks.length&&(!ex.checks||!ex.checks.length||ss.checks[0].date>ex.checks[0].date))ex.checks=ss.checks;ex.updatedAt=ss.updatedAt;uS++;}
+    }else{
+      const own=mapAssignee(ss.managerId);
+      DB.stores.push({...ss,managerId:own.id||"",managerName:own.name||ss.managerName||"",memberIds:(ss.memberIds||[]).map(id=>mapAssignee(id).id).filter(Boolean),source:ss.source||"공유"});nS++;
+    }
+    const targetSId=ex?ex.id:ss.id;
+    (data.tasks||[]).filter(t=>t.storeId===ss.id).forEach(st=>{
+      const exT=DB.tasks.find(y=>y.id===st.id)||DB.tasks.find(y=>y.storeId===targetSId&&norm(y.title)===norm(st.title));
+      const asg=mapAssignee(st.assigneeId);
+      if(exT){if((st.updatedAt||"")>(exT.updatedAt||"")){exT.status=st.status;exT.detail=st.detail;exT.due=st.due;exT.priority=st.priority;if(asg.id)exT.assigneeId=asg.id;exT.updatedAt=st.updatedAt;uT++;}}
+      else{DB.tasks.push({...st,projectId:"",storeId:targetSId,assigneeId:asg.id,assigneeName:st.assigneeName||asg.name});nT++;}
+    });
+    (data.comments||[]).filter(c=>c.storeId===ss.id).forEach(sc=>{if(!DB.comments.some(y=>y.id===sc.id))DB.comments.push({...sc,storeId:targetSId,memberId:memberById(sc.memberId)?sc.memberId:""});});
+  });
   logAct(`${esc(data.from||"외부")} 님의 공유 파일을 반영했습니다.`);
   saveDB();route();
-  toast(`공유 반영 완료 — 프로젝트 ${nP}개 추가·${uP}개 갱신, 업무 ${nT}건 추가·${uT}건 갱신`);
+  const seg=[`프로젝트 ${nP}개 추가·${uP}개 갱신`];
+  if(nS||uS)seg.push(`매장 ${nS}곳 추가·${uS}곳 갱신`);
+  seg.push(`업무 ${nT}건 추가·${uT}건 갱신`);
+  toast(`공유 반영 완료 — ${seg.join(", ")}`);
 }
 
 /* ═══════════ 모달 ═══════════ */
 function openModal(html){$("#m-box").innerHTML=html;$("#modal-root").classList.add("show");}
 function closeModal(){$("#modal-root").classList.remove("show");$("#m-box").innerHTML="";}
+const brandOpts=sel=>DB.brands.map(b=>`<option ${b===sel?"selected":""}>${esc(b)}</option>`).join("")+`<option value="__new">＋ 직접 입력…</option>`;
 function projectFormModal(p){
   const isNew=!p;
   p=p||{name:"",brand:DB.brands[0],status:"진행중",priority:"보통",startDate:todayStr(),dueDate:"",summary:"",memberIds:[],goals:[],links:[]};
@@ -953,7 +1195,7 @@ function projectFormModal(p){
   <h2><span class="bars"></span>${isNew?"새 프로젝트":"프로젝트 수정"}</h2>
   <label>프로젝트 이름</label><input id="pf-name" value="${esc(p.name)}" maxlength="80" placeholder="예: 쏘플파티룸 신규 지점 오픈">
   <div class="m-grid2">
-    <div><label>브랜드·회사</label><select id="pf-brand">${DB.brands.map(b=>`<option ${b===(p.brand||"")?"selected":""}>${esc(b)}</option>`).join("")}</select></div>
+    <div><label>브랜드·회사</label><select id="pf-brand" data-act="brand-pick">${brandOpts(p.brand||DB.brands[0])}</select></div>
     <div><label>상태</label><select id="pf-status">${stOpts(PROJ_ST,p.status)}</select></div>
     <div><label>우선순위</label><select id="pf-prio">${stOpts(PRIO,p.priority)}</select></div>
     <div><label>마감일</label><input id="pf-due" type="date" value="${esc(p.dueDate||"")}"></div>
@@ -974,6 +1216,39 @@ function pfSave(id){
   const vals={name,brand:$("#pf-brand").value,status:$("#pf-status").value,priority:$("#pf-prio").value,dueDate:$("#pf-due").value,summary:$("#pf-sum").value.trim(),memberIds,goals,links,updatedAt:new Date().toISOString()};
   if(id){const p=projectById(id);if(!p)return;Object.assign(p,vals);logAct(`프로젝트 "${name}" 정보를 수정했습니다.`);}
   else{const p={id:uid("p"),...vals,ownerId:ME.id,startDate:todayStr(),notes:"",createdAt:new Date().toISOString(),source:"직접"};DB.projects.push(p);logAct(`프로젝트 "${name}"을(를) 만들었습니다.`);saveDB();closeModal();go("#/project/"+p.id);return;}
+  saveDB();closeModal();route();
+}
+function storeFormModal(st){
+  const isNew=!st;
+  st=st||{name:"",brand:DB.brands[0],region:"",address:"",status:"운영중",managerId:ME.id,memberIds:[],openDate:"",checkCycleDays:7,links:[],notes:""};
+  openModal(`
+  <h2><span class="bars"></span>${isNew?"새 매장 등록":"매장 정보 수정"}</h2>
+  <label>매장 이름</label><input id="sf-name" value="${esc(st.name)}" maxlength="60" placeholder="예: 홍대점">
+  <div class="m-grid2">
+    <div><label>브랜드·회사</label><select id="sf-brand" data-act="brand-pick">${brandOpts(st.brand||DB.brands[0])}</select></div>
+    <div><label>지역</label><input id="sf-region" value="${esc(st.region||"")}" maxlength="20" placeholder="예: 서울 마포"></div>
+    <div><label>상태</label><select id="sf-status">${stOpts(STORE_ST,st.status)}</select></div>
+    <div><label>담당</label><select id="sf-manager">${assigneeOpts(st.managerId)}</select></div>
+    <div><label>오픈일</label><input id="sf-open" type="date" value="${esc(st.openDate||"")}"></div>
+    <div><label>점검 주기(일)</label><input id="sf-cycle" type="number" min="1" max="90" value="${Number(st.checkCycleDays||7)}"></div>
+  </div>
+  <label>주소</label><input id="sf-addr" value="${esc(st.address||"")}" maxlength="80" placeholder="선택 입력">
+  <label>배정 인원 <span style="font-weight:500;color:var(--faint);font-size:12px">— 협력사는 배정된 매장만 봅니다</span></label>
+  <div class="mem-check">${DB.members.filter(m=>m.active&&m.id!==ME.id).map(m=>`<label class="${(st.memberIds||[]).includes(m.id)?"on":""}"><input type="checkbox" value="${m.id}" ${(st.memberIds||[]).includes(m.id)?"checked":""}>${esc(m.name)} · ${ROLES[m.role]}</label>`).join("")||`<span style="font-size:13px;color:var(--faint)">구성원 메뉴에서 먼저 아이디를 발급하세요.</span>`}</div>
+  <label>링크 (제목 | 주소, 한 줄에 하나)</label><textarea id="sf-links" style="min-height:52px" placeholder="예약 페이지 | https://...">${esc((st.links||[]).map(l=>(l.title?l.title+" | ":"")+l.url).join("\n"))}</textarea>
+  <div class="m-foot"><button class="btn btn-ghost" data-g="modal-close">취소</button><button class="btn btn-pri" data-act="sf-save" data-id="${isNew?"":st.id}">${isNew?"등록하기":"저장"}</button></div>`);
+}
+function sfSave(id){
+  const name=$("#sf-name").value.trim();
+  if(!name)return toast("매장 이름을 입력하세요.");
+  const region=$("#sf-region").value.trim();
+  if(!region)return toast("지역을 입력하세요. (예: 서울 마포)");
+  let brand=$("#sf-brand").value;if(brand==="__new")brand=DB.brands[0]||"기타";
+  const memberIds=$$("#m-box .mem-check input:checked").map(c=>c.value);
+  const links=$("#sf-links").value.split("\n").map(x=>x.trim()).filter(Boolean).map(x=>{const i=x.indexOf("|");return i>-1?{title:x.slice(0,i).trim(),url:x.slice(i+1).trim()}:{title:"",url:x};}).filter(l=>l.url);
+  const vals={name,brand,region,status:$("#sf-status").value,managerId:$("#sf-manager").value,memberIds,openDate:$("#sf-open").value,checkCycleDays:Math.min(90,Math.max(1,Number($("#sf-cycle").value)||7)),address:$("#sf-addr").value.trim(),links,updatedAt:new Date().toISOString()};
+  if(id){const st=storeById(id);if(!st)return;Object.assign(st,vals);logAct(`매장 "${name}" 정보를 수정했습니다.`);}
+  else{const st={id:uid("s"),...vals,checks:[],notes:"",createdAt:new Date().toISOString(),source:"직접"};DB.stores.push(st);logAct(`매장 "${name}"을(를) 등록했습니다.`);saveDB();closeModal();go("#/store/"+st.id);return;}
   saveDB();closeModal();route();
 }
 function memberFormModal(m){
@@ -1055,10 +1330,21 @@ document.addEventListener("click",e=>{
     case"back-projects":go("#/projects");break;
     case"f-pj-status":F.pjStatus=b.dataset.v;route();break;
     case"task-add":{const p=projectById(id);if(!p||!canWorkProject(p))break;const t=$("#ta-title").value.trim();if(!t){toast("업무 이름을 입력하세요.");break;}DB.tasks.push({id:uid("t"),projectId:id,title:t,detail:"",status:"대기",assigneeId:$("#ta-assignee").value,assigneeName:"",due:$("#ta-due").value,priority:"보통",createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()});p.updatedAt=new Date().toISOString();logAct(`"${p.name}"에 업무 "${t}"을(를) 추가했습니다.`);saveDB();route();break;}
-    case"task-del":{const t=DB.tasks.find(x=>x.id===id);if(!t)break;const p=projectById(t.projectId);if(!canWorkProject(p))break;if(!confirm(`업무 "${t.title}"을(를) 삭제할까요?`))break;DB.tasks=DB.tasks.filter(x=>x.id!==id);logAct(`업무 "${t.title}"을(를) 삭제했습니다.`);saveDB();route();break;}
+    case"task-del":{const t=DB.tasks.find(x=>x.id===id);if(!t)break;if(t.storeId){const st=storeById(t.storeId);if(!st||!canWorkStore(st)||ME.role==="partner")break;}else{const p=projectById(t.projectId);if(!canWorkProject(p))break;}if(!confirm(`업무 "${t.title}"을(를) 삭제할까요?`))break;DB.tasks=DB.tasks.filter(x=>x.id!==id);logAct(`업무 "${t.title}"을(를) 삭제했습니다.`);saveDB();route();break;}
     case"task-move":{const t=DB.tasks.find(x=>x.id===id);if(!t)break;const p=projectById(t.projectId);if(!canTouchTask(t,p))break;const i=TASK_ST.indexOf(t.status)+Number(b.dataset.dir);if(i<0||i>=TASK_ST.length)break;t.status=TASK_ST[i];t.updatedAt=new Date().toISOString();logAct(`"${t.title}" 상태를 ${TASK_ST[i]}(으)로 옮겼습니다.`);saveDB();route();break;}
     case"save-notes":{const p=projectById(id);if(!p||!canWorkProject(p))break;p.notes=$("#pj-notes").value;p.updatedAt=new Date().toISOString();saveDB();toast("메모를 저장했습니다.");break;}
     case"cmt-add":{const p=projectById(id);if(!p)break;const inp=$("#cmt-in"),tx=inp.value.trim();if(!tx)break;DB.comments.push({id:uid("c"),projectId:id,memberId:ME.id,text:tx,ts:nowHM()});logAct(`"${p.name}"에 의견을 남겼습니다.`);saveDB();route();break;}
+    case"new-store":if(ME.role!=="partner")storeFormModal(null);break;
+    case"edit-store":{const st=storeById(id);if(st&&canEditStore(st))storeFormModal(st);break;}
+    case"del-store":{const st=storeById(id);if(!st||!isAdmin())break;if(!confirm(`"${st.name}" 매장과 소속 업무·의견을 모두 삭제할까요?`))break;DB.stores=DB.stores.filter(x=>x.id!==id);DB.tasks=DB.tasks.filter(t=>t.storeId!==id);DB.comments=DB.comments.filter(c=>c.storeId!==id);logAct(`매장 "${st.name}"을(를) 삭제했습니다.`);saveDB();go("#/stores");break;}
+    case"open-store":e.stopPropagation();go("#/store/"+id);break;
+    case"back-stores":case"go-stores":go("#/stores");break;
+    case"f-st-status":F.stStatus=b.dataset.v;route();break;
+    case"st-task-add":{const st=storeById(id);if(!st||!canWorkStore(st))break;const t=$("#sta-title").value.trim();if(!t){toast("업무 이름을 입력하세요.");break;}DB.tasks.push({id:uid("t"),projectId:"",storeId:id,title:t,detail:"",status:"대기",assigneeId:$("#sta-assignee").value,assigneeName:"",due:$("#sta-due").value,priority:"보통",createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()});st.updatedAt=new Date().toISOString();logAct(`매장 "${st.name}"에 업무 "${t}"을(를) 추가했습니다.`);saveDB();route();break;}
+    case"check-done":{const st=storeById(id);if(!st||!canWorkStore(st))break;st.checks=st.checks||[];if(st.checks[0]&&st.checks[0].date===todayStr()){toast("오늘 점검은 이미 기록되어 있습니다.");break;}st.checks.unshift({date:todayStr(),byId:ME.id});if(st.checks.length>30)st.checks.length=30;st.updatedAt=new Date().toISOString();logAct(`매장 "${st.name}" 점검을 완료했습니다.`);saveDB();route();toast("오늘 점검을 기록했습니다.");break;}
+    case"save-store-notes":{const st=storeById(id);if(!st||!canEditStore(st))break;st.notes=$("#st-notes").value;st.updatedAt=new Date().toISOString();saveDB();toast("메모를 저장했습니다.");break;}
+    case"scmt-add":{const st=storeById(id);if(!st)break;const inp=$("#scmt-in"),tx=inp.value.trim();if(!tx)break;DB.comments.push({id:uid("c"),projectId:"",storeId:id,memberId:ME.id,text:tx,ts:nowHM()});logAct(`매장 "${st.name}"에 의견을 남겼습니다.`);saveDB();route();break;}
+    case"sf-save":sfSave(id);break;
     case"new-member":if(isAdmin())memberFormModal(null);break;
     case"mem-reset":{if(!isAdmin())break;const m=memberById(id);if(!m)break;memberFormModal(m);break;}
     case"mem-toggle":{if(!isAdmin())break;const m=memberById(id);if(!m)break;m.active=!m.active;logAct(`구성원 "${m.name}"을(를) ${m.active?"활성화":"비활성화"}했습니다.`);saveDB();route();break;}
@@ -1090,6 +1376,11 @@ document.addEventListener("change",e=>{
     case"task-assignee":{const t=DB.tasks.find(x=>x.id===id);if(!t)break;t.assigneeId=el.value;t.assigneeName="";t.updatedAt=new Date().toISOString();saveDB();route();break;}
     case"task-due":{const t=DB.tasks.find(x=>x.id===id);if(!t)break;t.due=el.value;t.updatedAt=new Date().toISOString();saveDB();route();break;}
     case"quick-done":{const t=DB.tasks.find(x=>x.id===id);if(!t)break;t.status="완료";t.updatedAt=new Date().toISOString();logAct(`"${t.title}"을(를) 완료했습니다.`);saveDB();route();toast("완료 처리했습니다.");break;}
+    case"store-status":{const st=storeById(id);if(!st||!canEditStore(st))break;st.status=el.value;st.updatedAt=new Date().toISOString();logAct(`매장 "${st.name}" 상태를 ${el.value}(으)로 바꿨습니다.`);saveDB();route();break;}
+    case"store-cycle":{const st=storeById(id);if(!st||!canEditStore(st))break;st.checkCycleDays=Math.min(90,Math.max(1,Number(el.value)||7));st.updatedAt=new Date().toISOString();saveDB();route();break;}
+    case"brand-pick":{if(el.value!=="__new")break;const nb=(prompt("새 브랜드·회사 이름을 입력하세요.")||"").trim();if(nb){if(!DB.brands.includes(nb))DB.brands.push(nb);saveDB();el.innerHTML=brandOpts(nb);toast(`브랜드 "${nb}"을(를) 추가했습니다.`);}else{el.innerHTML=brandOpts(DB.brands[0]);}break;}
+    case"f-st-brand":F.stBrand=el.value;route();break;
+    case"f-st-region":F.stRegion=el.value;route();break;
     case"f-pj-brand":F.pjBrand=el.value;route();break;
     case"f-bd-project":F.bdProject=el.value;route();break;
     case"f-bd-assignee":F.bdAssignee=el.value;route();break;
@@ -1098,10 +1389,12 @@ document.addEventListener("change",e=>{
   if(mc)mc.classList.toggle("on",mc.querySelector("input").checked);
 });
 document.addEventListener("input",e=>{
-  const el=e.target.closest('[data-act="f-pj-q"]');
+  const el=e.target.closest('[data-act="f-pj-q"],[data-act="f-st-q"]');
   if(!el)return;
-  F.pjQ=el.value;route();
-  const again=$('[data-act="f-pj-q"]');
+  const act=el.dataset.act;
+  if(act==="f-pj-q")F.pjQ=el.value;else F.stQ=el.value;
+  route();
+  const again=$(`[data-act="${act}"]`);
   if(again){again.focus();const L=again.value.length;again.setSelectionRange(L,L);}
 });
 document.addEventListener("keydown",e=>{
