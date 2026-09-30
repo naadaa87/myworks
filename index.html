@@ -303,6 +303,8 @@ pre.code{background:var(--paper);border:1px solid var(--line);border-radius:9px;
   .hello h1{font-size:21px}
   .m-box{margin-top:6vh}
 }
+.sync-dot{width:9px;height:9px;border-radius:50%;flex:none;display:inline-block}
+.sync-dot.on{background:#1E7F4D}.sync-dot.warn{background:#E0A800}.sync-dot.off{background:var(--faint)}
 .brief{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0 0}
 .brief .bchip{display:inline-flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--line);border-radius:99px;padding:7px 13px;font-size:13px;font-weight:600;cursor:pointer}
 .brief .bchip b{font-family:var(--mono);font-size:14px}
@@ -330,6 +332,15 @@ pre.code{background:var(--paper);border:1px solid var(--line);border-radius:9px;
 .bar6 .b i{width:100%;max-width:44px;background:var(--accent);border-radius:5px 5px 0 0;min-height:3px;opacity:.9}
 .bar6 .b.cur i{background:var(--accent-deep)}
 .bar6 .b span{font-size:10.5px;color:var(--faint);font-family:var(--mono);white-space:nowrap}
+.pl-tabs{display:flex;gap:6px;margin-bottom:14px}
+.pl-tabs .fchip{font-size:13px}
+.pl-item{display:flex;align-items:center;gap:10px;padding:9px 2px;border-bottom:1px solid var(--line-soft);font-size:14px}
+.pl-item:last-of-type{border-bottom:0}
+.pl-item input[type=checkbox]{width:17px;height:17px;accent-color:var(--accent);flex:none}
+.pl-item .tx{flex:1;min-width:0}
+.pl-item.done .tx{color:var(--faint);text-decoration:line-through}
+.pl-add{display:flex;gap:8px;margin-top:12px;padding-top:13px;border-top:1px dashed var(--line)}
+.pl-add input{flex:1}
 .rt-tag{font-size:10.5px;color:#2456C8;background:#EDF2FC;border-radius:5px;padding:2px 6px;font-weight:700;vertical-align:1px}
 .tpl-line{display:flex;gap:9px;align-items:center;padding:8px 2px;border-bottom:1px solid var(--line-soft);font-size:13.5px}
 @media (max-width:820px){
@@ -389,7 +400,7 @@ pre.code{background:var(--paper);border:1px solid var(--line);border-radius:9px;
     <div class="side-logo"><span class="bars"></span><div><strong>마이웍스</strong><span id="side-ws"></span></div></div>
     <nav class="nav" id="nav-side"></nav>
     <div class="side-user">
-      <div class="u-name" id="side-uname"></div>
+      <div class="u-name" id="side-uname" style="display:flex;align-items:center;gap:7px"><span id="side-uname-t"></span><span id="sync-dot" class="sync-dot off"></span></div>
       <div class="u-role" id="side-urole"></div>
       <div class="u-acts">
         <button class="btn btn-sm" data-g="settings">설정</button>
@@ -446,12 +457,105 @@ const DEFAULT_INC=["매출","정산 입금","지원금","기타"];
 const fmtWon=n=>{n=Math.round(Number(n)||0);return n.toLocaleString("ko-KR")+"원";};
 const monKey=d=>{d=d||todayStr();return d.slice(0,7);};
 const monLabel=k=>k.slice(0,4)+"년 "+Number(k.slice(5))+"월";
+function addDaysStr(ds,n){const d=new Date(ds);d.setDate(d.getDate()+n);return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
+function mondayOf(ds){const d=new Date(ds);const off=(d.getDay()+6)%7;return addDaysStr(ds,-off);}
 function monShift(k,d){const y=Number(k.slice(0,4)),m=Number(k.slice(5))-1+d;const dt=new Date(y,m,1);return dt.getFullYear()+"-"+String(dt.getMonth()+1).padStart(2,"0");}
 
 /* ═══════════ 저장소 ═══════════ */
 let DB=null,ME=null;
-function loadDB(){try{const r=localStorage.getItem(KEY);DB=r?JSON.parse(r):null;}catch(e){DB=null;}if(DB){if(!Array.isArray(DB.stores))DB.stores=[];if(!Array.isArray(DB.finance))DB.finance=[];if(!Array.isArray(DB.routines))DB.routines=[];if(!Array.isArray(DB.templates))DB.templates=[defaultTemplate()];if(!DB.finCats)DB.finCats={expense:DEFAULT_EXP.slice(),income:DEFAULT_INC.slice()};}}
-function saveDB(){if(!DB)return;DB.meta.updatedAt=new Date().toISOString();try{localStorage.setItem(KEY,JSON.stringify(DB));}catch(e){toast("저장 공간이 부족합니다. 백업 후 오래된 데이터를 정리하세요.");}}
+function loadDB(){try{const r=localStorage.getItem(KEY);DB=r?JSON.parse(r):null;}catch(e){DB=null;}if(DB){if(!Array.isArray(DB.stores))DB.stores=[];if(!Array.isArray(DB.finance))DB.finance=[];if(!Array.isArray(DB.routines))DB.routines=[];if(!Array.isArray(DB.templates))DB.templates=[defaultTemplate()];if(!Array.isArray(DB.plans))DB.plans=[];if(!DB.finCats)DB.finCats={expense:DEFAULT_EXP.slice(),income:DEFAULT_INC.slice()};}}
+/* ═══════════ 클라우드 동기화 ═══════════ */
+let MODE="local",TOKEN="",CLOUD_INIT=false,WSNAME="",SNAP={},PENDING={},SYNC_AT="0",pushTimer=null,pollTimer=null,syncBusy=false,OFFLINE=false,needRender=false;
+const TKEY="mw_token_v1",CKEY="mw_cloud_cache_v1";
+const KINDS=[["member","members"],["project","projects"],["store","stores"],["task","tasks"],["comment","comments"],["fin","finance"],["routine","routines"],["template","templates"],["plan","plans"],["act","activity"]];
+async function api(path,body){
+  if(typeof fetch!=="function")throw new Error("no-fetch");
+  const r=await fetch("/api/"+path,{method:body?"POST":"GET",headers:Object.assign({"content-type":"application/json"},TOKEN?{authorization:"Bearer "+TOKEN}:{}),body:body?JSON.stringify(body):undefined});
+  let j={};try{j=await r.json();}catch(e){}
+  if(r.status===401&&MODE==="cloud"&&TOKEN){cloudSignOut(true);throw new Error("unauthorized");}
+  if(!r.ok)throw Object.assign(new Error(j.error||("HTTP "+r.status)),{code:j.error,status:r.status});
+  return j;
+}
+const kname=(k,id)=>k+":"+id;
+const stripPw=(k,it)=>{if(k!=="member")return it;const c={...it};delete c.pwHash;return c;};
+const metaObj=()=>({workspace:DB.meta.workspace,brands:DB.brands,finCats:DB.finCats});
+function buildSnap(){SNAP={};KINDS.forEach(([k,arr])=>(DB[arr]||[]).forEach(it=>SNAP[kname(k,it.id)]=JSON.stringify(stripPw(k,it))));SNAP["meta:ws"]=JSON.stringify(metaObj());}
+function queuePush(){
+  KINDS.forEach(([k,arr])=>(DB[arr]||[]).forEach(it=>{
+    const key=kname(k,it.id),cur=JSON.stringify(stripPw(k,it));
+    const pw=(k==="member"&&it.pwHash)?it.pwHash:undefined;
+    if(SNAP[key]!==cur||pw){PENDING[key]={kind:k,id:it.id,data:JSON.parse(cur),pw};SNAP[key]=cur;}
+  }));
+  const seen=new Set();KINDS.forEach(([k,arr])=>(DB[arr]||[]).forEach(it=>seen.add(kname(k,it.id))));
+  Object.keys(SNAP).forEach(key=>{if(key==="meta:ws")return;if(!seen.has(key)){const i=key.indexOf(":");PENDING[key]={kind:key.slice(0,i),id:key.slice(i+1),deleted:1};delete SNAP[key];}});
+  const m=JSON.stringify(metaObj());if(SNAP["meta:ws"]!==m){PENDING["meta:ws"]={kind:"meta",id:"ws",data:JSON.parse(m)};SNAP["meta:ws"]=m;}
+  clearTimeout(pushTimer);pushTimer=setTimeout(flushPush,700);
+}
+async function flushPush(){
+  const keys=Object.keys(PENDING);if(!keys.length||syncBusy)return;
+  syncBusy=true;const ops=keys.map(k=>PENDING[k]);
+  try{
+    const res=await api("push",{ops});
+    keys.forEach(k=>delete PENDING[k]);
+    DB.members.forEach(mm=>{if(mm.pwHash)delete mm.pwHash;});
+    SYNC_AT=res.now;OFFLINE=false;syncUI();
+  }catch(e){if(e.message!=="unauthorized"){OFFLINE=true;syncUI();}}
+  syncBusy=false;
+}
+function applyRemote(rows){
+  let changed=0;
+  rows.forEach(r=>{
+    const key=kname(r.kind,r.id);
+    if(PENDING[key])return;
+    if(r.kind==="meta"){const m=r.data||{};if(m.workspace)DB.meta.workspace=m.workspace;if(Array.isArray(m.brands))DB.brands=m.brands;if(m.finCats)DB.finCats=m.finCats;SNAP[key]=JSON.stringify(metaObj());changed++;return;}
+    const ent=KINDS.find(x=>x[0]===r.kind);if(!ent)return;
+    const arr=DB[ent[1]];const i=arr.findIndex(x=>x.id===r.id);
+    if(r.deleted){if(i>-1){arr.splice(i,1);changed++;}delete SNAP[key];return;}
+    const cur=JSON.stringify(r.data);
+    if(SNAP[key]===cur)return;
+    if(i>-1)arr[i]=r.data;else arr.push(r.data);
+    SNAP[key]=cur;changed++;
+  });
+  if(changed){
+    DB.activity.sort((a,b)=>(b.createdAt||"").localeCompare(a.createdAt||""));
+    try{localStorage.setItem(CKEY,JSON.stringify(DB));}catch(e){}
+  }
+  return changed;
+}
+function uiSafe(){const ae=document.activeElement;return !$("#modal-root").classList.contains("show")&&!(ae&&["INPUT","TEXTAREA","SELECT"].includes(ae.tagName));}
+async function pollSync(){
+  if(MODE!=="cloud"||!ME||syncBusy)return;
+  try{
+    const res=await api("sync?since="+encodeURIComponent(SYNC_AT));
+    SYNC_AT=res.now;OFFLINE=false;
+    const n=applyRemote(res.rows||[]);
+    if(n||needRender){if(uiSafe()){needRender=false;route();}else needRender=true;}
+    syncUI();
+  }catch(e){if(e.message!=="unauthorized"){OFFLINE=true;syncUI();}}
+  if(Object.keys(PENDING).length)flushPush();
+}
+function startPoll(){stopPoll();pollTimer=setInterval(pollSync,15000);document.addEventListener("visibilitychange",onVis);}
+function stopPoll(){clearInterval(pollTimer);document.removeEventListener("visibilitychange",onVis);}
+function onVis(){if(document.visibilityState==="visible")pollSync();}
+function syncUI(){const el=$("#sync-dot");if(!el)return;el.className="sync-dot "+(MODE!=="cloud"?"off":OFFLINE?"warn":"on");el.title=MODE!=="cloud"?"로컬 모드 — 이 브라우저에만 저장":OFFLINE?"오프라인 — 연결되면 자동 반영":"클라우드 연결됨";}
+function hydrate(st){
+  DB=newDB(st.workspace||"마이웍스");
+  const m=st.meta||{};if(m.workspace)DB.meta.workspace=m.workspace;if(Array.isArray(m.brands)&&m.brands.length)DB.brands=m.brands;if(m.finCats)DB.finCats=m.finCats;
+  KINDS.forEach(([k,arr])=>{DB[arr]=(st.entities&&st.entities[k])||[];});
+  if(!DB.templates.length)DB.templates=[defaultTemplate()];
+  DB.activity.sort((a,b)=>(b.createdAt||"").localeCompare(a.createdAt||""));
+  try{localStorage.setItem(CKEY,JSON.stringify(DB));}catch(e){}
+}
+async function cloudEnter(){
+  const st=await api("state");
+  hydrate(st);
+  ME=DB.members.find(x=>x.id===st.me&&x.active);
+  if(!ME)throw new Error("member-missing");
+  buildSnap();PENDING={};SYNC_AT=st.now;
+  enterApp();startPoll();syncUI();
+}
+function cloudSignOut(expired){stopPoll();TOKEN="";localStorage.removeItem(TKEY);ME=null;location.hash="";showGate("login");if(expired)toast("로그인이 만료되었습니다. 다시 로그인하세요.");}
+function saveDB(){if(!DB)return;DB.meta.updatedAt=new Date().toISOString();try{localStorage.setItem(MODE==="cloud"?CKEY:KEY,JSON.stringify(DB));}catch(e){toast("저장 공간이 부족합니다. 백업 후 오래된 데이터를 정리하세요.");}if(MODE==="cloud")queuePush();}
 function logAct(text){DB.activity.unshift({id:uid("a"),ts:nowHM(),who:ME?ME.name:"시스템",text});if(DB.activity.length>300)DB.activity.length=300;}
 function memberById(id){return DB.members.find(m=>m.id===id)||null;}
 function memberName(id){const m=memberById(id);return m?m.name:"미배정";}
@@ -503,7 +607,7 @@ function canEditStore(s){return isAdmin()||ME.role==="staff";}
 function canWorkStore(s){return canSeeStore(s);}
 
 /* ═══════════ 초기 데이터 ═══════════ */
-function newDB(ws){return{meta:{app:"myworks",ver:1,workspace:ws,createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()},members:[],brands:DEFAULT_BRANDS.slice(),projects:[],stores:[],tasks:[],comments:[],activity:[],finance:[],routines:[],templates:[defaultTemplate()],finCats:{expense:DEFAULT_EXP.slice(),income:DEFAULT_INC.slice()}};}
+function newDB(ws){return{meta:{app:"myworks",ver:1,workspace:ws,createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()},members:[],brands:DEFAULT_BRANDS.slice(),projects:[],stores:[],tasks:[],comments:[],activity:[],finance:[],routines:[],templates:[defaultTemplate()],plans:[],finCats:{expense:DEFAULT_EXP.slice(),income:DEFAULT_INC.slice()}};}
 function defaultTemplate(){return{id:uid("tp"),name:"외주 발주 세트",items:[{title:"브리프·요구사항 전달",off:0},{title:"중간 결과 확인",off:7},{title:"결과물 검수",off:14},{title:"정산 처리",off:16}]};}
 function seedSample(adminId){
   const p1=uid("p");
@@ -523,8 +627,20 @@ function doSetup(){
   if(id.length<4)return err.textContent="아이디는 4자 이상으로 입력하세요.";
   if(pw.length<4)return err.textContent="비밀번호는 4자 이상으로 입력하세요.";
   if(pw!==pw2)return err.textContent="비밀번호가 서로 다릅니다.";
-  DB=newDB(ws);
   const admin={id:uid("m"),loginId:id,name,role:"admin",org:ws,pwHash:hashPw(pw),active:true,createdAt:new Date().toISOString()};
+  if(MODE==="cloud"){
+    err.textContent="";
+    api("setup",{workspace:ws,admin}).then(res=>{
+      TOKEN=res.token;localStorage.setItem(TKEY,TOKEN);CLOUD_INIT=true;
+      DB=newDB(ws);const a2={...admin};delete a2.pwHash;DB.members.push(a2);ME=a2;
+      if($("#su-sample").checked)seedSample(a2.id);
+      logAct("워크스페이스를 만들었습니다.");
+      SNAP={};SNAP["member:"+a2.id]=JSON.stringify(a2);SYNC_AT=res.now;
+      saveDB();enterApp();startPoll();syncUI();toast("마이웍스를 시작합니다. 이제 어느 기기에서든 이 아이디로 로그인됩니다.");
+    }).catch(e=>{err.textContent=e.code==="initialized"?"이미 만들어진 워크스페이스입니다. 새로고침 후 로그인하세요.":"서버 연결에 실패했습니다. 잠시 후 다시 시도하세요.";});
+    return;
+  }
+  DB=newDB(ws);
   DB.members.push(admin);ME=admin;
   if($("#su-sample").checked)seedSample(admin.id);
   logAct("워크스페이스를 만들었습니다.");
@@ -533,6 +649,14 @@ function doSetup(){
 }
 function doLogin(){
   const id=$("#li-id").value.trim(),pw=$("#li-pw").value,err=$("#li-err");
+  if(MODE==="cloud"){
+    err.textContent="";
+    api("login",{loginId:id,pw:hashPw(pw)}).then(res=>{
+      TOKEN=res.token;localStorage.setItem(TKEY,TOKEN);$("#li-pw").value="";
+      return cloudEnter();
+    }).catch(e=>{err.textContent=e.code==="inactive"?"비활성화된 계정입니다. 관리자에게 문의하세요.":e.code==="invalid"?"아이디 또는 비밀번호가 맞지 않습니다.":"서버 연결에 실패했습니다. 잠시 후 다시 시도하세요.";});
+    return;
+  }
   const m=DB.members.find(x=>x.loginId===id);
   if(!m||m.pwHash!==hashPw(pw))return err.textContent="아이디 또는 비밀번호가 맞지 않습니다.";
   if(!m.active)return err.textContent="비활성화된 계정입니다. 관리자에게 문의하세요.";
@@ -542,25 +666,31 @@ function doLogin(){
 function bootRestoreFromText(text){
   const r=parseImportText(text);
   if(!r.backup)return toast("전체 백업 파일이 아닙니다. 연동·데이터의 \u201c전체 백업 내려받기\u201d로 받은 .json 파일을 선택하세요.");
+  if(MODE==="cloud"){
+    api("restore",{data:r.backup}).then(()=>{CLOUD_INIT=true;showGate("login");toast("서버에 워크스페이스를 올렸습니다. 본인 아이디로 로그인하세요.");})
+    .catch(e=>toast(e.code==="initialized"?"이미 서버에 워크스페이스가 있습니다. 로그인 후 연동·데이터에서 복원하세요.":"서버 업로드에 실패했습니다."));
+    return;
+  }
   DB=r.backup;
   if(!Array.isArray(DB.stores))DB.stores=[];
   if(!Array.isArray(DB.finance))DB.finance=[];
   if(!Array.isArray(DB.routines))DB.routines=[];
   if(!Array.isArray(DB.templates))DB.templates=[defaultTemplate()];
+  if(!Array.isArray(DB.plans))DB.plans=[];
   if(!DB.finCats)DB.finCats={expense:DEFAULT_EXP.slice(),income:DEFAULT_INC.slice()};
   saveDB();
   showGate("login");
   toast("워크스페이스를 불러왔습니다. 본인 아이디로 로그인하세요.");
 }
-function doLogout(){localStorage.removeItem(SKEY);ME=null;location.hash="";showGate("login");}
+function doLogout(){if(MODE==="cloud"){api("logout",{}).catch(()=>{});cloudSignOut(false);return;}localStorage.removeItem(SKEY);ME=null;location.hash="";showGate("login");}
 
 /* ═══════════ 앱 셸·라우터 ═══════════ */
-const NAV=[["dashboard","홈","⌂"],["projects","프로젝트","▤"],["stores","매장","▣"],["board","업무보드","☰","보드"],["members","구성원","◉"],["data","연동·데이터","⇅","연동"]];
+const NAV=[["dashboard","홈","⌂"],["plan","플랜","▥"],["projects","프로젝트","▤"],["stores","매장","▣"],["board","업무보드","☰","보드"],["members","구성원","◉"],["data","연동·데이터","⇅","연동"]];
 function enterApp(){
   showGate("app");
   runRoutines();
   $("#side-ws").textContent=DB.meta.workspace;
-  $("#side-uname").textContent=ME.name;
+  $("#side-uname-t").textContent=ME.name;syncUI();
   $("#side-urole").textContent=ROLES[ME.role]+" · "+ME.loginId;
   $("#nav-side").innerHTML=NAV.map(n=>`<button data-nav="${n[0]}"><span class="n-ico">${n[2]}</span>${n[1]}</button>`).join("");
   $("#tabbar").innerHTML=NAV.map(n=>`<button data-nav="${n[0]}"><span class="n-ico">${n[2]}</span>${n[3]||n[1]}</button>`).join("");
@@ -576,8 +706,8 @@ function route(){
   const v=$("#view");
   if(page==="project"&&arg){const p=projectById(arg);if(p&&canSeeProject(p)){setNav("projects");v.innerHTML=vProjectDetail(p);return;}location.hash="#/projects";return;}
   if(page==="store"&&arg){const st=storeById(arg);if(st&&canSeeStore(st)){setNav("stores");v.innerHTML=vStoreDetail(st);return;}location.hash="#/stores";return;}
-  const fn={dashboard:vDashboard,projects:vProjects,stores:vStores,board:vBoard,members:vMembers,data:vData}[page]||vDashboard;
-  setNav(page in {dashboard:1,projects:1,stores:1,board:1,members:1,data:1}?page:"dashboard");
+  const fn={dashboard:vDashboard,plan:vPlan,projects:vProjects,stores:vStores,board:vBoard,members:vMembers,data:vData}[page]||vDashboard;
+  setNav(page in {dashboard:1,plan:1,projects:1,stores:1,board:1,members:1,data:1}?page:"dashboard");
   v.innerHTML=fn();
   if(page==="data")wireDropzone();
 }
@@ -621,6 +751,7 @@ function vDashboard(){
       <span class="bchip ${late?"warn":""}"><b>${late}</b>지연</span>
       <span class="bchip"><b>${dueToday}</b>오늘 마감</span>
       <span class="bchip rev" data-act="brief-review" style="cursor:pointer"><b>${revCnt}</b>검토 대기</span>
+      ${(()=>{const pl=DB.plans.filter(p=>p.memberId===ME.id&&p.scope==="d"&&p.key===todayStr()&&p.type==="item");return pl.length?`<span class="bchip" data-act="brief-plan" style="cursor:pointer"><b>${pl.filter(p=>p.done).length}/${pl.length}</b>오늘 플랜</span>`:"";})()}
     </div>
     <div class="h-line">진행중 프로젝트 ${running}개${visStores.length?` · 운영 매장 ${visStores.filter(x=>x.status==="운영중").length}곳`:""} · 이번 주 마감 ${week}건${late?` · <span class="d-late">지연 ${late}건</span>`:""}${chkNeed?` · <span class="d-late">점검 필요 ${chkNeed}곳</span>`:""}</div>
   </div>
@@ -682,7 +813,7 @@ function vDashboard(){
 }
 
 /* ═══════════ 프로젝트 목록 ═══════════ */
-const F={pjStatus:"전체",pjBrand:"전체",pjQ:"",bdProject:"전체",bdAssignee:"전체",stStatus:"전체",stBrand:"전체",stRegion:"전체",stQ:"",dashMine:false,stMonth:monKey()};
+const F={pjStatus:"전체",pjBrand:"전체",pjQ:"",bdProject:"전체",bdAssignee:"전체",stStatus:"전체",stBrand:"전체",stRegion:"전체",stQ:"",dashMine:false,stMonth:monKey(),plMode:"d",plD:todayStr(),plW:mondayOf(todayStr()),plM:monKey()};
 function vProjects(){
   let list=visibleProjects();
   if(F.pjStatus!=="전체")list=list.filter(p=>p.status===F.pjStatus);
@@ -786,6 +917,79 @@ function vProjectDetail(p){
     <h2>의견 <span class="cnt">${cmts.length}</span></h2>
     ${cmts.map(c=>`<div class="cmt">${av(memberName(c.memberId))}<div style="min-width:0"><div class="c-h"><b>${esc(memberName(c.memberId))}</b>${esc(c.ts)}</div><div class="c-b">${esc(c.text)}</div></div></div>`).join("")||`<div class="empty">첫 의견을 남겨 보세요.</div>`}
     <div class="cmt-add"><input id="cmt-in" placeholder="의견 입력 후 Enter 또는 등록" maxlength="500" data-enter="cmt-add" data-id="${p.id}"><button class="btn" data-act="cmt-add" data-id="${p.id}">등록</button></div>
+  </div>`;
+}
+
+/* ═══════════ 플랜 (일일·주간·월간) ═══════════ */
+function plKey(){return F.plMode==="d"?F.plD:F.plMode==="w"?"W"+F.plW:F.plM;}
+function plItems(){return DB.plans.filter(p=>p.memberId===ME.id&&p.scope===F.plMode&&p.key===plKey()&&p.type==="item").sort((a,b)=>(a.createdAt||"").localeCompare(b.createdAt||""));}
+function plNote(){return DB.plans.find(p=>p.memberId===ME.id&&p.scope===F.plMode&&p.key===plKey()&&p.type==="note");}
+function plLabel(){
+  if(F.plMode==="d"){const t=todayStr();const dn=["일","월","화","수","목","금","토"][new Date(F.plD).getDay()];return fmtD(F.plD)+" ("+dn+")"+(F.plD===t?" · 오늘":"");}
+  if(F.plMode==="w"){const e=addDaysStr(F.plW,6);return fmtD(F.plW)+" ~ "+fmtD(e)+(F.plW===mondayOf(todayStr())?" · 이번 주":"");}
+  return monLabel(F.plM)+(F.plM===monKey()?" · 이번 달":"");
+}
+function plNav(d){
+  if(F.plMode==="d")F.plD=addDaysStr(F.plD,d);
+  else if(F.plMode==="w")F.plW=addDaysStr(F.plW,d*7);
+  else F.plM=monShift(F.plM,d);
+}
+function taskScopeLabel(t){if(t.storeId){const x=storeById(t.storeId);return x?`<span class="t-proj" data-act="open-store" data-id="${x.id}" style="cursor:pointer">▣ ${esc(x.name)}</span>`:"";}const p=projectById(t.projectId);return p?`<span class="t-proj" data-act="open-project" data-id="${p.id}" style="cursor:pointer">${esc(p.name)}</span>`:"";}
+function visTasks(){
+  const pIds=new Set(visibleProjects().map(p=>p.id)),sIds=new Set(visibleStores().map(x=>x.id));
+  return DB.tasks.filter(t=>t.storeId?sIds.has(t.storeId):pIds.has(t.projectId));
+}
+function vPlan(){
+  const items=plItems(),note=plNote(),done=items.filter(i=>i.done).length;
+  const modeName={d:"일일",w:"주간",m:"월간"}[F.plMode];
+  const goalWord=F.plMode==="d"?"오늘 할 일":F.plMode==="w"?"이번 주 목표":"이달 목표";
+  let auto="";
+  if(F.plMode==="d"){
+    const due=visTasks().filter(t=>t.due===F.plD&&t.status!=="완료");
+    const carry=DB.plans.filter(p=>p.memberId===ME.id&&p.scope==="d"&&p.type==="item"&&!p.done&&p.key<todayStr());
+    auto=`
+    ${carry.length&&F.plD===todayStr()?`<div style="display:flex;align-items:center;gap:10px;background:var(--accent-soft);border:1px solid #F6C9B8;border-radius:10px;padding:10px 14px;margin-bottom:14px;font-size:13.5px"><b style="color:var(--accent-deep)">지난 날짜 미완료 ${carry.length}건</b><button class="btn btn-sm" data-act="pl-carry" style="margin-left:auto">오늘로 가져오기</button></div>`:""}
+    <div class="card"><h2>이 날짜 마감 업무 <span class="cnt">${due.length}건</span></h2>
+      ${due.length?due.map(t=>`<div class="today-item">${canTouchTask(t,projectById(t.projectId))?`<input type="checkbox" data-act="quick-done" data-id="${t.id}" aria-label="완료 처리">`:`<span style="width:17px"></span>`}<span class="t-title">${esc(t.title)}</span>${taskScopeLabel(t)}</div>`).join(""):`<div class="empty">이 날짜로 마감이 걸린 프로젝트·매장 업무가 없습니다.</div>`}
+    </div>`;
+  }else if(F.plMode==="w"){
+    const e=addDaysStr(F.plW,6);
+    const due=visTasks().filter(t=>t.due&&t.due>=F.plW&&t.due<=e&&t.status!=="완료").sort((a,b)=>a.due.localeCompare(b.due));
+    const off=Math.round((new Date(mondayOf(todayStr()))-new Date(F.plW))/(7*86400000));
+    auto=`<div class="card"><h2>이 주 마감 업무 <span class="cnt">${due.length}건</span>${off>=0?`<button class="btn btn-sm btn-ghost" style="margin-left:auto" data-act="report-copy" data-off="${off}">이 주 리포트 복사</button>`:""}</h2>
+      ${due.length?due.map(t=>`<div class="today-item"><span class="mono" style="font-size:11.5px;color:var(--faint);width:44px;flex:none">${fmtD(t.due)}</span><span class="t-title">${esc(t.title)}</span>${taskScopeLabel(t)}</div>`).join(""):`<div class="empty">이 주에 마감이 걸린 업무가 없습니다.</div>`}
+    </div>`;
+  }else{
+    const inMon=t=>t.due&&monKey(t.due)===F.plM;
+    const doneCnt=DB.tasks.filter(t=>t.status==="완료"&&monKey((t.updatedAt||"").slice(0,10)||"0000-00")===F.plM).length;
+    const dueCnt=visTasks().filter(t=>inMon(t)&&t.status!=="완료").length;
+    const fin=canFinance()?finSum(DB.finance.filter(f=>monKey(f.date)===F.plM)):null;
+    auto=`<div class="card"><h2>이달 요약</h2>
+      <div class="fin-sum">
+        <div class="f"><div class="v">${doneCnt}건</div><div class="l">완료된 업무</div></div>
+        <div class="f"><div class="v">${dueCnt}건</div><div class="l">남은 마감</div></div>
+        ${fin?`<div class="f plus"><div class="v">${fmtWon(fin.inc)}</div><div class="l">수입</div></div><div class="f ${fin.net>=0?"plus":"minus"}"><div class="v">${(fin.net>=0?"+":"")+fmtWon(fin.net)}</div><div class="l">손익</div></div>`:""}
+      </div>
+    </div>`;
+  }
+  return `
+  <div class="page-head">
+    <div><h1><span class="bars"></span>플랜</h1><div class="desc">나만 보는 ${modeName} 계획과 기록입니다.</div></div>
+  </div>
+  <div class="pl-tabs">
+    ${[["d","일일"],["w","주간"],["m","월간"]].map(([k,l])=>`<button class="fchip ${F.plMode===k?"on":""}" data-act="pl-mode" data-v="${k}">${l}</button>`).join("")}
+    <span class="mon-nav"><button data-act="pl-nav" data-d="-1">◀</button><b>${plLabel()}</b><button data-act="pl-nav" data-d="1">▶</button><button class="btn btn-sm btn-ghost" data-act="pl-today">오늘</button></span>
+  </div>
+  <div class="card">
+    <h2><span class="bars"></span>${goalWord} <span class="cnt">${done}/${items.length}</span></h2>
+    ${items.length?items.map(i=>`<div class="pl-item ${i.done?"done":""}"><input type="checkbox" ${i.done?"checked":""} data-act="pl-toggle" data-id="${i.id}"><span class="tx">${esc(i.text)}</span><button class="tk-x btn-ghost" data-act="pl-del" data-id="${i.id}" style="color:var(--faint)">✕</button></div>`).join(""):`<div class="empty">${goalWord}을 적어 두세요. 체크로 완료를 관리합니다.</div>`}
+    <div class="pl-add"><input id="pl-in" placeholder="${goalWord} 입력 후 Enter" maxlength="120" data-enter="pl-add"><button class="btn btn-pri" data-act="pl-add">추가</button></div>
+  </div>
+  ${auto}
+  <div class="card">
+    <h2>${modeName} 노트</h2>
+    <textarea id="pl-note" placeholder="${F.plMode==="d"?"오늘의 기록, 만난 사람, 결정한 것":F.plMode==="w"?"이번 주 회고, 다음 주로 넘길 것":"이달의 정리, 배운 것, 다음 달 방향"}">${esc(note?note.text:"")}</textarea>
+    <div style="display:flex;justify-content:flex-end;margin-top:10px"><button class="btn btn-sm" data-act="pl-note-save">노트 저장</button></div>
   </div>`;
 }
 
@@ -1081,6 +1285,11 @@ function vData(){
     <div id="preview-wrap" style="margin-top:14px"></div>
   </div>
   <div class="card">
+    <h2>서버 연결 상태</h2>
+    ${MODE==="cloud"?`<div style="font-size:13.5px;color:var(--sub);line-height:1.7"><b style="color:#1E7F4D">클라우드 모드로 동작 중입니다.</b> 모든 변경이 Cloudflare D1 데이터베이스에 저장되어, 어떤 컴퓨터·휴대폰에서든 같은 주소로 로그인하면 동일한 데이터를 보고 함께 작업할 수 있습니다. 인터넷이 잠시 끊겨도 저장은 안전하며 연결되면 자동 반영됩니다.</div><div style="margin-top:10px"><button class="btn btn-sm" data-act="sync-now">지금 동기화</button></div>`
+    :`<div style="font-size:13.5px;color:var(--sub);line-height:1.7"><b>로컬 모드로 동작 중입니다.</b> 데이터가 이 브라우저에만 저장됩니다. 어디서든 로그인해 함께 쓰려면 README의 <b>클라우드 전환</b> 안내대로 Cloudflare에서 D1 데이터베이스를 만들어 연결하세요. 연결이 감지되면 이 화면이 자동으로 클라우드 모드로 바뀝니다.</div>`}
+  </div>
+  <div class="card">
     <h2>주간 리포트</h2>
     <div style="font-size:13.5px;color:var(--sub);margin-bottom:12px">이번 주 완료·지연·검토 대기${canFinance()?"와 재무 합계":""}를 한 번에 복사합니다. 클로드에 붙여넣고 회고를 요청하면 다음 주 우선순위까지 정리해 줍니다.</div>
     <div style="display:flex;gap:8px;flex-wrap:wrap">
@@ -1293,7 +1502,11 @@ function doBackup(){download(`마이웍스_백업_${todayStr()}.json`,JSON.strin
 function restoreBackup(data){
   if(!isAdmin())return toast("복원은 관리자만 할 수 있습니다.");
   if(!confirm("현재 데이터를 모두 지우고 백업 파일 내용으로 바꿉니다. 계속할까요?"))return;
-  DB=data;if(!Array.isArray(DB.stores))DB.stores=[];if(!Array.isArray(DB.finance))DB.finance=[];if(!Array.isArray(DB.routines))DB.routines=[];if(!Array.isArray(DB.templates))DB.templates=[defaultTemplate()];if(!DB.finCats)DB.finCats={expense:DEFAULT_EXP.slice(),income:DEFAULT_INC.slice()};saveDB();
+  if(MODE==="cloud"){
+    api("restore",{data}).then(()=>cloudEnter().then(()=>toast("백업을 서버에 복원했습니다."))).catch(e=>{if(e.message==="member-missing")cloudSignOut(false);else toast("복원에 실패했습니다.");});
+    return;
+  }
+  DB=data;if(!Array.isArray(DB.stores))DB.stores=[];if(!Array.isArray(DB.finance))DB.finance=[];if(!Array.isArray(DB.routines))DB.routines=[];if(!Array.isArray(DB.templates))DB.templates=[defaultTemplate()];if(!Array.isArray(DB.plans))DB.plans=[];if(!DB.finCats)DB.finCats={expense:DEFAULT_EXP.slice(),income:DEFAULT_INC.slice()};saveDB();
   const meAgain=DB.members.find(m=>m.loginId===ME.loginId)||DB.members.find(m=>m.role==="admin");
   if(meAgain){ME=meAgain;localStorage.setItem(SKEY,ME.id);enterApp();toast("백업을 복원했습니다.");}
   else{doLogout();toast("백업을 복원했습니다. 다시 로그인하세요.");}
@@ -1567,9 +1780,16 @@ function settingsModal(){
 function setSave(){
   const pw0=$("#set-pw0").value,pw1=$("#set-pw1").value;
   if(pw0||pw1){
-    if(ME.pwHash!==hashPw(pw0))return toast("현재 비밀번호가 맞지 않습니다.");
     if(pw1.length<4)return toast("새 비밀번호는 4자 이상으로 입력하세요.");
-    ME.pwHash=hashPw(pw1);
+    if(MODE==="cloud"){
+      api("login",{loginId:ME.loginId,pw:hashPw(pw0)}).then(res=>{
+        api("logout",{token:res.token}).catch(()=>{});
+        ME.pwHash=hashPw(pw1);saveDB();toast("비밀번호를 바꿨습니다.");
+      }).catch(()=>toast("현재 비밀번호가 맞지 않습니다."));
+    }else{
+      if(ME.pwHash!==hashPw(pw0))return toast("현재 비밀번호가 맞지 않습니다.");
+      ME.pwHash=hashPw(pw1);
+    }
   }
   if(isAdmin()){
     DB.meta.workspace=$("#set-ws").value.trim()||DB.meta.workspace;
@@ -1617,11 +1837,20 @@ document.addEventListener("click",e=>{
     case"scmt-add":{const st=storeById(id);if(!st)break;const inp=$("#scmt-in"),tx=inp.value.trim();if(!tx)break;DB.comments.push({id:uid("c"),projectId:"",storeId:id,memberId:ME.id,text:tx,ts:nowHM()});logAct(`매장 "${st.name}"에 의견을 남겼습니다.`);saveDB();route();break;}
     case"sf-save":sfSave(id);break;
     case"brief-review":go("#/board");break;
+    case"brief-plan":go("#/plan");break;
+    case"pl-mode":F.plMode=b.dataset.v;route();break;
+    case"pl-nav":plNav(Number(b.dataset.d));route();break;
+    case"pl-today":F.plD=todayStr();F.plW=mondayOf(todayStr());F.plM=monKey();route();break;
+    case"pl-add":{const inp=$("#pl-in"),tx=inp.value.trim();if(!tx)break;DB.plans.push({id:uid("p"),memberId:ME.id,scope:F.plMode,key:plKey(),type:"item",text:tx,done:false,createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()});saveDB();route();break;}
+    case"pl-del":{DB.plans=DB.plans.filter(p=>p.id!==id);saveDB();route();break;}
+    case"pl-carry":{const t=todayStr();let n=0;DB.plans.forEach(p=>{if(p.memberId===ME.id&&p.scope==="d"&&p.type==="item"&&!p.done&&p.key<t){p.key=t;p.updatedAt=new Date().toISOString();n++;}});saveDB();route();toast(`미완료 ${n}건을 오늘로 옮겼습니다.`);break;}
+    case"pl-note-save":{const tx=$("#pl-note").value;let n=plNote();if(n){n.text=tx;n.updatedAt=new Date().toISOString();}else if(tx.trim()){DB.plans.push({id:uid("p"),memberId:ME.id,scope:F.plMode,key:plKey(),type:"note",text:tx,done:false,createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()});}saveDB();toast("노트를 저장했습니다.");break;}
     case"dash-mine":F.dashMine=b.dataset.v==="1";route();break;
     case"st-mon":{const nk=monShift(F.stMonth,Number(b.dataset.d));if(nk>monKey())break;F.stMonth=nk;route();break;}
     case"fin-add":{if(!canFinance())break;const pid=b.dataset.pid||"",sid=b.dataset.sid||"";const amt=Math.round(Number($("#fa-amt").value)||0);if(amt<=0){toast("금액을 입력하세요.");break;}const kind=$("#fa-kind").value,cat=$("#fa-cat").value,date=$("#fa-date").value||todayStr(),memo=$("#fa-memo").value.trim();DB.finance.push({id:uid("f"),projectId:pid,storeId:sid,kind,amount:amt,category:cat,date,memo,memberId:ME.id,createdAt:new Date().toISOString()});const tgt=pid?projectById(pid):storeById(sid);if(tgt)tgt.updatedAt=new Date().toISOString();logAct(`${pid?`"${tgt?tgt.name:""}"`:`매장 "${tgt?tgt.name:""}"`}에 ${kind} ${fmtWon(amt)}을 기록했습니다.`);saveDB();route();break;}
     case"fin-del":{if(!canFinance())break;const f=DB.finance.find(x=>x.id===id);if(!f)break;if(!confirm(`${f.kind} ${fmtWon(f.amount)} (${f.category}) 내역을 삭제할까요?`))break;DB.finance=DB.finance.filter(x=>x.id!==id);saveDB();route();break;}
     case"fin-csv":if(canFinance())finCSV();break;
+    case"sync-now":Promise.resolve(flushPush()).then(()=>pollSync()).then(()=>toast("동기화했습니다.")).catch(()=>{});break;
     case"report-copy":copyText(buildWeekReport(Number(b.dataset.off)||0),"주간 리포트를 복사했습니다. 클로드에 붙여넣어 회고를 요청해 보세요.");break;
     case"open-routine":{const sc=b.dataset.pid?{projectId:b.dataset.pid}:{storeId:b.dataset.sid};routineModal(sc);break;}
     case"rt-add":{const pid=b.dataset.pid||"",sid=b.dataset.sid||"";const title=$("#rt-title").value.trim();if(!title){toast("반복 업무 이름을 입력하세요.");break;}const type=$("#rt-type").value,when=Number($("#rt-when").value);const r={id:uid("r"),projectId:pid,storeId:sid,title,detail:"",type,dow:type==="weekly"?when:5,day:type==="monthly"?when:25,assigneeId:$("#rt-assignee").value,active:true,lastGen:todayStr(),createdAt:new Date().toISOString()};DB.routines.push(r);logAct(`반복 업무 "${title}"을(를) 등록했습니다.`);saveDB();routineModal(pid?{projectId:pid}:{storeId:sid});toast("반복 업무를 등록했습니다. 다음 주기부터 자동 생성됩니다.");break;}
@@ -1649,7 +1878,7 @@ document.addEventListener("click",e=>{
     case"pf-save":pfSave(id);break;
     case"mf-save":mfSave(id);break;
     case"set-save":setSave();break;
-    case"set-reset":if(isAdmin()&&confirm("정말 모든 데이터를 지울까요?")&&confirm("백업은 해 두셨나요? 이 작업은 되돌릴 수 없습니다.")){localStorage.removeItem(KEY);localStorage.removeItem(SKEY);location.reload();}break;
+    case"set-reset":if(isAdmin()&&confirm("정말 모든 데이터를 지울까요?")&&confirm("백업은 해 두셨나요? 이 작업은 되돌릴 수 없습니다.")){if(MODE==="cloud"){api("wipe",{}).then(()=>{localStorage.removeItem(CKEY);localStorage.removeItem(TKEY);location.reload();}).catch(()=>toast("초기화에 실패했습니다."));}else{localStorage.removeItem(KEY);localStorage.removeItem(SKEY);location.reload();}}break;
   }
 });
 function fallbackCopy(done){const ta=document.createElement("textarea");ta.value=CLAUDE_PROMPT;document.body.appendChild(ta);ta.select();try{document.execCommand("copy");done();}catch(e){toast("복사에 실패했습니다. 프롬프트를 직접 선택해 복사하세요.");}ta.remove();}
@@ -1663,6 +1892,7 @@ document.addEventListener("change",e=>{
     case"task-assignee":{const t=DB.tasks.find(x=>x.id===id);if(!t)break;t.assigneeId=el.value;t.assigneeName="";t.updatedAt=new Date().toISOString();saveDB();route();break;}
     case"task-due":{const t=DB.tasks.find(x=>x.id===id);if(!t)break;t.due=el.value;t.updatedAt=new Date().toISOString();saveDB();route();break;}
     case"quick-done":{const t=DB.tasks.find(x=>x.id===id);if(!t)break;t.status="완료";t.updatedAt=new Date().toISOString();logAct(`"${t.title}"을(를) 완료했습니다.`);saveDB();route();toast("완료 처리했습니다.");break;}
+    case"pl-toggle":{const p=DB.plans.find(x=>x.id===id);if(!p)break;p.done=el.checked;p.updatedAt=new Date().toISOString();saveDB();route();break;}
     case"fa-kind":{const cats=el.value==="수입"?DB.finCats.income:DB.finCats.expense;$("#fa-cat").innerHTML=cats.map(c=>`<option>${esc(c)}</option>`).join("");break;}
     case"store-status":{const st=storeById(id);if(!st||!canEditStore(st))break;st.status=el.value;st.updatedAt=new Date().toISOString();logAct(`매장 "${st.name}" 상태를 ${el.value}(으)로 바꿨습니다.`);saveDB();route();break;}
     case"store-cycle":{const st=storeById(id);if(!st||!canEditStore(st))break;st.checkCycleDays=Math.min(90,Math.max(1,Number(el.value)||7));st.updatedAt=new Date().toISOString();saveDB();route();break;}
@@ -1712,7 +1942,18 @@ document.addEventListener("drop",e=>{
 /* ═══════════ 시작 ═══════════ */
 $("#su-go").addEventListener("click",doSetup);
 $("#li-go").addEventListener("click",doLogin);
-(function boot(){
+(async function boot(){
+  try{
+    if(typeof fetch!=="function")throw new Error("no-fetch");
+    const st=await Promise.race([api("status"),new Promise((_,rj)=>setTimeout(()=>rj(new Error("timeout")),3000))]);
+    MODE="cloud";CLOUD_INIT=!!st.initialized;WSNAME=st.workspace||"";
+  }catch(e){MODE="local";}
+  if(MODE==="cloud"){
+    if(!CLOUD_INIT)return showGate("setup");
+    TOKEN=localStorage.getItem(TKEY)||"";
+    if(TOKEN){try{await cloudEnter();return;}catch(e){TOKEN="";localStorage.removeItem(TKEY);}}
+    return showGate("login");
+  }
   loadDB();
   if(!DB)return showGate("setup");
   const sid=localStorage.getItem(SKEY);
