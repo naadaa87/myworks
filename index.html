@@ -361,6 +361,9 @@ pre.code{background:var(--paper);border:1px solid var(--line);border-radius:9px;
     <div class="checkline"><input type="checkbox" id="su-sample" checked><label for="su-sample" style="margin:0;font-weight:500">시작 안내용 샘플 프로젝트 포함</label></div>
     <button class="btn btn-pri btn-full" id="su-go">워크스페이스 만들기</button>
     <div class="gate-err" id="su-err"></div>
+    <div style="display:flex;align-items:center;gap:10px;margin:18px 0 14px"><span style="flex:1;height:1px;background:var(--line)"></span><span style="font-size:12px;color:var(--faint)">또는</span><span style="flex:1;height:1px;background:var(--line)"></span></div>
+    <button class="btn btn-full" data-act="boot-restore">이미 만든 워크스페이스가 있어요 — 백업 파일로 시작</button>
+    <div style="font-size:12px;color:var(--faint);margin-top:8px;line-height:1.6">다른 컴퓨터에서 쓰던 마이웍스라면, 그 기기의 연동·데이터에서 받은 <b>전체 백업(.json)</b>을 여기서 불러온 뒤 본인 아이디로 로그인하면 됩니다.</div>
     <div class="gate-foot">모든 데이터는 이 브라우저에만 저장됩니다. 연동·데이터 메뉴에서 언제든 백업할 수 있습니다.</div>
   </div>
 </div>
@@ -535,6 +538,19 @@ function doLogin(){
   if(!m.active)return err.textContent="비활성화된 계정입니다. 관리자에게 문의하세요.";
   ME=m;localStorage.setItem(SKEY,m.id);err.textContent="";$("#li-pw").value="";
   enterApp();
+}
+function bootRestoreFromText(text){
+  const r=parseImportText(text);
+  if(!r.backup)return toast("전체 백업 파일이 아닙니다. 연동·데이터의 \u201c전체 백업 내려받기\u201d로 받은 .json 파일을 선택하세요.");
+  DB=r.backup;
+  if(!Array.isArray(DB.stores))DB.stores=[];
+  if(!Array.isArray(DB.finance))DB.finance=[];
+  if(!Array.isArray(DB.routines))DB.routines=[];
+  if(!Array.isArray(DB.templates))DB.templates=[defaultTemplate()];
+  if(!DB.finCats)DB.finCats={expense:DEFAULT_EXP.slice(),income:DEFAULT_INC.slice()};
+  saveDB();
+  showGate("login");
+  toast("워크스페이스를 불러왔습니다. 본인 아이디로 로그인하세요.");
 }
 function doLogout(){localStorage.removeItem(SKEY);ME=null;location.hash="";showGate("login");}
 
@@ -1626,6 +1642,7 @@ document.addEventListener("click",e=>{
     case"cancel-import":PREVIEW=null;$("#preview-wrap").innerHTML="";break;
     case"apply-import":applyImport();break;
     case"backup":doBackup();break;
+    case"boot-restore":readFileThen(bootRestoreFromText);break;
     case"restore":readFileThen(text=>{const r=parseImportText(text);if(r.backup)restoreBackup(r.backup);else toast("백업 파일이 아닙니다. '전체 백업'으로 내려받은 파일을 선택하세요.");});break;
     case"share-export":doShareExport();break;
     case"share-import":readFileThen(handleImportedText);break;
