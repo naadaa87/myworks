@@ -11,15 +11,29 @@
   - **커머스** — 상품 판매: 주문·발송 → 재고 → 문의 → 채널별 손익
 - **확인 링크** — 계정이 없는 고객도 링크 하나로 견적 승인, 납품 확인, 청구서 확인을 할 수 있습니다.
 - **AI 접속** — 개인 토큰으로 클로드를 커넥터(MCP)로 연결하면 "오늘 뭐 해야 해?"에 내 데이터로 답하고, 업무·메모·연락처 변경을 **제안**합니다. 제안은 홈의 **오늘 결정할 것**에서 승인해야 반영됩니다.
-- Cloudflare Pages + D1 위에서 동작하며, 화면 클릭만으로 배포·운영할 수 있습니다. 서버 없이 `index.html`만 열면 이 브라우저에만 저장하는 로컬 모드로 동작합니다(모듈·AI 접속·확인 링크는 서버 연결이 필요합니다).
+- Cloudflare Pages + D1 위에서 동작하며, 화면 클릭만으로 배포·운영할 수 있습니다. 서버 없이 `app/index.html`만 열면 이 브라우저에만 저장하는 로컬 모드로 동작합니다(모듈·AI 접속·확인 링크는 서버 연결이 필요합니다).
+- 공개 홈페이지(`/`)에 서비스 소개·가격·가이드·공지가 있습니다. 마이웍스를 대표 서비스로 두고 마이스토어·마이빌딩·마이택스·마이셀러로 넓히는 계획은 홈페이지와 통합 기획 문서에 적혀 있습니다.
+
+
+## 주소 체계 (2026-10-31부터)
+
+| 주소 | 무엇 | 비고 |
+|---|---|---|
+| `/` | 공개 홈페이지 — 소개 · 서비스 4개(마이스토어·마이빌딩·마이택스·마이셀러) · 가격 · 가이드 · 공지 · 약관 | 로그인된 기기에서 열면 자동으로 `/app/`로 이동합니다. 소개 페이지를 보려면 `/?site=1` |
+| `/app/` | 마이웍스 앱(워크스페이스) | 예전의 `index.html`이 그대로 옮겨 온 것입니다 |
+| `/link/<토큰>` 또는 `/app/#/link/<토큰>` | 확인 링크 | 예전에 보낸 `/#/link/<토큰>` 주소도 그대로 동작합니다 |
+| `/#join=<코드>` · `/app/#join=<코드>` | 초대 링크 | 둘 다 동작합니다 |
+| `/api/*` · `/mcp` | 서버 | 변동 없음 |
+
+홈페이지 파일은 저장소 루트(`index.html`, `store.html`, `pricing.html` … `site/`)에, 앱은 `app/index.html`에 있습니다. 홈페이지 문구는 `src/site/gen.js`를 고쳐 다시 생성하거나, 급하면 HTML 파일을 직접 고쳐도 됩니다(다음 생성 때 덮어쓰이므로 `gen.js`에도 반영해 두세요).
 
 ---
 
 ## 이번 버전 올리는 방법
 
-Cloudflare 설정(D1 연결)은 그대로 두고, GitHub에서 파일 두 개만 바꾸면 됩니다. 기존 데이터는 그대로 이어지고, 필요한 표(테이블)와 칸은 서버가 첫 요청 때 스스로 추가합니다. SQL을 입력할 일은 없습니다.
+Cloudflare 설정(D1 연결)은 그대로 두고, GitHub에서 파일 두 개만 바꾸면 됩니다. 앱은 `app/index.html`, 서버는 `functions/_middleware.js`입니다. 기존 데이터는 그대로 이어지고, 필요한 표(테이블)와 칸은 서버가 첫 요청 때 스스로 추가합니다. SQL을 입력할 일은 없습니다.
 
-1. **index.html 교체** — 저장소(`naadaa87/myworks`) 첫 화면에서 `Add file → Upload files`를 누르고 새 `index.html`을 끌어다 놓은 뒤 **Commit changes**. 같은 이름이면 덮어써집니다.
+1. **앱 파일 교체** — 저장소(`naadaa87/myworks`)에서 `app` 폴더를 연 상태로 `Add file → Upload files`를 누르고 새 `index.html`을 끌어다 놓은 뒤 **Commit changes**. 같은 이름이면 덮어써집니다. (루트의 `index.html`은 공개 홈페이지 첫 화면이므로 여기에 앱 파일을 올리지 마세요.)
 2. **서버 파일 교체** — 저장소에서 `functions` 폴더를 연 상태로 `Add file → Upload files`를 누르고 새 `_middleware.js`를 끌어다 놓은 뒤 **Commit changes**. 폴더 안에서 올려야 그 자리의 파일이 바뀝니다.
 3. **(선택) README.md**, `sample-claude.json`도 같은 방법으로 올립니다.
 4. 1~2분 뒤 자동 배포가 끝나면 사이트를 엽니다. 처음 접속하는 순간 운영자 워크스페이스는 자동으로 **프로 + 스페이스**가 켜집니다. 아웃소싱·커머스는 **설정 → 등급과 모듈**에서 켭니다.
@@ -227,7 +241,7 @@ AI가 만든 업무·연락처에는 **AI** 표시가 붙습니다.
 
 ## 확인 링크 — 계정 없는 상대에게 보내기
 
-견적서·청구서·납품물은 **확인 링크**(`사이트주소/#/link/…`)로 보냅니다. 받은 사람은 로그인 없이 내용을 보고 **승인 / 확인 / 수정 요청**만 할 수 있습니다.
+견적서·청구서·납품물은 **확인 링크**(`사이트주소/app/#/link/…`, 짧게는 `사이트주소/link/…`)로 보냅니다. 받은 사람은 로그인 없이 내용을 보고 **승인 / 확인 / 수정 요청**만 할 수 있습니다.
 
 - 링크는 30일(견적은 만들 때 정한 기간) 동안 유효하고, 같은 대상으로 새 링크를 만들면 이전 링크는 닫힙니다.
 - 상대가 누른 결과는 보낸 사람의 마이웍스에 바로 기록되고(활동 기록, 홈의 결정할 것), 수정 요청 사유도 함께 들어옵니다.
@@ -397,7 +411,7 @@ AI 접속을 쓰지 않아도, 대화 내용을 파일로 받아 반영하는 �
 
 이미 배포를 마쳤다면 이 절은 건너뛰어도 됩니다.
 
-1. GitHub 저장소에 `index.html`, `functions/_middleware.js`(필요하면 `README.md`, `sample-claude.json`도)를 올립니다. `functions/_middleware.js`는 `Add file → Create new file`에서 파일 이름 칸에 경로째 입력하면 폴더가 함께 만들어집니다.
+1. GitHub 저장소에 `app/index.html`, `functions/_middleware.js`, 홈페이지 파일들(필요하면 `README.md`, `sample-claude.json`도)을 올립니다. `functions/_middleware.js`는 `Add file → Create new file`에서 파일 이름 칸에 경로째 입력하면 폴더가 함께 만들어집니다.
 2. Cloudflare 대시보드 → **Workers & Pages** → **Create** → **Pages** → **Connect to Git**에서 저장소를 선택합니다. 빌드 설정은 전부 비워 둡니다. (Framework preset: None, Build command 없음, Output directory: `/`)
 3. **Storage & Databases → D1 SQL Database → Create Database**로 데이터베이스(예: `myworks-db`)를 만듭니다.
 4. Pages 프로젝트의 **Settings → Bindings → Add → D1 database**에서 Variable name을 대문자 `DB`로 적고 방금 만든 데이터베이스를 연결합니다.
@@ -414,7 +428,7 @@ AI 접속을 쓰지 않아도, 대화 내용을 파일로 받아 반영하는 �
 
 ## 로컬 모드 (서버 없이 쓰기)
 
-`index.html` 파일을 그냥 열거나 D1이 연결되지 않은 곳에 올리면 로컬 모드로 동작합니다. 화면 왼쪽 아래 이름 옆 점이 회색이면 로컬 모드입니다.
+`app/index.html` 파일을 그냥 열거나 D1이 연결되지 않은 곳에 올리면 로컬 모드로 동작합니다. 화면 왼쪽 아래 이름 옆 점이 회색이면 로컬 모드입니다.
 
 - 데이터는 그 브라우저에만 저장되고, 회원가입·승인, 모듈, AI 접속, 확인 링크는 나타나지 않습니다. 첫 화면에서 관리자 계정을 만들어 바로 씁니다. 연락처와 검수 요청·승인은 로컬에서도 됩니다.
 - 다른 기기로 옮길 때는 연동·데이터의 **전체 백업 내려받기** → 새 기기 첫 화면의 **백업 파일로 시작**을 씁니다.
@@ -426,8 +440,15 @@ AI 접속을 쓰지 않아도, 대화 내용을 파일로 받아 반영하는 �
 ## 파일 구성
 
 ```
-index.html                 앱 전체 (HTML + CSS + JS 단일 파일 — 코어·스페이스·아웃소싱·커머스·확인 링크 화면)
+index.html                 공개 홈페이지 첫 화면 (로그인 상태면 /app/로 보냄)
+store.html building.html tax.html seller.html   서비스 소개 4장
+pricing.html guide.html notice.html start.html terms.html privacy.html   가격 · 가이드 · 공지 · 시작하기 · 약관 · 개인정보
+site/site.css site/site.js site/img/            홈페이지 스타일·계산기·화면 캡처
+link/index.html            /link/<토큰> 짧은 주소를 앱의 확인 링크로 넘기는 페이지 (_redirects와 함께)
+_redirects                 Cloudflare Pages 경로 규칙
+app/index.html             앱 전체 (HTML + CSS + JS 단일 파일 — 코어·스페이스·아웃소싱·커머스·확인 링크 화면)
 functions/_middleware.js   서버 — 회원가입·승인·로그인·동기화·등급·모듈·AI 접속(MCP)·확인 링크 (Cloudflare Pages Functions + D1)
+src/site/gen.js            홈페이지 생성기 (node src/site/gen.js . README.md 로 다시 생성)
 sample-claude.json         클로드 연동 형식 예시 파일
 README.md                  이 문서
 ```

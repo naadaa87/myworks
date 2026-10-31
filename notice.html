@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>공지 — 마이웍스</title>
+<meta name="description" content="마이웍스 배포 소식과 바뀐 점.">
+<meta property="og:title" content="공지 — 마이웍스">
+<meta property="og:description" content="마이웍스 배포 소식과 바뀐 점.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://myworkspro.pages.dev/site/img/og.png">
+<meta name="theme-color" content="#FF4712">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='4' y='9' width='24' height='5' fill='%23FF4712'/%3E%3Crect x='4' y='18' width='16' height='5' fill='%23FF4712'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="stylesheet" href="/site/site.css">
+
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <a class="logo" href="/" aria-label="마이웍스 홈"><span class="mark"></span>마이웍스</a>
+    <input type="checkbox" id="nav-toggle" class="nav-toggle" aria-label="메뉴 열기">
+    <label for="nav-toggle" class="nav-btn"><span></span><span></span><span></span></label>
+    <nav class="nav">
+      <div class="nav-group" tabindex="0"><span class="nav-label">서비스 <svg width="10" height="6" viewBox="0 0 10 6" aria-hidden="true"><path d="M1 1l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></span>
+        <div class="menu">
+          <a href="/store"><i class="dot" style="background:#1F7A5A"></i>마이스토어</a>
+          <a href="/building"><i class="dot" style="background:#2B4FD6"></i>마이빌딩</a>
+          <a href="/tax"><i class="dot" style="background:#6B4ED6"></i>마이택스</a>
+          <a href="/seller"><i class="dot" style="background:#0E8A8A"></i>마이셀러</a>
+        </div>
+      </div>
+      <a href="/pricing">가격</a>
+      <a href="/guide">가이드</a>
+      <a href="/notice" class="on">공지</a>
+      <a href="/app/" class="login">로그인</a>
+      <a href="/start" class="btn primary small">시작하기</a>
+    </nav>
+  </div>
+</header>
+<main>
+<section class="hero sub"><div class="wrap"><p class="kicker">공지</p><h1>바뀐 점</h1><p class="lead">배포할 때마다 한 줄씩 남깁니다. 장애가 있으면 맨 위에 적습니다.</p></div></section>
+<section class="sec"><div class="wrap doc">
+  <div class="notice"><time>2026. 10. 31.</time><h3>공개 홈페이지를 열고 주소 체계를 바꿨습니다</h3>
+    <p>첫 화면(<code>/</code>)은 이제 소개 페이지입니다. 앱은 <code>/app/</code>으로 옮겼고, 로그인된 기기에서 첫 화면을 열면 자동으로 앱이 열립니다. 예전에 보낸 확인 링크(<code>/#/link/…</code>)와 초대 링크(<code>/#join=…</code>)는 그대로 동작합니다. 홈 화면에 추가해 둔 바로가기도 그대로 쓸 수 있습니다.</p>
+    <p>마이웍스를 대표 서비스로 두고 마이스토어·마이빌딩·마이택스·마이셀러 네 분야 서비스로 넓히는 계획을 소개 페이지와 가격 페이지에 적었습니다. 지금 운영 중인 스페이스·아웃소싱·커머스 모듈은 그대로 쓸 수 있고, 다음 배포부터 새 이름과 자리로 차례로 옮깁니다.</p></div>
+  <div class="notice"><time>2026. 10. 21.</time><h3>v4 반영 확인</h3><p>저장소의 파일이 10월 10일 최종본과 같은지 확인했습니다. 운영 데이터에는 변화가 없습니다.</p></div>
+  <div class="notice"><time>2026. 10. 10.</time><h3>v4 — 등급, 오늘 결정할 것, 검수, 사람, 확인 링크, AI 접속, 아웃소싱·커머스</h3>
+    <p>베이직·프로 등급과 모듈 스위치, 홈의 ‘오늘 결정할 것’, 검수 요청·승인 흐름, 구성원과 연락처, 계정 없는 상대에게 보내는 확인 링크(견적 승인·납품 확인·청구서), 클로드를 연결하는 AI 접속(개인 토큰·MCP, 제안 → 승인), 아웃소싱·커머스 모듈, 스페이스의 채널별 수수료율, 운영 콘솔의 등급 설정을 더했습니다. 서버 테스트 418건, 화면 테스트 282건을 통과했습니다.</p></div>
+</div></section>
+</main>
+<footer class="foot">
+  <div class="wrap">
+    <div class="foot-grid">
+      <div>
+        <div class="logo small"><span class="mark"></span>마이웍스</div>
+        <p class="muted">혼자 하는 일을 끝까지 처리하는 일터.<br>㈜블랭크가 만들고 직접 씁니다.</p>
+      </div>
+      <div>
+        <b>서비스</b>
+        <a href="/store">마이스토어</a><a href="/building">마이빌딩</a><a href="/tax">마이택스</a><a href="/seller">마이셀러</a>
+      </div>
+      <div>
+        <b>안내</b>
+        <a href="/pricing">가격</a><a href="/guide">가이드</a><a href="/notice">공지</a><a href="/start">시작하기</a>
+      </div>
+      <div>
+        <b>회사</b>
+        <span>㈜블랭크 · 대표 최시준</span>
+        <a href="mailto:spaceblank0100@gmail.com">spaceblank0100@gmail.com</a>
+        <a href="/terms">이용약관</a><a href="/privacy">개인정보처리방침</a>
+      </div>
+    </div>
+    <div class="foot-bottom muted">
+      <span>© 2026 ㈜블랭크. 마이웍스는 Cloudflare 위에서 동작합니다.</span>
+      <span>최근 갱신 2026. 10. 31.</span>
+    </div>
+  </div>
+</footer>
+<script src="/site/site.js" defer></script>
+</body>
+</html>
