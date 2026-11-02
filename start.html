@@ -19,10 +19,9 @@
 <header class="top">
   <div class="wrap">
     <a class="logo" href="/" aria-label="마이웍스 홈"><span class="mark"></span>마이웍스</a>
-    <input type="checkbox" id="nav-toggle" class="nav-toggle" aria-label="메뉴 열기">
-    <label for="nav-toggle" class="nav-btn"><span></span><span></span><span></span></label>
-    <nav class="nav">
-      <div class="nav-group" tabindex="0"><span class="nav-label">서비스 <svg width="10" height="6" viewBox="0 0 10 6" aria-hidden="true"><path d="M1 1l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></span>
+    <button type="button" class="nav-btn" aria-label="메뉴 열기" aria-expanded="false" aria-controls="site-nav"><span></span><span></span><span></span></button>
+    <nav class="nav" id="site-nav">
+      <div class="nav-group"><button type="button" class="nav-label" aria-expanded="false" aria-haspopup="true">서비스 <svg width="10" height="6" viewBox="0 0 10 6" aria-hidden="true"><path d="M1 1l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></button>
         <div class="menu">
           <a href="/store"><i class="dot" style="background:#1F7A5A"></i>마이스토어</a>
           <a href="/building"><i class="dot" style="background:#2B4FD6"></i>마이빌딩</a>
@@ -42,11 +41,12 @@
 <section class="hero sub"><div class="wrap"><p class="kicker">시작하기</p><h1>세 단계면 됩니다</h1><p class="lead">카드 등록 없이 시작합니다. 지금은 비공개 운영 기간이라 가입 뒤 운영자 승인이 한 번 있습니다. 보통 하루 안에 처리됩니다.</p></div></section>
 <section class="sec"><div class="wrap">
   <ol class="steps">
-    <li><b>회원가입</b><p>앱 첫 화면의 ‘회원가입 · 새 워크스페이스 만들기’에서 워크스페이스 이름, 이름, 아이디, 비밀번호, 연락처를 적습니다. 사업자 정보는 묻지 않습니다.</p></li>
-    <li><b>승인</b><p>운영자가 신청 내용을 보고 승인합니다. 승인되면 어느 기기에서든 같은 아이디로 로그인할 수 있습니다. 새 워크스페이스는 베이직으로 시작합니다.</p></li>
-    <li><b>첫 데이터</b><p>프로젝트 하나, 매장 하나, 또는 거래처 하나만 넣어 보세요. ‘오늘’ 화면이 채워지기 시작합니다. 프로나 분야 서비스가 필요하면 설정에서 요청하거나 메일로 알려 주세요.</p></li>
+    <li><div><b>회원가입</b><p>아래 ‘회원가입 하러 가기’를 누르면 가입 화면이 바로 열립니다. 워크스페이스 이름, 이름, 아이디, 비밀번호, 연락처를 적습니다. 사업자 정보는 묻지 않습니다.</p></div></li>
+    <li><div><b>승인</b><p>운영자가 신청 내용을 보고 승인합니다. 승인되면 어느 기기에서든 같은 아이디로 로그인할 수 있습니다. 새 워크스페이스는 베이직으로 시작합니다.</p></div></li>
+    <li><div><b>첫 데이터</b><p>프로젝트 하나, 매장 하나, 또는 거래처 하나만 넣어 보세요. ‘오늘’ 화면이 채워지기 시작합니다. 프로나 분야 서비스가 필요하면 설정에서 요청하거나 메일로 알려 주세요.</p></div></li>
   </ol>
-  <div class="cta"><a class="btn primary" href="/app/">회원가입 하러 가기</a><a class="btn" href="/guide#이용-흐름">이용 흐름 자세히</a></div>
+  <div class="cta"><a class="btn primary" href="/app/#signup">회원가입 하러 가기</a><a class="btn" href="/app/">이미 계정이 있어요</a></div>
+  <p class="muted small"><a class="text-link" href="/guide#이용-흐름">이용 흐름 자세히 →</a></p>
   <p class="muted small">팀원으로 합류하려면 관리자가 보낸 초대 링크를 여세요. 초대 링크 없이 가입하면 새 워크스페이스가 만들어집니다.</p>
 </div></section>
 </main>
@@ -74,7 +74,7 @@
     </div>
     <div class="foot-bottom muted">
       <span>© 2026 ㈜블랭크. 마이웍스는 Cloudflare 위에서 동작합니다.</span>
-      <span>최근 갱신 2026. 10. 31.</span>
+      <span>최근 갱신 2026. 11. 2.</span>
     </div>
   </div>
 </footer>

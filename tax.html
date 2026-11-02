@@ -19,10 +19,9 @@
 <header class="top">
   <div class="wrap">
     <a class="logo" href="/" aria-label="마이웍스 홈"><span class="mark"></span>마이웍스</a>
-    <input type="checkbox" id="nav-toggle" class="nav-toggle" aria-label="메뉴 열기">
-    <label for="nav-toggle" class="nav-btn"><span></span><span></span><span></span></label>
-    <nav class="nav">
-      <div class="nav-group" tabindex="0"><span class="nav-label">서비스 <svg width="10" height="6" viewBox="0 0 10 6" aria-hidden="true"><path d="M1 1l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></span>
+    <button type="button" class="nav-btn" aria-label="메뉴 열기" aria-expanded="false" aria-controls="site-nav"><span></span><span></span><span></span></button>
+    <nav class="nav" id="site-nav">
+      <div class="nav-group"><button type="button" class="nav-label" aria-expanded="false" aria-haspopup="true">서비스 <svg width="10" height="6" viewBox="0 0 10 6" aria-hidden="true"><path d="M1 1l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></button>
         <div class="menu">
           <a href="/store"><i class="dot" style="background:#1F7A5A"></i>마이스토어</a>
           <a href="/building"><i class="dot" style="background:#2B4FD6"></i>마이빌딩</a>
@@ -111,7 +110,7 @@
     </div>
     <div class="foot-bottom muted">
       <span>© 2026 ㈜블랭크. 마이웍스는 Cloudflare 위에서 동작합니다.</span>
-      <span>최근 갱신 2026. 10. 31.</span>
+      <span>최근 갱신 2026. 11. 2.</span>
     </div>
   </div>
 </footer>

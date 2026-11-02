@@ -418,7 +418,8 @@ pre.code{background:var(--paper);border:1px solid var(--line);border-radius:9px;
 .gate-box.lk-wrap{max-width:640px}
 .lk-head h1{font-size:21px;font-weight:800;letter-spacing:-.02em;margin:8px 0 4px;line-height:1.35}
 .lk-head{margin-bottom:18px}
-.lk-tbl{min-width:0!important}
+.lk-tbl{min-width:0!important}.lk-tbl td.num,.lk-tbl th.r{white-space:nowrap}
+@media (max-width:480px){.lk-tbl th,.lk-tbl td{padding-left:6px!important;padding-right:6px!important}.lk-tbl td.num{font-size:12px}}
 .lk-meta{display:flex;gap:14px;flex-wrap:wrap;font-size:13px;color:var(--sub);margin:12px 0 14px}
 .lk-dl{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
 .lk-file{display:block;padding:10px 13px;border:1px solid var(--line);border-radius:9px;background:var(--paper);text-decoration:none;font-weight:600;font-size:14px;color:var(--accent-deep)}
@@ -685,6 +686,11 @@ table.tbl{border-collapse:collapse;width:100%;font-size:13.5px;min-width:560px}
   .os-row .os-acts{width:100%;justify-content:flex-start;max-width:none}
   .cu-map{grid-template-columns:1fr}
 }
+
+/* 화면 폭 대응: 격자 칸이 안의 긴 한 줄 때문에 화면 밖으로 밀리지 않게 한다 (1fr의 최소 폭을 0으로) */
+.stats>*,.two-col>*,.kwrap>*,.flow>*,.m-grid2>*,.m-grid3>*,.aiauto-grid>*,.sp-kpis>*,.sp-grid2>*,.sp-start>*,.cu-map>*,.task-row>*,.task-add>*,.fin-add>*{min-width:0}
+/* 한글은 단어 단위로 줄바꿈하고, 칸보다 긴 단어만 쪼갠다 */
+body{word-break:keep-all;overflow-wrap:anywhere}
 @media (prefers-reduced-motion:reduce){
   *{transition:none!important;animation:none!important}
 }
@@ -1008,7 +1014,7 @@ async function cloudEnter(){
   const st=await api("state");
   applyState(st);
   if(!ME)throw Object.assign(new Error("member-missing"),{code:"member-missing"});
-  if(/^#join=/.test(location.hash))location.hash="";
+  if(/^#(join=|signup$)/.test(location.hash))location.hash="";
   enterApp();startPoll();syncUI();
 }
 /* 볼 수 있는 범위가 바뀌면(역할 변경·새 프로젝트 배정) 전체를 다시 받습니다 */
@@ -5637,6 +5643,7 @@ $("#sg-go").addEventListener("click",doSignup);
       try{await cloudEnter();return;}catch(e){TOKEN="";localStorage.removeItem(TKEY);ME=null;}
     }
     if(jm)return openSignup("join",jm[1].toUpperCase());
+    if(/^#signup$/.test(location.hash))return openSignup("new");   // 홈페이지의 시작하기에서 바로 회원가입 화면으로
     return showGate("login");
   }
   loadDB();

@@ -19,10 +19,9 @@
 <header class="top">
   <div class="wrap">
     <a class="logo" href="/" aria-label="마이웍스 홈"><span class="mark"></span>마이웍스</a>
-    <input type="checkbox" id="nav-toggle" class="nav-toggle" aria-label="메뉴 열기">
-    <label for="nav-toggle" class="nav-btn"><span></span><span></span><span></span></label>
-    <nav class="nav">
-      <div class="nav-group" tabindex="0"><span class="nav-label">서비스 <svg width="10" height="6" viewBox="0 0 10 6" aria-hidden="true"><path d="M1 1l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></span>
+    <button type="button" class="nav-btn" aria-label="메뉴 열기" aria-expanded="false" aria-controls="site-nav"><span></span><span></span><span></span></button>
+    <nav class="nav" id="site-nav">
+      <div class="nav-group"><button type="button" class="nav-label" aria-expanded="false" aria-haspopup="true">서비스 <svg width="10" height="6" viewBox="0 0 10 6" aria-hidden="true"><path d="M1 1l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></button>
         <div class="menu">
           <a href="/store"><i class="dot" style="background:#1F7A5A"></i>마이스토어</a>
           <a href="/building"><i class="dot" style="background:#2B4FD6"></i>마이빌딩</a>
@@ -51,10 +50,10 @@
 </section>
 <section class="sec guide">
   <div class="wrap guide-grid">
-    <aside class="guide-toc"><b>목차</b><a href="#이용-흐름">이용 흐름</a><a href="#등급--베이직과-프로">등급 — 베이직과 프로</a><a href="#홈--오늘-결정할-것">홈 — 오늘 결정할 것</a><a href="#사람--구성원과-연락처">사람 — 구성원과 연락처</a><a href="#스페이스--공간-운영">스페이스 — 공간 운영</a><a href="#아웃소싱--프리랜서-외주-관리">아웃소싱 — 프리랜서 외주 관리</a><a href="#커머스--상품-판매-운영">커머스 — 상품 판매 운영</a><a href="#확인-링크--계정-없는-상대에게-보내기">확인 링크 — 계정 없는 상대에게 보내기</a><a href="#ai-접속--클로드를-마이웍스에-연결하기">AI 접속 — 클로드를 마이웍스에 연결하기</a><a href="#운영자-가이드">운영자 가이드</a><a href="#워크스페이스-관리자-가이드">워크스페이스 관리자 가이드</a><a href="#로그인-규칙과-보안">로그인 규칙과 보안</a><a href="#주요-기능">주요 기능</a><a href="#클로드-연동-사용법-파일-방식">클로드 연동 사용법 (파일 방식)</a><a href="#처음부터-배포하는-경우-참고">처음부터 배포하는 경우 (참고)</a><a href="#로컬-모드-서버-없이-쓰기">로컬 모드 (서버 없이 쓰기)</a><a href="#파일-구성">파일 구성</a></aside>
+    <details class="guide-toc" open><summary><span>목차 <span class="muted">17개</span></span></summary><nav><a href="#이용-흐름">이용 흐름</a><a href="#등급--베이직과-프로">등급 — 베이직과 프로</a><a href="#홈--오늘-결정할-것">홈 — 오늘 결정할 것</a><a href="#사람--구성원과-연락처">사람 — 구성원과 연락처</a><a href="#스페이스--공간-운영">스페이스 — 공간 운영</a><a href="#아웃소싱--프리랜서-외주-관리">아웃소싱 — 프리랜서 외주 관리</a><a href="#커머스--상품-판매-운영">커머스 — 상품 판매 운영</a><a href="#확인-링크--계정-없는-상대에게-보내기">확인 링크 — 계정 없는 상대에게 보내기</a><a href="#ai-접속--클로드를-마이웍스에-연결하기">AI 접속 — 클로드를 마이웍스에 연결하기</a><a href="#운영자-가이드">운영자 가이드</a><a href="#워크스페이스-관리자-가이드">워크스페이스 관리자 가이드</a><a href="#로그인-규칙과-보안">로그인 규칙과 보안</a><a href="#주요-기능">주요 기능</a><a href="#클로드-연동-사용법-파일-방식">클로드 연동 사용법 (파일 방식)</a><a href="#처음부터-배포하는-경우-참고">처음부터 배포하는 경우 (참고)</a><a href="#로컬-모드-서버-없이-쓰기">로컬 모드 (서버 없이 쓰기)</a><a href="#파일-구성">파일 구성</a></nav></details>
     <article class="doc">
 <h2 id="이용-흐름">이용 흐름</h2>
-<div class="table-wrap"><table>
+<div class="table-wrap stack-wrap"><table class="stack">
 <thead>
 <tr class="header">
 <th>단계</th>
@@ -64,36 +63,36 @@
 </thead>
 <tbody>
 <tr class="odd">
-<td>1. 회원가입</td>
-<td>새 사용자</td>
-<td>첫 화면 <strong>회원가입</strong>에서 워크스페이스 이름·이름·아이디·비밀번호·연락처를 입력해 개설을 신청합니다.</td>
+<td data-label="단계">1. 회원가입</td>
+<td data-label="누가">새 사용자</td>
+<td data-label="하는 일">첫 화면 <strong>회원가입</strong>에서 워크스페이스 이름·이름·아이디·비밀번호·연락처를 입력해 개설을 신청합니다.</td>
 </tr>
 <tr class="even">
-<td>2. 승인</td>
-<td>운영자</td>
-<td><strong>운영</strong> 메뉴(운영 콘솔)에서 신청 내용을 확인하고 승인합니다. 새 워크스페이스는 <strong>베이직</strong>으로 시작합니다.</td>
+<td data-label="단계">2. 승인</td>
+<td data-label="누가">운영자</td>
+<td data-label="하는 일"><strong>운영</strong> 메뉴(운영 콘솔)에서 신청 내용을 확인하고 승인합니다. 새 워크스페이스는 <strong>베이직</strong>으로 시작합니다.</td>
 </tr>
 <tr class="odd">
-<td>3. 로그인</td>
-<td>사용자</td>
-<td>승인되는 즉시, 어느 기기에서든 같은 아이디·비밀번호로 로그인해 본인 워크스페이스를 씁니다.</td>
+<td data-label="단계">3. 로그인</td>
+<td data-label="누가">사용자</td>
+<td data-label="하는 일">승인되는 즉시, 어느 기기에서든 같은 아이디·비밀번호로 로그인해 본인 워크스페이스를 씁니다.</td>
 </tr>
 <tr class="even">
-<td>4. 팀원 합류</td>
-<td>워크스페이스 관리자</td>
-<td>사람 메뉴의 <strong>초대 링크</strong>를 보내면, 받은 사람이 회원가입 후 합류를 요청합니다. 관리자가 역할(직원·현장 근무자·시설 담당·협력사)을 정해 승인합니다. 아이디를 바로 만들어 줄 수도 있습니다.</td>
+<td data-label="단계">4. 팀원 합류</td>
+<td data-label="누가">워크스페이스 관리자</td>
+<td data-label="하는 일">사람 메뉴의 <strong>초대 링크</strong>를 보내면, 받은 사람이 회원가입 후 합류를 요청합니다. 관리자가 역할(직원·현장 근무자·시설 담당·협력사)을 정해 승인합니다. 아이디를 바로 만들어 줄 수도 있습니다.</td>
 </tr>
 <tr class="odd">
-<td>5. 프로 전환</td>
-<td>운영자</td>
-<td>운영 콘솔 → 해당 워크스페이스의 <strong>등급·모듈</strong>에서 프로로 올리고 쓸 모듈과 기한을 정합니다.</td>
+<td data-label="단계">5. 프로 전환</td>
+<td data-label="누가">운영자</td>
+<td data-label="하는 일">운영 콘솔 → 해당 워크스페이스의 <strong>등급·모듈</strong>에서 프로로 올리고 쓸 모듈과 기한을 정합니다.</td>
 </tr>
 </tbody>
 </table></div>
 <p>승인 전에는 로그인되지 않고, 화면에 "가입 승인을 기다리는 중입니다"라고 안내됩니다. 워크스페이스끼리는 데이터가 완전히 분리되어 서로 보이지 않습니다.</p>
 <hr />
 <h2 id="등급--베이직과-프로">등급 — 베이직과 프로</h2>
-<div class="table-wrap"><table>
+<div class="table-wrap stack-wrap"><table class="stack">
 <thead>
 <tr class="header">
 <th></th>
@@ -104,33 +103,33 @@
 <tbody>
 <tr class="odd">
 <td>코어 기능</td>
-<td>전부 (프로젝트·매장·업무보드·플랜·재무·사람·클로드 파일 연동·백업)</td>
-<td>전부</td>
+<td data-label="베이직 (무료)">전부 (프로젝트·매장·업무보드·플랜·재무·사람·클로드 파일 연동·백업)</td>
+<td data-label="프로">전부</td>
 </tr>
 <tr class="even">
 <td>구성원</td>
-<td>본인 + 2명 (역할 무관)</td>
-<td>본인 + 10명</td>
+<td data-label="베이직 (무료)">본인 + 2명 (역할 무관)</td>
+<td data-label="프로">본인 + 10명</td>
 </tr>
 <tr class="odd">
 <td>브랜드·회사</td>
-<td>2개</td>
-<td>제한 없음</td>
+<td data-label="베이직 (무료)">2개</td>
+<td data-label="프로">제한 없음</td>
 </tr>
 <tr class="even">
 <td>AI 접속</td>
-<td>읽기 토큰 1개</td>
-<td>읽기·쓰기 토큰 20개, 제안 → 승인 반영</td>
+<td data-label="베이직 (무료)">읽기 토큰 1개</td>
+<td data-label="프로">읽기·쓰기 토큰 20개, 제안 → 승인 반영</td>
 </tr>
 <tr class="odd">
 <td>업종 모듈</td>
-<td>—</td>
-<td>스페이스 · 아웃소싱 · 커머스 (필요한 것만 켬)</td>
+<td data-label="베이직 (무료)">—</td>
+<td data-label="프로">스페이스 · 아웃소싱 · 커머스 (필요한 것만 켬)</td>
 </tr>
 <tr class="even">
 <td>확인 링크</td>
-<td>납품 확인</td>
-<td>납품 확인 · 견적 승인 · 청구서 확인</td>
+<td data-label="베이직 (무료)">납품 확인</td>
+<td data-label="프로">납품 확인 · 견적 승인 · 청구서 확인</td>
 </tr>
 </tbody>
 </table></div>
@@ -144,7 +143,7 @@
 <hr />
 <h2 id="홈--오늘-결정할-것">홈 — 오늘 결정할 것</h2>
 <p>홈 맨 위에 승인·확인이 필요한 일이 모입니다. 여기서 바로 처리하면 됩니다.</p>
-<div class="table-wrap"><table>
+<div class="table-wrap stack-wrap"><table class="stack">
 <thead>
 <tr class="header">
 <th>항목</th>
@@ -154,34 +153,34 @@
 </thead>
 <tbody>
 <tr class="odd">
-<td>AI 제안</td>
-<td>클로드가 올린 업무 추가·상태 변경·메모·연락처·외주 안건 제안</td>
-<td>승인 → 즉시 반영 / 거절(사유 기록)</td>
+<td data-label="항목">AI 제안</td>
+<td data-label="내용">클로드가 올린 업무 추가·상태 변경·메모·연락처·외주 안건 제안</td>
+<td data-label="버튼">승인 → 즉시 반영 / 거절(사유 기록)</td>
 </tr>
 <tr class="even">
-<td>검수 요청</td>
-<td>담당자가 결과물을 올리고 확인을 요청한 업무</td>
-<td>승인(업무 완료) / 보완(사유 전달) / 열기</td>
+<td data-label="항목">검수 요청</td>
+<td data-label="내용">담당자가 결과물을 올리고 확인을 요청한 업무</td>
+<td data-label="버튼">승인(업무 완료) / 보완(사유 전달) / 열기</td>
 </tr>
 <tr class="odd">
-<td>보완 요청</td>
-<td>내가 담당한 업무에 보완 요청이 온 것</td>
-<td>다시 검수 요청</td>
+<td data-label="항목">보완 요청</td>
+<td data-label="내용">내가 담당한 업무에 보완 요청이 온 것</td>
+<td data-label="버튼">다시 검수 요청</td>
 </tr>
 <tr class="even">
-<td>견적 수정 요청</td>
-<td>고객이 확인 링크에서 수정을 요청한 견적</td>
-<td>견적 고치기</td>
+<td data-label="항목">견적 수정 요청</td>
+<td data-label="내용">고객이 확인 링크에서 수정을 요청한 견적</td>
+<td data-label="버튼">견적 고치기</td>
 </tr>
 <tr class="odd">
-<td>입금 기한 지남</td>
-<td>기한이 지난 청구서</td>
-<td>입금 확인 / 청구 링크</td>
+<td data-label="항목">입금 기한 지남</td>
+<td data-label="내용">기한이 지난 청구서</td>
+<td data-label="버튼">입금 확인 / 청구 링크</td>
 </tr>
 <tr class="even">
-<td>가입·합류 요청</td>
-<td>(운영자·관리자) 승인 대기</td>
-<td>운영 콘솔 / 사람</td>
+<td data-label="항목">가입·합류 요청</td>
+<td data-label="내용">(운영자·관리자) 승인 대기</td>
+<td data-label="버튼">운영 콘솔 / 사람</td>
 </tr>
 </tbody>
 </table></div>
@@ -210,7 +209,7 @@
 </ol>
 <p>공통 체크리스트 20개 항목(증빙·쓰레기·주방·실내·화장실·기기·마무리)은 처음 열 때 자동으로 들어갑니다. 스페이스 → 청소 → 체크리스트 항목에서 고치거나, 지점별 특별 항목을 더할 수 있습니다.</p>
 <h3 id="메뉴">메뉴</h3>
-<div class="table-wrap"><table>
+<div class="table-wrap stack-wrap"><table class="stack two-col">
 <thead>
 <tr class="header">
 <th>화면</th>
@@ -219,36 +218,36 @@
 </thead>
 <tbody>
 <tr class="odd">
-<td>현황</td>
-<td>오늘 청소 진행, 확인 대기, 시설 이슈, 이달 예약 매출. 담당 미정·긴급·확인 후 진행 건이 있으면 맨 위에 알림</td>
+<td data-label="화면">현황</td>
+<td data-label="내용">오늘 청소 진행, 확인 대기, 시설 이슈, 이달 예약 매출. 담당 미정·긴급·확인 후 진행 건이 있으면 맨 위에 알림</td>
 </tr>
 <tr class="even">
-<td>주간 보드</td>
-<td>요일별 청소·담당·동시 진행 지점 수. 권역(지역) 단위 <strong>일괄 배정</strong>, 그날의 <strong>필수 확인사항</strong> 등록과 읽음 명단. 인쇄·PDF, 단톡 공유용 이미지 저장</td>
+<td data-label="화면">주간 보드</td>
+<td data-label="내용">요일별 청소·담당·동시 진행 지점 수. 권역(지역) 단위 <strong>일괄 배정</strong>, 그날의 <strong>필수 확인사항</strong> 등록과 읽음 명단. 인쇄·PDF, 단톡 공유용 이미지 저장</td>
 </tr>
 <tr class="odd">
-<td>청소</td>
-<td>기간·지점별 일정과 담당 지정, 수동 청소 추가 / 확인·피드백(미체크 항목 확인 후 확인 완료 또는 보완 요청) / 체크리스트 항목</td>
+<td data-label="화면">청소</td>
+<td data-label="내용">기간·지점별 일정과 담당 지정, 수동 청소 추가 / 확인·피드백(미체크 항목 확인 후 확인 완료 또는 보완 요청) / 체크리스트 항목</td>
 </tr>
 <tr class="even">
-<td>예약</td>
-<td>예약 달력(낮·밤·올데이 칸을 눌러 바로 등록, 상세 예약 추가, 확인 필요 표시) / 엑셀 업로드</td>
+<td data-label="화면">예약</td>
+<td data-label="내용">예약 달력(낮·밤·올데이 칸을 눌러 바로 등록, 상세 예약 추가, 확인 필요 표시) / 엑셀 업로드</td>
 </tr>
 <tr class="odd">
-<td>시설</td>
-<td>고장·오염·구매 필요 신고, 상태·담당·처리 비용·처리 기록 관리</td>
+<td data-label="화면">시설</td>
+<td data-label="내용">고장·오염·구매 필요 신고, 상태·담당·처리 비용·처리 기록 관리</td>
 </tr>
 <tr class="even">
-<td>채널</td>
-<td>지점별 홍보 채널(네이버·인스타그램 등) 상태와 마지막 점검일. 30일 넘게 점검하지 않으면 표시</td>
+<td data-label="화면">채널</td>
+<td data-label="내용">지점별 홍보 채널(네이버·인스타그램 등) 상태와 마지막 점검일. 30일 넘게 점검하지 않으면 표시</td>
 </tr>
 <tr class="odd">
-<td>손익</td>
-<td>지점별 매출·예약률·객단가·요일·채널 분석 / 월 비용 입력과 영업이익 계산, <strong>마이웍스 재무로 보내기</strong>. 예약에 채널(네이버·스페이스클라우드·에어비앤비·직접)을 적어 두면 설정의 채널별 수수료율로 수수료가 자동 계산됩니다</td>
+<td data-label="화면">손익</td>
+<td data-label="내용">지점별 매출·예약률·객단가·요일·채널 분석 / 월 비용 입력과 영업이익 계산, <strong>마이웍스 재무로 보내기</strong>. 예약에 채널(네이버·스페이스클라우드·에어비앤비·직접)을 적어 두면 설정의 채널별 수수료율로 수수료가 자동 계산됩니다</td>
 </tr>
 <tr class="even">
-<td>설정</td>
-<td>운영 지점, 운영 시간·규칙(예약 채널별 수수료율 포함), 근무자·단가, 연결(호스트 동기화·예전 데이터 가져오기)</td>
+<td data-label="화면">설정</td>
+<td data-label="내용">운영 지점, 운영 시간·규칙(예약 채널별 수수료율 포함), 근무자·단가, 연결(호스트 동기화·예전 데이터 가져오기)</td>
 </tr>
 </tbody>
 </table></div>
@@ -296,7 +295,7 @@
 <h2 id="아웃소싱--프리랜서-외주-관리">아웃소싱 — 프리랜서 외주 관리</h2>
 <p>왼쪽 메뉴 <strong>아웃소싱</strong>. 관리자·직원이 씁니다.</p>
 <pre><code>문의 → 안건 등록 → 견적(확인 링크로 승인) → 진행·납품 → 청구서(확인 링크) → 입금 확인 → 재무 기록</code></pre>
-<div class="table-wrap"><table>
+<div class="table-wrap stack-wrap"><table class="stack two-col">
 <thead>
 <tr class="header">
 <th>화면</th>
@@ -305,24 +304,24 @@
 </thead>
 <tbody>
 <tr class="odd">
-<td>현황</td>
-<td>진행 중 안건, 견적 회신 대기, 미수금, 이달 입금. 견적 수정 요청·입금 기한 지난 건을 맨 위에</td>
+<td data-label="화면">현황</td>
+<td data-label="내용">진행 중 안건, 견적 회신 대기, 미수금, 이달 입금. 견적 수정 요청·입금 기한 지난 건을 맨 위에</td>
 </tr>
 <tr class="even">
-<td>안건</td>
-<td>외주 한 건. 고객(연락처)·납기·예상 금액·요청 내용·계약 조건(범위·수정 횟수·대금 조건). 상태: 문의 → 견적 → 진행 → 납품 → 청구 → 완료 / 보류</td>
+<td data-label="화면">안건</td>
+<td data-label="내용">외주 한 건. 고객(연락처)·납기·예상 금액·요청 내용·계약 조건(범위·수정 횟수·대금 조건). 상태: 문의 → 견적 → 진행 → 납품 → 청구 → 완료 / 보류</td>
 </tr>
 <tr class="odd">
-<td>견적</td>
-<td>항목·수량·단가를 넣으면 공급가·부가세·합계가 바로 계산됩니다. 설정의 <strong>단가표</strong>에서 골라 넣을 수 있습니다. <strong>저장하고 발송 처리</strong>를 누르면 확인 링크가 만들어집니다. 고객이 승인하면 안건이 <strong>진행</strong>으로 바뀌고 승인 견적이 계약 조건에 기록됩니다. 승인된 견적은 고칠 수 없고(무효 처리만), 조건이 바뀌면 새 견적을 만듭니다.</td>
+<td data-label="화면">견적</td>
+<td data-label="내용">항목·수량·단가를 넣으면 공급가·부가세·합계가 바로 계산됩니다. 설정의 <strong>단가표</strong>에서 골라 넣을 수 있습니다. <strong>저장하고 발송 처리</strong>를 누르면 확인 링크가 만들어집니다. 고객이 승인하면 안건이 <strong>진행</strong>으로 바뀌고 승인 견적이 계약 조건에 기록됩니다. 승인된 견적은 고칠 수 없고(무효 처리만), 조건이 바뀌면 새 견적을 만듭니다.</td>
 </tr>
 <tr class="even">
-<td>청구·입금</td>
-<td>청구서를 만들면 세금 처리(부가세 10% 별도 / 3.3% 원천징수 / 없음)에 따라 받을 금액이 계산되고 확인 링크가 만들어집니다. <strong>입금 확인</strong>을 누르면 안건의 청구가 모두 입금됐을 때 자동으로 <strong>완료</strong>가 됩니다. <strong>재무에 기록</strong>을 누르면 마이웍스 재무에 수입으로 들어갑니다.</td>
+<td data-label="화면">청구·입금</td>
+<td data-label="내용">청구서를 만들면 세금 처리(부가세 10% 별도 / 3.3% 원천징수 / 없음)에 따라 받을 금액이 계산되고 확인 링크가 만들어집니다. <strong>입금 확인</strong>을 누르면 안건의 청구가 모두 입금됐을 때 자동으로 <strong>완료</strong>가 됩니다. <strong>재무에 기록</strong>을 누르면 마이웍스 재무에 수입으로 들어갑니다.</td>
 </tr>
 <tr class="odd">
-<td>설정</td>
-<td>보내는 사람(이름·상호·연락처·사업자 구분·사업자번호), 입금 계좌, 계약서 양식 링크, 견적서 기본 안내문, 단가표, 플랫폼 수수료율(크몽·위시켓 등, 참고용)</td>
+<td data-label="화면">설정</td>
+<td data-label="내용">보내는 사람(이름·상호·연락처·사업자 구분·사업자번호), 입금 계좌, 계약서 양식 링크, 견적서 기본 안내문, 단가표, 플랫폼 수수료율(크몽·위시켓 등, 참고용)</td>
 </tr>
 </tbody>
 </table></div>
@@ -331,7 +330,7 @@
 <h2 id="커머스--상품-판매-운영">커머스 — 상품 판매 운영</h2>
 <p>왼쪽 메뉴 <strong>커머스</strong>. 관리자·직원은 전체를, 현장 근무자(발송 담당)는 <strong>오늘 발송</strong> 화면만 씁니다.</p>
 <pre><code>주문(엑셀 업로드·직접 입력) → 포장·발송(송장) → 재고 차감 → 문의 답변 → 채널별 손익 → 재무 기록</code></pre>
-<div class="table-wrap"><table>
+<div class="table-wrap stack-wrap"><table class="stack two-col">
 <thead>
 <tr class="header">
 <th>화면</th>
@@ -340,28 +339,28 @@
 </thead>
 <tbody>
 <tr class="odd">
-<td>현황</td>
-<td>발송할 주문, 답할 문의, 재고 부족 상품, 이달 매출(채널별)</td>
+<td data-label="화면">현황</td>
+<td data-label="내용">발송할 주문, 답할 문의, 재고 부족 상품, 이달 매출(채널별)</td>
 </tr>
 <tr class="even">
-<td>주문</td>
-<td>기간·상태·채널·검색. <strong>엑셀 업로드</strong>는 스마트스토어·쿠팡 등에서 받은 주문 엑셀의 열 이름을 보고 자동으로 맞추고(수동 조정 가능), 채널별로 맞춤을 기억합니다. <strong>추가</strong>는 같은 주문번호를 건너뛰고, <strong>해당 월 교체</strong>는 그 달의 기존 엑셀분만 바꿉니다. 송장번호가 있는 행은 발송 상태로 들어갑니다. CSV 내보내기도 됩니다.</td>
+<td data-label="화면">주문</td>
+<td data-label="내용">기간·상태·채널·검색. <strong>엑셀 업로드</strong>는 스마트스토어·쿠팡 등에서 받은 주문 엑셀의 열 이름을 보고 자동으로 맞추고(수동 조정 가능), 채널별로 맞춤을 기억합니다. <strong>추가</strong>는 같은 주문번호를 건너뛰고, <strong>해당 월 교체</strong>는 그 달의 기존 엑셀분만 바꿉니다. 송장번호가 있는 행은 발송 상태로 들어갑니다. CSV 내보내기도 됩니다.</td>
 </tr>
 <tr class="odd">
-<td>상품·재고</td>
-<td>상품명·SKU·판매가·매입가·재고·안전 재고. 주문의 상품명이 같으면 자동 연결됩니다. 발송하면 재고가 빠지고, 발송 뒤 취소·반품이면 되돌아옵니다. <strong>재고 조정</strong>으로 실사 수량을 맞춥니다(+5, -3 같은 입력도 됩니다).</td>
+<td data-label="화면">상품·재고</td>
+<td data-label="내용">상품명·SKU·판매가·매입가·재고·안전 재고. 주문의 상품명이 같으면 자동 연결됩니다. 발송하면 재고가 빠지고, 발송 뒤 취소·반품이면 되돌아옵니다. <strong>재고 조정</strong>으로 실사 수량을 맞춥니다(+5, -3 같은 입력도 됩니다).</td>
 </tr>
 <tr class="even">
-<td>문의</td>
-<td>고객 문의와 답변 기한(기본 다음 날). 답변을 적고 <strong>답변 완료</strong>로 처리합니다.</td>
+<td data-label="화면">문의</td>
+<td data-label="내용">고객 문의와 답변 기한(기본 다음 날). 답변을 적고 <strong>답변 완료</strong>로 처리합니다.</td>
 </tr>
 <tr class="odd">
-<td>손익</td>
-<td>월별·채널별 매출(취소·반품 제외), 채널 수수료(설정의 수수료율), 배송비, 상품 원가(연결된 상품의 매입가 × 수량), 광고비·기타(직접 입력) → 손익. <strong>이달 손익을 재무에 기록</strong>으로 마이웍스 재무에 수입·지출로 넣습니다.</td>
+<td data-label="화면">손익</td>
+<td data-label="내용">월별·채널별 매출(취소·반품 제외), 채널 수수료(설정의 수수료율), 배송비, 상품 원가(연결된 상품의 매입가 × 수량), 광고비·기타(직접 입력) → 손익. <strong>이달 손익을 재무에 기록</strong>으로 마이웍스 재무에 수입·지출로 넣습니다.</td>
 </tr>
 <tr class="even">
-<td>설정</td>
-<td>판매 채널(수수료율·정산 주기), 기본 배송비, 운영 메모. 기본 채널은 네이버 스마트스토어·쿠팡·자사몰·오프라인입니다.</td>
+<td data-label="화면">설정</td>
+<td data-label="내용">판매 채널(수수료율·정산 주기), 기본 배송비, 운영 메모. 기본 채널은 네이버 스마트스토어·쿠팡·자사몰·오프라인입니다.</td>
 </tr>
 </tbody>
 </table></div>
@@ -393,7 +392,7 @@
 <hr />
 <h2 id="운영자-가이드">운영자 가이드</h2>
 <p>운영자 계정으로 로그인하면 왼쪽 메뉴에 <strong>운영</strong>이 추가됩니다. 새 가입 신청이 들어오면 메뉴 옆 숫자와 홈의 <strong>오늘 결정할 것</strong>으로 알려 줍니다.</p>
-<div class="table-wrap"><table>
+<div class="table-wrap stack-wrap"><table class="stack two-col">
 <thead>
 <tr class="header">
 <th>작업</th>
@@ -402,24 +401,24 @@
 </thead>
 <tbody>
 <tr class="odd">
-<td>승인 · 반려</td>
-<td>신청자 이름·아이디·연락처·가입 목적을 보고 결정합니다. 승인하면 그 사람은 바로 로그인할 수 있습니다.</td>
+<td data-label="작업">승인 · 반려</td>
+<td data-label="설명">신청자 이름·아이디·연락처·가입 목적을 보고 결정합니다. 승인하면 그 사람은 바로 로그인할 수 있습니다.</td>
 </tr>
 <tr class="even">
-<td>등급·모듈</td>
-<td>워크스페이스마다 베이직/프로, 쓸 모듈, 프로 기한, 한도(브랜드·구성원·토큰 수)를 정합니다. 비우면 등급 기본값(베이직 2/2/1, 프로 무제한/10/20)이 적용됩니다.</td>
+<td data-label="작업">등급·모듈</td>
+<td data-label="설명">워크스페이스마다 베이직/프로, 쓸 모듈, 프로 기한, 한도(브랜드·구성원·토큰 수)를 정합니다. 비우면 등급 기본값(베이직 2/2/1, 프로 무제한/10/20)이 적용됩니다.</td>
 </tr>
 <tr class="odd">
-<td>이용 중지 · 재개</td>
-<td>중지하면 그 워크스페이스 구성원 전원이 즉시 로그아웃되고, 재개할 때까지 로그인할 수 없습니다. 데이터는 그대로 남습니다.</td>
+<td data-label="작업">이용 중지 · 재개</td>
+<td data-label="설명">중지하면 그 워크스페이스 구성원 전원이 즉시 로그아웃되고, 재개할 때까지 로그인할 수 없습니다. 데이터는 그대로 남습니다.</td>
 </tr>
 <tr class="even">
-<td>관리자 비밀번호 초기화</td>
-<td>워크스페이스 관리자가 비밀번호를 잊었을 때 새 비밀번호를 정해 주고 직접 전달합니다.</td>
+<td data-label="작업">관리자 비밀번호 초기화</td>
+<td data-label="설명">워크스페이스 관리자가 비밀번호를 잊었을 때 새 비밀번호를 정해 주고 직접 전달합니다.</td>
 </tr>
 <tr class="odd">
-<td>삭제</td>
-<td>워크스페이스와 모든 데이터·계정(모듈 포함)을 지웁니다. 되돌릴 수 없습니다.</td>
+<td data-label="작업">삭제</td>
+<td data-label="설명">워크스페이스와 모든 데이터·계정(모듈 포함)을 지웁니다. 되돌릴 수 없습니다.</td>
 </tr>
 </tbody>
 </table></div>
@@ -445,7 +444,7 @@
 </ul>
 <hr />
 <h2 id="주요-기능">주요 기능</h2>
-<div class="table-wrap"><table>
+<div class="table-wrap stack-wrap"><table class="stack two-col">
 <thead>
 <tr class="header">
 <th>메뉴</th>
@@ -454,46 +453,46 @@
 </thead>
 <tbody>
 <tr class="odd">
-<td>홈</td>
-<td>오늘 브리핑(지연·마감·검토·결정할 것), <strong>오늘 결정할 것</strong>, 모듈별 오늘 카드(공간 운영·외주 현황·판매 현황), 오늘의 추진, 진행 현황, 매장 한눈에, 이달 재무, 최근 활동</td>
+<td data-label="메뉴">홈</td>
+<td data-label="내용">오늘 브리핑(지연·마감·검토·결정할 것), <strong>오늘 결정할 것</strong>, 모듈별 오늘 카드(공간 운영·외주 현황·판매 현황), 오늘의 추진, 진행 현황, 매장 한눈에, 이달 재무, 최근 활동</td>
 </tr>
 <tr class="even">
-<td>플랜</td>
-<td>일일·주간·월간 계획을 나만 보는 공간에서 관리. 할 일 체크리스트, 기간별 노트, 해당 기간 마감 업무 자동 표시</td>
+<td data-label="메뉴">플랜</td>
+<td data-label="내용">일일·주간·월간 계획을 나만 보는 공간에서 관리. 할 일 체크리스트, 기간별 노트, 해당 기간 마감 업무 자동 표시</td>
 </tr>
 <tr class="odd">
-<td>프로젝트</td>
-<td>브랜드별 프로젝트 카드, 상세 화면(업무 목록·검수·목표·메모·링크·의견·예산)</td>
+<td data-label="메뉴">프로젝트</td>
+<td data-label="내용">브랜드별 프로젝트 카드, 상세 화면(업무 목록·검수·목표·메모·링크·의견·예산)</td>
 </tr>
 <tr class="even">
-<td>매장</td>
-<td>오프라인 지점 관리 — 지역·브랜드·상태별 목록, 지점별 업무·정기 점검·매출·비용·메모·의견, 스페이스 운영 현황</td>
+<td data-label="메뉴">매장</td>
+<td data-label="내용">오프라인 지점 관리 — 지역·브랜드·상태별 목록, 지점별 업무·정기 점검·매출·비용·메모·의견, 스페이스 운영 현황</td>
 </tr>
 <tr class="odd">
-<td>업무보드</td>
-<td>프로젝트·매장 업무를 한 보드에서 대기 → 진행중 → 검토 → 완료로 관리 (검수·AI 표시 포함)</td>
+<td data-label="메뉴">업무보드</td>
+<td data-label="내용">프로젝트·매장 업무를 한 보드에서 대기 → 진행중 → 검토 → 완료로 관리 (검수·AI 표시 포함)</td>
 </tr>
 <tr class="even">
-<td>스페이스 · 아웃소싱 · 커머스</td>
-<td>프로에서 켠 모듈 (위 설명 참고)</td>
+<td data-label="메뉴">스페이스 · 아웃소싱 · 커머스</td>
+<td data-label="내용">프로에서 켠 모듈 (위 설명 참고)</td>
 </tr>
 <tr class="odd">
-<td>사람</td>
-<td>구성원(초대·합류 승인·아이디 발급·역할·단가) / 연락처(고객·거래처·외주)</td>
+<td data-label="메뉴">사람</td>
+<td data-label="내용">구성원(초대·합류 승인·아이디 발급·역할·단가) / 연락처(고객·거래처·외주)</td>
 </tr>
 <tr class="even">
-<td>연동·데이터</td>
-<td>클로드 파일 가져오기, <strong>AI 접속(토큰·MCP·자동 반영)</strong>, 주간 리포트(모듈 요약 포함), 전체 백업·복원, 공유 파일</td>
+<td data-label="메뉴">연동·데이터</td>
+<td data-label="내용">클로드 파일 가져오기, <strong>AI 접속(토큰·MCP·자동 반영)</strong>, 주간 리포트(모듈 요약 포함), 전체 백업·복원, 공유 파일</td>
 </tr>
 <tr class="odd">
-<td>운영</td>
-<td>(운영자 전용) 가입 승인, 등급·모듈, 워크스페이스 이용 관리</td>
+<td data-label="메뉴">운영</td>
+<td data-label="내용">(운영자 전용) 가입 승인, 등급·모듈, 워크스페이스 이용 관리</td>
 </tr>
 </tbody>
 </table></div>
 <p>이 밖에 반복 업무(매주·매월 자동 생성), 업무 템플릿, 재무 CSV 내보내기를 프로젝트·매장 화면에서 쓸 수 있습니다.</p>
 <h3 id="역할별-권한">역할별 권한</h3>
-<div class="table-wrap"><table>
+<div class="table-wrap stack-wrap"><table class="stack">
 <thead>
 <tr class="header">
 <th>역할</th>
@@ -503,29 +502,29 @@
 </thead>
 <tbody>
 <tr class="odd">
-<td>관리자</td>
-<td>전체</td>
-<td>모든 관리 기능, 구성원·연락처, 금액 기록, 모듈 켜기, AI 토큰·자동 반영 설정, 백업·복원</td>
+<td data-label="역할">관리자</td>
+<td data-label="보이는 메뉴">전체</td>
+<td data-label="할 수 있는 일">모든 관리 기능, 구성원·연락처, 금액 기록, 모듈 켜기, AI 토큰·자동 반영 설정, 백업·복원</td>
 </tr>
 <tr class="even">
-<td>직원</td>
-<td>전체(참여·담당 프로젝트, 전체 매장, 모듈)</td>
-<td>프로젝트·매장 업무, 검수 승인, 금액 기록, 연락처, 모듈 운영, 본인 AI 토큰, 확인 링크</td>
+<td data-label="역할">직원</td>
+<td data-label="보이는 메뉴">전체(참여·담당 프로젝트, 전체 매장, 모듈)</td>
+<td data-label="할 수 있는 일">프로젝트·매장 업무, 검수 승인, 금액 기록, 연락처, 모듈 운영, 본인 AI 토큰, 확인 링크</td>
 </tr>
 <tr class="odd">
-<td>현장 근무자</td>
-<td>오늘 청소 · 시설 신고 · 오늘 발송</td>
-<td>배정된 청소 체크리스트 제출, 시설 신고, 주문 포장·발송 처리</td>
+<td data-label="역할">현장 근무자</td>
+<td data-label="보이는 메뉴">오늘 청소 · 시설 신고 · 오늘 발송</td>
+<td data-label="할 수 있는 일">배정된 청소 체크리스트 제출, 시설 신고, 주문 포장·발송 처리</td>
 </tr>
 <tr class="even">
-<td>시설 담당</td>
-<td>현황 · 시설 관리 · 청소 현황</td>
-<td>시설 이슈 처리(상태·담당·비용·기록), 청소 현황 확인</td>
+<td data-label="역할">시설 담당</td>
+<td data-label="보이는 메뉴">현황 · 시설 관리 · 청소 현황</td>
+<td data-label="할 수 있는 일">시설 이슈 처리(상태·담당·비용·기록), 청소 현황 확인</td>
 </tr>
 <tr class="odd">
-<td>협력사</td>
-<td>참여 프로젝트, 배정된 매장</td>
-<td>본인 업무 상태 변경·검수 요청, 점검 기록, 의견 작성 (모듈·연락처·AI는 쓰지 않음)</td>
+<td data-label="역할">협력사</td>
+<td data-label="보이는 메뉴">참여 프로젝트, 배정된 매장</td>
+<td data-label="할 수 있는 일">본인 업무 상태 변경·검수 요청, 점검 기록, 의견 작성 (모듈·연락처·AI는 쓰지 않음)</td>
 </tr>
 </tbody>
 </table></div>
@@ -669,7 +668,7 @@ README.md                  이 문서</code></pre>
     </div>
     <div class="foot-bottom muted">
       <span>© 2026 ㈜블랭크. 마이웍스는 Cloudflare 위에서 동작합니다.</span>
-      <span>최근 갱신 2026. 10. 31.</span>
+      <span>최근 갱신 2026. 11. 2.</span>
     </div>
   </div>
 </footer>
