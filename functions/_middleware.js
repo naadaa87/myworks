@@ -12,7 +12,7 @@
    · 스페이스: 예약 → 청소 배정 → 체크리스트 → 확인 → 손익. HOSTDB(읽기)는 운영자 워크스페이스에서만, SPACEDB(1회 가져오기)는 운영자만.
    · 무료 요금제 한도(요청당 쿼리 50회)를 넘지 않도록 여러 건의 쓰기는 한 문장으로 묶어 처리합니다. */
 
-const SCHEMA = "4";
+const SCHEMA = "5";
 const PLANS = ["basic", "pro"];
 const MODULES = ["space", "outsourcing", "commerce"];
 const PLAN_LIMITS = { basic: { brands: 2, members: 2, tokens: 1 }, pro: { brands: 1000, members: 10, tokens: 20 } };   // members = 관리자 외 구성원 수
@@ -59,6 +59,8 @@ const ADD_COLS = [
   ["workspaces", "modules TEXT NOT NULL DEFAULT '[]'"],
   ["workspaces", "limits TEXT"],
   ["workspaces", "plan_until TEXT"],
+  ["workspaces", "op_note TEXT"],
+  ["workspaces", "comp INTEGER NOT NULL DEFAULT 0"],
   ["sp_res", "channel TEXT"]
 ];
 
@@ -163,7 +165,7 @@ async function ensure(db) {
   try { const r = await db.prepare("SELECT v FROM mw_meta WHERE k='schema'").first(); v = r && r.v; } catch (e) { v = null; }
   if (v !== SCHEMA) {
     // 표 만들기는 묶음(exec)으로 — 무료 플랜의 요청당 쿼리 수 한도를 넘지 않도록
-    for (const group of [DDL, SP_DDL, OS_DDL, CM_DDL]) await db.exec(group.join("\n"));
+    for (const group of [DDL, SP_DDL, OS_DDL, CM_DDL, ADM_DDL]) await db.exec(group.join("\n"));
     const have = {};
     for (const t of [...new Set(ADD_COLS.map(x => x[0]))]) have[t] = new Set((((await db.prepare(`PRAGMA table_info(${t})`).all()).results) || []).map(c => c.name));
     for (const [t, col] of ADD_COLS) {
@@ -290,12 +292,15 @@ function pick(me, r, vis) {
   return r;
 }
 const rawJson = (head, extra) => new Response(JSON.stringify(head).slice(0, -1) + extra + "}", { status: 200, headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" } });
-async function badgesFor(db, me) {
-  if (!me.owner && me.role !== "admin") return {};
-  const r = await db.prepare("SELECT (SELECT COUNT(*) FROM workspaces WHERE status='pending') AS pw, (SELECT COUNT(*) FROM accounts WHERE ws=?1 AND status='pending') AS jr").bind(me.ws).first();
+async function badgesFor(db, me) {   // 화면 배지 + 공지 + 문의 답변 — 질의 한 번
+  const r = await db.prepare("SELECT (SELECT v FROM mw_meta WHERE k='ann') AS ann, (SELECT COUNT(*) FROM fb WHERE ws=?1 AND member_id=?2 AND reply_at IS NOT NULL AND (seen_at IS NULL OR seen_at<reply_at)) AS fr"
+    + (me.owner ? ", (SELECT COUNT(*) FROM workspaces WHERE status='pending') AS pw, (SELECT COUNT(*) FROM fb WHERE status='new') AS fn" : "")
+    + (me.role === "admin" ? ", (SELECT COUNT(*) FROM accounts WHERE ws=?1 AND status='pending') AS jr" : "")).bind(me.ws, me.id).first() || {};
   const out = {};
-  if (me.owner) out.pendingWs = r ? Number(r.pw) : 0;
-  if (me.role === "admin") out.joinReq = r ? Number(r.jr) : 0;
+  if (me.owner) { out.pendingWs = Number(r.pw) || 0; out.fbNew = Number(r.fn) || 0; }
+  if (me.role === "admin") out.joinReq = Number(r.jr) || 0;
+  if (Number(r.fr)) out.fbReply = Number(r.fr);
+  const ann = annFor(r.ann, me); if (ann.length) out.ann = ann;
   return out;
 }
 
@@ -336,8 +341,9 @@ async function planAccounts(db, ws, members, keep) {
 /* ───────── 공개 API ───────── */
 const PUBLIC = {
   async status(db) {
-    const o = await db.prepare("SELECT v FROM mw_meta WHERE k='owner'").first();
-    return json({ ok: true, v: 2, initialized: !!o });
+    const r = await db.prepare("SELECT (SELECT v FROM mw_meta WHERE k='owner') AS o, (SELECT v FROM mw_meta WHERE k='platform') AS plat").first();
+    const pl = platformOf(r && r.plat);
+    return json({ ok: true, v: 2, initialized: !!(r && r.o), signup: pl.signup, contact: pl.contact });
   },
 
   // 플랫폼 최초 설정 — 운영자 계정 + 운영자 워크스페이스
@@ -401,9 +407,29 @@ const PUBLIC = {
       if (mode === "new") {
         const wsName = clip(b.workspace, 40);
         if (!wsName || !contact) return fail("bad-request");
+        const pl = await platform(db);
+        if (pl.signup === "closed") return fail("closed", 403);
+        const betaIn = codeNorm(b.beta);
+        let code = null;
+        if (betaIn) { code = await db.prepare("SELECT * FROM adm_code WHERE code=?1").bind(betaIn).first(); if (!codeUsable(code)) return fail("bad-beta", 404); }
+        else if (pl.signup === "code") return fail("need-beta", 403);
+        const ws = "w_" + rand(6);
+        if (code || pl.signup === "open") {   // 베타 코드 또는 자동 개설 — 승인 없이 바로 엽니다
+          const c = await db.prepare("SELECT COUNT(*) AS n FROM workspaces WHERE created_at>=?1").bind(new Date(Date.now() - 3600e3).toISOString()).first();
+          if (c && Number(c.n) >= 30) return fail("busy", 429);
+          const st = startTier(code ? { plan: code.plan, modules: parse(code.modules) || [], days: code.days } : pl.newPlan);
+          const member = memberData(mid, lid, name, "admin", wsName, now);
+          await db.batch([
+            db.prepare("INSERT INTO workspaces(id,name,status,admin_login,contact,note,invite,created_at,approved_at,last_active,plan,modules,plan_until) VALUES(?1,?2,'active',?3,?4,?5,?6,?7,?7,?7,?8,?9,?10)").bind(ws, wsName, lid, contact, note, await freshInvite(db), now, st.plan, JSON.stringify(st.modules), st.until),
+            db.prepare("INSERT INTO accounts(login_id,ws,member_id,pw,status,role,is_owner,name,contact,note,created_at) VALUES(?1,?2,?3,?4,'active','admin',0,?5,?6,?7,?8)").bind(lid, ws, mid, pw, name, contact, note, now),
+            ...seedWorkspace(db, ws, wsName, [wsName, "기타"], member),
+            ...(code ? [db.prepare("UPDATE adm_code SET uses=uses+1 WHERE code=?1").bind(code.code)] : []),
+            admLog(db, "auto-open", { id: ws, name: wsName }, code ? `베타 코드 ${code.code}로 바로 개설` : "자동 개설")
+          ]);
+          return json({ ok: true, status: "active", mode, workspace: wsName, plan: st.plan, planUntil: st.until || "" });
+        }
         const c = await db.prepare("SELECT COUNT(*) AS n FROM workspaces WHERE status='pending'").first();
         if (c && Number(c.n) >= MAX_PENDING_WS) return fail("busy", 429);
-        const ws = "w_" + rand(6);
         await db.batch([
           db.prepare("INSERT INTO workspaces(id,name,status,admin_login,contact,note,invite,created_at) VALUES(?1,?2,'pending',?3,?4,?5,NULL,?6)").bind(ws, wsName, lid, contact, note, now),
           db.prepare("INSERT INTO accounts(login_id,ws,member_id,pw,status,role,is_owner,name,contact,note,created_at) VALUES(?1,?2,?3,?4,'pending','admin',0,?5,?6,?7,?8)").bind(lid, ws, mid, pw, name, contact, note, now)
@@ -849,14 +875,6 @@ const PRIVATE = {
   },
 
   /* 운영 콘솔 — 운영자 전용 (업무 내용은 다루지 않습니다) */
-  async "admin/overview"(db, me) {
-    if (!me.owner) return fail("forbidden", 403);
-    const ws = (await db.prepare("SELECT w.*, a.name AS admin_name, a.contact AS admin_contact FROM workspaces w LEFT JOIN accounts a ON a.login_id=w.admin_login ORDER BY w.created_at DESC").all()).results || [];
-    const cnt = (await db.prepare("SELECT ws, COUNT(*) AS n FROM accounts WHERE status IN ('active','disabled') GROUP BY ws").all()).results || [];
-    const n = new Map(cnt.map(c => [c.ws, Number(c.n)]));
-    return json({ ok: true, workspaces: ws.map(w => { const t = tierOf(w); return { id: w.id, name: w.name, status: w.status, adminLogin: w.admin_login || "", adminName: w.admin_name || "", contact: w.contact || w.admin_contact || "", note: w.note || "", createdAt: w.created_at, approvedAt: w.approved_at || "", lastActive: w.last_active || "", members: n.get(w.id) || 0, mine: w.id === me.ws, plan: t.planRaw, planNow: t.plan, modules: modulesOk(w.modules), planUntil: w.plan_until || "", limits: parse(w.limits) || {} }; }) });
-  },
-
   async "admin/ws"(db, me, b) {
     if (!me.owner) return fail("forbidden", 403);
     const w = await db.prepare("SELECT * FROM workspaces WHERE id=?1").bind(String(b.id || "")).first();
@@ -867,8 +885,23 @@ const PRIVATE = {
       const until = dOk(b.until) || null;
       const lim = {}; const L = b.limits && typeof b.limits === "object" ? b.limits : {};
       for (const k of ["brands", "members", "tokens"]) if (L[k] !== undefined && L[k] !== "" && L[k] !== null) { const n = clampInt(L[k], 0, 100000, null); if (n !== null) lim[k] = n; }
-      await db.prepare("UPDATE workspaces SET plan=?1, modules=?2, plan_until=?3, limits=?4 WHERE id=?5").bind(plan, JSON.stringify(modules), until, Object.keys(lim).length ? JSON.stringify(lim) : null, w.id).run();
+      await db.batch([
+        db.prepare("UPDATE workspaces SET plan=?1, modules=?2, plan_until=?3, limits=?4 WHERE id=?5").bind(plan, JSON.stringify(modules), until, Object.keys(lim).length ? JSON.stringify(lim) : null, w.id),
+        admLog(db, "plan", w, `${plan === "pro" ? "프로" : "베이직"}${modules.length ? " · " + modules.map(m => ({ space: "스페이스", outsourcing: "아웃소싱", commerce: "커머스" })[m] || m).join(", ") : ""}${until ? " · ~" + until : ""}`)
+      ]);
       return json({ ok: true, plan, modules, planUntil: until || "", limits: lim });
+    }
+    if (act === "note") {   // 운영 메모·무료 제공 표시 — 운영자에게만 보입니다
+      await db.batch([db.prepare("UPDATE workspaces SET op_note=?1, comp=?2 WHERE id=?3").bind(clip(b.note, 1000), b.comp ? 1 : 0, w.id), admLog(db, "note", w, `운영 메모 저장${b.comp ? " · 무료 제공" : ""}`)]);
+      return json({ ok: true });
+    }
+    if (act === "extend") {   // 프로 기한 연장 — 남은 기한 뒤에 이어 붙입니다
+      if (w.plan === "pro" && !w.plan_until) return fail("unlimited");
+      const days = clampInt(b.days, 1, 3650, 30), today = kstToday();
+      const base = w.plan === "pro" && w.plan_until && w.plan_until > today ? w.plan_until : today;
+      const until = addDaysS(base, days);
+      await db.batch([db.prepare("UPDATE workspaces SET plan='pro', plan_until=?1 WHERE id=?2").bind(until, w.id), admLog(db, "extend", w, `프로 기한 ${until}까지 (+${days}일)`)]);
+      return json({ ok: true, planUntil: until });
     }
     if (w.id === me.ws) return fail("self");
     const now = iso();
@@ -877,10 +910,12 @@ const PRIVATE = {
       const a = await db.prepare("SELECT * FROM accounts WHERE login_id=?1 AND ws=?2").bind(w.admin_login || "", w.id).first();
       if (!a) return fail("not-found", 404);
       const member = memberData(a.member_id, a.login_id, a.name, "admin", w.name, a.created_at);
+      const st = startTier((await platform(db)).newPlan);
       await db.batch([
-        db.prepare("UPDATE workspaces SET status='active', approved_at=?1, last_active=?1, invite=?2 WHERE id=?3").bind(now, await freshInvite(db), w.id),
+        db.prepare("UPDATE workspaces SET status='active', approved_at=?1, last_active=?1, invite=?2, plan=?4, modules=?5, plan_until=?6 WHERE id=?3").bind(now, await freshInvite(db), w.id, st.plan, JSON.stringify(st.modules), st.until),
         db.prepare("UPDATE accounts SET status='active', role='admin' WHERE login_id=?1").bind(a.login_id),
-        ...seedWorkspace(db, w.id, w.name, [w.name, "기타"], member)
+        ...seedWorkspace(db, w.id, w.name, [w.name, "기타"], member),
+        admLog(db, "approve", w, `개설 승인 · ${st.plan === "pro" ? "프로" + (st.until ? " ~" + st.until : "") : "베이직"}으로 시작`)
       ]);
       return json({ ok: true, loginId: a.login_id });
     }
@@ -888,14 +923,15 @@ const PRIVATE = {
       if (w.status !== "pending") return fail("bad-state");
       await db.batch([
         db.prepare("UPDATE workspaces SET status='rejected' WHERE id=?1").bind(w.id),
-        db.prepare("UPDATE accounts SET status='rejected' WHERE ws=?1").bind(w.id)
+        db.prepare("UPDATE accounts SET status='rejected' WHERE ws=?1").bind(w.id),
+        admLog(db, "reject", w, "개설 신청 반려")
       ]);
       return json({ ok: true });
     }
     if (act === "suspend" || act === "activate") {
       if (act === "suspend" && w.status !== "active") return fail("bad-state");
       if (act === "activate" && w.status !== "suspended") return fail("bad-state");
-      const stmts = [db.prepare("UPDATE workspaces SET status=?1 WHERE id=?2").bind(act === "suspend" ? "suspended" : "active", w.id)];
+      const stmts = [db.prepare("UPDATE workspaces SET status=?1 WHERE id=?2").bind(act === "suspend" ? "suspended" : "active", w.id), admLog(db, act, w, act === "suspend" ? "이용 중지" : "이용 재개")];
       if (act === "suspend") stmts.push(db.prepare("DELETE FROM sess WHERE ws=?1").bind(w.id));
       await db.batch(stmts);
       return json({ ok: true });
@@ -906,7 +942,8 @@ const PRIVATE = {
         db.prepare("DELETE FROM ent WHERE ws=?1").bind(w.id),
         db.prepare("DELETE FROM sess WHERE ws=?1").bind(w.id),
         db.prepare("DELETE FROM accounts WHERE ws=?1").bind(w.id),
-        db.prepare("DELETE FROM workspaces WHERE id=?1").bind(w.id)
+        db.prepare("DELETE FROM workspaces WHERE id=?1").bind(w.id),
+        admLog(db, "delete", w, "워크스페이스와 모든 데이터 삭제")
       ]);
       return json({ ok: true });
     }
@@ -918,7 +955,8 @@ const PRIVATE = {
       await db.batch([
         db.prepare("UPDATE accounts SET pw=?1, fails=0, lock_until=0 WHERE login_id=?2").bind(await makePw(b.pw), a.login_id),
         db.prepare("DELETE FROM sess WHERE ws=?1 AND member_id=?2").bind(w.id, a.member_id),
-        db.prepare("UPDATE workspaces SET admin_login=?1 WHERE id=?2").bind(a.login_id, w.id)
+        db.prepare("UPDATE workspaces SET admin_login=?1 WHERE id=?2").bind(a.login_id, w.id),
+        admLog(db, "resetpw", w, `관리자 ${a.login_id} 비밀번호 초기화`)
       ]);
       return json({ ok: true, loginId: a.login_id });
     }
@@ -2724,6 +2762,328 @@ async function mcp(db, request) {
 
 const spOneT = spOne;
 
+
+/* ═════════ 총괄관리 — 운영자 전용 ═════════
+   플랫폼 설정(가입 방식·시작 등급·가격표), 결제 기록, 베타 코드, 문의, 공지, 운영 기록·오류, 오픈 준비, 전체 백업.
+   · 워크스페이스의 업무 내용은 다루지 않습니다. 계정 목록과 기록 '개수'까지만 봅니다.
+   · 모든 운영 작업은 adm_log에 남깁니다. */
+const ADM_DDL = [
+  "CREATE TABLE IF NOT EXISTS adm_pay(id TEXT PRIMARY KEY, ws TEXT, ws_name TEXT, paid_at TEXT NOT NULL, amount INTEGER NOT NULL DEFAULT 0, method TEXT, item TEXT, period_from TEXT, period_to TEXT, invoice INTEGER NOT NULL DEFAULT 0, memo TEXT, created_at TEXT NOT NULL)",
+  "CREATE INDEX IF NOT EXISTS idx_pay_ws ON adm_pay(ws, paid_at)",
+  "CREATE TABLE IF NOT EXISTS adm_code(code TEXT PRIMARY KEY, label TEXT, plan TEXT NOT NULL DEFAULT 'basic', modules TEXT NOT NULL DEFAULT '[]', days INTEGER NOT NULL DEFAULT 0, max_uses INTEGER NOT NULL DEFAULT 0, uses INTEGER NOT NULL DEFAULT 0, expires TEXT, active INTEGER NOT NULL DEFAULT 1, created_at TEXT NOT NULL)",
+  "CREATE TABLE IF NOT EXISTS fb(id TEXT PRIMARY KEY, ws TEXT NOT NULL, ws_name TEXT, member_id TEXT NOT NULL, login_id TEXT, name TEXT, role TEXT, kind TEXT, body TEXT NOT NULL, page TEXT, ua TEXT, contact TEXT, status TEXT NOT NULL DEFAULT 'new', reply TEXT, reply_at TEXT, seen_at TEXT, memo TEXT, created_at TEXT NOT NULL, updated_at TEXT)",
+  "CREATE INDEX IF NOT EXISTS idx_fb_member ON fb(ws, member_id)",
+  "CREATE INDEX IF NOT EXISTS idx_fb_status ON fb(status, created_at)",
+  "CREATE TABLE IF NOT EXISTS adm_log(id TEXT PRIMARY KEY, at TEXT NOT NULL, action TEXT NOT NULL, ws TEXT, ws_name TEXT, detail TEXT)",
+  "CREATE INDEX IF NOT EXISTS idx_admlog_at ON adm_log(at)",
+  "CREATE TABLE IF NOT EXISTS err_log(id TEXT PRIMARY KEY, at TEXT NOT NULL, path TEXT, msg TEXT, ws TEXT)",
+  "CREATE INDEX IF NOT EXISTS idx_errlog_at ON err_log(at)"
+];
+const SIGNUP_POL = ["approve", "code", "open", "closed"];
+const PRICE_KEYS = ["pro", "space", "outsourcing", "commerce", "seat"];
+const FB_KINDS = ["error", "inconvenient", "idea", "billing", "etc"];
+const FB_ST = ["new", "doing", "done"];
+const ANN_LV = ["info", "important", "maint"];
+const PAY_METHODS = ["계좌이체", "카드", "현금", "기타"];
+const PLAT_DEF = () => ({ signup: "approve", newPlan: { plan: "basic", days: 0, modules: [] }, contact: "", prices: { pro: 12000, space: 19000, outsourcing: 0, commerce: 19000, seat: 4900 }, saved: false });
+function platNorm(p) {
+  const d = PLAT_DEF(); p = p && typeof p === "object" ? p : {};
+  const np = p.newPlan && typeof p.newPlan === "object" ? p.newPlan : {};
+  const pr = p.prices && typeof p.prices === "object" ? p.prices : {};
+  const plan = planOk(np.plan);
+  return {
+    signup: SIGNUP_POL.includes(p.signup) ? p.signup : d.signup,
+    newPlan: { plan, days: clampInt(np.days, 0, 3650, 0), modules: plan === "pro" ? modulesOk(np.modules) : [] },
+    contact: clip(p.contact, 80),
+    prices: Object.fromEntries(PRICE_KEYS.map(k => [k, clampInt(pr[k], 0, 10000000, d.prices[k])])),
+    saved: !!p.saved
+  };
+}
+const platformOf = v => platNorm(parse(v));
+async function platform(db) { const r = await db.prepare("SELECT v FROM mw_meta WHERE k='platform'").first(); return platformOf(r && r.v); }
+function startTier(src) {   // 새 워크스페이스의 시작 등급 — 베타 코드 또는 플랫폼 설정
+  src = src || {};
+  const plan = planOk(src.plan), days = clampInt(src.days, 0, 3650, 0);
+  return { plan, modules: plan === "pro" ? modulesOk(src.modules) : [], until: plan === "pro" && days > 0 ? addDaysS(kstToday(), days) : null };
+}
+const admLog = (db, action, w, detail) => db.prepare("INSERT INTO adm_log(id,at,action,ws,ws_name,detail) VALUES(?1,?2,?3,?4,?5,?6)").bind(uid("l"), iso(), action, w ? w.id : "", w ? w.name : "", clip(detail, 300));
+const annList = v => { const a = parse(v); return Array.isArray(a) ? a.filter(x => x && x.id) : []; };
+function annNorm(a, prev) {
+  return { id: (prev && prev.id) || uid("an"), title: clip(a.title, 80), body: clip(a.body, 600), level: ANN_LV.includes(a.level) ? a.level : "info", aud: a.aud === "admin" ? "admin" : "all", from: dOk(a.from) || kstToday(), to: dOk(a.to) || "", on: a.on !== false && a.on !== 0, created_at: (prev && prev.created_at) || iso(), updated_at: iso() };
+}
+function annFor(v, me) {   // 지금 보여 줄 공지 — 기간 안, 대상에 맞는 것 3개까지
+  const t = kstToday();
+  return annList(v).filter(a => a.on && a.from <= t && (!a.to || a.to >= t) && (a.aud === "all" || me.role === "admin" || me.owner)).slice(0, 3).map(a => ({ id: a.id, t: a.title, b: a.body, lv: a.level }));
+}
+const codeNorm = s => String(s || "").toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 16);
+function betaCode() { const a = new Uint8Array(6); crypto.getRandomValues(a); return "MW" + [...a].map(x => INVITE_ABC[x % INVITE_ABC.length]).join(""); }
+const codeUsable = c => !!(c && Number(c.active) && (!c.expires || c.expires >= kstToday()) && (!Number(c.max_uses) || Number(c.uses) < Number(c.max_uses)));
+const codeOut = c => ({ code: c.code, label: c.label || "", plan: planOk(c.plan), modules: modulesOk(c.modules), days: Number(c.days) || 0, maxUses: Number(c.max_uses) || 0, uses: Number(c.uses) || 0, expires: c.expires || "", active: !!Number(c.active), usable: codeUsable(c), createdAt: c.created_at });
+const payOut = p => ({ id: p.id, ws: p.ws || "", wsName: p.ws_name || "", paidAt: p.paid_at, amount: Number(p.amount) || 0, method: p.method || "", item: p.item || "", from: p.period_from || "", to: p.period_to || "", invoice: !!Number(p.invoice), memo: p.memo || "", createdAt: p.created_at });
+const fbOut = f => ({ id: f.id, ws: f.ws, wsName: f.ws_name || "", loginId: f.login_id || "", name: f.name || "", role: f.role || "", kind: f.kind, body: f.body, page: f.page || "", ua: f.ua || "", contact: f.contact || "", status: f.status, reply: f.reply || "", replyAt: f.reply_at || "", memo: f.memo || "", createdAt: f.created_at, updatedAt: f.updated_at || "" });
+// 전체 백업에 넣는 표 — 로그인 세션(sess)과 오류 기록은 빼고, AI 토큰은 해시를 지웁니다
+const EXPORT_TABLES = () => ["mw_meta", "workspaces", "accounts", "ent", "ws_set", "api_tokens", "links", "mod_set", ...SP_TABLES, ...OS_TABLES, ...CM_TABLES, "adm_pay", "adm_code", "fb", "adm_log"];
+const EXPORT_PAGE = 800;
+const ownerOnly = me => !me.owner ? fail("forbidden", 403) : null;
+
+const ADMIN_API = {
+  /* 현황 + 워크스페이스 목록 */
+  async "admin/overview"(db, me, b, req, url) {
+    const no = ownerOnly(me); if (no) return no;
+    const now = Date.now(), ym = kstToday().slice(0, 7), prevYm = addDaysS(ym + "-01", -1).slice(0, 7);
+    const [wsR, cntR, seenR, entR, resR, jobR, ordR, sumR, logR] = await db.batch([
+      db.prepare("SELECT w.*, a.name AS admin_name, a.contact AS admin_contact FROM workspaces w LEFT JOIN accounts a ON a.login_id=w.admin_login ORDER BY w.created_at DESC"),
+      db.prepare("SELECT ws, role, COUNT(*) AS n FROM accounts WHERE status IN ('active','disabled') GROUP BY ws, role"),
+      db.prepare("SELECT ws, MAX(seen) AS s FROM sess GROUP BY ws"),
+      db.prepare("SELECT ws, kind, COUNT(*) AS n FROM ent WHERE deleted=0 AND kind IN ('project','task','store','contact','fin') GROUP BY ws, kind"),
+      db.prepare("SELECT ws, COUNT(*) AS n FROM sp_res GROUP BY ws"),
+      db.prepare("SELECT ws, COUNT(*) AS n FROM os_job GROUP BY ws"),
+      db.prepare("SELECT ws, COUNT(*) AS n FROM cm_order GROUP BY ws"),
+      db.prepare("SELECT (SELECT COUNT(*) FROM fb WHERE status='new') AS fb_new, (SELECT COUNT(*) FROM fb WHERE status='doing') AS fb_doing, (SELECT COUNT(*) FROM err_log WHERE at>=?1) AS err24, (SELECT COALESCE(SUM(amount),0) FROM adm_pay WHERE substr(paid_at,1,7)=?2) AS pay_m, (SELECT COALESCE(SUM(amount),0) FROM adm_pay WHERE substr(paid_at,1,7)=?3) AS pay_p, (SELECT COALESCE(SUM(amount),0) FROM adm_pay WHERE substr(paid_at,1,4)=?4) AS pay_y, (SELECT COUNT(*) FROM accounts WHERE status='active') AS acc, (SELECT v FROM mw_meta WHERE k='platform') AS plat, (SELECT v FROM mw_meta WHERE k='launch') AS launch, (SELECT v FROM mw_meta WHERE k='last_export') AS last_export, (SELECT v FROM mw_meta WHERE k='ann') AS ann, (SELECT COUNT(*) FROM adm_code WHERE active=1) AS codes").bind(new Date(now - 864e5).toISOString(), ym, prevYm, ym.slice(0, 4)),
+      db.prepare("SELECT * FROM adm_log ORDER BY at DESC LIMIT 8")
+    ]);
+    const rows = r => (r && r.results) || [];
+    const roles = new Map(); for (const c of rows(cntR)) { const m = roles.get(c.ws) || {}; m[c.role] = Number(c.n); roles.set(c.ws, m); }
+    const seen = new Map(rows(seenR).map(r => [r.ws, Number(r.s) || 0]));
+    const usage = new Map(); const U = (ws) => { let u = usage.get(ws); if (!u) { u = { project: 0, task: 0, store: 0, contact: 0, fin: 0, res: 0, job: 0, order: 0 }; usage.set(ws, u); } return u; };
+    for (const r of rows(entR)) U(r.ws)[r.kind] = Number(r.n);
+    for (const r of rows(resR)) U(r.ws).res = Number(r.n);
+    for (const r of rows(jobR)) U(r.ws).job = Number(r.n);
+    for (const r of rows(ordR)) U(r.ws).order = Number(r.n);
+    const s = rows(sumR)[0] || {};
+    const workspaces = rows(wsR).map(w => {
+      const t = tierOf(w), rl = roles.get(w.id) || {};
+      const sMs = seen.get(w.id) || 0, la = w.last_active ? Date.parse(w.last_active) || 0 : 0;
+      return { id: w.id, name: w.name, status: w.status, adminLogin: w.admin_login || "", adminName: w.admin_name || "", contact: w.contact || w.admin_contact || "", note: w.note || "", createdAt: w.created_at, approvedAt: w.approved_at || "", lastActive: w.last_active || "", lastSeen: Math.max(sMs, la) ? new Date(Math.max(sMs, la)).toISOString() : "", members: Object.values(rl).reduce((a, n) => a + n, 0), roles: rl, mine: w.id === me.ws, plan: t.planRaw, planNow: t.plan, modules: modulesOk(w.modules), planUntil: w.plan_until || "", limits: parse(w.limits) || {}, opNote: w.op_note || "", comp: !!Number(w.comp), usage: usage.get(w.id) || U(w.id) };
+    });
+    return json({ ok: true, workspaces, host: url.hostname, summary: { fbNew: Number(s.fb_new) || 0, fbDoing: Number(s.fb_doing) || 0, err24: Number(s.err24) || 0, payMonth: Number(s.pay_m) || 0, payPrev: Number(s.pay_p) || 0, payYear: Number(s.pay_y) || 0, accounts: Number(s.acc) || 0, codes: Number(s.codes) || 0, ann: annList(s.ann).filter(a => a.on).length, lastExport: s.last_export || "" }, platform: platformOf(s.plat), launch: parse(s.launch) || {}, log: rows(logR) });
+  },
+
+  /* 워크스페이스 상세 — 계정·사용량·토큰·확인 링크·결제 (업무 내용은 없음) */
+  async "admin/ws-detail"(db, me, b) {
+    const no = ownerOnly(me); if (no) return no;
+    const id = String(b.id || "");
+    const w = await db.prepare("SELECT id FROM workspaces WHERE id=?1").bind(id).first();
+    if (!w) return fail("not-found", 404);
+    const [acc, tok, lnk, pay, act] = await db.batch([
+      db.prepare("SELECT login_id, name, role, status, is_owner, created_at, last_login, CASE WHEN role='admin' THEN contact ELSE '' END AS contact FROM accounts WHERE ws=?1 ORDER BY CASE role WHEN 'admin' THEN 0 ELSE 1 END, created_at"),
+      db.prepare("SELECT name, scope, created_at, last_used, revoked FROM api_tokens WHERE ws=?1 ORDER BY created_at DESC"),
+      db.prepare("SELECT kind, COUNT(*) AS n, SUM(CASE WHEN used_at IS NOT NULL THEN 1 ELSE 0 END) AS used FROM links WHERE ws=?1 GROUP BY kind"),
+      db.prepare("SELECT * FROM adm_pay WHERE ws=?1 ORDER BY paid_at DESC, created_at DESC LIMIT 50"),
+      db.prepare("SELECT COUNT(DISTINCT member_id) AS n FROM sess WHERE ws=?1 AND seen>=?2").bind(id, Date.now() - 7 * 864e5)
+    ].map((s, i) => i < 4 ? s.bind(id) : s));
+    const rows = r => (r && r.results) || [];
+    return json({ ok: true, accounts: rows(acc).map(a => ({ loginId: a.login_id, name: a.name || "", role: roleOk(a.role), status: a.status, owner: !!Number(a.is_owner), createdAt: a.created_at, lastLogin: a.last_login || "", contact: a.contact || "" })), tokens: rows(tok).map(t => ({ name: t.name || "", scope: t.scope, createdAt: t.created_at, lastUsed: t.last_used || "", revoked: !!Number(t.revoked) })), links: rows(lnk).map(l => ({ kind: l.kind, n: Number(l.n), used: Number(l.used) || 0 })), payments: rows(pay).map(payOut), active7: Number((rows(act)[0] || {}).n) || 0 });
+  },
+
+  /* 결제 기록 — 결제 연동 전까지 운영자가 직접 적습니다 */
+  async "admin/pay"(db, me, b) {
+    const no = ownerOnly(me); if (no) return no;
+    const op = String(b.op || "list");
+    if (op === "list") {
+      const ym = /^\d{4}-\d{2}$/.test(String(b.ym || "")) ? String(b.ym) : "";
+      const ws = String(b.ws || "");
+      let sql = "SELECT * FROM adm_pay", w = [], bind = [];
+      if (ym) { w.push("substr(paid_at,1,7)=?" + (bind.length + 1)); bind.push(ym); }
+      if (ws) { w.push("ws=?" + (bind.length + 1)); bind.push(ws); }
+      if (w.length) sql += " WHERE " + w.join(" AND ");
+      sql += " ORDER BY paid_at DESC, created_at DESC LIMIT 500";
+      const r = await db.prepare(sql).bind(...bind).all();
+      return json({ ok: true, payments: ((r && r.results) || []).map(payOut) });
+    }
+    if (op === "delete") {
+      const p = await db.prepare("SELECT * FROM adm_pay WHERE id=?1").bind(String(b.id || "")).first();
+      if (!p) return fail("not-found", 404);
+      await db.batch([db.prepare("DELETE FROM adm_pay WHERE id=?1").bind(p.id), admLog(db, "pay-delete", { id: p.ws, name: p.ws_name }, `${p.paid_at} ${Number(p.amount).toLocaleString("ko-KR")}원 기록 삭제`)]);
+      return json({ ok: true });
+    }
+    if (op !== "save") return fail("bad-request");
+    const w = await db.prepare("SELECT id, name, plan, plan_until FROM workspaces WHERE id=?1").bind(String(b.ws || "")).first();
+    if (!w) return fail("not-found", 404);
+    const paidAt = dOk(b.paidAt), amount = clampInt(b.amount, 0, 1000000000, null);
+    if (!paidAt || amount === null) return fail("bad-request");
+    const from = dOk(b.from) || "", to = dOk(b.to) || "";
+    if (from && to && to < from) return fail("bad-period");
+    const prev = b.id ? await db.prepare("SELECT id, created_at FROM adm_pay WHERE id=?1").bind(String(b.id)).first() : null;
+    const id = prev ? prev.id : uid("pay");
+    const stmts = [db.prepare("INSERT OR REPLACE INTO adm_pay(id,ws,ws_name,paid_at,amount,method,item,period_from,period_to,invoice,memo,created_at) VALUES(?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,?11,?12)").bind(id, w.id, w.name, paidAt, amount, PAY_METHODS.includes(b.method) ? b.method : "기타", clip(b.item, 60), from || null, to || null, b.invoice ? 1 : 0, clip(b.memo, 300), prev ? prev.created_at : iso())];
+    let planUntil = w.plan_until || "";
+    if (b.apply && to) {   // 프로 기한을 결제 기간 끝으로 맞춥니다 (더 늦은 날짜가 있으면 그대로)
+      const unlimited = w.plan === "pro" && !w.plan_until;
+      if (!unlimited) { planUntil = w.plan === "pro" && w.plan_until && w.plan_until > to ? w.plan_until : to; stmts.push(db.prepare("UPDATE workspaces SET plan='pro', plan_until=?1 WHERE id=?2").bind(planUntil, w.id)); }
+    }
+    stmts.push(admLog(db, prev ? "pay-edit" : "pay-add", w, `${paidAt} ${amount.toLocaleString("ko-KR")}원${clip(b.item, 60) ? " · " + clip(b.item, 60) : ""}${b.apply && to ? ` · 프로 기한 ${planUntil}` : ""}`));
+    await db.batch(stmts);
+    const row = await db.prepare("SELECT * FROM adm_pay WHERE id=?1").bind(id).first();
+    return json({ ok: true, payment: payOut(row), planUntil });
+  },
+
+  /* 베타 코드 — 코드가 있으면 승인 없이 바로 개설되고, 코드에 정한 등급으로 시작합니다 */
+  async "admin/codes"(db, me, b) {
+    const no = ownerOnly(me); if (no) return no;
+    const op = String(b.op || "list");
+    if (op === "save") {
+      let code = codeNorm(b.code);
+      if (code && code.length < 4) return fail("bad-code");
+      const isNew = !b.edit;
+      if (!code) code = betaCode();
+      const t = startTier({ plan: b.plan, modules: b.modules, days: 0 });
+      const vals = [code, clip(b.label, 60), t.plan, JSON.stringify(t.modules), clampInt(b.days, 0, 3650, 0), clampInt(b.maxUses, 0, 100000, 0), dOk(b.expires) || null];
+      try {
+        if (isNew) await db.batch([db.prepare("INSERT INTO adm_code(code,label,plan,modules,days,max_uses,expires,uses,active,created_at) VALUES(?1,?2,?3,?4,?5,?6,?7,0,1,?8)").bind(...vals, iso()), admLog(db, "code-add", null, `베타 코드 ${code}${vals[1] ? " · " + vals[1] : ""}`)]);
+        else { const r = await db.prepare("UPDATE adm_code SET label=?2, plan=?3, modules=?4, days=?5, max_uses=?6, expires=?7 WHERE code=?1").bind(...vals).run(); if (!r.meta || !r.meta.changes) return fail("not-found", 404); }
+      } catch (e) { if (isUnique(e)) return fail("taken", 409); throw e; }
+      const row = await db.prepare("SELECT * FROM adm_code WHERE code=?1").bind(code).first();
+      return json({ ok: true, code: codeOut(row) });
+    }
+    if (op === "toggle" || op === "delete") {
+      const c = await db.prepare("SELECT * FROM adm_code WHERE code=?1").bind(codeNorm(b.code)).first();
+      if (!c) return fail("not-found", 404);
+      if (op === "toggle") await db.batch([db.prepare("UPDATE adm_code SET active=?1 WHERE code=?2").bind(b.active ? 1 : 0, c.code), admLog(db, "code-toggle", null, `베타 코드 ${c.code} ${b.active ? "사용" : "중지"}`)]);
+      else await db.batch([db.prepare("DELETE FROM adm_code WHERE code=?1").bind(c.code), admLog(db, "code-delete", null, `베타 코드 ${c.code} 삭제`)]);
+      return json({ ok: true });
+    }
+    const r = await db.prepare("SELECT * FROM adm_code ORDER BY created_at DESC LIMIT 200").all();
+    return json({ ok: true, codes: ((r && r.results) || []).map(codeOut) });
+  },
+
+  /* 문의·의견 — 목록, 답변(사용자에게 보임), 내부 메모, 상태 */
+  async "admin/fb"(db, me, b) {
+    const no = ownerOnly(me); if (no) return no;
+    if (b.op === "save") {
+      const f = await db.prepare("SELECT * FROM fb WHERE id=?1").bind(String(b.id || "")).first();
+      if (!f) return fail("not-found", 404);
+      const reply = b.reply !== undefined ? clip(b.reply, 2000) : (f.reply || "");
+      const replyAt = reply && reply !== (f.reply || "") ? iso() : (reply ? f.reply_at : null);
+      const status = FB_ST.includes(b.status) ? b.status : f.status;
+      await db.batch([
+        db.prepare("UPDATE fb SET status=?1, reply=?2, reply_at=?3, memo=?4, updated_at=?5 WHERE id=?6").bind(status, reply || null, replyAt, b.memo !== undefined ? clip(b.memo, 1000) : (f.memo || ""), iso(), f.id),
+        admLog(db, "fb", { id: f.ws, name: f.ws_name }, `문의 ${{ new: "새 문의", doing: "처리 중", done: "완료" }[status]}${reply !== (f.reply || "") ? " · 답변 등록" : ""}`)
+      ]);
+      const row = await db.prepare("SELECT * FROM fb WHERE id=?1").bind(f.id).first();
+      return json({ ok: true, item: fbOut(row) });
+    }
+    const st = FB_ST.includes(b.status) ? b.status : "";
+    const r = await (st ? db.prepare("SELECT * FROM fb WHERE status=?1 ORDER BY created_at DESC LIMIT 300").bind(st) : db.prepare("SELECT * FROM fb ORDER BY created_at DESC LIMIT 300")).all();
+    return json({ ok: true, items: ((r && r.results) || []).map(fbOut) });
+  },
+
+  /* 앱 안 공지 — 기간·대상을 정해 모든 워크스페이스 화면 위에 띄웁니다 */
+  async "admin/ann"(db, me, b) {
+    const no = ownerOnly(me); if (no) return no;
+    const r = await db.prepare("SELECT v FROM mw_meta WHERE k='ann'").first();
+    let list = annList(r && r.v);
+    const op = String(b.op || "list");
+    if (op === "save" || op === "delete") {
+      const prev = b.id ? list.find(a => a.id === b.id) : null;
+      if (b.id && !prev) return fail("not-found", 404);
+      let detail;
+      if (op === "delete") { list = list.filter(a => a.id !== prev.id); detail = `공지 삭제 · ${prev.title}`; }
+      else {
+        const a = annNorm(b, prev);
+        if (!a.title) return fail("bad-request");
+        if (a.to && a.to < a.from) return fail("bad-period");
+        list = prev ? list.map(x => x.id === prev.id ? a : x) : [a, ...list].slice(0, 30);
+        detail = `공지 ${prev ? "수정" : "등록"} · ${a.title}`;
+      }
+      await db.batch([db.prepare("INSERT OR REPLACE INTO mw_meta(k,v) VALUES('ann',?1)").bind(JSON.stringify(list)), admLog(db, "ann", null, detail)]);
+    }
+    return json({ ok: true, items: list });
+  },
+
+  /* 플랫폼 설정 — 가입 방식, 새 워크스페이스 시작 등급, 문의 연락처, 매출 계산용 가격표 */
+  async "admin/settings"(db, me, b) {
+    const no = ownerOnly(me); if (no) return no;
+    if (b.op === "save") {
+      const cur = await platform(db);
+      const next = platNorm(Object.assign({}, cur, b.settings && typeof b.settings === "object" ? b.settings : {}, { saved: true }));
+      const changes = [];
+      if (next.signup !== cur.signup) changes.push("가입 방식 " + ({ approve: "승인제", code: "베타 코드 전용", open: "자동 개설", closed: "신청 마감" })[next.signup]);
+      if (JSON.stringify(next.newPlan) !== JSON.stringify(cur.newPlan)) changes.push("시작 등급 " + (next.newPlan.plan === "pro" ? "프로 체험" + (next.newPlan.days ? ` ${next.newPlan.days}일` : "") : "베이직"));
+      if (JSON.stringify(next.prices) !== JSON.stringify(cur.prices)) changes.push("가격표");
+      if (next.contact !== cur.contact) changes.push("문의 연락처");
+      await db.batch([db.prepare("INSERT OR REPLACE INTO mw_meta(k,v) VALUES('platform',?1)").bind(JSON.stringify(next)), admLog(db, "settings", null, changes.join(" · ") || "변경 없음")]);
+      return json({ ok: true, platform: next });
+    }
+    return json({ ok: true, platform: await platform(db) });
+  },
+
+  /* 운영 기록·서버 오류 */
+  async "admin/logs"(db, me, b) {
+    const no = ownerOnly(me); if (no) return no;
+    if (b.op === "clear-err") { await db.batch([db.prepare("DELETE FROM err_log"), admLog(db, "err-clear", null, "서버 오류 기록 비움")]); }
+    const [a, e] = await db.batch([
+      db.prepare("SELECT * FROM adm_log ORDER BY at DESC LIMIT 200"),
+      db.prepare("SELECT * FROM err_log ORDER BY at DESC LIMIT 200"),
+      db.prepare("DELETE FROM adm_log WHERE id NOT IN (SELECT id FROM adm_log ORDER BY at DESC LIMIT 3000)"),
+      db.prepare("DELETE FROM err_log WHERE id NOT IN (SELECT id FROM err_log ORDER BY at DESC LIMIT 1000)")
+    ]);
+    return json({ ok: true, admin: (a && a.results) || [], errors: (e && e.results) || [] });
+  },
+
+  /* 오픈 준비 체크리스트 — 운영자가 체크한 상태 + 서버가 확인할 수 있는 항목 */
+  async "admin/launch"(db, me, b, req, url) {
+    const no = ownerOnly(me); if (no) return no;
+    const r = await db.prepare("SELECT (SELECT v FROM mw_meta WHERE k='launch') AS launch, (SELECT v FROM mw_meta WHERE k='platform') AS plat, (SELECT v FROM mw_meta WHERE k='last_export') AS last_export, (SELECT v FROM mw_meta WHERE k='ann') AS ann, (SELECT COUNT(*) FROM adm_code) AS codes, (SELECT COUNT(*) FROM fb) AS fbs").first();
+    let state = parse(r && r.launch) || {};
+    if (b.op === "save") {
+      const key = String(b.key || "").replace(/[^a-z0-9_-]/gi, "").slice(0, 40);
+      if (!key) return fail("bad-request");
+      state[key] = { done: !!b.done, note: clip(b.note, 500), at: iso() };
+      await db.prepare("INSERT OR REPLACE INTO mw_meta(k,v) VALUES('launch',?1)").bind(JSON.stringify(state)).run();
+    }
+    const host = url.hostname, le = (r && r.last_export) || "";
+    const auto = {
+      domain: !/\.pages\.dev$|^localhost$|^127\.|^\[?::1/.test(host),
+      backup: !!le && Date.now() - (Date.parse(le) || 0) < 30 * 864e5,
+      signup: platformOf(r && r.plat).saved,
+      codes: Number(r && r.codes) > 0,
+      ann: annList(r && r.ann).length > 0
+    };
+    return json({ ok: true, state, auto, host, lastExport: le });
+  },
+
+  /* 전체 백업 — 표를 나눠 내려받아 브라우저에서 한 파일로 묶습니다 */
+  async "admin/export"(db, me, b) {
+    const no = ownerOnly(me); if (no) return no;
+    if (b.op === "done") {
+      const at = iso();
+      await db.batch([db.prepare("INSERT OR REPLACE INTO mw_meta(k,v) VALUES('last_export',?1)").bind(at), admLog(db, "export", null, `전체 백업 내려받기 · ${clampInt(b.rows, 0, 1e9, 0)}행`)]);
+      return json({ ok: true, at });
+    }
+    const tables = EXPORT_TABLES();
+    if (b.op === "tables") return json({ ok: true, tables });
+    const t = String(b.table || "");
+    if (!tables.includes(t)) return fail("bad-request");
+    const off = clampInt(b.offset, 0, 1e9, 0);
+    let rows = [];
+    try { rows = ((await db.prepare(`SELECT * FROM ${t} ORDER BY rowid LIMIT ${EXPORT_PAGE} OFFSET ?1`).bind(off).all()).results) || []; }
+    catch (e) { if (/no such table/i.test(String((e && e.message) || e))) return json({ ok: true, rows: [], done: true }); throw e; }
+    if (t === "api_tokens") rows = rows.map(x => Object.assign({}, x, { hash: undefined }));
+    return json({ ok: true, rows, done: rows.length < EXPORT_PAGE });
+  },
+
+  /* ── 모든 구성원: 운영자에게 문의 보내기 / 내 문의와 답변 보기 ── */
+  async "fb/send"(db, me, b) {
+    const body = clip(b.body, 2000);
+    if (body.length < 2) return fail("bad-request");
+    const c = await db.prepare("SELECT COUNT(*) AS n FROM fb WHERE ws=?1 AND member_id=?2 AND created_at>=?3").bind(me.ws, me.id, new Date(Date.now() - 864e5).toISOString()).first();
+    if (c && Number(c.n) >= 20) return fail("busy", 429);
+    const id = uid("fb"), now = iso();
+    await db.prepare("INSERT INTO fb(id,ws,ws_name,member_id,login_id,name,role,kind,body,page,ua,contact,status,created_at,updated_at) VALUES(?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,?11,?12,'new',?13,?13)").bind(id, me.ws, me.wname || "", me.id, me.lid || "", me.name || "", me.role, FB_KINDS.includes(b.kind) ? b.kind : "etc", body, clip(b.page, 120), clip(b.ua, 200), clip(b.contact, 80), now).run();
+    return json({ ok: true, id });
+  },
+  async "fb/mine"(db, me) {
+    const [r] = await db.batch([
+      db.prepare("SELECT id, kind, body, status, reply, reply_at, created_at FROM fb WHERE ws=?1 AND member_id=?2 ORDER BY created_at DESC LIMIT 30").bind(me.ws, me.id),
+      db.prepare("UPDATE fb SET seen_at=?3 WHERE ws=?1 AND member_id=?2 AND reply_at IS NOT NULL AND (seen_at IS NULL OR seen_at<reply_at)").bind(me.ws, me.id, iso())
+    ]);
+    return json({ ok: true, items: ((r && r.results) || []).map(f => ({ id: f.id, kind: f.kind, body: f.body, status: f.status, reply: f.reply || "", replyAt: f.reply_at || "", createdAt: f.created_at })) });
+  }
+};
+
+Object.assign(PRIVATE, ADMIN_API);
+
 /* ───────── 진입점 ───────── */
 export async function onRequest(context) {
   const { request, env, next } = context;
@@ -2768,6 +3128,8 @@ export async function onRequest(context) {
     if (me.err) return fail(me.err, 403);
     return await PRIVATE[path](db, me, body, request, url);
   } catch (e) {
-    return fail("server-error", 500, { detail: String((e && e.message) || e).slice(0, 300) });
+    const msg = String((e && e.message) || e).slice(0, 500);
+    try { await db.prepare("INSERT INTO err_log(id,at,path,msg,ws) VALUES(?1,?2,?3,?4,'')").bind(uid("e"), iso(), path.slice(0, 80), msg).run(); } catch (e2) {}
+    return fail("server-error", 500, { detail: msg.slice(0, 300) });
   }
 }

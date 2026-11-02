@@ -691,6 +691,154 @@ table.tbl{border-collapse:collapse;width:100%;font-size:13.5px;min-width:560px}
 .stats>*,.two-col>*,.kwrap>*,.flow>*,.m-grid2>*,.m-grid3>*,.aiauto-grid>*,.sp-kpis>*,.sp-grid2>*,.sp-start>*,.cu-map>*,.task-row>*,.task-add>*,.fin-add>*{min-width:0}
 /* 한글은 단어 단위로 줄바꿈하고, 칸보다 긴 단어만 쪼갠다 */
 body{word-break:keep-all;overflow-wrap:anywhere}
+
+
+/* ── 총괄관리 ── */
+.adm-head{margin-bottom:16px}
+.adm-tabs{margin:0 0 16px}
+.adm-stats{grid-template-columns:repeat(4,1fr)}
+.stat .s-sub{font-size:12px;color:var(--faint);margin-top:2px;line-height:1.45}
+.adm-grid{display:grid;grid-template-columns:1.25fr 1fr;gap:14px;align-items:start}
+.adm-grid>*,.adm-dgrid>*,.adm-form>*{min-width:0}
+.adm-h-btn{margin-left:auto}
+.card h2 .adm-h-btn{font-size:13px}
+.adm-bars{display:grid;grid-template-columns:repeat(8,1fr);gap:8px;align-items:end;height:118px;margin:4px 0 14px;padding:0 2px}
+.adm-bars .ab{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:4px;min-width:0}
+.adm-bars .ab i{display:block;width:100%;max-width:26px;background:var(--accent);border-radius:4px 4px 0 0;min-height:2px}
+.adm-bars .ab-n{font-family:var(--mono);font-size:11.5px;color:var(--sub);line-height:1}
+.adm-bars .ab-l{font-family:var(--mono);font-size:10.5px;color:var(--faint);white-space:nowrap}
+.adm-kv{display:flex;flex-direction:column}
+.adm-kv>div{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:7px 0;border-bottom:1px solid var(--line-soft);font-size:13.5px}
+.adm-kv>div:last-child{border-bottom:0}
+.adm-kv span{color:var(--sub);flex:none;max-width:55%}
+.adm-kv b{font-weight:600;text-align:right;min-width:0;overflow-wrap:anywhere}
+.adm-log{display:flex;flex-direction:column}
+.adm-log .lg{display:grid;grid-template-columns:86px auto 1fr;gap:10px;align-items:start;padding:8px 0;border-bottom:1px solid var(--line-soft);font-size:13px}
+.adm-log .lg:last-child{border-bottom:0}
+.adm-log .lg-t{font-size:12px;color:var(--faint);padding-top:2px;white-space:nowrap}
+.adm-log .lg-d{min-width:0;color:var(--sub);overflow-wrap:anywhere}
+.adm-log .lg-d b{color:var(--ink)}
+.adm-log .lg .pill{justify-self:start}
+.adm-filters{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:14px;padding:14px 16px}
+.adm-filters #adm-q{flex:1 1 260px;min-width:0}
+.adm-chips{display:flex;gap:6px;flex-wrap:wrap}
+.fchip em{font-style:normal;font-family:var(--mono);font-size:11.5px;opacity:.7;margin-left:2px}
+.adm-sel{display:flex;gap:8px}
+.adm-sel select{width:auto;min-width:130px}
+.adm-link{font-weight:700;color:var(--ink);text-align:left;border-bottom:1px solid transparent;padding:0;line-height:1.4}
+.adm-link:hover{color:var(--accent-deep);border-bottom-color:var(--accent)}
+.adm-memo{background:var(--accent-soft);color:var(--accent-deep)}
+.linkbtn{color:var(--accent-deep);font-weight:600;font-size:inherit;padding:0;text-decoration:underline;text-underline-offset:2px;display:inline}
+a.linkbtn{display:inline-block;margin-top:6px}
+.m-box:has(.adm-wide){width:min(880px,calc(100% - 32px));margin-top:5vh}
+.adm-wide h2{flex-wrap:wrap}
+.adm-dgrid{display:grid;grid-template-columns:1fr 1fr;gap:0 22px}
+.adm-sec{padding:14px 0;border-top:1px solid var(--line-soft)}
+.adm-wide>.adm-sec:first-of-type,.adm-wide>.adm-dgrid:first-of-type .adm-sec{border-top:0;padding-top:4px}
+.adm-sec h3,.adm-h3{font-size:14px;font-weight:800;margin-bottom:8px;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.adm-h3{margin:18px 0 4px}
+.adm-sec h3 .cnt{font-family:var(--mono);font-size:12px;color:var(--faint);font-weight:500}
+.adm-sec .tbl{min-width:520px}
+.adm-acts{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.adm-row{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-top:12px}
+.adm-row .adm-acts{margin-top:0}
+.adm-check{display:flex!important;align-items:center;gap:8px;font-size:13.5px!important;font-weight:500!important;color:var(--ink)!important;margin:6px 0!important;cursor:pointer}
+.adm-check input{width:16px;height:16px;flex:none;accent-color:var(--accent);padding:0}
+.adm-danger h3{color:var(--late)}
+.adm-pol{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.adm-opt{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);border-radius:10px;padding:12px 14px;cursor:pointer;background:var(--card)}
+.adm-opt input{width:16px;height:16px;flex:none;margin-top:3px;accent-color:var(--accent);padding:0}
+.adm-opt b{display:block;font-size:14px}
+.adm-opt em{display:block;font-style:normal;font-size:12.5px;color:var(--sub);line-height:1.55;margin-top:2px}
+.adm-opt.on{border-color:var(--accent);background:var(--accent-soft)}
+.adm-form{display:grid;grid-template-columns:1fr 1fr;gap:4px 14px}
+.adm-form .full{grid-column:1/-1}
+.adm-form label{display:block;font-size:13px;font-weight:600;color:var(--sub);margin:10px 0 5px}
+.adm-prices{grid-template-columns:repeat(5,1fr)}
+.adm-mods{display:flex;gap:18px;flex-wrap:wrap}
+.adm-tacts{white-space:nowrap;text-align:right}
+.adm-tacts .btn{margin-left:4px}
+.adm-month{display:inline-flex;align-items:center;gap:4px;font-weight:600}
+.adm-month b{font-family:var(--mono);font-size:13.5px;min-width:84px;text-align:center}
+.adm-fb{padding:13px 4px;border-bottom:1px solid var(--line-soft);cursor:pointer;border-radius:6px}
+.adm-fb:last-child{border-bottom:0}
+.adm-fb:hover{background:var(--paper)}
+.fb-top{display:flex;gap:6px;align-items:center;flex-wrap:wrap;font-size:13.5px}
+.fb-body{font-size:14px;margin-top:6px;white-space:pre-wrap;line-height:1.6;overflow-wrap:anywhere}
+.adm-fb .fb-body{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.fb-reply{font-size:13px;margin-top:8px;background:var(--ok-soft);color:#1A5C3A;border-radius:8px;padding:8px 11px;white-space:pre-wrap;overflow-wrap:anywhere}
+.fb-mine{margin-top:22px;border-top:1px solid var(--line);padding-top:6px}
+.fb-mine:empty{display:none}
+.fb-mine h3{font-size:14px;font-weight:800;margin:10px 0 4px}
+.fbm{padding:10px 0;border-bottom:1px solid var(--line-soft)}
+.fbm:last-child{border-bottom:0}
+.adm-prog{height:8px;background:var(--line-soft);border-radius:99px;overflow:hidden;margin-top:4px}
+.adm-prog i{display:block;height:100%;background:var(--accent);border-radius:99px;transition:width .3s}
+.adm-lgroup{margin-top:14px}
+.adm-li{display:flex;gap:12px;padding:14px 0;border-bottom:1px solid var(--line-soft)}
+.adm-li:last-child{border-bottom:0}
+.adm-lcheck{position:relative;flex:none;width:22px;height:22px;margin-top:1px;cursor:pointer}
+.adm-lcheck input{position:absolute;inset:0;opacity:0;width:22px;height:22px;margin:0;cursor:pointer}
+.adm-lcheck span{position:absolute;inset:0;border:2px solid var(--line);border-radius:6px;background:var(--card);pointer-events:none}
+.adm-lcheck input:checked+span{background:var(--accent);border-color:var(--accent)}
+.adm-lcheck input:checked+span::after{content:"";position:absolute;left:6px;top:2px;width:6px;height:11px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg)}
+.adm-lcheck input:disabled{cursor:default}
+.adm-lcheck input:focus-visible+span{outline:2px solid var(--accent);outline-offset:2px}
+.adm-lbody{flex:1;min-width:0}
+.adm-lt{font-weight:700;font-size:14.5px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.adm-li.done .adm-lt{color:var(--sub)}
+.adm-lw{font-size:13px;color:var(--sub);margin-top:3px;line-height:1.6}
+.adm-how{margin-top:6px;font-size:13px}
+.adm-how summary{cursor:pointer;color:var(--accent-deep);font-weight:600;list-style:none;display:inline-block}
+.adm-how summary::-webkit-details-marker{display:none}
+.adm-how summary::after{content:" ▾";font-size:11px}
+.adm-how[open] summary::after{content:" ▴"}
+.adm-how ol{margin:6px 0 0 18px;color:var(--ink);line-height:1.7}
+.adm-lnote{margin-top:8px}
+.adm-lnote input{font-size:13px;padding:7px 10px;background:var(--paper)}
+/* 공지 띠 */
+#ann-bar{display:flex;flex-direction:column;gap:8px;margin-bottom:14px}
+#ann-bar .ann{display:flex;align-items:flex-start;gap:10px;background:var(--card);border:1px solid var(--line);border-left:3px solid var(--review);border-radius:10px;padding:10px 12px 10px 14px;font-size:13.5px}
+#ann-bar .ann-important{border-left-color:var(--accent)}
+#ann-bar .ann-maint{border-left-color:#E5A23C}
+#ann-bar .ann .pill{flex:none;margin-top:1px}
+#ann-bar .ann-t{flex:1;min-width:0;line-height:1.55}
+#ann-bar .ann-t span{display:block;color:var(--sub);white-space:pre-wrap;margin-top:1px}
+#ann-bar .ann-x{flex:none;width:28px;height:28px;border-radius:7px;color:var(--faint);font-size:13px;margin:-3px -4px 0 0}
+#ann-bar .ann-x:hover{background:var(--paper);color:var(--ink)}
+@media (max-width:1060px){
+  .adm-stats{grid-template-columns:repeat(2,1fr)}
+  .adm-grid{grid-template-columns:1fr}
+  .adm-prices{grid-template-columns:repeat(3,1fr)}
+}
+@media (max-width:820px){
+  .adm-dgrid{grid-template-columns:1fr}
+  .adm-dgrid .adm-sec+.adm-sec{border-top:1px solid var(--line-soft)}
+  .adm-pol{grid-template-columns:1fr}
+  .adm-sel{width:100%}
+  .adm-sel select{flex:1;min-width:0}
+  .m-box:has(.adm-wide){padding:22px 18px 20px}
+}
+@media (max-width:560px){
+  .adm-form,.adm-prices{grid-template-columns:1fr 1fr}
+  .adm-form>div:not(.full){grid-column:1/-1}
+  .adm-prices>div{grid-column:auto!important}
+  .adm-log .lg{grid-template-columns:auto 1fr;row-gap:2px}
+  .adm-log .lg-d{grid-column:1/-1}
+  .adm-bars{gap:4px}
+  .adm-kv>div{flex-wrap:wrap}
+  .adm-kv span{max-width:none}
+  .adm-kv b{text-align:left}
+  .card h2 .adm-h-btn{margin-left:0}
+  .adm-month b{min-width:0}
+}
+.set-help{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:18px;padding:11px 14px;background:var(--paper);border-radius:9px;font-size:13px;color:var(--sub)}
+.adm-stats .s-num{font-size:24px;overflow-wrap:anywhere}
+@media (max-width:560px){.adm-stats .s-num{font-size:20px}.adm-stats .stat{padding:13px 14px}}
+.tbl td.adm-item{min-width:150px}
+.adm-grid>.card+.card{margin-top:0}
+#sg-beta::placeholder{font-family:var(--sans);letter-spacing:0;text-transform:none}
+#adm-c-code::placeholder{font-family:var(--sans);text-transform:none}
 @media (prefers-reduced-motion:reduce){
   *{transition:none!important;animation:none!important}
 }
@@ -772,9 +920,12 @@ body{word-break:keep-all;overflow-wrap:anywhere}
       <label for="sg-contact">연락처 <span id="sg-contact-opt" style="font-weight:500;color:var(--faint)"></span></label>
       <input id="sg-contact" maxlength="60" placeholder="휴대폰 또는 이메일 — 승인 안내에 사용합니다">
       <div id="sg-note-wrap">
+        <label for="sg-beta">베타 코드 <span id="sg-beta-opt" style="font-weight:500;color:var(--faint)">(선택)</span></label>
+        <input id="sg-beta" maxlength="16" autocapitalize="characters" autocomplete="off" placeholder="초대받은 베타 코드가 있으면 입력하세요" style="font-family:var(--mono);letter-spacing:.06em;text-transform:uppercase">
         <label for="sg-note">가입 목적 <span style="font-weight:500;color:var(--faint)">(선택)</span></label>
         <textarea id="sg-note" maxlength="300" style="min-height:66px" placeholder="어떤 일에 쓰실지 한두 줄 적어 주시면 확인이 빨라집니다."></textarea>
       </div>
+      <div id="sg-closed" class="gate-hint hidden" style="margin:14px 0 4px;text-align:left"></div>
       <button class="btn btn-pri btn-full" id="sg-go">가입 신청하기</button>
       <div class="gate-err" id="sg-err"></div>
       <div class="gate-hint" id="sg-hint">운영자가 확인 후 승인하면 바로 로그인할 수 있습니다.</div>
@@ -803,6 +954,7 @@ body{word-break:keep-all;overflow-wrap:anywhere}
       <div class="u-role" id="side-urole"></div>
       <div class="u-acts">
         <button class="btn btn-sm" data-g="settings">설정</button>
+        <button class="btn btn-sm hidden" data-fb="open">문의</button>
         <button class="btn btn-sm btn-ghost" data-g="logout">로그아웃</button>
       </div>
     </div>
@@ -815,6 +967,7 @@ body{word-break:keep-all;overflow-wrap:anywhere}
         <button class="btn btn-sm btn-ghost" data-g="logout">나가기</button>
       </div>
     </div>
+    <div id="ann-bar" class="hidden" aria-live="polite"></div>
     <div id="view"></div>
   </main>
   <nav id="tabbar"></nav>
@@ -963,7 +1116,7 @@ async function pollSync(force){
     const a=applyRemote(res.rows||[]);
     if(res.spv!=null){SPACE.onVersion(res.spv);OUTS.onVersion(res.spv);COMM.onVersion(res.spv);}
     let n=a.changed;
-    if(res.badges&&JSON.stringify(res.badges)!==JSON.stringify(CLOUD.badges)){CLOUD.badges=res.badges;renderNav();n++;}
+    if(res.badges&&JSON.stringify(res.badges)!==JSON.stringify(CLOUD.badges)){CLOUD.badges=res.badges;renderNav();ADM.onBadges();n++;}
     if(res.tier&&setTier(res.tier)){renderNav();n++;}
     if(res.inv&&CLOUD.ws&&CLOUD.ws.invite!==res.inv){CLOUD.ws.invite=res.inv;n++;}
     const me2=memberById(ME.id);
@@ -1033,7 +1186,7 @@ async function cloudRefresh(){
 function cloudSignOut(reason){
   stopPoll();clearTimeout(pushTimer);TOKEN="";ME=null;PENDING={};
   [TKEY,CKEY,CMETA,CPEND].forEach(k=>{try{localStorage.removeItem(k);}catch(e){}});
-  CLOUD={owner:false,ws:null,badges:{},tier:null};ADMIN=null;REQS=null;ADMIN_AT=0;REQS_AT=0;TOKENS=null;SPACE.reset();OUTS.reset();COMM.reset();
+  CLOUD={owner:false,ws:null,badges:{},tier:null};ADMIN=null;REQS=null;ADMIN_AT=0;REQS_AT=0;TOKENS=null;SPACE.reset();OUTS.reset();COMM.reset();ADM.reset();
   if($("#modal-root").classList.contains("show"))closeModal();
   location.hash="";showGate("login");
   if(reason==="expired")toast("로그인이 만료되었습니다. 다시 로그인하세요.");
@@ -1126,6 +1279,9 @@ const SIGNUP_ERR={
   "bad-pw":"비밀번호는 6자 이상으로 입력하세요.",
   "bad-code":"초대 코드를 찾을 수 없습니다. 코드를 다시 확인하거나 관리자에게 새 코드를 받으세요.",
   busy:"지금은 신청이 많아 잠시 받을 수 없습니다. 잠시 후 다시 시도하세요.",
+  closed:"지금은 새 워크스페이스 신청을 받지 않습니다. 초대 코드가 있으면 ‘초대 코드로 합류’를 이용하세요.",
+  "need-beta":"지금은 베타 코드가 있어야 가입할 수 있습니다. 받은 베타 코드를 넣어 주세요.",
+  "bad-beta":"베타 코드를 찾을 수 없거나 사용 기간이 끝났습니다. 코드를 다시 확인해 주세요.",
   "not-initialized":"아직 운영자 설정이 끝나지 않았습니다.",
   "bad-request":"입력 내용을 다시 확인하세요."
 };
@@ -1175,7 +1331,7 @@ function doLogin(){
   enterApp();
 }
 /* 회원가입 — 새 워크스페이스(운영자 승인) / 초대 코드로 합류(관리자 승인) */
-let SG_MODE="new";
+let SG_MODE="new",SG_POL={signup:"approve",contact:""};
 function setSgMode(m){
   SG_MODE=m==="join"?"join":"new";
   $$('[data-act="sg-mode"]').forEach(b=>b.classList.toggle("on",b.dataset.v===SG_MODE));
@@ -1183,8 +1339,16 @@ function setSgMode(m){
   $("#sg-join-fields").classList.toggle("hidden",SG_MODE!=="join");
   $("#sg-note-wrap").classList.toggle("hidden",SG_MODE!=="new");
   $("#sg-contact-opt").textContent=SG_MODE==="new"?"":"(선택)";
-  $("#sg-go").textContent=SG_MODE==="new"?"가입 신청하기":"합류 신청하기";
-  $("#sg-hint").textContent=SG_MODE==="new"?"운영자가 확인 후 승인하면 바로 로그인할 수 있습니다.":"워크스페이스 관리자가 승인하면 로그인할 수 있습니다.";
+  const pol=SG_POL.signup,closed=SG_MODE==="new"&&pol==="closed";
+  $("#sg-beta-opt").textContent=pol==="code"?"(필수)":"(선택)";
+  $("#sg-beta").placeholder=pol==="code"?"초대받은 베타 코드를 입력하세요":"초대받은 베타 코드가 있으면 입력하세요";
+  $("#sg-form .gate-sub").textContent=SG_MODE==="new"&&pol==="open"?"가입하면 바로 워크스페이스가 열리고, 어느 기기에서든 같은 아이디로 로그인해 일할 수 있습니다.":"가입 신청이 승인되면 어느 기기에서든 같은 아이디로 로그인해 일할 수 있습니다.";
+  $("#sg-go").textContent=SG_MODE==="new"?(pol==="open"?"워크스페이스 만들기":"가입 신청하기"):"합류 신청하기";
+  $("#sg-hint").textContent=SG_MODE==="new"?(pol==="open"?"가입하면 바로 로그인해 쓸 수 있습니다.":pol==="code"?"베타 코드가 맞으면 승인 없이 바로 로그인할 수 있습니다.":"운영자가 확인 후 승인하면 바로 로그인할 수 있습니다. 베타 코드가 있으면 바로 열립니다."):"워크스페이스 관리자가 승인하면 로그인할 수 있습니다.";
+  const cl=$("#sg-closed");cl.classList.toggle("hidden",!closed);
+  cl.innerHTML=closed?`지금은 새 워크스페이스 신청을 받지 않습니다.${SG_POL.contact?`<br>문의: <b>${esc(SG_POL.contact)}</b>`:""}<br>팀에서 받은 초대 코드가 있으면 위의 ‘초대 코드로 합류’를 눌러 주세요.`:"";
+  $$("#sg-form input,#sg-form textarea").forEach(x=>{if(x.closest("#sg-join-fields"))return;x.disabled=closed;});
+  $("#sg-go").disabled=closed;
   $("#sg-err").textContent="";
 }
 function openSignup(mode,code){
@@ -1197,7 +1361,7 @@ async function doSignup(){
   const err=$("#sg-err");err.textContent="";
   const name=$("#sg-name").value.trim(),lid=$("#sg-id").value.trim().toLowerCase(),pw=$("#sg-pw").value,pw2=$("#sg-pw2").value,contact=$("#sg-contact").value.trim();
   const body={mode:SG_MODE,name,loginId:lid,pw,contact};
-  if(SG_MODE==="new"){body.workspace=$("#sg-ws").value.trim();body.note=$("#sg-note").value.trim();if(!body.workspace)return err.textContent="워크스페이스 이름을 입력하세요.";}
+  if(SG_MODE==="new"){body.workspace=$("#sg-ws").value.trim();body.note=$("#sg-note").value.trim();body.beta=$("#sg-beta").value.toUpperCase().replace(/[^A-Z0-9]/g,"");if(!body.workspace)return err.textContent="워크스페이스 이름을 입력하세요.";if(SG_POL.signup==="code"&&!body.beta)return err.textContent=SIGNUP_ERR["need-beta"];}
   else{body.code=$("#sg-code").value.toUpperCase().replace(/[^A-Z0-9]/g,"");if(body.code.length<6)return err.textContent="관리자에게 받은 초대 코드 6자리를 입력하세요.";}
   if(!name)return err.textContent="이름을 입력하세요.";
   if(!ID_RE.test(lid))return err.textContent=SIGNUP_ERR["bad-id"];
@@ -1210,7 +1374,9 @@ async function doSignup(){
     $("#sg-pw").value="";$("#sg-pw2").value="";
     $("#sg-form").classList.add("hidden");
     const d=$("#sg-done");d.classList.remove("hidden");
-    d.innerHTML=SG_MODE==="new"
+    d.innerHTML=SG_MODE==="new"&&res.status==="active"
+      ?`<div class="ok">✓</div><h2>워크스페이스가 열렸습니다</h2><p><b>${esc(res.workspace||body.workspace)}</b> 워크스페이스를 만들었습니다${res.plan==="pro"?` — 마이웍스 프로${res.planUntil?` (${esc(res.planUntil)}까지)`:""}로 시작합니다`:""}.<br>지금 아이디 <b class="mono">${esc(lid)}</b>로 로그인하세요.</p><button class="btn btn-pri btn-full" data-act="go-login" data-lid="${esc(lid)}">로그인하기</button>`
+      :SG_MODE==="new"
       ?`<div class="ok">✓</div><h2>가입 신청이 접수되었습니다</h2><p><b>${esc(body.workspace)}</b> 워크스페이스 개설 신청을 운영자에게 전달했습니다.<br>승인되면 아이디 <b class="mono">${esc(lid)}</b>로 바로 로그인할 수 있습니다.</p><button class="btn btn-pri btn-full" data-act="go-login" data-lid="${esc(lid)}">로그인 화면으로</button>`
       :`<div class="ok">✓</div><h2>합류 요청을 보냈습니다</h2><p><b>${esc(res.workspace||"")}</b> 관리자에게 합류 요청이 전달되었습니다.<br>승인되면 아이디 <b class="mono">${esc(lid)}</b>로 로그인할 수 있습니다.</p><button class="btn btn-pri btn-full" data-act="go-login" data-lid="${esc(lid)}">로그인 화면으로</button>`;
   }catch(e){err.textContent=errText(SIGNUP_ERR,e,"서버 연결에 실패했습니다. 잠시 후 다시 시도하세요.");}
@@ -1228,7 +1394,7 @@ function applyGateText(){
   $("#li-signup").classList.remove("hidden");
   $("#li-foot").textContent="가입 신청이 승인되면 어느 기기에서든 같은 아이디로 로그인할 수 있습니다.";
 }
-function sideUser(){if(!ME)return;$("#side-uname-t").textContent=ME.name;$("#side-urole").textContent=ROLES[ME.role]+(ME.loginId?" · "+ME.loginId:"");}
+function sideUser(){if(!ME)return;$("#side-uname-t").textContent=ME.name;$("#side-urole").textContent=ROLES[ME.role]+(ME.loginId?" · "+ME.loginId:"");$$('#sidebar [data-fb="open"]').forEach(b=>b.classList.toggle("hidden",MODE!=="cloud"));}
 function bootRestoreFromText(text){
   const r=parseImportText(text);
   if(!r.backup)return toast("전체 백업 파일이 아닙니다. 연동·데이터의 \u201c전체 백업 내려받기\u201d로 받은 .json 파일을 선택하세요.");
@@ -1263,7 +1429,7 @@ function enterApp(){
   if(!location.hash||location.hash==="#")location.hash="#/"+(isField()?navList()[0][0]:"dashboard");
   route();
 }
-function setNav(name){$$("[data-nav]").forEach(b=>b.classList.toggle("on",b.dataset.nav===name));}
+function setNav(name){$$("[data-nav]").forEach(b=>b.classList.toggle("on",b.dataset.nav===name));const tb=$("#tabbar"),t=tb&&tb.querySelector("button.on");if(t&&tb.scrollWidth>tb.clientWidth+2){const l=t.offsetLeft,r=l+t.offsetWidth;if(l<tb.scrollLeft)tb.scrollLeft=Math.max(0,l-8);else if(r>tb.scrollLeft+tb.clientWidth)tb.scrollLeft=r-tb.clientWidth+8;}}
 function navList(){
   if(ME&&ME.role==="worker"){
     const L=[];
@@ -1280,16 +1446,17 @@ function navList(){
     if(modOn("commerce"))mods.push(["commerce","커머스","▧"]);
     L.splice(5,0,...mods);
   }
-  if(MODE==="cloud"&&CLOUD.owner)L.push(["admin","운영","⚙"]);
+  if(MODE==="cloud"&&CLOUD.owner)L.push(["admin","총괄관리","⚙","관리"]);
   return L;
 }
-function navBadge(key){if(MODE!=="cloud")return 0;if(key==="admin")return CLOUD.badges.pendingWs||0;if(key==="members"&&isAdmin())return CLOUD.badges.joinReq||0;return 0;}
+function navBadge(key){if(MODE!=="cloud")return 0;if(key==="admin")return(CLOUD.badges.pendingWs||0)+(CLOUD.badges.fbNew||0);if(key==="members"&&isAdmin())return CLOUD.badges.joinReq||0;return 0;}
 function renderNav(){
   const L=navList();
   $("#nav-side").innerHTML=L.map(n=>{const c=navBadge(n[0]);return`<button data-nav="${n[0]}"><span class="n-ico">${n[2]}</span>${n[1]}${c?`<b class="nbadge">${c}</b>`:""}</button>`;}).join("");
   $("#tabbar").innerHTML=L.map(n=>{const c=navBadge(n[0]);return`<button data-nav="${n[0]}"><span class="n-ico">${n[2]}${c?`<i class="tdot"></i>`:""}</span>${n[3]||n[1]}</button>`;}).join("");
   const pg=location.hash.replace(/^#\/?/,"").split("/")[0];
   setNav(pg==="project"?"projects":pg==="store"?"stores":pg||"dashboard");
+  ADM.renderAnn();
 }
 function go(h){location.hash=h;}
 function route(){
@@ -1324,7 +1491,7 @@ function route(){
   v.innerHTML=VIEWS[pg]();
   if(pg==="data"){wireDropzone();if(MODE==="cloud"&&canFinance()){if(modOn("space"))SPACE.prefetch(weekRange(1)[0],weekRange(0)[1]);loadTokens();loadWsSet();}}
   if(pg==="dashboard"){if(modOn("space"))SPACE.fillDash();if(modOn("outsourcing"))OUTS.fillDash();if(modOn("commerce"))COMM.fillDash();}
-  if(pg==="admin")loadAdmin();
+  if(pg==="admin")ADM.view(arg);
   if(pg==="members"&&MODE==="cloud"&&isAdmin())loadReqs();
 }
 window.addEventListener("hashchange",route);
@@ -1413,7 +1580,9 @@ function decisionItems(){
   const out=[];
   if(!ME||isField())return{count:0,html:""};
   const partner=ME.role==="partner";
-  if(!partner&&MODE==="cloud"&&CLOUD.owner&&CLOUD.badges.pendingWs)out.push(`<div class="dec-row"><span class="pill p-red">가입 신청</span><span class="dt">새 워크스페이스 개설 신청 ${CLOUD.badges.pendingWs}건</span><span class="da"><button class="btn btn-sm" data-act="brief-admin">운영 콘솔</button></span></div>`);
+  if(!partner&&MODE==="cloud"&&CLOUD.owner&&CLOUD.badges.pendingWs)out.push(`<div class="dec-row"><span class="pill p-red">가입 신청</span><span class="dt">새 워크스페이스 개설 신청 ${CLOUD.badges.pendingWs}건</span><span class="da"><button class="btn btn-sm" data-act="brief-admin" data-v="signup">총괄관리</button></span></div>`);
+  if(!partner&&MODE==="cloud"&&CLOUD.owner&&CLOUD.badges.fbNew)out.push(`<div class="dec-row"><span class="pill p-red">문의</span><span class="dt">구성원이 보낸 새 문의 ${CLOUD.badges.fbNew}건</span><span class="da"><button class="btn btn-sm" data-act="brief-admin" data-v="fb">답변하기</button></span></div>`);
+  if(MODE==="cloud"&&CLOUD.badges.fbReply)out.push(`<div class="dec-row"><span class="pill p-green">문의 답변</span><span class="dt">운영자가 문의에 답변했습니다${CLOUD.badges.fbReply>1?` (${CLOUD.badges.fbReply}건)`:""}</span><span class="da"><button class="btn btn-sm" data-fb="open">확인</button></span></div>`);
   if(MODE==="cloud"&&isAdmin()&&CLOUD.badges.joinReq)out.push(`<div class="dec-row"><span class="pill p-red">합류 요청</span><span class="dt">초대 링크로 가입한 ${CLOUD.badges.joinReq}명이 승인을 기다립니다</span><span class="da"><button class="btn btn-sm" data-act="brief-req">사람</button></span></div>`);
   const props=partner?[]:(DB.proposals||[]).filter(p=>p.status==="pending").sort((a,b)=>(a.createdAt||"").localeCompare(b.createdAt||""));
   props.forEach(p=>out.push(`<div class="dec-row" data-prop="${esc(p.id)}"><span class="pill p-blue">AI 제안 · ${PROP_KIND[p.kind]||esc(p.kind)}</span><span class="dt">${propText(p)}${p.reason?`<div class="ds">${esc(p.tokenName||"AI")} · ${esc(p.reason)}</div>`:`<div class="ds">${esc(p.tokenName||"AI")} · ${fmtWhen(p.createdAt)}</div>`}</span><span class="da"><button class="btn btn-sm btn-pri" data-act="prop-ok" data-id="${esc(p.id)}">승인</button><button class="btn btn-sm btn-ghost" data-act="prop-no" data-id="${esc(p.id)}">거절</button></span></div>`));
@@ -2070,74 +2239,8 @@ function fmtWhen(v){
   if(diff>1&&diff<7)return diff+"일 전";
   return(d.getFullYear()!==n.getFullYear()?d.getFullYear()+". ":"")+(d.getMonth()+1)+". "+d.getDate()+".";
 }
-function vAdmin(){
-  return`
-  <div class="page-head">
-    <div><h1><span class="bars"></span>운영 콘솔</h1><div class="desc">가입 신청을 승인하고 워크스페이스 이용을 관리합니다. 각 워크스페이스의 업무 내용은 운영자에게도 보이지 않습니다.</div></div>
-    <button class="btn btn-sm" data-act="adm-refresh">새로고침</button>
-  </div>
-  <div id="adm-body">${ADMIN?admBody(ADMIN):`<div class="card"><div class="empty">불러오는 중…</div></div>`}</div>`;
-}
-function loadAdmin(force){
-  if(!force&&ADMIN&&Date.now()-ADMIN_AT<10000)return;
-  ADMIN_AT=Date.now();
-  api("admin/overview").then(res=>{
-    ADMIN=res;
-    const p=(res.workspaces||[]).filter(w=>w.status==="pending").length;
-    if((CLOUD.badges.pendingWs||0)!==p){CLOUD.badges.pendingWs=p;renderNav();}
-    const el=$("#adm-body");if(el)el.innerHTML=admBody(ADMIN);
-  }).catch(e=>{if(e.code==="unauthorized")return;const el=$("#adm-body");if(el&&!ADMIN)el.innerHTML=`<div class="card"><div class="empty"><b>불러오지 못했습니다</b>잠시 후 새로고침을 눌러 주세요.</div></div>`;});
-}
-function admBody(d){
-  const ws=d.workspaces||[];
-  const pend=ws.filter(w=>w.status==="pending"),rest=ws.filter(w=>w.status!=="pending");
-  const cnt=st=>ws.filter(w=>w.status===st).length;
-  return`
-  <div class="stats">
-    <div class="stat"><div class="s-num">${ws.filter(w=>w.status!=="rejected").length}<em>곳</em></div><div class="s-lb">전체 워크스페이스</div></div>
-    <div class="stat ${pend.length?"warn":""}"><div class="s-num">${pend.length}<em>건</em></div><div class="s-lb">승인 대기</div></div>
-    <div class="stat"><div class="s-num">${cnt("active")}<em>곳</em></div><div class="s-lb">이용 중</div></div>
-    <div class="stat"><div class="s-num">${cnt("suspended")}<em>곳</em></div><div class="s-lb">이용 중지</div></div>
-  </div>
-  <div class="stack">
-    <div class="card">
-      <h2><span class="bars"></span>승인 대기 <span class="cnt">${pend.length}건</span></h2>
-      ${pend.length?pend.map(w=>`
-      <div class="ws-row">
-        <div class="w-info">
-          <div class="w-nm">${esc(w.name)}</div>
-          <div class="w-sub">신청자 ${esc(w.adminName||"-")} · <span class="mono">${esc(w.adminLogin)}</span> · ${esc(w.contact||"연락처 없음")}</div>
-          <div class="w-sub">${fmtWhen(w.createdAt)} 신청</div>
-          ${w.note?`<div class="r-note">${esc(w.note)}</div>`:""}
-        </div>
-        <div class="w-acts"><button class="btn btn-sm btn-pri" data-act="adm-ws" data-op="approve" data-id="${w.id}">승인</button><button class="btn btn-sm btn-ghost" data-act="adm-ws" data-op="reject" data-id="${w.id}">반려</button></div>
-      </div>`).join(""):`<div class="empty" style="padding:22px 10px">대기 중인 가입 신청이 없습니다.</div>`}
-    </div>
-    <div class="card">
-      <h2><span class="bars"></span>워크스페이스 <span class="cnt">${rest.length}곳</span></h2>
-      ${rest.map(w=>`
-      <div class="ws-row">
-        <div class="w-info">
-          <div class="w-nm">${esc(w.name)}${w.mine?`<span class="own-badge">운영자</span>`:""}${wsPill(w.status)}</div>
-          <div class="w-sub">관리자 ${esc(w.adminName||"-")} · <span class="mono">${esc(w.adminLogin||"-")}</span>${w.contact?` · ${esc(w.contact)}`:""}</div>
-          <div class="w-sub">구성원 ${w.members}명 · 최근 활동 ${w.lastActive?fmtWhen(w.lastActive):"없음"} · 개설 ${fmtWhen(w.approvedAt||w.createdAt)}</div>
-          <div class="w-sub"><span class="pill ${w.planNow==="pro"?"p-red":"p-gray"}">${planName(w.planNow||w.plan)}</span>${w.plan==="pro"&&w.planNow!=="pro"?` <span class="d-late" style="font-size:12px">기한 만료</span>`:""}${w.planUntil?` <span class="mono">~${esc(w.planUntil)}</span>`:""}${(w.modules||[]).length?` · ${w.modules.map(m=>MOD_LABEL[m]||m).join(", ")}`:""}</div>
-        </div>
-        ${w.mine?`<div class="w-acts"><button class="btn btn-sm" data-act="adm-plan" data-id="${w.id}">등급·모듈</button></div>`:`<div class="w-acts">
-          <button class="btn btn-sm" data-act="adm-plan" data-id="${w.id}">등급·모듈</button>
-          ${w.status==="active"?`<button class="btn btn-sm" data-act="adm-ws" data-op="resetpw" data-id="${w.id}">관리자 비밀번호 초기화</button><button class="btn btn-sm btn-ghost" data-act="adm-ws" data-op="suspend" data-id="${w.id}">이용 중지</button>`:""}
-          ${w.status==="suspended"?`<button class="btn btn-sm" data-act="adm-ws" data-op="activate" data-id="${w.id}">이용 재개</button>`:""}
-          <button class="btn btn-sm btn-danger" data-act="adm-ws" data-op="delete" data-id="${w.id}">삭제</button>
-        </div>`}
-      </div>`).join("")||`<div class="empty">아직 승인된 워크스페이스가 없습니다.</div>`}
-    </div>
-    <div class="card">
-      <h2>가입 안내</h2>
-      <div style="font-size:13.5px;color:var(--sub);line-height:1.75">새 사용자는 <b class="mono">${esc(location.origin)}</b> 첫 화면의 <b>회원가입</b>에서 워크스페이스 개설을 신청합니다. 신청이 들어오면 홈 브리핑과 이 화면에 표시되고, 승인하는 즉시 신청자가 같은 아이디로 로그인할 수 있습니다.</div>
-      <div style="margin-top:12px"><button class="btn btn-sm" data-act="adm-copy-link">가입 안내 문구 복사</button></div>
-    </div>
-  </div>`;
-}
+function vAdmin(){return"";}   // 총괄관리 화면은 ADM 모듈이 그립니다 (admin.js)
+function loadAdmin(force){ADM.refresh(force);}
 
 /* ═══════════ 연동·데이터 ═══════════ */
 const CLAUDE_PROMPT=`지금까지 이 대화에서 논의한 내용을 마이웍스 업무 파일로 정리해줘.
@@ -2966,6 +3069,7 @@ function settingsModal(){
     <div><input id="set-pw0" type="password" placeholder="현재 비밀번호" autocomplete="current-password"></div>
     <div><input id="set-pw1" type="password" placeholder="새 비밀번호 (${MODE==="cloud"?6:4}자 이상)" autocomplete="new-password"></div>
   </div>
+  ${MODE==="cloud"?`<div class="set-help"><span>쓰다가 막히거나 오류가 보이면</span><button class="btn btn-sm" data-fb="open">운영자에게 문의</button></div>`:""}
   ${isAdmin()?`<div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--line-soft)"><label style="color:var(--late);margin-top:0">초기화</label><div style="font-size:12.5px;color:var(--faint);margin-bottom:8px">${MODE==="cloud"?"프로젝트·매장·업무·재무·플랜 기록과 스페이스의 예약·청소 기록을 모두 지웁니다. 구성원 계정, 운영 시간, 공통 체크리스트는 남습니다. 반드시 백업 후 진행하세요.":"모든 데이터를 지우고 처음 상태로 되돌립니다. 반드시 백업 후 진행하세요."}</div><button class="btn btn-sm btn-danger" data-act="set-reset">${MODE==="cloud"?"업무 데이터 초기화":"전체 초기화"}</button></div>`:""}
   <div class="m-foot"><button class="btn btn-ghost" data-g="modal-close">취소</button><button class="btn btn-pri" data-act="set-save">저장</button></div>`);
 }
@@ -5420,6 +5524,676 @@ function weekText(s0,s1){
 return{view,fillDash,onVersion,reset,refresh,weekText};
 })();
 
+/* ═══════════ 총괄관리 — 운영자 전용 (현황 · 워크스페이스 · 가입·베타 · 결제·매출 · 문의 · 공지 · 기록 · 오픈 준비) ═══════════
+   워크스페이스의 업무 내용은 다루지 않습니다. 계정 목록과 기록 개수까지만 봅니다.
+   모든 구성원이 쓰는 '운영자에게 문의'와 화면 위 공지 띠도 여기서 그립니다. */
+const ADM=(()=>{
+const A={ov:null,at:0,loading:null,codes:null,pays:null,payYm:"",fb:null,ann:null,logs:null,launch:null,detail:{},busy:false};
+const U={tab:"",q:"",st:"all",pl:"all",sort:"recent",fbF:"new"};
+const TABS=[["","현황"],["ws","워크스페이스"],["signup","가입·베타"],["pay","결제·매출"],["fb","문의"],["ann","공지"],["log","기록"],["launch","오픈 준비"]];
+const POL={approve:["승인제","신청을 받고 운영자가 승인하면 열립니다. 베타 코드가 있으면 바로 열립니다."],code:["베타 코드 전용","베타 코드가 있어야 신청할 수 있습니다. 비공개 베타 기간에 씁니다."],open:["자동 개설","누구나 가입하면 바로 열립니다. 정식 오픈 뒤에 씁니다."],closed:["신청 마감","새 워크스페이스 신청을 받지 않습니다. 기존 워크스페이스의 팀원 초대는 그대로 됩니다."]};
+const FB_KIND={error:["오류","p-red"],inconvenient:["불편","p-amber"],idea:["제안","p-blue"],billing:["결제·요금","p-green"],etc:["기타","p-gray"]};
+const FB_ST={new:["새 문의","p-red"],doing:["처리 중","p-amber"],done:["완료","p-green"]};
+const ANN_LV={info:["안내","p-blue"],important:["중요","p-red"],maint:["점검","p-amber"]};
+const LOG_LB={approve:"개설 승인",reject:"신청 반려",suspend:"이용 중지",activate:"이용 재개",delete:"워크스페이스 삭제",resetpw:"비밀번호 초기화",plan:"등급·모듈",note:"운영 메모",extend:"기한 연장","pay-add":"결제 기록","pay-edit":"결제 수정","pay-delete":"결제 삭제","code-add":"베타 코드","code-toggle":"베타 코드","code-delete":"베타 코드",fb:"문의",ann:"공지",settings:"플랫폼 설정","err-clear":"오류 기록",export:"전체 백업","auto-open":"바로 개설"};
+const PAY_ITEMS=["프로 1개월","프로 1년","프로 + 스페이스 1개월","프로 + 커머스 1개월","프로 + 아웃소싱 1개월","추가 좌석","기타"];
+const fmt=n=>Math.round(Number(n)||0).toLocaleString("ko-KR");
+const onPage=()=>/^#\/admin(\/|$)/.test(location.hash);
+const usable=()=>MODE==="cloud"&&!!CLOUD.owner;
+const pillOf=(map,k)=>{const x=map[k]||[k,"p-gray"];return`<span class="pill ${x[1]}">${esc(x[0])}</span>`;};
+const ERR={forbidden:"운영자만 쓸 수 있습니다.","not-found":"대상을 찾을 수 없습니다. 새로고침 후 다시 시도하세요.",unlimited:"기한 없는 프로입니다. 기한을 정하려면 등급·모듈에서 날짜를 넣으세요.","bad-period":"기간의 끝이 시작보다 빠릅니다.",taken:"이미 있는 코드입니다. 다른 코드를 넣으세요.","bad-code":"코드는 영문·숫자 4자 이상으로 넣으세요.","bad-request":"입력한 내용을 다시 확인하세요."};
+const failToast=e=>{if(!e||e.code==="unauthorized")return;toast(ERR[e.code]||"처리하지 못했습니다. 잠시 후 다시 시도하세요.");};
+const ws=()=>(A.ov&&A.ov.workspaces)||[];
+const wsById=id=>ws().find(w=>w.id===id)||null;
+const PL=()=>(A.ov&&A.ov.platform)||{signup:"approve",newPlan:{plan:"basic",days:0,modules:[]},contact:"",prices:{pro:12000,space:19000,outsourcing:0,commerce:19000,seat:4900}};
+const daysLeft=d=>d?dday(d):null;
+const modTxt=m=>(m||[]).map(x=>MOD_LABEL[x]||x).join(", ");
+const tierTxt=(plan,days,mods)=>plan==="pro"?`프로${days?` ${days}일`:" (기한 없음)"}${(mods||[]).length?` + ${modTxt(mods)}`:""}`:"베이직";
+function mrrOf(w){const p=PL().prices;if(w.status!=="active"||w.planNow!=="pro"||w.comp||w.mine)return 0;return p.pro+(w.modules||[]).reduce((s,m)=>s+(Number(p[m])||0),0);}
+function lastActive(w){return w.lastSeen||w.lastActive||"";}
+function active7(w){const t=Date.parse(lastActive(w));return t&&Date.now()-t<7*864e5;}
+
+/* ── 서버 ── */
+async function load(force){
+  if(!usable())return;
+  if(A.loading){try{await A.loading;}catch(e){}if(!force)return;}
+  if(!force&&A.ov&&Date.now()-A.at<10000)return;
+  A.loading=api("admin/overview").then(res=>{
+    A.ov=res;A.at=Date.now();ADMIN=res;ADMIN_AT=A.at;
+    const p=res.workspaces.filter(w=>w.status==="pending").length,f=res.summary.fbNew||0;
+    if((CLOUD.badges.pendingWs||0)!==p||(CLOUD.badges.fbNew||0)!==f){CLOUD.badges.pendingWs=p;CLOUD.badges.fbNew=f;renderNav();}
+  });
+  try{await A.loading;}catch(e){failToast(e);}finally{A.loading=null;}
+  if(onPage())paint();
+}
+async function loadTab(t,force){
+  try{
+    if(t==="signup"&&(force||!A.codes))A.codes=(await api("admin/codes",{op:"list"})).codes;
+    if(t==="pay"&&(force||!A.pays))A.pays=(await api("admin/pay",{op:"list",ym:A.payYm})).payments;
+    if(t==="fb"&&(force||!A.fb))A.fb=(await api("admin/fb",{op:"list"})).items;
+    if(t==="ann"&&(force||!A.ann))A.ann=(await api("admin/ann",{op:"list"})).items;
+    if(t==="log"&&(force||!A.logs))A.logs=await api("admin/logs",{op:"list"});
+    if(t==="launch"&&(force||!A.launch))A.launch=await api("admin/launch",{op:"get"});
+  }catch(e){failToast(e);}
+  if(onPage()&&U.tab===t)paint();
+}
+function refresh(force){load(force).then(()=>{if(U.tab)loadTab(U.tab,true);});}
+
+/* ── 화면 ── */
+function view(arg){
+  if(!usable()){go("#/dashboard");return;}
+  U.tab=TABS.some(t=>t[0]===arg)?arg:"";
+  $("#view").innerHTML=`
+  <div class="page-head adm-head">
+    <div><h1><span class="bars"></span>총괄관리</h1><div class="desc">마이웍스 플랫폼 전체를 운영합니다. 각 워크스페이스의 업무 내용은 운영자에게도 보이지 않습니다.</div></div>
+    <button class="btn btn-sm" data-adm="refresh">새로고침</button>
+  </div>
+  <nav class="sp-tabs adm-tabs">${TABS.map(([k,l])=>`<button data-adm="tab" data-v="${k}" class="${U.tab===k?"on":""}">${l}${tabBadge(k)}</button>`).join("")}</nav>
+  <div id="adm-body">${A.ov?body():`<div class="card"><div class="empty">불러오는 중…</div></div>`}</div>`;
+  load(false);if(U.tab)loadTab(U.tab,false);
+}
+function tabBadge(k){
+  if(!A.ov)return"";const s=A.ov.summary;
+  const n=k==="signup"?ws().filter(w=>w.status==="pending").length:k==="fb"?s.fbNew:k==="log"?s.err24:0;
+  return n?`<b class="nbadge">${n}</b>`:"";
+}
+function paint(){
+  const el=$("#adm-body");if(!el)return;
+  const ae=document.activeElement;
+  if(ae&&el.contains(ae)&&ae.matches("textarea,input:not([type=checkbox]):not([type=radio])")&&ae.id!=="adm-q"){A.dirty=true;return;}   // 입력 중이면 다시 그리지 않습니다
+  const keep=ae&&ae.id==="adm-q"?ae.selectionStart:null;
+  A.dirty=false;el.innerHTML=body();
+  $$(".adm-tabs button").forEach(b=>{b.innerHTML=(TABS.find(t=>t[0]===b.dataset.v)||["",""])[1]+tabBadge(b.dataset.v);});
+  if(keep!==null){const q=$("#adm-q");if(q){q.focus();try{q.setSelectionRange(keep,keep);}catch(x){}}}
+}
+function body(){
+  if(!A.ov)return`<div class="card"><div class="empty">불러오는 중…</div></div>`;
+  return({"":vHome,ws:vWs,signup:vSignup,pay:vPay,fb:vFb,ann:vAnn,log:vLog,launch:vLaunch}[U.tab]||vHome)();
+}
+const loadingCard=`<div class="card"><div class="empty">불러오는 중…</div></div>`;
+
+/* 현황 */
+function vHome(){
+  const W=ws(),s=A.ov.summary,act=W.filter(w=>w.status==="active");
+  const pend=W.filter(w=>w.status==="pending");
+  const pro=act.filter(w=>w.planNow==="pro"),paid=pro.filter(w=>!w.comp&&!w.mine);
+  const mrr=act.reduce((a,w)=>a+mrrOf(w),0);
+  const soon=act.filter(w=>w.planNow==="pro"&&w.planUntil&&daysLeft(w.planUntil)!==null&&daysLeft(w.planUntil)<=7);
+  const lapsed=W.filter(w=>w.status==="active"&&w.plan==="pro"&&w.planNow!=="pro");
+  const ym=todayStr().slice(0,7),newM=W.filter(w=>w.status!=="rejected"&&(w.createdAt||"").slice(0,7)===ym).length;
+  const L=launchStat();
+  const backupOld=!s.lastExport||Date.now()-Date.parse(s.lastExport)>30*864e5;
+  const todo=[];
+  if(pend.length)todo.push(["p-red","가입 신청",`새 워크스페이스 개설 신청 ${pend.length}건`,"signup","확인"]);
+  if(s.fbNew)todo.push(["p-red","문의",`새 문의 ${s.fbNew}건${s.fbDoing?` · 처리 중 ${s.fbDoing}건`:""}`,"fb","답변"]);
+  if(soon.length)todo.push(["p-amber","기한 임박",`프로 기한이 7일 안에 끝나는 곳 ${soon.length}곳 — ${soon.slice(0,3).map(w=>esc(w.name)).join(", ")}`,"pay","결제·연장"]);
+  if(lapsed.length)todo.push(["p-amber","기한 만료",`프로 기한이 지나 베이직 규칙으로 돌아간 곳 ${lapsed.length}곳`,"pay","확인"]);
+  if(s.err24)todo.push(["p-red","서버 오류",`지난 24시간 서버 오류 ${s.err24}건`,"log","보기"]);
+  if(L.total&&L.done<L.total)todo.push(["p-blue","오픈 준비",`${L.total}개 중 ${L.done}개 완료`,"launch","이어서"]);
+  if(backupOld)todo.push(["p-gray","백업",s.lastExport?`마지막 전체 백업 ${fmtWhen(s.lastExport)} — 30일이 지났습니다`:"아직 전체 백업을 내려받지 않았습니다","launch","백업"]);
+  // 주별 가입 추이 (8주)
+  const weeks=[];for(let i=7;i>=0;i--){const st=addDaysStr(mondayOf(todayStr()),-7*i),en=addDaysStr(st,7);weeks.push({st,n:W.filter(w=>w.status!=="rejected"&&(w.createdAt||"").slice(0,10)>=st&&(w.createdAt||"").slice(0,10)<en).length});}
+  const mx=Math.max(1,...weeks.map(x=>x.n));
+  const modUse=MOD_ROUTES.map(m=>[m,pro.filter(w=>(w.modules||[]).includes(m)).length]);
+  const tot=k=>W.reduce((a,w)=>a+((w.usage||{})[k]||0),0);
+  return`
+  <div class="stats adm-stats">
+    ${stat(act.length,"곳","이용 중 워크스페이스",`최근 7일 활동 ${act.filter(active7).length}곳`)}
+    ${stat(pend.length,"건","승인 대기","",pend.length>0)}
+    ${stat(pro.length,"곳","프로",`유료 ${paid.length} · 무료·운영자 ${pro.length-paid.length}`)}
+    ${stat(fmt(mrr),"원","예상 월 정기 매출","가격표 기준 · 무료 제공 제외")}
+    ${stat(fmt(s.payMonth),"원","이번 달 입금",`지난달 ${fmt(s.payPrev)}원`)}
+    ${stat(s.fbNew,"건","새 문의","",s.fbNew>0)}
+    ${stat(s.accounts,"명","전체 계정",`이번 달 신규 워크스페이스 ${newM}곳`)}
+    ${stat(s.err24,"건","서버 오류 (24시간)","",s.err24>0)}
+  </div>
+  <div class="adm-grid">
+    <div class="card">
+      <h2><span class="bars"></span>지금 처리할 것 <span class="cnt">${todo.length}건</span></h2>
+      ${todo.length?todo.map(t=>`<div class="dec-row"><span class="pill ${t[0]}">${t[1]}</span><span class="dt">${t[2]}</span><span class="da"><button class="btn btn-sm" data-adm="tab" data-v="${t[3]}">${t[4]}</button></span></div>`).join(""):`<div class="empty" style="padding:22px 10px">지금 처리할 일이 없습니다.</div>`}
+    </div>
+    <div class="card">
+      <h2>가입 추이 <span class="cnt">주별 · 최근 8주</span></h2>
+      <div class="adm-bars">${weeks.map(x=>`<div class="ab"><span class="ab-n">${x.n||""}</span><i style="height:${Math.round(x.n/mx*100)}%"></i><span class="ab-l">${Number(x.st.slice(5,7))}/${Number(x.st.slice(8))}</span></div>`).join("")}</div>
+      <div class="adm-kv">
+        ${modUse.map(([m,n])=>`<div><span>${MOD_LABEL[m]} 사용</span><b>${n}곳</b></div>`).join("")}
+        <div><span>프로젝트 · 업무</span><b>${fmt(tot("project"))} · ${fmt(tot("task"))}</b></div>
+        <div><span>예약 · 외주 안건 · 주문</span><b>${fmt(tot("res"))} · ${fmt(tot("job"))} · ${fmt(tot("order"))}</b></div>
+      </div>
+    </div>
+  </div>
+  <div class="card" style="margin-top:14px">
+    <h2>최근 운영 기록 <button class="btn btn-sm btn-ghost adm-h-btn" data-adm="tab" data-v="log">전체 보기</button></h2>
+    ${(A.ov.log||[]).length?logRows(A.ov.log):`<div class="empty" style="padding:18px">아직 기록이 없습니다.</div>`}
+  </div>`;
+}
+function stat(n,unit,lb,sub,warn){return`<div class="stat ${warn?"warn":""}"><div class="s-num">${n}<em>${unit}</em></div><div class="s-lb">${lb}</div>${sub?`<div class="s-sub">${sub}</div>`:""}</div>`;}
+function logRows(list){return`<div class="adm-log">${list.map(l=>`<div class="lg"><span class="lg-t mono">${fmtWhen(l.at)}</span><span class="pill p-gray">${esc(LOG_LB[l.action]||l.action)}</span><span class="lg-d">${l.ws_name?`<b>${esc(l.ws_name)}</b> `:""}${esc(l.detail||"")}</span></div>`).join("")}</div>`;}
+
+/* 워크스페이스 */
+function filtered(){
+  const q=norm(U.q);
+  let L=ws().filter(w=>U.st==="all"||w.status===U.st);
+  if(U.pl==="pro")L=L.filter(w=>w.planNow==="pro"&&!w.comp);
+  else if(U.pl==="basic")L=L.filter(w=>w.planNow!=="pro");
+  else if(U.pl==="comp")L=L.filter(w=>w.comp);
+  else if(U.pl==="lapsed")L=L.filter(w=>w.plan==="pro"&&w.planNow!=="pro");
+  else if(U.pl==="soon")L=L.filter(w=>w.planNow==="pro"&&w.planUntil&&daysLeft(w.planUntil)<=14);
+  if(q)L=L.filter(w=>norm([w.name,w.adminName,w.adminLogin,w.contact,w.opNote].join(" ")).includes(q));
+  const by={recent:(a,b)=>lastActive(b).localeCompare(lastActive(a)),created:(a,b)=>(b.createdAt||"").localeCompare(a.createdAt||""),name:(a,b)=>a.name.localeCompare(b.name,"ko"),members:(a,b)=>b.members-a.members}[U.sort];
+  return L.sort(by);
+}
+function vWs(){
+  const W=ws(),L=filtered(),cnt=st=>W.filter(w=>st==="all"||w.status===st).length;
+  return`
+  <div class="card adm-filters">
+    <input id="adm-q" data-adm-in="q" value="${esc(U.q)}" placeholder="이름 · 관리자 · 아이디 · 연락처 · 메모 검색">
+    <div class="adm-chips">${[["all","전체"],["active","이용 중"],["pending","승인 대기"],["suspended","이용 중지"],["rejected","반려"]].map(([k,l])=>`<button class="fchip ${U.st===k?"on":""}" data-adm="st" data-v="${k}">${l} <em>${cnt(k)}</em></button>`).join("")}</div>
+    <div class="adm-sel">
+      <select data-adm-in="pl">${[["all","모든 등급"],["pro","프로 (유료)"],["basic","베이직"],["comp","무료 제공"],["soon","기한 14일 이내"],["lapsed","기한 만료"]].map(([k,l])=>`<option value="${k}" ${U.pl===k?"selected":""}>${l}</option>`).join("")}</select>
+      <select data-adm-in="sort">${[["recent","최근 활동순"],["created","개설일순"],["name","이름순"],["members","구성원 많은순"]].map(([k,l])=>`<option value="${k}" ${U.sort===k?"selected":""}>${l}</option>`).join("")}</select>
+    </div>
+  </div>
+  <div class="card" id="adm-wslist">${wsList(L)}</div>`;
+}
+function wsList(L){return`<h2><span class="bars"></span>워크스페이스 <span class="cnt">${L.length}곳</span></h2>${L.length?L.map(wsRow).join(""):`<div class="empty">조건에 맞는 워크스페이스가 없습니다.</div>`}`;}
+function wsRow(w){
+  const u=w.usage||{},left=w.planUntil?daysLeft(w.planUntil):null;
+  return`<div class="ws-row">
+    <div class="w-info">
+      <div class="w-nm"><button class="adm-link" data-adm="detail" data-id="${w.id}">${esc(w.name)}</button>${w.mine?`<span class="own-badge">운영자</span>`:""}${wsPill(w.status)}<span class="pill ${w.planNow==="pro"?"p-red":"p-gray"}">${w.planNow==="pro"?"프로":"베이직"}</span>${w.comp?`<span class="pill p-green">무료 제공</span>`:""}${w.plan==="pro"&&w.planNow!=="pro"?`<span class="pill p-amber">기한 만료</span>`:left!==null&&left<=7&&w.planNow==="pro"?`<span class="pill p-amber">D-${left}</span>`:""}</div>
+      <div class="w-sub">관리자 ${esc(w.adminName||"-")} · <span class="mono">${esc(w.adminLogin||"-")}</span>${w.contact?` · ${esc(w.contact)}`:""}</div>
+      <div class="w-sub">구성원 ${w.members}명 · 최근 활동 ${lastActive(w)?fmtWhen(lastActive(w)):"없음"} · 개설 ${fmtWhen(w.approvedAt||w.createdAt)}${w.planUntil?` · 프로 ~${esc(w.planUntil)}`:""}${(w.modules||[]).length?` · ${esc(modTxt(w.modules))}`:""}</div>
+      ${w.status==="active"?`<div class="w-sub">프로젝트 ${u.project||0} · 업무 ${u.task||0} · 매장 ${u.store||0} · 연락처 ${u.contact||0}${u.res?` · 예약 ${u.res}`:""}${u.job?` · 안건 ${u.job}`:""}${u.order?` · 주문 ${u.order}`:""}</div>`:""}
+      ${w.status==="pending"&&w.note?`<div class="r-note">${esc(w.note)}</div>`:""}
+      ${w.opNote?`<div class="r-note adm-memo">메모 · ${esc(w.opNote)}</div>`:""}
+    </div>
+    <div class="w-acts">
+      ${w.status==="pending"?`<button class="btn btn-sm btn-pri" data-act="adm-ws" data-op="approve" data-id="${w.id}">승인</button><button class="btn btn-sm btn-ghost" data-act="adm-ws" data-op="reject" data-id="${w.id}">반려</button>`:`<button class="btn btn-sm" data-adm="detail" data-id="${w.id}">상세</button><button class="btn btn-sm" data-act="adm-plan" data-id="${w.id}">등급·모듈</button>`}
+    </div>
+  </div>`;
+}
+async function detail(id){
+  const w=wsById(id);if(!w)return;
+  openModal(`<div class="adm-wide"><h2><span class="bars"></span>${esc(w.name)}</h2><div class="empty">불러오는 중…</div></div>`);
+  let d;try{d=await api("admin/ws-detail",{id});}catch(e){closeModal();failToast(e);return;}
+  A.detail[id]=d;
+  if(!$("#m-box .adm-wide"))return;
+  const u=w.usage||{};
+  $("#m-box").innerHTML=`<div class="adm-wide">
+    <h2><span class="bars"></span>${esc(w.name)} ${wsPill(w.status)}${w.mine?`<span class="own-badge">운영자</span>`:""}</h2>
+    <div class="adm-dgrid">
+      <div class="adm-sec">
+        <h3>등급</h3>
+        <div class="adm-kv">
+          <div><span>지금 등급</span><b>${w.planNow==="pro"?"프로":"베이직"}${w.plan==="pro"&&w.planNow!=="pro"?" (기한 만료)":""}</b></div>
+          <div><span>프로 기한</span><b>${w.plan==="pro"?(w.planUntil?esc(w.planUntil)+(daysLeft(w.planUntil)>=0?` · D-${daysLeft(w.planUntil)}`:""):"기한 없음"):"-"}</b></div>
+          <div><span>모듈</span><b>${esc(modTxt(w.modules)||"-")}</b></div>
+          <div><span>예상 월 이용료</span><b>${w.mine?"운영자 워크스페이스":w.comp?"무료 제공":fmt(mrrOf(w))+"원"}</b></div>
+        </div>
+        <div class="adm-acts"><button class="btn btn-sm" data-act="adm-plan" data-id="${w.id}">등급·모듈</button><button class="btn btn-sm" data-adm="extend" data-id="${w.id}" data-days="31">+1개월</button><button class="btn btn-sm" data-adm="extend" data-id="${w.id}" data-days="365">+1년</button><button class="btn btn-sm btn-ghost" data-adm="pay-new" data-id="${w.id}">결제 기록 추가</button></div>
+      </div>
+      <div class="adm-sec">
+        <h3>기본 정보</h3>
+        <div class="adm-kv">
+          <div><span>관리자</span><b>${esc(w.adminName||"-")} <span class="mono">${esc(w.adminLogin||"")}</span></b></div>
+          <div><span>연락처</span><b>${esc(w.contact||"-")}</b></div>
+          <div><span>개설</span><b>${fmtWhen(w.approvedAt||w.createdAt)}</b></div>
+          <div><span>최근 활동</span><b>${lastActive(w)?fmtWhen(lastActive(w)):"없음"} · 7일 안 접속 ${d.active7}명</b></div>
+        </div>
+        ${w.note?`<div class="r-note">가입 목적 · ${esc(w.note)}</div>`:""}
+      </div>
+    </div>
+    <div class="adm-sec">
+      <h3>운영 메모 <span class="hint">운영자에게만 보입니다</span></h3>
+      <textarea id="adm-note" maxlength="1000" style="min-height:64px" placeholder="예: 쏘플 지인 소개 · 11월 베타 참여 · 매달 말일 계좌이체">${esc(w.opNote||"")}</textarea>
+      <div class="adm-row"><label class="adm-check"><input type="checkbox" id="adm-comp" ${w.comp?"checked":""}> 무료 제공 (예상 매출에서 뺍니다)</label><button class="btn btn-sm btn-pri" data-adm="note-save" data-id="${w.id}">메모 저장</button></div>
+    </div>
+    <div class="adm-sec">
+      <h3>계정 <span class="cnt">${d.accounts.length}명</span></h3>
+      <div class="tblwrap"><table class="tbl"><thead><tr><th>이름</th><th>아이디</th><th>역할</th><th>상태</th><th>최근 로그인</th></tr></thead><tbody>
+      ${d.accounts.map(a=>`<tr><td>${esc(a.name)}${a.owner?` <span class="own-badge">운영자</span>`:""}</td><td class="mono">${esc(a.loginId)}</td><td>${esc(ROLES[a.role]||a.role)}</td><td>${{active:"사용",disabled:"비활성",pending:"승인 대기",rejected:"반려"}[a.status]||esc(a.status)}</td><td>${a.lastLogin?fmtWhen(a.lastLogin):"-"}</td></tr>`).join("")}
+      </tbody></table></div>
+    </div>
+    <div class="adm-dgrid">
+      <div class="adm-sec">
+        <h3>사용 현황 <span class="hint">개수만 표시</span></h3>
+        <div class="adm-kv">
+          <div><span>프로젝트 · 업무</span><b>${u.project||0} · ${u.task||0}</b></div>
+          <div><span>매장 · 연락처 · 재무 기록</span><b>${u.store||0} · ${u.contact||0} · ${u.fin||0}</b></div>
+          <div><span>예약 · 외주 안건 · 주문</span><b>${u.res||0} · ${u.job||0} · ${u.order||0}</b></div>
+          <div><span>확인 링크 (처리/발행)</span><b>${d.links.length?d.links.map(l=>`${{quote:"견적",delivery:"납품",invoice:"청구"}[l.kind]||esc(l.kind)} ${l.used}/${l.n}`).join(" · "):"-"}</b></div>
+        </div>
+      </div>
+      <div class="adm-sec">
+        <h3>AI 토큰 <span class="cnt">${d.tokens.filter(t=>!t.revoked).length}개 사용 중</span></h3>
+        ${d.tokens.length?`<div class="adm-kv">${d.tokens.slice(0,6).map(t=>`<div><span>${esc(t.name||"이름 없음")} · ${t.scope==="write"?"쓰기":"읽기"}${t.revoked?" · 회수":""}</span><b>${t.lastUsed?fmtWhen(t.lastUsed):"사용 안 함"}</b></div>`).join("")}</div>`:`<div class="hint">발급한 토큰이 없습니다.</div>`}
+      </div>
+    </div>
+    <div class="adm-sec">
+      <h3>결제 기록 <span class="cnt">${d.payments.length}건 · ${fmt(d.payments.reduce((a,p)=>a+p.amount,0))}원</span></h3>
+      ${d.payments.length?payTable(d.payments,false):`<div class="hint">아직 결제 기록이 없습니다.</div>`}
+    </div>
+    ${w.mine?"":`<div class="adm-sec adm-danger"><h3>관리</h3><div class="adm-acts">
+      ${w.status==="active"?`<button class="btn btn-sm" data-act="adm-ws" data-op="resetpw" data-id="${w.id}">관리자 비밀번호 초기화</button><button class="btn btn-sm btn-ghost" data-act="adm-ws" data-op="suspend" data-id="${w.id}">이용 중지</button>`:""}
+      ${w.status==="suspended"?`<button class="btn btn-sm" data-act="adm-ws" data-op="activate" data-id="${w.id}">이용 재개</button>`:""}
+      <button class="btn btn-sm btn-danger" data-act="adm-ws" data-op="delete" data-id="${w.id}">워크스페이스 삭제</button></div></div>`}
+    <div class="m-foot"><button class="btn btn-ghost" data-g="modal-close">닫기</button></div>
+  </div>`;
+}
+
+/* 가입·베타 */
+function vSignup(){
+  const p=PL(),pend=ws().filter(w=>w.status==="pending");
+  return`
+  <div class="card">
+    <h2><span class="bars"></span>승인 대기 <span class="cnt">${pend.length}건</span></h2>
+    ${pend.length?pend.map(wsRow).join(""):`<div class="empty" style="padding:20px 10px">대기 중인 가입 신청이 없습니다.</div>`}
+  </div>
+  <div class="card" style="margin-top:14px">
+    <h2><span class="bars"></span>가입 방식</h2>
+    <div class="adm-pol">${Object.entries(POL).map(([k,[t,d]])=>`<label class="adm-opt ${p.signup===k?"on":""}"><input type="radio" name="adm-pol" value="${k}" ${p.signup===k?"checked":""}><span><b>${t}</b><em>${d}</em></span></label>`).join("")}</div>
+    <h3 class="adm-h3">새 워크스페이스 시작 등급 <span class="hint">승인하거나 자동 개설할 때 적용 · 베타 코드가 있으면 코드에 정한 등급이 우선</span></h3>
+    <div class="adm-form">
+      <div><label>등급</label><select id="adm-np-plan"><option value="basic" ${p.newPlan.plan!=="pro"?"selected":""}>베이직 (무료)</option><option value="pro" ${p.newPlan.plan==="pro"?"selected":""}>프로 체험</option></select></div>
+      <div><label>체험 기간 (일, 0이면 기한 없음)</label><input id="adm-np-days" type="number" min="0" max="3650" value="${p.newPlan.days||0}"></div>
+      <div class="full"><label>체험에 켤 모듈</label><div class="adm-mods">${MOD_ROUTES.map(m=>`<label class="adm-check"><input type="checkbox" class="adm-np-mod" value="${m}" ${(p.newPlan.modules||[]).includes(m)?"checked":""}> ${MOD_LABEL[m]}</label>`).join("")}</div></div>
+      <div class="full"><label>고객 문의 연락처 <span class="hint">가입 화면과 문의 창에 보입니다</span></label><input id="adm-contact" maxlength="80" value="${esc(p.contact||"")}" placeholder="예: help@myworks.kr 또는 카카오톡 채널 주소"></div>
+    </div>
+    <div class="adm-row"><span class="hint">가입 주소: <b class="mono">${esc(location.origin)}/app/#signup</b></span><button class="btn btn-pri btn-sm" data-adm="settings-save">가입 설정 저장</button></div>
+  </div>
+  <div class="card" style="margin-top:14px">
+    <h2><span class="bars"></span>베타 코드 <span class="cnt">${A.codes?A.codes.length+"개":""}</span></h2>
+    <div class="hint" style="margin-bottom:12px">코드를 넣고 가입하면 승인 없이 바로 열리고, 코드에 정한 등급으로 시작합니다. 사용 횟수와 만료일로 범위를 정하세요.</div>
+    <div class="adm-form">
+      <div><label>코드 이름</label><input id="adm-c-label" maxlength="60" placeholder="예: 11월 1차 베타 · 건물주 모임"></div>
+      <div><label>코드 직접 정하기 <span class="hint">(선택)</span></label><input id="adm-c-code" maxlength="16" placeholder="비우면 자동 생성" style="text-transform:uppercase;font-family:var(--mono)"></div>
+      <div><label>등급</label><select id="adm-c-plan"><option value="pro">프로</option><option value="basic">베이직</option></select></div>
+      <div><label>프로 기간 (일, 0이면 기한 없음)</label><input id="adm-c-days" type="number" min="0" max="3650" value="90"></div>
+      <div class="full"><label>켤 모듈</label><div class="adm-mods">${MOD_ROUTES.map(m=>`<label class="adm-check"><input type="checkbox" class="adm-c-mod" value="${m}"> ${MOD_LABEL[m]}</label>`).join("")}</div></div>
+      <div><label>최대 사용 횟수 (0이면 제한 없음)</label><input id="adm-c-max" type="number" min="0" value="20"></div>
+      <div><label>만료일 <span class="hint">(선택)</span></label><input id="adm-c-exp" type="date"></div>
+    </div>
+    <div class="adm-row"><span></span><button class="btn btn-pri btn-sm" data-adm="code-add">코드 만들기</button></div>
+    ${!A.codes?`<div class="empty">불러오는 중…</div>`:A.codes.length?`<div class="tblwrap" style="margin-top:12px"><table class="tbl"><thead><tr><th>코드</th><th>이름</th><th>등급</th><th class="r">사용</th><th>만료</th><th>상태</th><th></th></tr></thead><tbody>
+      ${A.codes.map(c=>`<tr><td class="mono nw"><b>${esc(c.code)}</b></td><td class="adm-item">${esc(c.label||"-")}</td><td class="adm-item">${esc(tierTxt(c.plan,c.days,c.modules))}</td><td class="r mono nw">${c.uses}${c.maxUses?" / "+c.maxUses:""}</td><td class="nw">${c.expires?fmtD(c.expires):"-"}</td><td class="nw">${c.usable?`<span class="pill p-green">사용 가능</span>`:c.active?`<span class="pill p-gray">소진·만료</span>`:`<span class="pill p-gray">중지</span>`}</td>
+      <td class="adm-tacts"><button class="btn btn-sm" data-adm="code-copy" data-v="${esc(c.code)}">안내 문구 복사</button><button class="btn btn-sm btn-ghost" data-adm="code-toggle" data-v="${esc(c.code)}" data-on="${c.active?0:1}">${c.active?"중지":"다시 사용"}</button><button class="btn btn-sm btn-ghost" data-adm="code-del" data-v="${esc(c.code)}">삭제</button></td></tr>`).join("")}
+    </tbody></table></div>`:`<div class="empty" style="padding:18px">아직 만든 코드가 없습니다.</div>`}
+  </div>`;
+}
+
+/* 결제·매출 */
+function payTable(list,editable){
+  return`<div class="tblwrap"><table class="tbl"><thead><tr><th>입금일</th>${editable?"<th>워크스페이스</th>":""}<th>항목</th><th>기간</th><th>방법</th><th>세금계산서</th><th class="r">금액</th>${editable?"<th></th>":""}</tr></thead><tbody>
+  ${list.map(p=>`<tr><td class="nw">${fmtD(p.paidAt)}</td>${editable?`<td>${p.ws&&wsById(p.ws)?`<button class="adm-link" data-adm="detail" data-id="${p.ws}">${esc(p.wsName)}</button>`:esc(p.wsName||"-")}</td>`:""}<td class="adm-item">${esc(p.item||"-")}${p.memo?`<div class="hint">${esc(p.memo)}</div>`:""}</td><td class="nw">${p.from||p.to?`${fmtD(p.from)} ~ ${fmtD(p.to)}`:"-"}</td><td class="nw">${esc(p.method||"-")}</td><td class="nw">${p.invoice?"발행":"-"}</td><td class="r mono">${fmt(p.amount)}</td>${editable?`<td class="adm-tacts"><button class="btn btn-sm btn-ghost" data-adm="pay-edit" data-id="${p.id}">수정</button><button class="btn btn-sm btn-ghost" data-adm="pay-del" data-id="${p.id}">삭제</button></td>`:""}</tr>`).join("")}
+  ${editable&&list.length?`<tr class="sum"><td colspan="6">합계 ${list.length}건</td><td class="r mono">${fmt(list.reduce((a,p)=>a+p.amount,0))}</td><td></td></tr>`:""}
+  </tbody></table></div>`;
+}
+function vPay(){
+  const s=A.ov.summary,W=ws(),p=PL().prices;
+  const act=W.filter(w=>w.status==="active");
+  const mrr=act.reduce((a,w)=>a+mrrOf(w),0),payers=act.filter(w=>mrrOf(w)>0).length;
+  const due=W.filter(w=>w.status==="active"&&w.plan==="pro"&&w.planUntil&&daysLeft(w.planUntil)<=14).sort((a,b)=>a.planUntil.localeCompare(b.planUntil));
+  const ymLabel=A.payYm?monLabel(A.payYm):"전체 기간";
+  return`
+  <div class="stats adm-stats">
+    ${stat(fmt(s.payMonth),"원","이번 달 입금")}
+    ${stat(fmt(s.payPrev),"원","지난달 입금")}
+    ${stat(fmt(s.payYear),"원","올해 누적 입금")}
+    ${stat(fmt(mrr),"원","예상 월 정기 매출",`유료 프로 ${payers}곳 · 가격표 기준`)}
+  </div>
+  <div class="card">
+    <h2><span class="bars"></span>기한 임박 · 만료 <span class="cnt">${due.length}곳</span></h2>
+    ${due.length?due.map(w=>{const left=daysLeft(w.planUntil);return`<div class="dec-row"><span class="pill ${left<0?"p-gray":"p-amber"}">${left<0?"만료":"D-"+left}</span><span class="dt"><button class="adm-link" data-adm="detail" data-id="${w.id}">${esc(w.name)}</button><div class="ds">프로 ~${esc(w.planUntil)}${(w.modules||[]).length?" · "+esc(modTxt(w.modules)):""} · ${esc(w.adminName||"")} ${esc(w.contact||"")}${w.comp?" · 무료 제공":""}</div></span><span class="da"><button class="btn btn-sm btn-pri" data-adm="pay-new" data-id="${w.id}">결제 기록</button><button class="btn btn-sm" data-adm="extend" data-id="${w.id}" data-days="31">+1개월</button></span></div>`;}).join(""):`<div class="empty" style="padding:18px">14일 안에 끝나는 프로가 없습니다.</div>`}
+  </div>
+  <div class="card" style="margin-top:14px">
+    <h2><span class="bars"></span>결제 기록
+      <span class="adm-h-btn adm-month"><button class="btn btn-sm btn-ghost" data-adm="ym" data-d="-1" aria-label="이전 달">‹</button><b>${ymLabel}</b><button class="btn btn-sm btn-ghost" data-adm="ym" data-d="1" aria-label="다음 달">›</button><button class="btn btn-sm btn-ghost" data-adm="ym" data-d="all">${A.payYm?"전체":"이번 달"}</button></span>
+    </h2>
+    <div class="adm-row" style="margin:-4px 0 10px"><span class="hint">결제 연동 전까지는 입금을 확인한 뒤 여기에 적습니다. ‘프로 기한 맞추기’를 켜면 기한이 자동으로 늘어납니다.</span><span class="adm-acts"><button class="btn btn-sm" data-adm="pay-csv">CSV 내려받기</button><button class="btn btn-sm btn-pri" data-adm="pay-new">결제 기록 추가</button></span></div>
+    ${!A.pays?`<div class="empty">불러오는 중…</div>`:A.pays.length?payTable(A.pays,true):`<div class="empty" style="padding:18px">${ymLabel}에 적은 결제가 없습니다.</div>`}
+  </div>
+  <div class="card" style="margin-top:14px">
+    <h2>가격표</h2><div class="hint" style="margin:-6px 0 4px">예상 월 정기 매출 계산에만 씁니다. 실제 청구 금액이 아닙니다.</div>
+    <div class="adm-form adm-prices">
+      ${[["pro","마이웍스 프로"],["space","스페이스 (마이스토어)"],["commerce","커머스 (마이셀러)"],["outsourcing","아웃소싱 (거래)"],["seat","추가 좌석 1명"]].map(([k,l])=>`<div><label>${l}</label><input type="number" min="0" class="adm-price" data-k="${k}" value="${p[k]||0}"></div>`).join("")}
+    </div>
+    <div class="adm-row"><span></span><button class="btn btn-sm btn-pri" data-adm="price-save">가격표 저장</button></div>
+  </div>`;
+}
+function payModal(pay,wsId){
+  const isNew=!pay,t=todayStr();
+  pay=pay||{ws:wsId||"",paidAt:t,amount:"",method:"계좌이체",item:"",from:t,to:addDaysStr(t,30),invoice:false,memo:""};
+  const W=ws().filter(w=>w.status!=="rejected").sort((a,b)=>a.name.localeCompare(b.name,"ko"));
+  openModal(`
+  <h2><span class="bars"></span>${isNew?"결제 기록 추가":"결제 기록 수정"}</h2>
+  <label>워크스페이스</label><select id="ap-ws">${W.map(w=>`<option value="${w.id}" ${w.id===pay.ws?"selected":""}>${esc(w.name)}${w.adminLogin?" · "+esc(w.adminLogin):""}</option>`).join("")}</select>
+  <div class="m-grid2">
+    <div><label>입금일</label><input id="ap-date" type="date" value="${esc(pay.paidAt)}"></div>
+    <div><label>금액 (원)</label><input id="ap-amt" type="number" min="0" value="${esc(pay.amount)}" placeholder="예: 31000"></div>
+  </div>
+  <div class="m-grid2">
+    <div><label>결제 방법</label><select id="ap-method">${["계좌이체","카드","현금","기타"].map(m=>`<option ${m===pay.method?"selected":""}>${m}</option>`).join("")}</select></div>
+    <div><label>항목</label><input id="ap-item" list="ap-items" maxlength="60" value="${esc(pay.item)}" placeholder="예: 프로 1개월"><datalist id="ap-items">${PAY_ITEMS.map(x=>`<option value="${x}">`).join("")}</datalist></div>
+  </div>
+  <label>이용 기간 <span class="hint">빠르게: <button type="button" class="linkbtn" data-adm="ap-per" data-m="1">1개월</button> · <button type="button" class="linkbtn" data-adm="ap-per" data-m="3">3개월</button> · <button type="button" class="linkbtn" data-adm="ap-per" data-m="12">1년</button></span></label>
+  <div class="m-grid2"><div><input id="ap-from" type="date" value="${esc(pay.from)}"></div><div><input id="ap-to" type="date" value="${esc(pay.to)}"></div></div>
+  <label>메모 <span class="hint">(선택)</span></label><input id="ap-memo" maxlength="300" value="${esc(pay.memo)}" placeholder="예: 입금자명 하루카페">
+  <label class="adm-check" style="margin-top:12px"><input type="checkbox" id="ap-inv" ${pay.invoice?"checked":""}> 세금계산서 발행함</label>
+  <label class="adm-check"><input type="checkbox" id="ap-apply" ${isNew?"checked":""}> 프로 기한을 이용 기간 끝으로 맞추기 <span class="hint">(더 늦은 기한이 있으면 그대로)</span></label>
+  <div class="m-foot"><button class="btn btn-ghost" data-g="modal-close">취소</button><button class="btn btn-pri" data-adm="pay-save" data-id="${isNew?"":esc(pay.id)}">저장</button></div>`);
+}
+function addMonths(ds,m){const d=new Date(ds);d.setMonth(d.getMonth()+m);d.setDate(d.getDate()-1);return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
+
+/* 문의 */
+function vFb(){
+  const all=A.fb;if(!all)return loadingCard;
+  const cnt=k=>k==="all"?all.length:all.filter(f=>f.status===k).length;
+  const L=U.fbF==="all"?all:all.filter(f=>f.status===U.fbF);
+  return`
+  <div class="card adm-filters"><div class="adm-chips">${[["new","새 문의"],["doing","처리 중"],["done","완료"],["all","전체"]].map(([k,l])=>`<button class="fchip ${U.fbF===k?"on":""}" data-adm="fbf" data-v="${k}">${l} <em>${cnt(k)}</em></button>`).join("")}</div><span class="hint">구성원이 앱의 ‘문의’에서 보낸 내용입니다. 답변은 보낸 사람 화면에 보이고, 메모는 운영자만 봅니다.</span></div>
+  <div class="card">
+    ${L.length?L.map(f=>`<div class="adm-fb" data-adm="fb-open" data-id="${f.id}" role="button" tabindex="0">
+      <div class="fb-top">${pillOf(FB_KIND,f.kind)}${pillOf(FB_ST,f.status)}<b>${esc(f.wsName||"-")}</b><span class="hint">${esc(f.name)} · ${esc(ROLES[f.role]||f.role)} · ${fmtWhen(f.createdAt)}</span></div>
+      <div class="fb-body">${esc(f.body)}</div>
+      ${f.reply?`<div class="fb-reply">답변 · ${esc(f.reply)}</div>`:""}
+    </div>`).join(""):`<div class="empty">${U.fbF==="new"?"새 문의가 없습니다.":"해당하는 문의가 없습니다."}</div>`}
+  </div>`;
+}
+function fbAdminModal(id){
+  const f=(A.fb||[]).find(x=>x.id===id);if(!f)return;
+  openModal(`
+  <h2><span class="bars"></span>문의 ${pillOf(FB_KIND,f.kind)}</h2>
+  <div class="adm-kv">
+    <div><span>워크스페이스</span><b>${esc(f.wsName||"-")}</b></div>
+    <div><span>보낸 사람</span><b>${esc(f.name)} · <span class="mono">${esc(f.loginId)}</span> · ${esc(ROLES[f.role]||f.role)}</b></div>
+    ${f.contact?`<div><span>연락처</span><b>${esc(f.contact)}</b></div>`:""}
+    <div><span>보낸 때 · 화면</span><b>${fmtWhen(f.createdAt)} · <span class="mono">${esc(f.page||"-")}</span></b></div>
+  </div>
+  <div class="r-note" style="margin-top:12px;font-size:14px">${esc(f.body)}</div>
+  ${f.ua?`<div class="hint" style="margin-top:6px">${esc(f.ua)}</div>`:""}
+  <label>답변 <span class="hint">보낸 사람의 문의 창에 보이고, 화면에 알림이 뜹니다</span></label>
+  <textarea id="af-reply" maxlength="2000" style="min-height:96px" placeholder="예: 확인했습니다. 오늘 저녁 업데이트로 고치겠습니다.">${esc(f.reply)}</textarea>
+  <div class="m-grid2">
+    <div><label>상태</label><select id="af-st">${Object.entries(FB_ST).map(([k,[l]])=>`<option value="${k}" ${f.status===k?"selected":""}>${l}</option>`).join("")}</select></div>
+    <div><label>내부 메모 <span class="hint">운영자만</span></label><input id="af-memo" maxlength="1000" value="${esc(f.memo)}"></div>
+  </div>
+  <div class="m-foot"><button class="btn btn-ghost" data-g="modal-close">닫기</button><button class="btn btn-pri" data-adm="fb-save" data-id="${f.id}">저장</button></div>`);
+}
+
+/* 공지 */
+function annState(a){const t=todayStr();if(!a.on)return["꺼짐","p-gray"];if(a.from>t)return["예약","p-blue"];if(a.to&&a.to<t)return["종료","p-gray"];return["게시 중","p-green"];}
+function vAnn(){
+  const L=A.ann;if(!L)return loadingCard;
+  return`
+  <div class="card">
+    <h2><span class="bars"></span>공지 <span class="cnt">${L.length}개</span><button class="btn btn-sm btn-pri adm-h-btn" data-adm="ann-new">새 공지</button></h2>
+    <div class="hint" style="margin-bottom:10px">게시 중인 공지는 모든 워크스페이스 화면 위에 띠로 보입니다(한 번에 3개까지). 사용자가 닫으면 그 기기에서는 다시 뜨지 않습니다.</div>
+    ${L.length?L.map(a=>{const s=annState(a);return`<div class="ws-row"><div class="w-info"><div class="w-nm">${esc(a.title)}<span class="pill ${s[1]}">${s[0]}</span>${pillOf(ANN_LV,a.level)}${a.aud==="admin"?`<span class="pill p-gray">관리자만</span>`:""}</div><div class="w-sub">${fmtD(a.from)} ~ ${a.to?fmtD(a.to):"계속"}</div>${a.body?`<div class="r-note">${esc(a.body)}</div>`:""}</div><div class="w-acts"><button class="btn btn-sm" data-adm="ann-edit" data-id="${a.id}">수정</button><button class="btn btn-sm btn-ghost" data-adm="ann-del" data-id="${a.id}">삭제</button></div></div>`;}).join(""):`<div class="empty" style="padding:20px">아직 공지가 없습니다. 점검·업데이트·정책 변경을 알릴 때 씁니다.</div>`}
+  </div>`;
+}
+function annModal(a){
+  const isNew=!a;a=a||{title:"",body:"",level:"info",aud:"all",from:todayStr(),to:"",on:true};
+  openModal(`
+  <h2><span class="bars"></span>${isNew?"새 공지":"공지 수정"}</h2>
+  <label>제목</label><input id="an-t" maxlength="80" value="${esc(a.title)}" placeholder="예: 11월 5일(수) 02:00~03:00 점검">
+  <label>내용 <span class="hint">(선택 · 600자)</span></label><textarea id="an-b" maxlength="600" style="min-height:80px">${esc(a.body)}</textarea>
+  <div class="m-grid2">
+    <div><label>종류</label><select id="an-lv">${Object.entries(ANN_LV).map(([k,[l]])=>`<option value="${k}" ${a.level===k?"selected":""}>${l}</option>`).join("")}</select></div>
+    <div><label>보는 사람</label><select id="an-aud"><option value="all" ${a.aud!=="admin"?"selected":""}>모든 구성원</option><option value="admin" ${a.aud==="admin"?"selected":""}>워크스페이스 관리자만</option></select></div>
+  </div>
+  <div class="m-grid2">
+    <div><label>시작일</label><input id="an-from" type="date" value="${esc(a.from)}"></div>
+    <div><label>종료일 <span class="hint">(비우면 계속)</span></label><input id="an-to" type="date" value="${esc(a.to)}"></div>
+  </div>
+  <label class="adm-check" style="margin-top:12px"><input type="checkbox" id="an-on" ${a.on?"checked":""}> 게시하기</label>
+  <div class="m-foot"><button class="btn btn-ghost" data-g="modal-close">취소</button><button class="btn btn-pri" data-adm="ann-save" data-id="${isNew?"":esc(a.id)}">저장</button></div>`);
+}
+
+/* 기록 */
+function vLog(){
+  const L=A.logs;if(!L)return loadingCard;
+  return`
+  <div class="card">
+    <h2><span class="bars"></span>서버 오류 <span class="cnt">${L.errors.length}건</span>${L.errors.length?`<button class="btn btn-sm btn-ghost adm-h-btn" data-adm="err-clear">오류 기록 비우기</button>`:""}</h2>
+    ${L.errors.length?`<div class="adm-log">${L.errors.map(e=>`<div class="lg"><span class="lg-t mono">${fmtWhen(e.at)}</span><span class="pill p-red mono">${esc(e.path||"-")}</span><span class="lg-d mono">${esc(e.msg||"")}</span></div>`).join("")}</div><div class="hint" style="margin-top:8px">같은 오류가 반복되면 내용을 복사해 제작 담당(클로드)에게 전달하세요.</div>`:`<div class="empty" style="padding:18px">기록된 서버 오류가 없습니다.</div>`}
+  </div>
+  <div class="card" style="margin-top:14px">
+    <h2><span class="bars"></span>운영 기록 <span class="cnt">최근 ${L.admin.length}건</span></h2>
+    ${L.admin.length?logRows(L.admin):`<div class="empty" style="padding:18px">아직 기록이 없습니다.</div>`}
+  </div>`;
+}
+
+/* 오픈 준비 — 운영자가 직접 할 일 */
+const LAUNCH=[
+  ["사업자·법적 준비",[
+    ["biz-mailorder","통신판매업 신고","온라인으로 이용료를 받으려면 필요합니다. 직전 연도 통신판매 거래가 50회 미만이거나 간이과세자이면 면제될 수 있으나, 법인은 보통 일반과세자입니다.",["결제대행사(PG)에 가입하고 구매안전서비스 이용확인증을 받습니다.","정부24에서 ‘통신판매업 신고’를 신청합니다(사업자등록증, 대표 신분증, 사이트 주소, 이용확인증).","등록면허세 안내 문자를 받으면 위택스로 납부하고 신고증을 출력합니다(출력은 처리 뒤 7일 안)."],"https://www.gov.kr/mw/AA020InfoCappView.do?HighCtgCD=A09006&CappBizCD=13100000052"],
+    ["biz-telecom","부가통신사업 신고 확인","인터넷으로 서비스를 제공하면 부가통신사업에 해당합니다. 자본금 1억 원 이하인 소규모 사업자는 신고한 것으로 봅니다.",["㈜블랭크 자본금을 확인합니다.","1억 원을 넘으면 과학기술정보통신부(전파관리소 등)에 부가통신사업 신고를 합니다."],""],
+    ["legal-terms","이용약관·개인정보처리방침 확정","지금 홈페이지의 약관과 처리방침은 초안입니다. 해외 클라우드(Cloudflare 등) 보관은 처리방침에 이전 항목·국가·업체·기간·거부 방법을 적어야 동의 없이 갈음할 수 있습니다.",["전문가(변호사·개인정보 컨설팅) 검토를 한 번 받습니다.","시행일을 정해 홈페이지에 게시하고, 공지로 알립니다."],"/privacy"],
+    ["legal-footer","사업자 정보 표시","홈페이지 첫 화면 아래에 상호·대표자·주소·전화·이메일·사업자등록번호·통신판매업 신고번호를 표시해야 합니다(전자상거래법 제10조).",["사업자등록번호, 사업장 주소, 대표 전화, 통신판매업 신고번호를 정리합니다.","제작 담당(클로드)에게 전달하면 홈페이지 바닥글에 넣습니다."],""],
+    ["legal-officer","개인정보 보호책임자 지정","처리방침에 적힌 책임자(최시준)와 연락처가 맞는지 확인하고, 열람·삭제 요청을 받을 창구를 정합니다.",["책임자 이름·이메일을 확정합니다.","요청이 오면 7일 안에 처리하는 내부 순서를 정합니다."],""],
+    ["brand-tm","‘마이웍스’ 상표 확인","같거나 비슷한 이름이 이미 등록돼 있으면 분쟁이 생길 수 있습니다.",["키프리스(KIPRIS)에서 ‘마이웍스’, ‘MYWORKS’를 소프트웨어·서비스업 분류로 검색합니다.","겹치지 않으면 상표 출원을 검토합니다(변리사 상담)."],"https://www.kipris.or.kr"]
+  ]],
+  ["결제",[
+    ["pay-pg","결제대행(PG) 가입·정기결제 신청","카드 정기결제를 받으려면 PG 가입과 별도 심사가 필요합니다. 심사 때 홈페이지의 약관·환불 규정·사업자 정보 표시를 봅니다.",["토스페이먼츠 등 PG에 가입하고 사업자 서류를 제출합니다.","자동결제(빌링) 사용을 따로 신청합니다.","테스트 키를 받으면 제작 담당에게 전달합니다(결제 연동은 제작지시서 WP3)."],"https://www.tosspayments.com"],
+    ["pay-refund","환불·해지 규정 확정","언제 해지할 수 있고, 남은 기간을 환불하는지 정합니다. 약관·가격 페이지·결제 화면에 같은 내용을 씁니다.",["월 결제·연 결제 각각의 환불 기준을 정합니다.","약관과 가격 페이지 문구에 반영합니다."],"/pricing"],
+    ["pay-invoice","세금계산서 발행 방식","결제를 받으면 세금계산서(또는 현금영수증)를 발행해야 합니다.",["홈택스 직접 발행 또는 회계 프로그램 중에서 정합니다.","총괄관리 결제 기록의 ‘세금계산서 발행함’으로 빠진 것이 없는지 확인합니다."],""],
+    ["pay-price","정식 가격 확정","지금 가격은 예정 요금입니다. 베타 결과를 보고 확정합니다.",["확정되면 홈페이지 가격 페이지, 결제 설정, 총괄관리 가격표를 같은 날 고칩니다.","베타 참여자에게 약속한 1년 가격 고정을 지킵니다."],"/pricing"]
+  ]],
+  ["도메인·메일·알림",[
+    ["dom-buy","도메인 구입","지금 주소는 myworkspro.pages.dev입니다. 정식 오픈에는 자체 도메인이 좋습니다.",["가비아 등에서 myworks.kr 같은 이름이 남아 있는지 확인하고 구입합니다(.kr 연 1~2만 원대).","Cloudflare로 네임서버를 옮기면 관리가 쉽습니다."],""],
+    ["dom-connect","도메인 연결","",["Cloudflare → Workers & Pages → 마이웍스 프로젝트 → Custom domains에서 도메인을 추가합니다.","연결 뒤 새 주소로 로그인·확인 링크가 잘 열리는지 봅니다."],"","domain"],
+    ["mail-route","문의 메일 주소 만들기","help@도메인 같은 주소를 만들어 Gmail로 받으면 비용 없이 운영할 수 있습니다.",["Cloudflare → Email → Email Routing에서 주소를 만들고 받을 Gmail을 연결합니다.","총괄관리 → 가입·베타의 ‘고객 문의 연락처’에 적습니다."],"","contact"],
+    ["kakao-channel","카카오톡 채널 개설","알림톡(고지서·확인 링크 안내)을 보내려면 카카오톡 채널이 필요합니다.",["카카오톡 채널 관리자센터에서 채널을 만들고 비즈니스 인증을 신청합니다.","고객 상담 창구로도 쓸 수 있게 채널 주소를 문의 연락처에 함께 적습니다."],"https://center-pf.kakao.com"],
+    ["alimtalk","알림톡 발송 서비스 가입","알림 기능을 붙일 때 필요합니다(제작지시서 WP6). 템플릿은 카카오 검수에 영업일 1~3일 걸립니다.",["솔라피 등 발송 서비스에 가입하고 카카오톡 채널을 연동합니다.","제작 담당이 준비한 템플릿 문구로 검수를 신청합니다."],"https://solapi.com"]
+  ]],
+  ["보안·운영",[
+    ["sec-owner","운영자 계정 지키기","운영자 계정은 모든 워크스페이스의 등급·삭제를 다룹니다.",["운영자 비밀번호를 12자 이상 고유한 것으로 바꿉니다(설정 → 비밀번호 변경).","운영자 계정은 다른 사람과 같이 쓰지 않습니다. 직원에게는 별도 계정을 줍니다."],""],
+    ["sec-2fa","GitHub·Cloudflare·Google 2단계 인증","코드와 서버, 메일 계정이 뚫리면 서비스 전체가 위험합니다.",["GitHub, Cloudflare, Google 계정에 2단계 인증을 켭니다.","복구 코드를 안전한 곳에 보관합니다."],""],
+    ["sec-cf-plan","Cloudflare 요금제 점검","무료 한도는 하루 10만 요청입니다. 사용자가 늘면 월 5달러 유료로 올립니다.",["Cloudflare에 결제 수단을 등록해 둡니다.","대시보드에서 하루 요청 수가 한도의 70%를 넘으면 Workers 유료로 전환합니다."],"https://dash.cloudflare.com"],
+    ["ops-backup","전체 백업 받기","월 1회 이상 전체 백업을 내려받아 안전한 곳에 보관합니다. 아래 ‘전체 백업 내려받기’를 쓰세요.",["백업 파일에는 계정 정보가 들어 있으니 비밀번호가 걸린 저장소에 둡니다.","Cloudflare D1의 시점 복구(Time Travel)도 함께 확인합니다."],"","backup"],
+    ["ops-signup","가입 방식 정하기","베타 기간에는 ‘베타 코드 전용’ 또는 ‘승인제’, 정식 오픈 뒤에는 ‘자동 개설’을 권합니다.",["가입·베타 탭에서 가입 방식과 시작 등급을 저장합니다."],"","signup"],
+    ["ops-support","문의 응대 기준 정하기","응답 시간을 정해 두면 혼자서도 지킬 수 있습니다.",["예: 평일 10~18시, 1영업일 안에 답변.","공지와 홈페이지에 안내합니다."],""]
+  ]],
+  ["베타·오픈",[
+    ["beta-codes","베타 코드 만들기","코드를 받은 사람은 승인 없이 바로 시작합니다.",["가입·베타 탭에서 묶음별(건물주·셀러·매장 등)로 코드를 만듭니다.","‘안내 문구 복사’로 초대 메시지를 보냅니다."],"","codes"],
+    ["beta-recruit","비공개 베타 20~50명 모집","㈜블랭크 네트워크(건물주·중개사·외주 파트너·거래처·세무사)에서 분야별 5~10명.",["참여자 명단과 연락처를 정리합니다.","1년 가격 고정 혜택을 안내합니다."],""],
+    ["beta-feedback","베타 피드백 모으기","2~4주 운영하면서 문의 탭으로 들어오는 의견을 정리합니다.",["주 1회 문의를 정리해 제작 담당에게 전달합니다.","‘돈 내고 쓰겠다 / 무료여야 한다’를 직접 물어봅니다."],""],
+    ["launch-ann","오픈 공지 준비","앱 공지와 홈페이지 공지에 같은 내용을 올립니다.",["공지 탭에서 오픈 일정과 바뀌는 점을 씁니다."],"","ann"],
+    ["launch-open","정식 오픈 전환","가입 방식을 바꾸고 홈페이지의 ‘예정 요금’ 표현을 확정 요금으로 바꿉니다.",["가입 방식을 ‘자동 개설’ 또는 ‘승인제’로 바꿉니다.","홈페이지 문구 수정은 제작 담당에게 요청합니다."],""]
+  ]]
+];
+function autoOf(key){   // 시스템이 확인할 수 있는 항목 — 오픈 준비 탭을 열기 전에는 현황 자료로 어림합니다
+  const au=A.launch&&A.launch.auto;
+  if(key==="contact")return !!PL().contact;
+  if(au&&key in au)return !!au[key];
+  const s=(A.ov&&A.ov.summary)||{};
+  if(key==="domain")return !/\.pages\.dev$|^localhost$|^127\./.test(location.hostname);
+  if(key==="backup")return !!s.lastExport&&Date.now()-Date.parse(s.lastExport)<30*864e5;
+  if(key==="signup")return !!PL().saved;
+  if(key==="codes")return (s.codes||0)>0;
+  if(key==="ann")return (s.ann||0)>0;
+  return undefined;
+}
+function launchState(){return(A.launch&&A.launch.state)||(A.ov&&A.ov.launch)||{};}
+function itemDone(it){const st=launchState()[it[0]]||{};const a=it[5]?autoOf(it[5]):undefined;return !!st.done||a===true;}
+function launchStat(){const all=LAUNCH.flatMap(g=>g[1]);return{total:all.length,done:all.filter(itemDone).length};}
+function vLaunch(){
+  if(!A.launch)return loadingCard;
+  const s=launchStat(),st=A.launch.state||{},pct=Math.round(s.done/s.total*100);
+  return`
+  <div class="card">
+    <h2><span class="bars"></span>정식 오픈 준비 <span class="cnt">${s.done} / ${s.total}</span></h2>
+    <div class="adm-prog"><i style="width:${pct}%"></i></div>
+    <div class="hint" style="margin-top:8px">대표님이 직접 하셔야 하는 일입니다. 끝난 항목은 체크하고, 진행 상황은 메모에 적어 두세요. ‘자동 확인’ 표시가 있는 항목은 시스템이 상태를 확인합니다.</div>
+  </div>
+  ${LAUNCH.map(([g,items])=>`<div class="card adm-lgroup">
+    <h2>${esc(g)} <span class="cnt">${items.filter(itemDone).length} / ${items.length}</span></h2>
+    ${items.map(it=>{const [key,title,why,how,link,auto]=it,x=st[key]||{},a=auto?autoOf(auto):undefined,done=itemDone(it);return`<div class="adm-li ${done?"done":""}">
+      <label class="adm-lcheck"><input type="checkbox" data-adm-in="launch" data-k="${key}" ${x.done||a===true?"checked":""} ${a===true&&!x.done?"disabled":""}><span></span></label>
+      <div class="adm-lbody">
+        <div class="adm-lt">${esc(title)}${a!==undefined?`<span class="pill ${a?"p-green":"p-gray"}">자동 확인 · ${a?"완료":"아직"}</span>`:""}${x.at&&x.done?`<span class="hint">${fmtWhen(x.at)} 완료</span>`:""}</div>
+        ${why?`<div class="adm-lw">${esc(why)}</div>`:""}
+        <details class="adm-how"><summary>어떻게 하나요</summary><ol>${how.map(h=>`<li>${esc(h)}</li>`).join("")}</ol>${link?`<a href="${esc(link)}" target="_blank" rel="noopener" class="linkbtn">관련 페이지 열기 →</a>`:""}</details>
+        <div class="adm-lnote"><input data-adm-in="lnote" data-k="${key}" maxlength="500" value="${esc(x.note||"")}" placeholder="메모 (예: 11/10 구청 방문 예정)"></div>
+      </div>
+    </div>`;}).join("")}
+  </div>`).join("")}
+  <div class="adm-grid" style="margin-top:14px">
+    <div class="card">
+      <h2><span class="bars"></span>전체 백업</h2>
+      <div class="hint">모든 워크스페이스의 데이터·계정·설정을 한 파일(JSON)로 내려받습니다. 로그인 세션과 AI 토큰 비밀값은 빠집니다. 파일에 계정 정보가 들어 있으니 안전한 곳에 보관하세요.</div>
+      <div class="adm-kv" style="margin-top:10px"><div><span>마지막 백업</span><b>${A.launch.lastExport?fmtWhen(A.launch.lastExport):"없음"}</b></div></div>
+      <div class="adm-row"><span id="adm-exp-st" class="hint"></span><button class="btn btn-pri btn-sm" data-adm="export" ${A.busy?"disabled":""}>전체 백업 내려받기</button></div>
+    </div>
+    <div class="card">
+      <h2>주소 · 접속</h2>
+      <div class="adm-kv">
+        <div><span>지금 주소</span><b class="mono">${esc(A.launch.host||location.host)}</b></div>
+        <div><span>총괄관리</span><b class="mono">${esc(location.origin)}/admin</b></div>
+        <div><span>가입</span><b class="mono">${esc(location.origin)}/app/#signup</b></div>
+        <div><span>운영자 계정</span><b class="mono">${esc(ME.loginId||"")}</b></div>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ── 전체 백업 ── */
+async function exportAll(){
+  if(A.busy)return;A.busy=true;paint();
+  const stEl=()=>$("#adm-exp-st");
+  try{
+    const {tables}=await api("admin/export",{op:"tables"});
+    const out={app:"myworks-platform-backup",v:1,at:new Date().toISOString(),host:location.host,tables:{}};let rows=0;
+    for(const t of tables){
+      out.tables[t]=[];let off=0;
+      for(;;){const r=await api("admin/export",{table:t,offset:off});out.tables[t].push(...r.rows);rows+=r.rows.length;off+=r.rows.length;const el=stEl();if(el)el.textContent=`${t} · ${fmt(rows)}행`;if(r.done)break;}
+    }
+    download(`myworks-platform-backup-${todayStr()}.json`,JSON.stringify(out));
+    const r=await api("admin/export",{op:"done",rows});
+    if(A.launch)A.launch.lastExport=r.at;if(A.ov)A.ov.summary.lastExport=r.at;
+    toast(`전체 백업을 내려받았습니다 (${fmt(rows)}행).`);
+  }catch(e){failToast(e);}
+  A.busy=false;loadTab("launch",true);
+}
+
+/* ── 공지 띠 (모든 구성원) ── */
+const ANN_KEY="mw_ann_closed";
+function closedAnn(){try{return JSON.parse(localStorage.getItem(ANN_KEY)||"[]");}catch(e){return[];}}
+function renderAnn(){
+  const bar=$("#ann-bar");if(!bar)return;
+  const list=(MODE==="cloud"&&CLOUD.badges&&CLOUD.badges.ann||[]).filter(a=>!closedAnn().includes(a.id));
+  bar.innerHTML=list.map(a=>`<div class="ann ann-${esc(a.lv)}"><span class="pill ${(ANN_LV[a.lv]||ANN_LV.info)[1]}">${(ANN_LV[a.lv]||ANN_LV.info)[0]}</span><div class="ann-t"><b>${esc(a.t)}</b>${a.b?`<span>${esc(a.b)}</span>`:""}</div><button class="ann-x" data-fb="ann-close" data-id="${esc(a.id)}" aria-label="공지 닫기">✕</button></div>`).join("");
+  bar.classList.toggle("hidden",!list.length);
+}
+
+/* ── 운영자에게 문의 (모든 구성원) ── */
+const FB_LB={error:"오류가 있어요",inconvenient:"불편해요",idea:"이런 기능이 있으면 좋겠어요",billing:"결제·요금 문의",etc:"기타"};
+async function fbModal(){
+  if(MODE!=="cloud"){toast("문의는 서버에 연결된 상태에서 보낼 수 있습니다.");return;}
+  openModal(`
+  <h2><span class="bars"></span>운영자에게 문의</h2>
+  <div class="hint" style="margin-bottom:6px">마이웍스를 쓰다가 생긴 오류나 의견을 보내 주세요. 답변은 이 창에서 확인할 수 있고, 답이 오면 홈 화면에 알려 드립니다.</div>
+  <label>종류</label><select id="fb-kind">${Object.entries(FB_LB).map(([k,l])=>`<option value="${k}">${l}</option>`).join("")}</select>
+  <label>내용</label><textarea id="fb-body" maxlength="2000" style="min-height:110px" placeholder="어느 화면에서 무엇을 했을 때 어떻게 됐는지 적어 주시면 빨리 해결할 수 있습니다."></textarea>
+  <label>연락받을 곳 <span class="hint">(선택)</span></label><input id="fb-contact" maxlength="80" placeholder="휴대폰 또는 이메일">
+  <div class="m-foot"><button class="btn btn-ghost" data-g="modal-close">닫기</button><button class="btn btn-pri" data-fb="send">보내기</button></div>
+  <div id="fb-mine" class="fb-mine"><div class="hint">보낸 문의를 불러오는 중…</div></div>`);
+  try{
+    const r=await api("fb/mine");
+    if(CLOUD.badges.fbReply){delete CLOUD.badges.fbReply;needRender=true;$$('.dec-row [data-fb="open"]').forEach(x=>x.closest(".dec-row").remove());}
+    const el=$("#fb-mine");if(!el)return;
+    el.innerHTML=r.items.length?`<h3>보낸 문의</h3>`+r.items.map(f=>`<div class="fbm"><div class="fb-top">${pillOf(FB_KIND,f.kind)}${pillOf(FB_ST,f.status)}<span class="hint">${fmtWhen(f.createdAt)}</span></div><div class="fb-body">${esc(f.body)}</div>${f.reply?`<div class="fb-reply"><b>운영자 답변</b> · ${fmtWhen(f.replyAt)}<br>${esc(f.reply)}</div>`:""}</div>`).join(""):"";
+  }catch(e){const el=$("#fb-mine");if(el)el.innerHTML="";}
+}
+async function fbSend(btn){
+  const body=$("#fb-body").value.trim();if(body.length<2){toast("내용을 적어 주세요.");return;}
+  btn.disabled=true;
+  try{await api("fb/send",{kind:$("#fb-kind").value,body,contact:$("#fb-contact").value.trim(),page:location.hash.slice(0,120),ua:navigator.userAgent.slice(0,200)});closeModal();toast("문의를 보냈습니다. 답변이 오면 홈 화면에 알려 드립니다.");}
+  catch(e){btn.disabled=false;toast(e.code==="busy"?"오늘은 문의를 더 보낼 수 없습니다. 내일 다시 보내 주세요.":"보내지 못했습니다. 잠시 후 다시 시도하세요.");}
+}
+
+/* ── 이벤트 ── */
+async function settingsSave(patch,msg){
+  try{const r=await api("admin/settings",{op:"save",settings:patch});if(A.ov)A.ov.platform=r.platform;toast(msg||"저장했습니다.");paint();}catch(e){failToast(e);}
+}
+document.addEventListener("click",async e=>{
+  const f=e.target.closest("[data-fb]");
+  if(f){
+    const k=f.dataset.fb;
+    if(k==="open")fbModal();
+    else if(k==="send")fbSend(f);
+    else if(k==="ann-close"){const L=closedAnn();L.push(f.dataset.id);try{localStorage.setItem(ANN_KEY,JSON.stringify(L.slice(-50)));}catch(x){}renderAnn();}
+    return;
+  }
+  const b=e.target.closest("[data-adm]");if(!b||!usable())return;
+  const k=b.dataset.adm,id=b.dataset.id;
+  switch(k){
+    case"refresh":A.codes=A.pays=A.fb=A.ann=A.logs=A.launch=null;refresh(true);toast("새로 불러왔습니다.");break;
+    case"tab":closeModal();go("#/admin"+(b.dataset.v?"/"+b.dataset.v:""));break;
+    case"st":U.st=b.dataset.v;paint();break;
+    case"fbf":U.fbF=b.dataset.v;paint();break;
+    case"detail":detail(id);break;
+    case"extend":{const w=wsById(id);if(!w)break;b.disabled=true;try{const r=await api("admin/ws",{id,action:"extend",days:Number(b.dataset.days)});toast(`"${w.name}" 프로 기한을 ${r.planUntil}까지 늘렸습니다.`);await load(true);if($("#m-box .adm-wide"))detail(id);}catch(x){b.disabled=false;failToast(x);}break;}
+    case"note-save":{b.disabled=true;try{await api("admin/ws",{id,action:"note",note:$("#adm-note").value,comp:$("#adm-comp").checked});toast("메모를 저장했습니다.");await load(true);if($("#m-box .adm-wide"))detail(id);}catch(x){b.disabled=false;failToast(x);}break;}
+    case"settings-save":{
+      const pol=($('input[name="adm-pol"]:checked')||{}).value||"approve";
+      await settingsSave({signup:pol,newPlan:{plan:$("#adm-np-plan").value,days:Number($("#adm-np-days").value)||0,modules:$$(".adm-np-mod:checked").map(x=>x.value)},contact:$("#adm-contact").value.trim()},`가입 방식을 ‘${POL[pol][0]}’(으)로 저장했습니다.`);break;}
+    case"price-save":{const prices={};$$(".adm-price").forEach(i=>prices[i.dataset.k]=Number(i.value)||0);await settingsSave({prices},"가격표를 저장했습니다.");break;}
+    case"code-add":{
+      b.disabled=true;
+      try{const r=await api("admin/codes",{op:"save",label:$("#adm-c-label").value.trim(),code:$("#adm-c-code").value.trim(),plan:$("#adm-c-plan").value,days:Number($("#adm-c-days").value)||0,modules:$$(".adm-c-mod:checked").map(x=>x.value),maxUses:Number($("#adm-c-max").value)||0,expires:$("#adm-c-exp").value});
+        A.codes=[r.code,...(A.codes||[])];toast(`베타 코드 ${r.code.code}을(를) 만들었습니다.`);load(true);paint();}
+      catch(x){b.disabled=false;failToast(x);}break;}
+    case"code-copy":{const c=(A.codes||[]).find(x=>x.code===b.dataset.v);if(!c)break;copyText(`마이웍스 베타에 초대합니다.\n\n가입 주소: ${location.origin}/app/#signup\n베타 코드: ${c.code}\n\n가입 화면의 ‘베타 코드’ 칸에 코드를 넣으면 승인 없이 바로 시작할 수 있습니다. (${tierTxt(c.plan,c.days,c.modules)})`,"초대 문구를 복사했습니다. 메신저로 보내세요.");break;}
+    case"code-toggle":{try{await api("admin/codes",{op:"toggle",code:b.dataset.v,active:b.dataset.on==="1"});loadTab("signup",true);}catch(x){failToast(x);}break;}
+    case"code-del":{if(!confirm(`베타 코드 ${b.dataset.v}을(를) 삭제할까요? 이미 가입한 워크스페이스에는 영향이 없습니다.`))break;try{await api("admin/codes",{op:"delete",code:b.dataset.v});A.codes=(A.codes||[]).filter(x=>x.code!==b.dataset.v);paint();}catch(x){failToast(x);}break;}
+    case"ym":{const d=b.dataset.d;A.payYm=d==="all"?(A.payYm?"":todayStr().slice(0,7)):monShift(A.payYm||todayStr().slice(0,7),Number(d));A.pays=null;paint();loadTab("pay",true);break;}
+    case"pay-new":payModal(null,id||"");break;
+    case"pay-edit":{const p=(A.pays||[]).find(x=>x.id===id);if(p)payModal(p);break;}
+    case"ap-per":{const fr=$("#ap-from");if(!fr.value)fr.value=todayStr();$("#ap-to").value=addMonths(fr.value,Number(b.dataset.m));break;}
+    case"pay-save":{
+      const body={op:"save",id:id||undefined,ws:$("#ap-ws").value,paidAt:$("#ap-date").value,amount:Number($("#ap-amt").value),method:$("#ap-method").value,item:$("#ap-item").value.trim(),from:$("#ap-from").value,to:$("#ap-to").value,invoice:$("#ap-inv").checked,memo:$("#ap-memo").value.trim(),apply:$("#ap-apply").checked};
+      if(!body.ws||!body.paidAt||!$("#ap-amt").value){toast("워크스페이스, 입금일, 금액을 넣으세요.");break;}
+      b.disabled=true;
+      try{const r=await api("admin/pay",body);closeModal();toast(`${fmt(r.payment.amount)}원 결제를 기록했습니다.${body.apply&&r.planUntil?` 프로 기한 ${r.planUntil}`:""}`);A.pays=null;await load(true);loadTab("pay",true);}
+      catch(x){b.disabled=false;failToast(x);}break;}
+    case"pay-del":{const p=(A.pays||[]).find(x=>x.id===id);if(!p||!confirm(`${fmtD(p.paidAt)} ${p.wsName} ${fmt(p.amount)}원 기록을 삭제할까요? 프로 기한은 바뀌지 않습니다.`))break;try{await api("admin/pay",{op:"delete",id});A.pays=A.pays.filter(x=>x.id!==id);load(true);paint();}catch(x){failToast(x);}break;}
+    case"pay-csv":{const L=A.pays||[];if(!L.length){toast("내려받을 기록이 없습니다.");break;}const q=v=>`"${String(v??"").replace(/"/g,'""')}"`;const csv="﻿"+[["입금일","워크스페이스","항목","기간 시작","기간 끝","방법","세금계산서","금액","메모"].map(q).join(","),...L.map(p=>[p.paidAt,p.wsName,p.item,p.from,p.to,p.method,p.invoice?"발행":"",p.amount,p.memo].map(q).join(","))].join("\n");const bl=new Blob([csv],{type:"text/csv;charset=utf-8"});const a=document.createElement("a");a.href=URL.createObjectURL(bl);a.download=`myworks-payments-${A.payYm||"all"}.csv`;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},500);break;}
+    case"fb-open":fbAdminModal(id);break;
+    case"fb-save":{b.disabled=true;try{const r=await api("admin/fb",{op:"save",id,status:$("#af-st").value,reply:$("#af-reply").value.trim(),memo:$("#af-memo").value.trim()});A.fb=(A.fb||[]).map(x=>x.id===id?r.item:x);closeModal();toast("저장했습니다.");load(true);paint();}catch(x){b.disabled=false;failToast(x);}break;}
+    case"ann-new":annModal(null);break;
+    case"ann-edit":{const a=(A.ann||[]).find(x=>x.id===id);if(a)annModal(a);break;}
+    case"ann-save":{
+      const body={op:"save",id:id||undefined,title:$("#an-t").value.trim(),body:$("#an-b").value.trim(),level:$("#an-lv").value,aud:$("#an-aud").value,from:$("#an-from").value,to:$("#an-to").value,on:$("#an-on").checked};
+      if(!body.title){toast("제목을 넣으세요.");break;}
+      b.disabled=true;try{const r=await api("admin/ann",body);A.ann=r.items;closeModal();toast("공지를 저장했습니다.");paint();pollSync(true);}catch(x){b.disabled=false;failToast(x);}break;}
+    case"ann-del":{const a=(A.ann||[]).find(x=>x.id===id);if(!a||!confirm(`"${a.title}" 공지를 삭제할까요?`))break;try{const r=await api("admin/ann",{op:"delete",id});A.ann=r.items;paint();pollSync(true);}catch(x){failToast(x);}break;}
+    case"err-clear":{if(!confirm("서버 오류 기록을 모두 비울까요?"))break;try{A.logs=await api("admin/logs",{op:"clear-err"});load(true);paint();}catch(x){failToast(x);}break;}
+    case"export":exportAll();break;
+  }
+});
+document.addEventListener("keydown",e=>{if((e.key==="Enter"||e.key===" ")&&e.target.matches&&e.target.matches('.adm-fb[data-adm="fb-open"]')){e.preventDefault();fbAdminModal(e.target.dataset.id);}});
+document.addEventListener("change",async e=>{
+  const el=e.target;if(!el.dataset)return;
+  const k=el.dataset.admIn;if(!k||!usable())return;
+  if(k==="pl"){U.pl=el.value;paint();}
+  else if(k==="sort"){U.sort=el.value;paint();}
+  else if(k==="launch"||k==="lnote"){
+    const key=el.dataset.k,box=$(`input[data-adm-in="launch"][data-k="${key}"]`),note=$(`input[data-adm-in="lnote"][data-k="${key}"]`);
+    const done=box?(box.disabled?!!(launchState()[key]||{}).done:box.checked):false;
+    try{const r=await api("admin/launch",{op:"save",key,done,note:note?note.value:""});A.launch.state=r.state;A.launch.auto=r.auto;if(k==="launch")paint();else toast("메모를 저장했습니다.");}
+    catch(x){failToast(x);}
+  }
+});
+document.addEventListener("input",e=>{const el=e.target;if(el.dataset&&el.dataset.admIn==="q"&&usable()){U.q=el.value;const box=$("#adm-wslist");if(box)box.innerHTML=wsList(filtered());}});   // 입력창은 그대로 두고 목록만 바꿉니다 (한글 조합 유지)
+document.addEventListener("change",e=>{const r=e.target;if(r.name==="adm-pol"){$$(".adm-opt").forEach(o=>o.classList.toggle("on",o.querySelector("input")===r));}});
+
+function onBadges(){if(usable()&&onPage()&&A.ov){const p=CLOUD.badges.pendingWs||0,f=CLOUD.badges.fbNew||0;if(p!==A.ov.workspaces.filter(w=>w.status==="pending").length||f!==A.ov.summary.fbNew)refresh(true);}}
+function reset(){A.ov=null;A.at=0;A.codes=A.pays=A.fb=A.ann=A.logs=A.launch=null;A.detail={};A.payYm="";}
+return{view,refresh,reset,renderAnn,fbModal,onBadges};
+})();
+
 /* ═══════════ 이벤트 위임 ═══════════ */
 document.addEventListener("click",e=>{
   const g=e.target.closest("[data-g]");
@@ -5453,7 +6227,7 @@ document.addEventListener("click",e=>{
     case"scmt-add":{const st=storeById(id);if(!st)break;const inp=$("#scmt-in"),tx=inp.value.trim();if(!tx)break;DB.comments.push({id:uid("c"),projectId:"",storeId:id,memberId:ME.id,text:tx,ts:nowHM()});logAct(`매장 "${st.name}"에 의견을 남겼습니다.`);saveDB();route();break;}
     case"sf-save":sfSave(id);break;
     case"brief-review":go("#/board");break;
-    case"brief-admin":go("#/admin");break;
+    case"brief-admin":go("#/admin"+(b.dataset.v?"/"+b.dataset.v:""));break;
     case"brief-req":go("#/members");break;
     case"go-signup":openSignup("new");break;
     case"go-join":openSignup("join");break;
@@ -5473,7 +6247,7 @@ document.addEventListener("click",e=>{
       }).catch(e=>{b.disabled=false;if(e.code!=="unauthorized")toast(e.code==="plan-limit"?planLimitMsg(e.data):"처리하지 못했습니다. 잠시 후 다시 시도하세요.");});
       break;}
     case"adm-refresh":loadAdmin(true);break;
-    case"adm-copy-link":copyText(`마이웍스 가입 주소: ${location.origin}\n첫 화면의 '회원가입'에서 워크스페이스 개설을 신청해 주세요. 승인되면 같은 아이디로 어느 기기에서든 로그인할 수 있습니다.`,"가입 안내 문구를 복사했습니다.");break;
+    case"adm-copy-link":copyText(`마이웍스 가입 주소: ${location.origin}/app/#signup\n'새 워크스페이스'로 개설을 신청해 주세요. 승인되면 같은 아이디로 어느 기기에서든 로그인할 수 있습니다.`,"가입 안내 문구를 복사했습니다.");break;
     case"adm-ws":{
       const op=b.dataset.op,w=((ADMIN&&ADMIN.workspaces)||[]).find(x=>x.id===id);if(!w)break;
       let pw="";
@@ -5484,7 +6258,7 @@ document.addEventListener("click",e=>{
       b.disabled=true;
       api("admin/ws",{id,action:op,pw}).then(res=>{
         const msg={approve:`"${w.name}" 승인 완료 — ${res.loginId||w.adminLogin} 님이 이제 로그인할 수 있습니다.`,reject:`"${w.name}" 신청을 반려했습니다.`,suspend:`"${w.name}" 이용을 중지했습니다.`,activate:`"${w.name}" 이용을 재개했습니다.`,delete:`"${w.name}"을(를) 삭제했습니다.`,resetpw:`${res.loginId} 비밀번호를 바꿨습니다. 새 비밀번호를 관리자에게 전달하세요.`}[op];
-        toast(msg||"처리했습니다.");loadAdmin(true);
+        toast(msg||"처리했습니다.");if((op==="delete"||op==="suspend"||op==="activate"||op==="approve"||op==="reject")&&$("#m-box .adm-wide"))closeModal();loadAdmin(true);
       }).catch(e=>{b.disabled=false;if(e.code!=="unauthorized")toast(e.code==="self"?"운영자 워크스페이스에는 할 수 없는 작업입니다.":e.code==="bad-state"?"이미 처리된 항목입니다. 새로고침해 주세요.":"처리하지 못했습니다. 잠시 후 다시 시도하세요.");});
       break;}
     case"brief-plan":go("#/plan");break;
@@ -5629,7 +6403,7 @@ $("#sg-go").addEventListener("click",doSignup);
     if(typeof fetch!=="function")throw new Error("no-fetch");
     const st=await Promise.race([api("status"),new Promise((_,rj)=>setTimeout(()=>rj(new Error("timeout")),3000))]);
     if(!st||st.ok!==true)throw new Error("not-myworks-server");
-    MODE="cloud";CLOUD_INIT=!!st.initialized;
+    MODE="cloud";CLOUD_INIT=!!st.initialized;SG_POL={signup:st.signup||"approve",contact:st.contact||""};
   }catch(e){MODE="local";}
   applyGateText();
   const lm=location.hash.match(/^#\/link\/([0-9a-f]{32})$/);

@@ -457,6 +457,9 @@ page({
   body: `
 <section class="hero sub"><div class="wrap"><p class="kicker">공지</p><h1>바뀐 점</h1><p class="lead">배포할 때마다 한 줄씩 남깁니다. 장애가 있으면 맨 위에 적습니다.</p></div></section>
 <section class="sec"><div class="wrap doc">
+  <div class="notice"><time>2026. 11. 2.</time><h3>운영자용 ‘총괄관리’와 앱 안 문의·공지를 추가했습니다</h3>
+    <p>운영자 계정의 ‘운영’ 메뉴를 ‘총괄관리’로 바꾸고 현황, 워크스페이스, 가입·베타, 결제·매출, 문의, 공지, 기록, 오픈 준비 화면을 붙였습니다. 운영자는 <code>/admin</code> 주소로 바로 들어갈 수 있습니다. 운영자에게도 각 워크스페이스의 업무 내용은 보이지 않고, 계정 목록과 기록 개수만 보입니다.</p>
+    <p>가입 화면에 ‘베타 코드’ 칸이 생겼습니다. 초대받은 코드를 넣으면 승인을 기다리지 않고 바로 시작합니다. 앱의 ‘문의’ 버튼으로 운영자에게 오류나 의견을 보낼 수 있고, 답변은 같은 창과 홈 화면에서 확인합니다. 점검이나 바뀐 점은 앱 화면 위 공지로 알려 드립니다.</p></div>
   <div class="notice"><time>2026. 11. 2.</time><h3>화면 폭에 따라 깨지던 곳을 고쳤습니다</h3>
     <p>‘시작하기’ 페이지의 단계 설명이 좁은 칸에 눌려 보이던 문제를 고쳤습니다. 폰에서는 가격표와 가이드의 표가 옆으로 잘리지 않고 한 줄씩 쌓여 보이고, 태블릿에서는 서비스·가격 카드가 두 줄로 정리됩니다. 한글이 단어 중간에서 끊기지 않게 줄바꿈 규칙을 바꾸고, 폰·태블릿에서 누르기 쉽도록 링크와 버튼 크기를 키웠습니다.</p>
     <p>‘회원가입 하러 가기’를 누르면 앱의 가입 화면이 바로 열립니다(<code>/app/#signup</code>).</p>
@@ -532,6 +535,13 @@ fs.writeFileSync(path.join(OUT, "link", "index.html"), `<!DOCTYPE html>
 <script>(function(){var m=location.pathname.match(/\\/link\\/([0-9a-f]{32})/);if(m){location.replace("/app/#/link/"+m[1]);}})();</script>
 <style>body{font-family:Pretendard,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;background:#F8F7F4;color:#1C1B19;display:flex;min-height:100vh;align-items:center;justify-content:center;margin:0}div{text-align:center;padding:24px}a{color:#FF4712}</style></head>
 <body><div><p>확인 링크를 여는 중입니다.</p><p style="color:#6B6861;font-size:14px">자동으로 열리지 않으면 보낸 분에게 링크를 다시 요청하세요. <a href="/">마이웍스 소개</a></p></div></body></html>`);
+
+// ---------- 총괄관리 바로가기 (/admin → 앱의 총괄관리) ----------
+fs.writeFileSync(path.join(OUT, "admin.html"), `<!DOCTYPE html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>마이웍스 총괄관리</title>
+<script>location.replace("/app/#/admin"+(location.hash&&/^#[a-z]+$/.test(location.hash)?"/"+location.hash.slice(1):""));</script>
+<style>body{font-family:Pretendard,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;background:#F8F7F4;color:#1C1B19;display:flex;min-height:100vh;align-items:center;justify-content:center;margin:0}div{text-align:center;padding:24px}a{color:#FF4712}</style></head>
+<body><div><p>총괄관리로 이동하는 중입니다.</p><p style="color:#6B6861;font-size:14px">운영자 계정으로 로그인해야 열립니다. <a href="/app/#/admin">직접 열기</a></p></div></body></html>`);
 
 // _redirects
 fs.writeFileSync(path.join(OUT, "_redirects"), `/link/*  /link/index.html  200\n`);
