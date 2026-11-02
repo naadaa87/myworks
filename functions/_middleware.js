@@ -12,7 +12,7 @@
    · 스페이스: 예약 → 청소 배정 → 체크리스트 → 확인 → 손익. HOSTDB(읽기)는 운영자 워크스페이스에서만, SPACEDB(1회 가져오기)는 운영자만.
    · 무료 요금제 한도(요청당 쿼리 50회)를 넘지 않도록 여러 건의 쓰기는 한 문장으로 묶어 처리합니다. */
 
-const SCHEMA = "5";
+const SCHEMA = "6";
 const PLANS = ["basic", "pro"];
 const MODULES = ["space", "outsourcing", "commerce"];
 const PLAN_LIMITS = { basic: { brands: 2, members: 2, tokens: 1 }, pro: { brands: 1000, members: 10, tokens: 20 } };   // members = 관리자 외 구성원 수
@@ -54,6 +54,7 @@ const DDL = [
 ];
 // 나중에 더해진 칸 — 이미 있으면 그대로 둡니다
 const ADD_COLS = [
+  ["accounts", "agreed_at TEXT"],
   ["workspaces", "sp_ver INTEGER NOT NULL DEFAULT 0"],
   ["workspaces", "plan TEXT NOT NULL DEFAULT 'basic'"],
   ["workspaces", "modules TEXT NOT NULL DEFAULT '[]'"],
@@ -402,7 +403,7 @@ const PUBLIC = {
     if (!ID_RE.test(lid)) return fail("bad-id");
     if (!pwValid(b.pw)) return fail("bad-pw");
     if (await loginTaken(db, lid)) return fail("taken", 409);
-    const now = iso(), mid = uid("m"), pw = await makePw(b.pw);
+    const now = iso(), mid = uid("m"), pw = await makePw(b.pw), agreed = b.agree ? now : null;   // 약관 동의 일시
     try {
       if (mode === "new") {
         const wsName = clip(b.workspace, 40);
@@ -421,7 +422,7 @@ const PUBLIC = {
           const member = memberData(mid, lid, name, "admin", wsName, now);
           await db.batch([
             db.prepare("INSERT INTO workspaces(id,name,status,admin_login,contact,note,invite,created_at,approved_at,last_active,plan,modules,plan_until) VALUES(?1,?2,'active',?3,?4,?5,?6,?7,?7,?7,?8,?9,?10)").bind(ws, wsName, lid, contact, note, await freshInvite(db), now, st.plan, JSON.stringify(st.modules), st.until),
-            db.prepare("INSERT INTO accounts(login_id,ws,member_id,pw,status,role,is_owner,name,contact,note,created_at) VALUES(?1,?2,?3,?4,'active','admin',0,?5,?6,?7,?8)").bind(lid, ws, mid, pw, name, contact, note, now),
+            db.prepare("INSERT INTO accounts(login_id,ws,member_id,pw,status,role,is_owner,name,contact,note,created_at,agreed_at) VALUES(?1,?2,?3,?4,'active','admin',0,?5,?6,?7,?8,?9)").bind(lid, ws, mid, pw, name, contact, note, now, agreed),
             ...seedWorkspace(db, ws, wsName, [wsName, "기타"], member),
             ...(code ? [db.prepare("UPDATE adm_code SET uses=uses+1 WHERE code=?1").bind(code.code)] : []),
             admLog(db, "auto-open", { id: ws, name: wsName }, code ? `베타 코드 ${code.code}로 바로 개설` : "자동 개설")
@@ -432,7 +433,7 @@ const PUBLIC = {
         if (c && Number(c.n) >= MAX_PENDING_WS) return fail("busy", 429);
         await db.batch([
           db.prepare("INSERT INTO workspaces(id,name,status,admin_login,contact,note,invite,created_at) VALUES(?1,?2,'pending',?3,?4,?5,NULL,?6)").bind(ws, wsName, lid, contact, note, now),
-          db.prepare("INSERT INTO accounts(login_id,ws,member_id,pw,status,role,is_owner,name,contact,note,created_at) VALUES(?1,?2,?3,?4,'pending','admin',0,?5,?6,?7,?8)").bind(lid, ws, mid, pw, name, contact, note, now)
+          db.prepare("INSERT INTO accounts(login_id,ws,member_id,pw,status,role,is_owner,name,contact,note,created_at,agreed_at) VALUES(?1,?2,?3,?4,'pending','admin',0,?5,?6,?7,?8,?9)").bind(lid, ws, mid, pw, name, contact, note, now, agreed)
         ]);
         return json({ ok: true, status: "pending", mode, workspace: wsName });
       }
@@ -441,7 +442,7 @@ const PUBLIC = {
       if (!w || w.status !== "active") return fail("bad-code", 404);
       const c = await db.prepare("SELECT COUNT(*) AS n FROM accounts WHERE ws=?1 AND status='pending'").bind(w.id).first();
       if (c && Number(c.n) >= MAX_PENDING_JOIN) return fail("busy", 429);
-      await db.prepare("INSERT INTO accounts(login_id,ws,member_id,pw,status,role,is_owner,name,contact,note,created_at) VALUES(?1,?2,?3,?4,'pending','staff',0,?5,?6,?7,?8)").bind(lid, w.id, mid, pw, name, contact, note, now).run();
+      await db.prepare("INSERT INTO accounts(login_id,ws,member_id,pw,status,role,is_owner,name,contact,note,created_at,agreed_at) VALUES(?1,?2,?3,?4,'pending','staff',0,?5,?6,?7,?8,?9)").bind(lid, w.id, mid, pw, name, contact, note, now, agreed).run();
       return json({ ok: true, status: "pending", mode, workspace: w.name });
     } catch (e) { if (isUnique(e)) return fail("taken", 409); throw e; }
   },
@@ -2831,6 +2832,13 @@ const ADMIN_API = {
   async "admin/overview"(db, me, b, req, url) {
     const no = ownerOnly(me); if (no) return no;
     const now = Date.now(), ym = kstToday().slice(0, 7), prevYm = addDaysS(ym + "-01", -1).slice(0, 7);
+    // 보관 기간이 지난 기록 정리 — 반려된 가입 신청(신청 후 30일), 처리 끝난 문의(3년)
+    const cut30 = new Date(now - 30 * 864e5).toISOString(), cut3y = new Date(now - 3 * 365 * 864e5).toISOString();
+    await db.batch([
+      db.prepare("DELETE FROM accounts WHERE ws IN (SELECT id FROM workspaces WHERE status='rejected' AND created_at<?1)").bind(cut30),
+      db.prepare("DELETE FROM workspaces WHERE status='rejected' AND created_at<?1").bind(cut30),
+      db.prepare("DELETE FROM fb WHERE status='done' AND COALESCE(updated_at,created_at)<?1").bind(cut3y)
+    ]);
     const [wsR, cntR, seenR, entR, resR, jobR, ordR, sumR, logR] = await db.batch([
       db.prepare("SELECT w.*, a.name AS admin_name, a.contact AS admin_contact FROM workspaces w LEFT JOIN accounts a ON a.login_id=w.admin_login ORDER BY w.created_at DESC"),
       db.prepare("SELECT ws, role, COUNT(*) AS n FROM accounts WHERE status IN ('active','disabled') GROUP BY ws, role"),
@@ -3085,10 +3093,14 @@ const ADMIN_API = {
 Object.assign(PRIVATE, ADMIN_API);
 
 /* ───────── 진입점 ───────── */
+const CANON_HOST = "myworks.ai.kr", MOVE_HOSTS = new Set(["myworkspro.pages.dev", "www.myworks.ai.kr"]);
 export async function onRequest(context) {
   const { request, env, next } = context;
   const url = new URL(request.url);
   const isMcp = url.pathname === "/mcp" || url.pathname === "/mcp/";
+  // 주소 통일 — 예전 주소와 www는 myworks.ai.kr로 옮깁니다. 서버(API)와 AI 접속(MCP)은 예전 주소로도 그대로 받습니다.
+  if (MOVE_HOSTS.has(url.hostname) && !url.pathname.startsWith("/api/") && !isMcp && (request.method === "GET" || request.method === "HEAD"))
+    return new Response(null, { status: 301, headers: { location: "https://" + CANON_HOST + url.pathname + url.search, "cache-control": "max-age=86400" } });
   if (!url.pathname.startsWith("/api/") && !isMcp) return next();
   if (!env.DB) return fail("db-not-bound", 503, { hint: "Pages 설정 → Bindings에서 D1 데이터베이스를 변수 이름 DB로 연결하세요." });
   const db = env.DB;
