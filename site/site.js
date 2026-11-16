@@ -43,7 +43,7 @@
     if(seats>0){lines.push(["추가 좌석 "+seats+"명",seats*P.seat]); sum+=seats*P.seat;}
     var note="";
     if(pro&&svcs.length===4){var all=year?P.allYear:P.all; var base=sum-seats*P.seat; if(all<base){sum=all+seats*P.seat; lines=[["마이웍스 올인원 (프로 + 서비스 4개)",all]]; if(seats>0)lines.push(["추가 좌석 "+seats+"명",seats*P.seat]); note="프로와 서비스 4개를 전부 고르면 올인원 요금이 적용됩니다.";}}
-    if(!pro&&svcs.length){note="분야 서비스는 프로에서 켭니다. 프로를 함께 계산에 넣어 주세요.";}
+    if(!pro&&svcs.length){note="확장판은 프로에서 켭니다. 프로를 함께 계산에 넣어 주세요.";}
     if(!lines.length){note="베이직은 무료입니다. 프로와 서비스를 골라 보세요.";}
     total.textContent=won(sum)+(year?" (연 결제)":"");
     document.getElementById("c-lines").innerHTML=lines.map(function(l){return "<li><span>"+l[0]+"</span><span>"+won(l[1])+"</span></li>";}).join("");
