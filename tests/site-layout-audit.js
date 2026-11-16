@@ -11,7 +11,10 @@ const OUT = process.argv[2] || __dirname + "/out";
 const SHOTS = process.argv[3] === "shots";
 fs.mkdirSync(OUT, { recursive: true });
 const BASE = "http://localhost:8099";
-const PAGES = ["/", "/store", "/building", "/tax", "/seller", "/pricing", "/guide", "/notice", "/start", "/terms", "/privacy"];
+// 점검할 페이지는 sitemap.xml에서 읽는다(새 페이지·글이 생기면 자동으로 포함). 세 번째 인자로 주소 일부를 주면 그 페이지만 본다.
+const path = require("path");
+const ONLY = process.argv[4] || "";
+const PAGES = [...fs.readFileSync(path.join(__dirname, "..", "sitemap.xml"), "utf8").matchAll(/<loc>https?:\/\/[^/]+([^<]*)<\/loc>/g)].map((m) => m[1] || "/").concat(["/404"]).filter((p) => !ONLY || p.includes(ONLY));
 const VPS = [
   { n: "phone-360", w: 360, h: 760, touch: true },
   { n: "phone-390", w: 390, h: 844, touch: true },
@@ -66,7 +69,7 @@ const VPS = [
           for (const el of document.querySelectorAll("a, button, input, select, summary, label[for]")) {
             if (!visible(el)) continue;
             if (getComputedStyle(el).pointerEvents === "none") continue;
-            if (el.closest(".doc") && el.tagName === "A" && getComputedStyle(el).display === "inline") continue; // 본문 속 글 링크는 제외
+            if (el.tagName === "A" && getComputedStyle(el).display === "inline" && el.closest(".doc, p, li, td, dd")) continue; // 본문 속 글 링크는 제외
             if (el.tagName === "INPUT" && el.closest("label")) { const lr = el.closest("label").getBoundingClientRect(); if (lr.height >= 40) continue; } // 줄 전체가 눌리는 체크박스
             const rc = el.getBoundingClientRect();
             if (rc.height < 32 || rc.width < 32) issues.push({ k: "small-tap", d: label(el) + ` ${Math.round(rc.width)}x${Math.round(rc.height)}` });

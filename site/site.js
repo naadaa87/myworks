@@ -15,6 +15,13 @@
   // 가이드 목차: 좁은 화면에서는 접어 둔다
   if(window.matchMedia && window.matchMedia("(max-width:900px)").matches){ document.querySelectorAll("details.guide-toc").forEach(function(d){ d.removeAttribute("open"); d.querySelectorAll("a").forEach(function(a){ a.addEventListener("click",function(){ d.removeAttribute("open"); }); }); }); }
 })();
+// 블로그: 주제별로 보기
+(function(){
+  var btns=[].slice.call(document.querySelectorAll("[data-filter]")), list=document.getElementById("post-list"); if(!btns.length||!list) return;
+  function apply(k){ btns.forEach(function(b){ var on=b.getAttribute("data-filter")===k; b.classList.toggle("on",on); b.setAttribute("aria-pressed",on?"true":"false"); });
+    [].slice.call(list.children).forEach(function(c){ c.hidden = k!=="all" && c.getAttribute("data-cat")!==k; }); }
+  btns.forEach(function(b){ b.addEventListener("click",function(){ apply(b.getAttribute("data-filter")); }); });
+})();
 // 가격 계산기 — 숫자는 서버 상수와 같이 바꾼다
 (function(){
   var P={"pro":12000,"proYear":9900,"svc":{"store":19000,"building":19000,"tax":9900,"seller":19000},"names":{"store":"마이스토어","building":"마이빌딩","tax":"마이택스","seller":"마이셀러"},"seat":4900,"disc":0.1,"all":49000,"allYear":39900};

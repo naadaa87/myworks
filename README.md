@@ -28,6 +28,13 @@
 | `/app/#signup` | 회원가입 화면 바로 열기 | 홈페이지 ‘시작하기 → 회원가입 하러 가기’가 이 주소로 연결됩니다 |
 | `/admin` → `/app/#/admin` | 총괄관리(운영자 전용) | 운영자 계정으로 로그인해야 열립니다. `/app/#/admin/fb`처럼 탭을 바로 열 수도 있습니다 |
 | `/api/*` · `/mcp` | 서버 | 변동 없음 |
+| `/features` · `/faq` · `/about` | 기본 기능 · 자주 묻는 질문 · 회사 소개 | 2026-11-16 추가 |
+| `/blog/` · `/blog/<글 주소>` | 블로그(업무 노트) | 글은 `src/site/content.js`에 있습니다. 새 글을 더하면 목록·사이트맵·RSS에 자동으로 들어갑니다 |
+| `/sitemap.xml` · `/rss.xml` · `/robots.txt` | 검색엔진용 파일 | 생성기가 함께 만듭니다. 없는 주소는 `404.html`이 열립니다 |
+
+**검색엔진 등록** — 네이버 서치어드바이저 소유확인 태그(`naver-site-verification`)는 생성기의 `NAVER_VERIFY` 상수로 모든 페이지 `<head>`에 들어갑니다. 구글 서치콘솔과 Bing은 DNS로 확인했습니다. 네이버에는 `https://myworks.ai.kr/sitemap.xml`과 `https://myworks.ai.kr/rss.xml`을 제출합니다. 페이지마다 대표 주소(canonical), 공유용 정보(Open Graph), 구조화 데이터(JSON-LD)를 넣습니다.
+
+**블로그 글 쓰는 법** — `src/site/content.js`의 `ARTICLES` 맨 앞에 글을 하나 더하고(`slug`, `cat`, `date`, `title`, `desc`, `tags`, `svc`, `body`) 생성기를 다시 돌립니다. 기능 설명은 이 README와 어긋나지 않게, 준비 중인 기능은 ‘예정’이라고 적습니다. 수치는 출처가 있는 것만 쓰고 `refs`에 남깁니다.
 
 홈페이지 파일은 저장소 루트(`index.html`, `store.html`, `pricing.html` … `site/`)에, 앱은 `app/index.html`에 있습니다. 홈페이지 문구는 `src/site/gen.js`를 고쳐 다시 생성하거나, 급하면 HTML 파일을 직접 고쳐도 됩니다(다음 생성 때 덮어쓰이므로 `gen.js`에도 반영해 두세요).
 
@@ -465,6 +472,9 @@ _redirects                 Cloudflare Pages 경로 규칙
 app/index.html             앱 전체 (HTML + CSS + JS 단일 파일 — 코어·스페이스·아웃소싱·커머스·확인 링크·총괄관리 화면)
 functions/_middleware.js   서버 — 회원가입·승인·로그인·동기화·등급·모듈·AI 접속(MCP)·확인 링크·총괄관리 (Cloudflare Pages Functions + D1)
 src/site/gen.js            홈페이지 생성기 (node src/site/gen.js . README.md 로 다시 생성)
+src/site/content.js        블로그 글과 자주 묻는 질문 (생성기가 읽어 /blog/, /faq, RSS, 사이트맵을 만든다)
+blog/ features.html faq.html about.html 404.html   블로그 · 기본 기능 · 자주 묻는 질문 · 회사 소개 · 없는 주소 안내
+sitemap.xml rss.xml robots.txt favicon.ico          검색엔진용 파일과 아이콘
 sample-claude.json         클로드 연동 형식 예시 파일
 README.md                  이 문서
 ```

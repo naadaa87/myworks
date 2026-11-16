@@ -13,30 +13,34 @@ const BIZ = {
   tel: "010-2384-9580", email: "spaceblank0100@gmail.com",
   mailorder: "신고 진행 중", host: "myworks.ai.kr", hosting: "Cloudflare, Inc.",
 };
-const DATE = "2026. 11. 2.";
+const DATE = "2026. 11. 16.";
+const ISO_DATE = "2026-11-16";
+// 검색엔진 소유확인 — 네이버 서치어드바이저(HTML 태그 방식). 구글·Bing은 DNS로 확인해 태그가 필요 없다.
+const NAVER_VERIFY = "586c9b2fa411e4a5f8fc39b971e52b7b6e9b4bed";
+const { CATS, ARTICLES, FAQ } = require("./content.js");
 
 // ---------- 공통 데이터 ----------
 const SVC = [
-  { id: "store", name: "마이스토어", color: "#1F7A5A", who: "자영업자 · 점주 · 공간 운영자", one: "매장과 공간을 하루 단위로 굴린다",
+  { id: "store", seoTitle: "마이스토어 — 매장·공간대여 운영 관리", seoDesc: "파티룸·스터디룸 같은 공간대여와 매장 운영을 위한 마이웍스의 분야 서비스. 예약, 청소 배정과 확인, 근무자 체크리스트, 시설, 지점별 손익을 한 흐름으로 관리합니다.", name: "마이스토어", color: "#1F7A5A", who: "자영업자 · 점주 · 공간 운영자", one: "매장과 공간을 하루 단위로 굴린다",
     line: "지점 · 예약 · 일 마감 · 근무자 · 점검 · 리뷰를 한 흐름으로", status: "part",
     now: "공간 대관(예약 → 청소 배정·확인 → 시설 → 손익)은 지금 쓸 수 있습니다.", next: "일 마감 · 근무자 체크리스트 · 점검 · 리뷰는 2026년 12월 추가 예정입니다.",
     cases: ["파티룸·스터디룸처럼 예약으로 돌아가는 공간을 두세 곳 운영한다", "직원 없이 혼자 매장을 보며 저녁에 그날 매출을 정리한다", "청소·개점·마감을 근무자에게 맡기되 고객 정보는 보여 주고 싶지 않다"],
     features: [["지점", "매장·공간 단위 운영. 영업시간, 규칙, 담당, 채널"], ["예약·대관", "달력에서 바로 등록. 채널별 수수료가 자동 계산된다(네이버·스페이스클라우드·직접 등)"], ["일 마감", "카드·현금·배달·예약 매출과 시재를 적으면 돈 메뉴와 세금 준비로 흘러간다"], ["근무자", "교대·체크리스트·시재 인계. 근무자 화면에는 예약자 이름·연락처·금액이 보이지 않는다"], ["점검", "청소·안전·위생 체크리스트, 소모품 발주 알림, 시설 고장 신고와 처리"], ["리뷰·문의", "플랫폼 리뷰·문의를 모아 두고, 답글 초안은 AI가 쓰고 사람이 확정한다"]],
     img: { src: "space-pnl.jpg", alt: "마이스토어 공간 대관 손익 화면 — 지점별 매출, 채널 수수료, 영업이익" },
     with: ["tax", "seller"], price: "월 19,000원 · 지점 3개 포함 · 추가 지점 1개당 5,000원" },
-  { id: "building", name: "마이빌딩", color: "#2B4FD6", who: "소규모 건물주 · 임대인 · 상가 운영자", one: "임대차와 건물 관리를 혼자서 챙긴다",
+  { id: "building", seoTitle: "마이빌딩 — 소규모 건물·임대관리", seoDesc: "소규모 건물주와 임대인을 위한 임대관리 서비스. 호실, 임대차계약 만기 알림, 월세·관리비 수납, 공실, 법정 점검을 달력과 알림으로 챙깁니다. 2027년 1분기 출시 예정.", name: "마이빌딩", color: "#2B4FD6", who: "소규모 건물주 · 임대인 · 상가 운영자", one: "임대차와 건물 관리를 혼자서 챙긴다",
     line: "호실 · 계약 · 수납 · 공실 · 시설 점검 · 정산을 달력과 알림으로", status: "soon",
     now: "", next: "2027년 1분기 출시 예정입니다. 비공개 베타에 먼저 초대합니다.",
     cases: ["2~3층짜리 건물에 상가와 사무실 호실 몇 개를 직접 관리한다", "월세 입금은 통장을 보고 확인하고, 계약 만기는 수첩에 적어 둔다", "소방 점검 보고를 한 번 놓쳐 과태료를 낸 적이 있다"],
     features: [["건물·호실", "건물마다 호실·면적·용도·임차인. 공실은 한눈에"], ["임대차계약", "기간·보증금·월세·관리비·인상 조건. 만기 90/60/30일 전 알림, 갱신요구권 안내"], ["수납", "월세·관리비 고지서 발행, 입금 확인, 미납 알림. 임차인은 확인 링크로 고지서와 영수증을 본다"], ["공실", "공실 → 광고 → 문의 → 계약까지 단계 관리. 중개사 공유 링크"], ["시설·점검", "소방·승강기·전기 등 법정 점검 주기를 달력에 올리고, 수리는 업체에 견적 요청"], ["정산·세금", "공과금 배분, 세금계산서 발행 체크, 임대소득 자료를 마이택스로"]],
     img: null, with: ["tax"], price: "월 19,000원 · 건물 3개·호실 30개 포함 · 추가 호실 10개당 5,000원" },
-  { id: "tax", name: "마이택스", color: "#6B4ED6", who: "1인 사업자 · 프리랜서 · 소상공인", one: "세금 낼 준비를 평소에 끝내 둔다",
+  { id: "tax", seoTitle: "마이택스 — 1인 사업자 세금 준비·증빙 관리", seoDesc: "1인 사업자·프리랜서·소상공인의 세금 준비를 돕는 서비스. 증빙함, 세금 달력, 예상 세금, 세무사 공유를 제공하며 신고·대리는 하지 않습니다. 2027년 1분기 출시 예정.", name: "마이택스", color: "#6B4ED6", who: "1인 사업자 · 프리랜서 · 소상공인", one: "세금 낼 준비를 평소에 끝내 둔다",
     line: "증빙함 · 세금 달력 · 예상 세금 · 절세 체크 · 세무사 공유", status: "soon",
     now: "", next: "2027년 1분기 출시 예정입니다. 비공개 베타에 먼저 초대합니다.",
     cases: ["부가세 신고 때마다 영수증을 찾느라 이틀을 쓴다", "세무사에게 자료를 카톡으로 보내는데 빠진 것이 늘 있다", "매장 매출과 온라인 판매 매출을 따로 집계하고 있다"],
     features: [["증빙함", "세금계산서·현금영수증·카드 매입을 한곳에. 사진을 올리면 항목을 추천한다"], ["세금 달력", "부가세·종합소득세·원천세·4대보험 일정을 내 사업자 유형에 맞게 알린다"], ["예상 세금", "이번 분기 낼 돈을 대략 보여 주고, 미리 떼어 둘 금액을 제안한다(안내용 추정치)"], ["절세 체크", "노란우산·연금계좌·사업용 카드 등록·적격증빙 같은 기본 점검표"], ["세무사 공유", "내 세무사를 읽기 전용으로 초대하고, 기간별 자료를 묶어 보낸다"], ["하지 않는 것", "신고·대리·세무 상담은 하지 않는다. 자료 정리와 일정, 준비 상태까지가 마이택스의 일이다"]],
     img: null, with: ["store", "building", "seller"], price: "월 9,900원 · 세무사 초대 무료 · 증빙 보관 5GB" },
-  { id: "seller", name: "마이셀러", color: "#0E8A8A", who: "1인 온라인 판매자 · 부업 셀러", one: "주문·재고·발송·정산을 하루 한 번에 끝낸다",
+  { id: "seller", seoTitle: "마이셀러 — 온라인 셀러 주문·재고·발송 관리", seoDesc: "스마트스토어·쿠팡 등 여러 채널의 주문 엑셀을 한곳에 모으고 재고, 발송, 문의, 채널별 손익을 관리하는 1인 온라인 판매자용 서비스입니다.", name: "마이셀러", color: "#0E8A8A", who: "1인 온라인 판매자 · 부업 셀러", one: "주문·재고·발송·정산을 하루 한 번에 끝낸다",
     line: "채널 · 상품 · 주문 · 재고 · 수발주 · 발송 · 문의 · 손익", status: "part",
     now: "주문 엑셀 업로드, 상품·재고, 발송 작업자 화면, 문의, 채널별 손익은 지금 쓸 수 있습니다.", next: "송장 일괄 처리 · 수발주 · 정산 대사는 2026년 12월 추가 예정입니다.",
     cases: ["스마트스토어와 쿠팡 주문을 엑셀로 내려받아 합치고 송장을 다시 올린다", "한쪽에서 품절된 상품이 다른 쪽에서 팔려 취소가 난다", "정산이 맞는지 확인할 시간이 없다"],
@@ -57,7 +61,28 @@ const PRICING = {
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 const won = (n) => n.toLocaleString("ko-KR") + "원";
 
-function head(title, desc, extra = "") {
+// 구조화 데이터(JSON-LD)
+const ld = (obj) => `<script type="application/ld+json">${JSON.stringify(obj).replace(/</g, "\\u003c")}</script>`;
+const ORG_ID = SITE + "/#organization";
+const ORG_LD = {
+  "@type": "Organization", "@id": ORG_ID, name: "마이웍스", legalName: BIZ.name, alternateName: ["MyWorks", "㈜블랭크"], url: SITE + "/",
+  logo: { "@type": "ImageObject", url: SITE + "/site/img/icon-512.png", width: 512, height: 512 },
+  email: BIZ.email, telephone: "+82-" + BIZ.tel.replace(/^0/, ""),
+  address: { "@type": "PostalAddress", addressCountry: "KR", addressRegion: "서울특별시", addressLocality: "강남구", streetAddress: "영동대로 602, 6층 제트71" },
+  founder: { "@type": "Person", name: BIZ.ceo },
+};
+const SITE_LD = { "@type": "WebSite", "@id": SITE + "/#website", name: "마이웍스", alternateName: ["MyWorks", "마이웍스 업무관리"], url: SITE + "/", inLanguage: "ko-KR", publisher: { "@id": ORG_ID } };
+const APP_LD = {
+  "@type": "SoftwareApplication", name: "마이웍스", applicationCategory: "BusinessApplication", operatingSystem: "Web",
+  description: "1인 사업자·프리랜서·소규모 팀을 위한 업무관리 플랫폼. 오늘 결정할 것, 일, 거래, 돈, 사람을 한곳에서 관리합니다.",
+  url: SITE + "/", inLanguage: "ko-KR", publisher: { "@id": ORG_ID },
+  offers: { "@type": "Offer", price: "0", priceCurrency: "KRW", description: "베이직 — 기본 기능 무료" },
+};
+const crumbsLd = (items) => ({ "@type": "BreadcrumbList", itemListElement: items.map(([name, url], i) => ({ "@type": "ListItem", position: i + 1, name, item: SITE + url })) });
+const graph = (...nodes) => ld({ "@context": "https://schema.org", "@graph": nodes });
+
+function head(title, desc, extra = "", opt = {}) {
+  const img = SITE + (opt.image || "/site/img/og.png");
   return `<!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -65,17 +90,33 @@ function head(title, desc, extra = "") {
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>${esc(title)}</title>
 <meta name="description" content="${esc(desc)}">
-<meta property="og:title" content="${esc(title)}">
+<meta name="robots" content="${opt.noindex ? "noindex,follow" : "index,follow,max-image-preview:large,max-snippet:-1"}">
+<meta name="naver-site-verification" content="${NAVER_VERIFY}">
+<meta property="og:site_name" content="마이웍스">
+<meta property="og:locale" content="ko_KR">
+<meta property="og:type" content="${opt.type || "website"}">
+<meta property="og:title" content="${esc(opt.ogTitle || title)}">
 <meta property="og:description" content="${esc(desc)}">
-<meta property="og:type" content="website">
-<meta property="og:image" content="${SITE}/site/img/og.png">
+<meta property="og:image" content="${img}">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="${esc(opt.ogTitle || title)}">
+<meta name="twitter:description" content="${esc(desc)}">
+<meta name="twitter:image" content="${img}">
 <meta name="theme-color" content="#FF4712">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='4' y='9' width='24' height='5' fill='%23FF4712'/%3E%3Crect x='4' y='18' width='16' height='5' fill='%23FF4712'/%3E%3C/svg%3E">
+<meta name="format-detection" content="telephone=no">
+<link rel="icon" href="/favicon.ico" sizes="48x48">
+<link rel="icon" type="image/svg+xml" href="/site/img/icon.svg">
+<link rel="apple-touch-icon" href="/site/img/apple-touch-icon.png">
+<link rel="alternate" type="application/rss+xml" title="마이웍스 블로그" href="/rss.xml">
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 <link rel="stylesheet" href="/site/site.css">
 ${extra}
 </head>
-<body>`;
+<body>
+<a class="skip" href="#main">본문으로 건너뛰기</a>`;
 }
 
 function header(active = "") {
@@ -88,6 +129,7 @@ function header(active = "") {
     <nav class="nav" id="site-nav">
       <div class="nav-group"><button type="button" class="nav-label" aria-expanded="false" aria-haspopup="true">서비스 <svg width="10" height="6" viewBox="0 0 10 6" aria-hidden="true"><path d="M1 1l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></button>
         <div class="menu">
+          <a href="/features"${a("features")}><i class="dot" style="background:#FF4712"></i>기본 기능</a>
           <a href="/store"${a("store")}><i class="dot" style="background:#1F7A5A"></i>마이스토어</a>
           <a href="/building"${a("building")}><i class="dot" style="background:#2B4FD6"></i>마이빌딩</a>
           <a href="/tax"${a("tax")}><i class="dot" style="background:#6B4ED6"></i>마이택스</a>
@@ -95,8 +137,9 @@ function header(active = "") {
         </div>
       </div>
       <a href="/pricing"${a("pricing")}>가격</a>
+      <a href="/blog/"${a("blog")}>블로그</a>
       <a href="/guide"${a("guide")}>가이드</a>
-      <a href="/notice"${a("notice")}>공지</a>
+      <a href="/faq"${a("faq")}>자주 묻는 질문</a>
       <a href="/app/" class="login">로그인</a>
       <a href="/start" class="btn primary small">시작하기</a>
     </nav>
@@ -115,14 +158,15 @@ function footer() {
       </div>
       <div>
         <b>서비스</b>
-        <a href="/store">마이스토어</a><a href="/building">마이빌딩</a><a href="/tax">마이택스</a><a href="/seller">마이셀러</a>
+        <a href="/features">기본 기능</a><a href="/store">마이스토어</a><a href="/building">마이빌딩</a><a href="/tax">마이택스</a><a href="/seller">마이셀러</a><a href="/pricing">가격</a>
       </div>
       <div>
         <b>안내</b>
-        <a href="/pricing">가격</a><a href="/guide">가이드</a><a href="/notice">공지</a><a href="/start">시작하기</a>
+        <a href="/start">시작하기</a><a href="/guide">가이드</a><a href="/faq">자주 묻는 질문</a><a href="/blog/">블로그</a><a href="/notice">공지</a>
       </div>
       <div>
         <b>회사</b>
+        <a href="/about">회사 소개</a>
         <span>㈜블랭크 · 대표 최시준</span>
         <a href="mailto:${BIZ.email}">${BIZ.email}</a>
         <a href="tel:${BIZ.tel.replace(/-/g, "")}">${BIZ.tel}</a>
@@ -153,14 +197,20 @@ function footer() {
 
 // 검색엔진용: 페이지마다 대표 주소(canonical)를 붙이고, 만든 페이지 목록으로 sitemap.xml을 만든다.
 const PAGES = [];
-function page({ file, title, desc, active, body, extra = "" }) {
-  const urlPath = file === "index.html" ? "/" : "/" + file.replace(/\.html$/, "");
-  PAGES.push(urlPath);
-  extra = `<link rel="canonical" href="${SITE}${urlPath}">\n<meta property="og:url" content="${SITE}${urlPath}">` + (extra ? "\n" + extra : "");
-  const html = head(title, desc, extra) + header(active) + `\n<main>${body}\n</main>` + footer();
+const urlOf = (file) => file === "index.html" ? "/" : /\/index\.html$/.test(file) ? "/" + file.replace(/index\.html$/, "") : "/" + file.replace(/\.html$/, "");
+// crumbs: [[이름, 주소], …] — 화면 위 경로와 구조화 데이터에 함께 쓴다(홈은 자동으로 붙는다)
+function page({ file, title, desc, active, body, extra = "", lastmod = ISO_DATE, crumbs = null, ldNodes = [], type, ogTitle, noindex = false, priority }) {
+  const urlPath = urlOf(file);
+  if (!noindex) PAGES.push({ url: urlPath, lastmod, priority: priority || (urlPath === "/" ? "1.0" : /^\/blog\/./.test(urlPath) ? "0.7" : "0.8") });
+  const nodes = [...ldNodes];
+  if (crumbs) nodes.push(crumbsLd([["홈", "/"], ...crumbs]));
+  extra = `<link rel="canonical" href="${SITE}${urlPath}">\n<meta property="og:url" content="${SITE}${urlPath}">` + (nodes.length ? "\n" + graph(...nodes) : "") + (extra ? "\n" + extra : "");
+  const html = head(title, desc, extra, { type, ogTitle, noindex }) + header(active) + `\n<main id="main">${body}\n</main>` + footer();
+  fs.mkdirSync(path.dirname(path.join(OUT, file)), { recursive: true });
   fs.writeFileSync(path.join(OUT, file), html);
   console.log("written", file, html.length);
 }
+const crumbNav = (items) => `<nav class="crumbs" aria-label="현재 위치"><a href="/">홈</a>${items.map(([n, u], i) => i === items.length - 1 ? `<span aria-current="page">${esc(n)}</span>` : `<a href="${u}">${esc(n)}</a>`).join("")}</nav>`;
 
 const svcCard = (s, full = false) => `
 <a class="svc-card" href="/${s.id}">
@@ -171,6 +221,32 @@ const svcCard = (s, full = false) => `
   <span class="more">자세히 →</span>
 </a>`;
 const statusChip = (s) => s.status === "now" ? '<span class="chip ok">사용 가능</span>' : s.status === "part" ? '<span class="chip ok">일부 사용 가능</span>' : '<span class="chip soon">2027년 1분기</span>';
+
+// ---------- 블로그 공통 ----------
+const fmtDate = (iso) => { const [y, m, d] = iso.split("-").map(Number); return `${y}. ${m}. ${d}.`; };
+const plain = (html) => html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+const readMin = (html) => Math.max(2, Math.round(plain(html).length / 550));
+const postCard = (a) => `
+<a class="post-card" href="/blog/${a.slug}" data-cat="${a.cat}">
+  <span class="post-cat">${esc(CATS[a.cat])}</span>
+  <b>${esc(a.title)}</b>
+  <p>${esc(a.desc)}</p>
+  <span class="post-meta"><time datetime="${a.date}">${fmtDate(a.date)}</time> · 읽는 시간 ${readMin(a.body)}분</span>
+</a>`;
+const postsFor = (id, n = 3) => ARTICLES.filter((a) => a.svc.includes(id)).slice(0, n);
+const relatedPosts = (id, title = "함께 읽으면 좋은 글") => {
+  const list = postsFor(id);
+  return list.length ? `
+<section class="sec">
+  <div class="wrap">
+    <h2>${title}</h2>
+    <div class="post-grid">${list.map(postCard).join("")}</div>
+    <a class="text-link" href="/blog/">블로그 전체 보기 →</a>
+  </div>
+</section>` : "";
+};
+const faqHtml = (items) => `<div class="faq">${items.map(([q, a]) => `<details><summary>${esc(q)}</summary><p>${esc(a)}</p></details>`).join("")}</div>`;
+const faqLd = (items) => ({ "@type": "FAQPage", mainEntity: items.map(([q, a]) => ({ "@type": "Question", name: q, acceptedAnswer: { "@type": "Answer", text: a } })) });
 
 // ---------- 홈 ----------
 const redirectScript = `<script>
@@ -183,14 +259,16 @@ const redirectScript = `<script>
 
 page({
   file: "index.html", active: "home",
-  title: "마이웍스 — 혼자 하는 일을 끝까지 처리하는 일터",
-  desc: "1인 사업자·프리랜서·소규모 팀을 위한 업무 플랫폼. 오늘 결정할 것, 일, 거래, 돈, 사람을 한곳에 두고 매장·건물·세금·판매는 필요한 것만 켭니다.",
+  title: "마이웍스 — 1인 사업자·프리랜서·소규모 팀을 위한 업무관리 플랫폼",
+  ogTitle: "마이웍스 — 혼자 하는 일을 끝까지 처리하는 일터",
+  desc: "오늘 결정할 것, 일, 거래, 돈, 사람을 한곳에서 관리하는 업무관리 서비스. 견적 승인은 링크 하나로, 근무자에게는 필요한 것만. 매장·공간대여, 건물 임대, 세금, 온라인 판매는 필요한 것만 켭니다. 기본 기능 무료.",
   extra: redirectScript,
+  ldNodes: [ORG_LD, SITE_LD, APP_LD],
   body: `
 <section class="hero">
   <div class="wrap hero-grid">
     <div class="hero-text">
-      <p class="kicker">1인 사업자 · 프리랜서 · 소규모 팀을 위한</p>
+      <p class="kicker">1인 사업자 · 프리랜서 · 소규모 팀을 위한 업무관리 플랫폼</p>
       <h1>혼자 하는 일을<br>끝까지 처리하는 일터.</h1>
       <p class="lead">오늘 결정할 것, 일, 거래, 돈, 사람을 한곳에 둡니다. 매장·건물·세금·판매는 필요한 것만 켭니다. 함께 일할 사람은 역할에 맞게 부르고, 고객은 계정 없이 링크 하나로 승인합니다.</p>
       <div class="cta">
@@ -223,6 +301,21 @@ page({
 
 <section class="sec alt">
   <div class="wrap">
+    <p class="kicker">이런 분들이 씁니다</p>
+    <h2>혼자서, 또는 몇 명이서 여러 일을 굴리는 분</h2>
+    <div class="who-grid">
+      <a class="who" href="/store"><b>공간대여·파티룸 운영자</b><p>예약이 들어오면 청소 일정이 생기고, 근무자는 폰으로 체크리스트를 냅니다.</p><span class="more">마이스토어 →</span></a>
+      <a class="who" href="/features#deal"><b>프리랜서·외주 수주</b><p>견적은 링크로 승인받고, 납품·청구·입금까지 한 줄로 이어집니다.</p><span class="more">거래 기능 →</span></a>
+      <a class="who" href="/seller"><b>1인 온라인 셀러</b><p>채널별 주문 엑셀을 올리면 한 표로 모이고, 발송하면 재고가 빠집니다.</p><span class="more">마이셀러 →</span></a>
+      <a class="who" href="/features#work"><b>작은 팀의 대표</b><p>맡기고, 검수 요청을 받고, 승인으로 끝냅니다. 협력사에게는 맡은 일만 보입니다.</p><span class="more">일 기능 →</span></a>
+      <a class="who" href="/building"><b>작은 건물 임대인</b><p>계약 만기, 월세 입금, 법정 점검을 달력과 알림으로 챙깁니다. 2027년 1분기 예정.</p><span class="more">마이빌딩 →</span></a>
+      <a class="who" href="/tax"><b>세금 준비가 버거운 사장님</b><p>증빙을 평소에 모아 두고 세무사에게 읽기 전용으로 보여 줍니다. 2027년 1분기 예정.</p><span class="more">마이택스 →</span></a>
+    </div>
+  </div>
+</section>
+
+<section class="sec">
+  <div class="wrap">
     <p class="kicker">분야 서비스</p>
     <h2>필요한 것만 켭니다</h2>
     <p class="lead">매장을 보면서 건물도 관리하고, 온라인으로도 파는 사람이 많습니다. 그래서 분야는 앱이 아니라 스위치입니다. 켜면 메뉴에 나타나고, 끄면 메뉴만 사라지고 데이터는 남습니다.</p>
@@ -230,7 +323,7 @@ page({
   </div>
 </section>
 
-<section class="sec">
+<section class="sec alt">
   <div class="wrap two">
     <div>
       <p class="kicker">함께 일하기</p>
@@ -247,7 +340,7 @@ page({
   </div>
 </section>
 
-<section class="sec alt">
+<section class="sec">
   <div class="wrap two rev">
     <figure class="shot-frame">
       <img class="shot" src="/site/img/people.jpg" alt="사람 메뉴 — 구성원과 연락처 탭, 고객·거래처·외주 구분" width="1280" height="790" loading="lazy">
@@ -263,7 +356,7 @@ page({
   </div>
 </section>
 
-<section class="sec">
+<section class="sec alt">
   <div class="wrap">
     <p class="kicker">가격</p>
     <h2>기본은 무료, 분야 서비스는 골라서</h2>
@@ -275,6 +368,29 @@ page({
     </div>
     <p class="muted small">예정 요금입니다. 정식 요금은 공개 베타 때 확정하고, 베타 참여자는 1년간 이 가격으로 고정합니다. 근무자·파트너·전문가 초대와 확인 링크 상대방은 요금이 없습니다.</p>
     <a class="text-link" href="/pricing">전체 가격표와 계산기 →</a>
+  </div>
+</section>
+
+<section class="sec">
+  <div class="wrap">
+    <p class="kicker">블로그</p>
+    <h2>혼자 일하는 사람을 위한 업무 노트</h2>
+    <p class="lead">매장과 공간 운영, 외주 거래, 세금, 온라인 판매처럼 혼자 챙겨야 하는 일을 실무 순서대로 정리합니다.</p>
+    <div class="post-grid">${["solo-business-work-management", "party-room-operation-checklist", "freelancer-quote-approval"].map((sl) => postCard(ARTICLES.find((a) => a.slug === sl))).join("")}</div>
+    <a class="text-link" href="/blog/">글 ${ARTICLES.length}편 모두 보기 →</a>
+  </div>
+</section>
+
+<section class="sec alt">
+  <div class="wrap two start">
+    <div>
+      <p class="kicker">자주 묻는 질문</p>
+      <h2>시작하기 전에 많이 묻는 것</h2>
+      <p>마이웍스는 10년 넘게 340개가 넘는 공간을 기획·운영해 온 ㈜블랭크가 직접 쓰려고 만든 도구입니다.</p>
+      <a class="text-link" href="/about">만든 이유와 원칙 →</a><br>
+      <a class="text-link" href="/faq">자주 묻는 질문 전체 →</a>
+    </div>
+    ${faqHtml([FAQ[0][1][0], FAQ[1][1][3], FAQ[2][1][0], FAQ[3][1][1], FAQ[4][1][1]])}
   </div>
 </section>
 
@@ -297,8 +413,9 @@ SVC.forEach((s) => {
     : `<div class="status ok"><b>지금 쓸 수 있는 것</b><p>${esc(s.now)}</p><p class="muted">${esc(s.next)}</p></div>`;
   page({
     file: `${s.id}.html`, active: s.id,
-    title: `${s.name} — ${s.one} | 마이웍스`,
-    desc: `${s.who}를 위한 마이웍스의 분야 서비스. ${s.line}.`,
+    title: `${s.seoTitle} | 마이웍스`, ogTitle: `${s.name} — ${s.one}`,
+    desc: s.seoDesc,
+    crumbs: [[s.name, `/${s.id}`]],
     body: `
 <section class="hero sub" style="--svc:${s.color}">
   <div class="wrap">
@@ -341,6 +458,7 @@ SVC.forEach((s) => {
     </div>
   </div>
 </section>
+${relatedPosts(s.id, `${s.name}와 관련된 글`)}
 <section class="sec cta-sec">
   <div class="wrap center">
     <h2>${s.status === "soon" ? "출시 전에 먼저 써 보고 싶다면" : "오늘부터 쓸 수 있습니다"}</h2>
@@ -353,9 +471,22 @@ SVC.forEach((s) => {
 });
 
 // ---------- 가격 ----------
+// 답은 이용약관(제9·10·16조)과 같아야 한다.
+const PRICE_FAQ = [
+  ["지금 돈을 내야 하나요?", "아닙니다. 지금은 베이직 무료로 시작합니다. 프로와 분야 서비스는 운영자가 켜 드리고, 결제는 2027년 공개 베타 뒤에 시작합니다."],
+  ["체험이 끝나면 어떻게 되나요?", "베이직 규칙으로 돌아갑니다. 데이터는 그대로 남고 메뉴만 사라집니다. 다시 켜면 그대로 보입니다."],
+  ["서비스를 끄면 데이터는요?", "남습니다. 전체 백업에도 포함되고, 언제든 백업 파일(JSON)로 내려받을 수 있습니다. 재무와 주문은 CSV로도 내보냅니다."],
+  ["근무자나 세무사도 요금을 내나요?", "아닙니다. 현장 근무자·파트너·전문가(세무사·관리업체·중개사)는 무료 게스트입니다. 돈을 받는 좌석은 관리자·직원뿐입니다."],
+  ["고객이 확인 링크를 열 때 비용이 드나요?", "아닙니다. 상대방은 계정도, 요금도 없습니다."],
+  ["거래 수수료가 있나요?", "없습니다. 월 이용료만 받습니다. 플랫폼 수수료 위에 또 하나의 %를 더하지 않습니다."],
+  ["세금계산서를 받을 수 있나요?", "결제가 시작되면 요청하시는 대로 세금계산서나 현금영수증을 발행합니다."],
+  ["해지와 환불은 어떻게 하나요?", "앱의 ‘문의’나 이메일로 언제든 해지를 요청할 수 있습니다. 결제 후 7일 안에 유료 기능을 쓰지 않았다면 전액 환불하고, 월 결제는 다음 결제일부터 청구하지 않습니다. 연 결제는 쓴 개월 수를 월 정가로 빼고 남은 금액을 돌려드립니다."],
+];
 page({
   file: "pricing.html", active: "pricing",
-  title: "가격 — 마이웍스", desc: "마이웍스 베이직은 무료, 프로는 월 12,000원. 마이스토어·마이빌딩·마이택스·마이셀러는 골라서 켭니다. 계산기로 월 금액을 바로 확인하세요.",
+  title: "가격 — 베이직 무료, 프로 월 12,000원 | 마이웍스", desc: "마이웍스 베이직은 무료, 프로는 월 12,000원(예정)입니다. 마이스토어·마이빌딩·마이택스·마이셀러는 골라서 켜고, 계산기로 월 금액을 바로 확인할 수 있습니다.",
+  crumbs: [["가격", "/pricing"]],
+  ldNodes: [APP_LD, faqLd(PRICE_FAQ)],
   body: `
 <section class="hero sub">
   <div class="wrap">
@@ -414,16 +545,8 @@ page({
 <section class="sec">
   <div class="wrap">
     <h2>자주 묻는 것</h2>
-    <div class="faq">
-      <details><summary>지금 돈을 내야 하나요?</summary><p>아닙니다. 지금은 베이직 무료로 시작합니다. 프로와 분야 서비스는 운영자가 켜 드리고, 결제는 2027년 공개 베타 뒤에 시작합니다.</p></details>
-      <details><summary>체험이 끝나면 어떻게 되나요?</summary><p>베이직 규칙으로 돌아갑니다. 데이터는 그대로 남고 메뉴만 사라집니다. 다시 켜면 그대로 보입니다.</p></details>
-      <details><summary>서비스를 끄면 데이터는요?</summary><p>남습니다. 백업에도 포함되고, 언제든 엑셀·JSON으로 전부 내려받을 수 있습니다.</p></details>
-      <details><summary>근무자나 세무사도 요금을 내나요?</summary><p>아닙니다. 현장 근무자·파트너·전문가(세무사·관리업체·중개사)는 무료 게스트입니다. 돈을 받는 좌석은 관리자·직원뿐입니다.</p></details>
-      <details><summary>고객이 확인 링크를 열 때 비용이 드나요?</summary><p>아닙니다. 상대방은 계정도, 요금도 없습니다.</p></details>
-      <details><summary>거래 수수료가 있나요?</summary><p>없습니다. 월 이용료만 받습니다. 플랫폼 수수료 위에 또 하나의 %를 더하지 않습니다.</p></details>
-      <details><summary>세금계산서를 받을 수 있나요?</summary><p>결제가 시작되면 월 단위로 발행합니다. 사업자 정보는 설정에서 등록합니다.</p></details>
-      <details><summary>해지는 어떻게 하나요?</summary><p>설정에서 바로 할 수 있습니다. 다음 결제일까지 쓰고, 그 뒤 베이직으로 돌아갑니다.</p></details>
-    </div>
+    ${faqHtml(PRICE_FAQ)}
+    <a class="text-link" href="/faq">자주 묻는 질문 전체 →</a>
   </div>
 </section>`,
 });
@@ -453,7 +576,8 @@ if (readmePath && fs.existsSync(readmePath)) {
   });
   page({
     file: "guide.html", active: "guide",
-    title: "가이드 — 마이웍스", desc: "마이웍스 사용 안내. 이용 흐름, 등급, 오늘 결정할 것, 사람, 스페이스, 아웃소싱, 커머스, 확인 링크, AI 접속, 데이터 백업.",
+    title: "가이드 — 마이웍스 사용 안내", desc: "마이웍스 사용 안내. 가입과 승인, 베이직·프로 등급, 오늘 결정할 것, 구성원과 연락처, 공간 운영(스페이스), 외주 관리(아웃소싱), 상품 판매(커머스), 확인 링크, AI 접속, 데이터 백업을 설명합니다.",
+    crumbs: [["가이드", "/guide"]],
     body: `
 <section class="hero sub">
   <div class="wrap">
@@ -477,10 +601,14 @@ if (readmePath && fs.existsSync(readmePath)) {
 // ---------- 공지 ----------
 page({
   file: "notice.html", active: "notice",
-  title: "공지 — 마이웍스", desc: "마이웍스 배포 소식과 바뀐 점.",
+  title: "공지 — 마이웍스 업데이트 소식", desc: "마이웍스 배포 소식과 바뀐 점을 날짜순으로 남깁니다.",
+  crumbs: [["공지", "/notice"]],
   body: `
 <section class="hero sub"><div class="wrap"><p class="kicker">공지</p><h1>바뀐 점</h1><p class="lead">배포할 때마다 한 줄씩 남깁니다. 장애가 있으면 맨 위에 적습니다.</p></div></section>
 <section class="sec"><div class="wrap doc">
+  <div class="notice"><time>2026. 11. 16.</time><h3>블로그·자주 묻는 질문·기본 기능·회사 소개 페이지를 열었습니다</h3>
+    <p><a href="/blog/">블로그</a>에 파티룸·무인매장 운영, 견적서와 미수금, 세금 일정, 임대관리, 온라인 판매, AI 연결에 관한 글 ${ARTICLES.length}편을 올렸습니다. <a href="/features">기본 기능</a> 페이지에서 오늘·일·거래·돈·사람 메뉴를 한 번에 볼 수 있고, <a href="/faq">자주 묻는 질문</a>에 가입·요금·데이터·AI 연결에 관한 답을 모았습니다. 마이웍스를 만드는 회사는 <a href="/about">회사 소개</a>에 적었습니다.</p>
+    <p>네이버·구글·Bing 검색에 사이트를 등록하고, 새 글을 받아 볼 수 있는 <a href="/rss.xml">RSS</a>를 추가했습니다. 가격 페이지의 해지·환불 안내를 이용약관과 같은 내용으로 맞췄습니다. 앱과 데이터에는 바뀐 것이 없습니다.</p></div>
   <div class="notice"><time>2026. 11. 2.</time><h3>새 주소 myworks.ai.kr, 이용약관·개인정보처리방침 확정</h3>
     <p>마이웍스의 주소가 <b>myworks.ai.kr</b>로 바뀌었습니다. 예전 주소(myworkspro.pages.dev)나 www를 붙인 주소로 들어와도 새 주소로 자동으로 옮겨집니다. 브라우저가 주소별로 로그인을 따로 기억하기 때문에 새 주소에서 한 번 다시 로그인해 주세요. 데이터는 그대로입니다. 클로드 같은 AI를 MCP로 연결해 두셨다면 예전 주소도 계속 동작하지만, 연동·데이터 → AI 접속에 나오는 새 주소로 바꿔 두시길 권합니다.</p>
     <p><a href="/terms">이용약관</a>과 <a href="/privacy">개인정보처리방침</a>을 확정했습니다. 개인정보처리방침은 오늘부터, 이용약관은 11월 9일부터 시행합니다. 처리방침에는 데이터를 보관하는 Cloudflare(미국 본사, 데이터베이스는 아시아·태평양 지역)로의 국외 이전 항목·국가·시기·방법·기간과 거부 방법을 적었습니다. 홈페이지 아래에 사업자 정보를 표시했고, 가입 화면에 약관 동의 칸을 추가했습니다.</p></div>
@@ -503,7 +631,8 @@ page({
 // ---------- 시작하기 ----------
 page({
   file: "start.html", active: "start",
-  title: "시작하기 — 마이웍스", desc: "마이웍스 가입 안내. 회원가입 뒤 운영자 승인을 거쳐 베이직으로 시작합니다.",
+  title: "시작하기 — 마이웍스 무료 가입 안내", desc: "마이웍스 가입 안내. 카드 등록 없이 회원가입하고 운영자 승인을 거쳐 베이직(무료)으로 시작합니다. 세 단계면 됩니다.",
+  crumbs: [["시작하기", "/start"]],
   body: `
 <section class="hero sub"><div class="wrap"><p class="kicker">시작하기</p><h1>세 단계면 됩니다</h1><p class="lead">카드 등록 없이 시작합니다. 지금은 비공개 운영 기간이라 가입 뒤 운영자 승인이 한 번 있습니다. 보통 하루 안에 처리됩니다.</p></div></section>
 <section class="sec"><div class="wrap">
@@ -530,6 +659,7 @@ const PRIVACY_ON = { posted: "2026년 11월 2일", from: "2026년 11월 2일" };
 page({
   file: "terms.html", active: "",
   title: "이용약관 — 마이웍스", desc: "마이웍스 서비스 이용약관.",
+  crumbs: [["이용약관", "/terms"]], priority: "0.3",
   body: `
 <section class="hero sub"><div class="wrap"><p class="kicker">이용약관</p><h1>마이웍스 이용약관</h1><p class="lead">공고일 ${TERMS_ON.posted} · 시행일 ${TERMS_ON.from}</p></div></section>
 <section class="sec"><div class="wrap doc legal">
@@ -682,6 +812,7 @@ page({
 page({
   file: "privacy.html", active: "",
   title: "개인정보처리방침 — 마이웍스", desc: "마이웍스 개인정보처리방침 — 처리 항목, 보유 기간, 처리 위탁과 국외 이전, 이용자의 권리.",
+  crumbs: [["개인정보처리방침", "/privacy"]], priority: "0.3",
   body: `
 <section class="hero sub"><div class="wrap"><p class="kicker">개인정보처리방침</p><h1>마이웍스 개인정보처리방침</h1><p class="lead">공개일 ${PRIVACY_ON.posted} · 시행일 ${PRIVACY_ON.from}</p></div></section>
 <section class="sec"><div class="wrap doc legal">
@@ -801,6 +932,285 @@ ${ltable(["구분", "내용"], [
 </div></section>`,
 });
 
+// ---------- 기본 기능 ----------
+const FEATS = [
+  { id: "today", name: "오늘", head: "아침에 열면 결정할 것부터 보입니다",
+    lead: "마이웍스의 첫 화면은 할 일 목록이 아니라 ‘오늘 결정할 것’입니다. 내가 손대지 않으면 멈춰 있는 일을 먼저 처리하게 합니다.",
+    items: ["오늘 브리핑 — 지연, 오늘 마감, 검토 대기, 결정할 것의 개수", "검수 요청 — 담당자가 결과물을 올리고 확인을 요청한 업무를 승인하거나 보완 요청", "견적 수정 요청 — 고객이 확인 링크에서 수정을 요청한 견적", "입금 기한이 지난 청구서 — 입금 확인 또는 청구 링크 다시 보내기", "AI 제안 — 클로드가 올린 업무 추가·상태 변경·연락처 제안을 승인하거나 거절", "합류 요청 — 초대 링크로 들어온 팀원 승인"] },
+  { id: "work", name: "일", head: "맡기고, 검수 요청을 받고, 승인으로 끝냅니다",
+    lead: "프로젝트와 매장의 업무를 한 보드에서 대기 → 진행중 → 검토 → 완료로 관리합니다. ‘다 했어요?’를 묻지 않아도 됩니다.",
+    items: ["프로젝트 — 브랜드별 카드, 업무 목록, 목표, 메모, 링크, 의견, 예산", "매장 — 지점별 업무, 정기 점검, 매출·비용, 메모", "업무보드 — 프로젝트·매장 업무를 한 보드에서, 검수와 AI 표시 포함", "검수 흐름 — 담당자가 납품물 링크와 메모를 붙여 요청, 본인 업무는 본인이 승인할 수 없음", "반복 업무와 템플릿 — 매주·매월 자동 생성, 자주 쓰는 업무 묶음 저장", "플랜 — 일·주·월 계획과 체크리스트를 나만 보는 공간에서"] },
+  { id: "deal", name: "거래", head: "견적에서 입금까지 한 줄로 잇습니다",
+    lead: "고객 → 견적 → 진행·납품 → 청구 → 입금 확인이 한 안건으로 이어집니다. 어느 단계에서 멈춘 거래인지 바로 보입니다.",
+    items: ["연락처 — 고객·거래처·외주를 이름·회사·구분·메모로 관리하고 검색", "견적 — 항목·수량·단가를 넣으면 공급가·부가세·합계 계산, 단가표에서 골라 넣기 (프로 · 아웃소싱)", "견적 승인 — 고객이 확인 링크에서 승인하면 안건이 ‘진행’으로, 승인된 견적은 수정 불가 (프로)", "납품 확인 — 결과물 확인 링크를 보내고 확인 또는 수정 요청을 받음 (베이직 포함)", "청구 — 부가세 10% 별도 / 3.3% 원천징수 / 없음 중 선택해 받을 금액 계산 (프로)", "입금 확인과 미수금 — 입금되면 안건이 완료되고 재무에 수입으로 기록"] },
+  { id: "money", name: "돈", head: "매출과 비용이 한곳으로 모입니다",
+    lead: "프로젝트 예산, 매장 매출·비용, 외주 입금, 판매 손익이 재무로 모입니다. 월말에 통장을 다시 계산하지 않아도 됩니다.",
+    items: ["재무 기록 — 수입·지출을 프로젝트·매장별로 기록", "이달 재무 — 홈에서 이번 달 수입·지출·손익 확인", "모듈 손익 보내기 — 공간 운영·판매의 월 손익을 버튼 하나로 재무에 기록", "CSV 내보내기 — 세무사에게 보낼 자료를 엑셀로 열 수 있는 형식으로"] },
+  { id: "people", name: "사람", head: "역할에 필요한 만큼만 보여 줍니다",
+    lead: "함께 일하는 사람은 구성원으로 초대하고, 고객·거래처는 연락처로 둡니다. 보이는 범위는 화면에서 숨기지 않고 서버가 애초에 보내지 않는 방식으로 지킵니다.",
+    items: ["초대 — 초대 링크를 보내 합류를 승인하거나 아이디를 바로 발급", "역할 5가지 — 관리자, 직원, 현장 근무자, 시설 담당, 협력사", "현장 근무자 — 오늘 청소·시설 신고·오늘 발송만 보이고 예약자 이름·연락처·금액은 전송되지 않음", "협력사 — 참여 프로젝트와 맡은 업무만 보이고 예산·매출·연락처는 전송되지 않음", "퇴사·계약 종료 — 비활성화하면 즉시 로그아웃, 만든 AI 토큰도 함께 회수"] },
+  { id: "link", name: "확인 링크", head: "고객은 가입 없이 링크 하나로 승인합니다",
+    lead: "견적서, 납품물, 청구서를 링크로 보냅니다. 받은 사람은 로그인 없이 내용을 보고 승인·확인·수정 요청만 할 수 있습니다.",
+    items: ["상대가 누른 결과는 내 ‘오늘 결정할 것’과 활동 기록에 바로 남음", "링크는 30일(견적은 정한 기간) 동안 유효하고, 새 링크를 만들면 이전 링크는 닫힘", "링크 페이지에는 고객 연락처, 내부 메모, 다른 업무 정보가 나가지 않음", "수정 요청이 오면 고친 뒤 같은 링크로 다시 승인받을 수 있음"] },
+  { id: "ai", name: "AI 접속", head: "클로드가 내 데이터로 답하고, 변경은 제안으로 올립니다",
+    lead: "개인 토큰으로 클로드를 커넥터(MCP)로 연결하면 “오늘 뭐 해야 해?”, “외주 미수금 얼마야?”에 내 워크스페이스 데이터로 답합니다.",
+    items: ["읽기 토큰 — 묻고 정리하는 용도 (베이직 1개)", "쓰기 토큰 — 업무 추가·상태 변경·메모·연락처·외주 안건을 ‘제안’으로 올림 (프로)", "제안 → 승인 — 홈에서 승인해야 반영, 자동 반영은 고른 종류만", "AI가 만든 업무·연락처에는 AI 표시", "토큰은 만든 사람의 권한 범위 안에서만 읽고, 시간당 60회·하루 1,500회까지"] },
+  { id: "data", name: "데이터·보안", head: "데이터는 이용자의 것입니다",
+    lead: "워크스페이스끼리는 데이터가 완전히 분리됩니다. 운영자 화면에도 업무 내용은 보이지 않고 개수만 보입니다.",
+    items: ["전체 백업·복원 — 백업 파일 하나로 내려받고 다른 기기에서 복원", "비밀번호·AI 토큰은 복원할 수 없는 해시(PBKDF2)로만 저장", "비밀번호 10회 연속 오류 시 10분 잠금, 30일 미사용 로그인 자동 종료", "모든 통신은 HTTPS, 데이터는 Cloudflare 클라우드에 보관", "이용자 데이터를 AI 학습에 쓰지 않음"] },
+];
+page({
+  file: "features.html", active: "features",
+  title: "기본 기능 — 1인 사업자·소규모 팀 업무관리 | 마이웍스",
+  desc: "마이웍스 기본 기능 소개. 오늘 결정할 것, 프로젝트·업무보드, 견적·납품·청구, 재무, 구성원·연락처, 확인 링크, AI 접속까지 1인 사업자와 소규모 팀이 매일 쓰는 업무관리 기능입니다.",
+  crumbs: [["기본 기능", "/features"]],
+  ldNodes: [APP_LD],
+  body: `
+<section class="hero sub">
+  <div class="wrap">
+    <p class="kicker">마이웍스 기본 기능</p>
+    <h1>매일 여는 업무관리<span class="h-sub">오늘 · 일 · 거래 · 돈 · 사람을 한곳에</span></h1>
+    <p class="lead">어떤 일을 하든 똑같이 쓰는 기본 기능입니다. 베이직(무료)에서 대부분 쓸 수 있고, 견적 승인·청구·AI 쓰기처럼 표시한 기능은 프로에서 열립니다.</p>
+    <div class="guide-quick">${FEATS.map((f) => `<a class="pill" href="#${f.id}">${f.name}</a>`).join("")}</div>
+  </div>
+</section>
+${FEATS.map((f, i) => `
+<section class="sec${i % 2 ? " alt" : ""}" id="${f.id}">
+  <div class="wrap feat-row">
+    <div>
+      <p class="kicker">${f.name}</p>
+      <h2>${f.head}</h2>
+      <p class="lead">${f.lead}</p>
+    </div>
+    <ul class="checks">${f.items.map((x) => `<li>${esc(x)}</li>`).join("")}</ul>
+  </div>
+</section>`).join("")}
+<section class="sec">
+  <div class="wrap">
+    <h2>엑셀·카톡으로 할 때와 무엇이 달라지나</h2>
+    <div class="table-wrap stack-wrap"><table class="stack">
+      <thead><tr><th>상황</th><th>엑셀·카톡·메모장</th><th>마이웍스</th></tr></thead>
+      <tbody>
+        <tr><td>견적 승인</td><td data-label="엑셀·카톡·메모장">카톡으로 “네, 진행해 주세요”. 어느 버전에 대한 답인지 남지 않는다</td><td data-label="마이웍스">확인 링크에서 승인. 승인한 견적과 시각이 기록되고 안건이 진행으로 바뀐다</td></tr>
+        <tr><td>일 맡기기</td><td data-label="엑셀·카톡·메모장">단톡방에 지시하고 “다 했어요?”를 다시 묻는다</td><td data-label="마이웍스">담당자가 검수를 요청하면 홈에 올라오고, 승인하거나 보완을 요청한다</td></tr>
+        <tr><td>근무자와 공유</td><td data-label="엑셀·카톡·메모장">예약 목록을 통째로 보낸다. 연락처와 금액도 함께 간다</td><td data-label="마이웍스">근무자 기기에는 오늘 할 일만 간다. 예약자 정보와 금액은 전송되지 않는다</td></tr>
+        <tr><td>미수금 확인</td><td data-label="엑셀·카톡·메모장">월말에 통장과 청구 메일을 맞춰 본다</td><td data-label="마이웍스">입금 기한이 지난 청구서가 홈에 올라온다</td></tr>
+        <tr><td>월 손익</td><td data-label="엑셀·카톡·메모장">시트를 여러 개 열어 다시 더한다</td><td data-label="마이웍스">매장·외주·판매 매출과 비용이 재무로 모인다</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+</section>
+<section class="sec alt">
+  <div class="wrap">
+    <p class="kicker">분야 서비스</p>
+    <h2>하는 일에 맞춰 필요한 것만 켭니다</h2>
+    <p class="lead">기본 기능 위에 분야 서비스를 스위치처럼 켭니다. 끄면 메뉴만 사라지고 데이터는 남습니다.</p>
+    <div class="svc-grid">${SVC.map((s) => svcCard(s)).join("")}</div>
+  </div>
+</section>
+${relatedPosts("features", "업무관리에 관한 글")}
+<section class="sec cta-sec">
+  <div class="wrap center">
+    <h2>기본 기능은 계속 무료입니다</h2>
+    <p class="lead">카드 등록 없이 시작하고, 쓰다가 필요해지면 프로와 분야 서비스를 켭니다.</p>
+    <div class="cta center"><a class="btn primary" href="/start">무료로 시작하기</a><a class="btn" href="/pricing">가격 보기</a></div>
+  </div>
+</section>`,
+});
+
+// ---------- 자주 묻는 질문 ----------
+const FAQ_ALL = FAQ.flatMap(([, items]) => items);
+page({
+  file: "faq.html", active: "faq",
+  title: "자주 묻는 질문 — 마이웍스",
+  desc: "마이웍스 자주 묻는 질문. 어떤 서비스인지, 가입과 초대, 요금과 환불, 데이터 저장과 보안, 클로드 AI 연결까지 한곳에 모았습니다.",
+  crumbs: [["자주 묻는 질문", "/faq"]],
+  ldNodes: [faqLd(FAQ_ALL)],
+  body: `
+<section class="hero sub">
+  <div class="wrap">
+    <p class="kicker">자주 묻는 질문</p>
+    <h1>궁금한 점을 모았습니다</h1>
+    <p class="lead">찾는 답이 없으면 앱의 ‘문의’나 <a class="inline-link" href="mailto:${BIZ.email}">${BIZ.email}</a>로 알려 주세요. 영업일 기준 2일 안에 답합니다.</p>
+    <div class="guide-quick">${FAQ.map(([g], i) => `<a class="pill" href="#faq-${i + 1}">${esc(g)}</a>`).join("")}</div>
+  </div>
+</section>
+<section class="sec">
+  <div class="wrap faq-page">
+    ${FAQ.map(([g, items], i) => `<div class="faq-group" id="faq-${i + 1}"><h2>${esc(g)}</h2>${faqHtml(items)}</div>`).join("")}
+    <p class="muted small">요금은 예정 요금이며 정식 요금은 공개 베타 때 확정합니다. 자세한 기준은 <a class="inline-link" href="/pricing">가격</a>, <a class="inline-link" href="/terms">이용약관</a>, <a class="inline-link" href="/privacy">개인정보처리방침</a>에 있습니다.</p>
+  </div>
+</section>
+<section class="sec cta-sec">
+  <div class="wrap center">
+    <h2>직접 써 보는 것이 가장 빠릅니다</h2>
+    <div class="cta center"><a class="btn primary" href="/start">무료로 시작하기</a><a class="btn" href="/guide">가이드 보기</a></div>
+  </div>
+</section>`,
+});
+
+// ---------- 회사 소개 ----------
+page({
+  file: "about.html", active: "about",
+  title: "회사 소개 — 마이웍스를 만드는 ㈜블랭크",
+  desc: "마이웍스는 10년 넘게 340개가 넘는 공간을 기획·운영해 온 ㈜블랭크가 직접 쓰려고 만든 업무관리 서비스입니다. 만든 이유와 지키는 원칙, 회사 정보를 소개합니다.",
+  crumbs: [["회사 소개", "/about"]],
+  ldNodes: [ORG_LD],
+  body: `
+<section class="hero sub">
+  <div class="wrap">
+    <p class="kicker">회사 소개</p>
+    <h1>직접 쓰려고 만든 업무 도구입니다</h1>
+    <p class="lead">마이웍스는 ㈜블랭크가 만들고 매일 씁니다. 공간을 기획하고 운영하면서 필요했던 것을 하나씩 만들었고, 같은 방식으로 일하는 분들이 쓸 수 있게 열었습니다.</p>
+  </div>
+</section>
+<section class="sec">
+  <div class="wrap two start">
+    <div>
+      <h2>왜 만들었나</h2>
+      <p>㈜블랭크와 대표 최시준은 10년 넘게 340개가 넘는 공간을 기획하고 운영해 왔습니다. 무인 파티룸 브랜드 쏘플파티룸을 만들었고, 공간 브랜딩·인테리어 서비스 Core Mood와 건물 운영 사업을 이어 오고 있습니다.</p>
+      <p>공간이 늘수록 카톡방과 엑셀 시트도 함께 늘었습니다. 예약은 예약 사이트에, 청소 확인은 단톡방에, 견적은 메일에, 정산은 엑셀에 있었습니다. 사람을 더 뽑는 대신 일하는 방식을 바꾸기로 했고, 그 결과가 마이웍스입니다.</p>
+      <p>그래서 마이웍스에는 실제로 매일 쓰는 기능부터 들어갑니다. 예약이 들어오면 청소 일정이 생기고, 근무자는 폰으로 체크리스트를 내고, 고객은 링크에서 견적을 승인합니다.</p>
+    </div>
+    <div>
+      <h2>지키는 원칙</h2>
+      <ul class="checks">
+        <li><b>데이터는 이용자의 것입니다.</b> 언제든 전체를 내려받을 수 있고, 운영자도 업무 내용을 볼 수 없습니다.</li>
+        <li><b>필요한 만큼만 보여 줍니다.</b> 근무자와 협력사 기기에는 일하는 데 필요한 정보만 전송합니다.</li>
+        <li><b>거래에 수수료를 붙이지 않습니다.</b> 월 이용료만 받습니다.</li>
+        <li><b>AI는 제안하고 사람이 승인합니다.</b> AI가 만든 것에는 표시를 붙입니다.</li>
+        <li><b>세무·법률 판단은 하지 않습니다.</b> 자료 정리와 일정까지 돕고, 판단은 전문가에게 맡깁니다.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+<section class="sec alt">
+  <div class="wrap">
+    <h2>지금까지</h2>
+    <div class="timeline">
+      <div><time>2026. 10.</time><p>마이웍스 v4 — 등급, 오늘 결정할 것, 검수, 확인 링크, AI 접속, 아웃소싱·커머스</p></div>
+      <div><time>2026. 10.</time><p>공개 홈페이지를 열고 마이스토어·마이빌딩·마이택스·마이셀러 계획 공개</p></div>
+      <div><time>2026. 11.</time><p>정식 주소 myworks.ai.kr, 이용약관·개인정보처리방침 확정, 베타 운영 시작</p></div>
+      <div><time>2026. 12. 예정</time><p>마이스토어 일 마감·점검, 마이셀러 수발주·정산 대사</p></div>
+      <div><time>2027. 1분기 예정</time><p>마이빌딩, 마이택스 출시</p></div>
+    </div>
+    <a class="text-link" href="/notice">바뀐 점 전체 보기 →</a>
+  </div>
+</section>
+<section class="sec">
+  <div class="wrap">
+    <h2>회사 정보</h2>
+    <div class="table-wrap stack-wrap"><table class="stack two-col">
+      <tbody>
+        <tr><td>상호</td><td>${BIZ.name}</td></tr>
+        <tr><td>대표</td><td>${BIZ.ceo}</td></tr>
+        <tr><td>사업자등록번호</td><td>${BIZ.no}</td></tr>
+        <tr><td>주소</td><td>${BIZ.addr}</td></tr>
+        <tr><td>문의</td><td><a class="inline-link" href="mailto:${BIZ.email}">${BIZ.email}</a> · ${BIZ.tel}</td></tr>
+        <tr><td>제휴·베타 참여</td><td>세무사·관리업체·중개사 등 전문가 파트너와 베타 참여 문의를 메일로 받습니다.</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+</section>
+<section class="sec cta-sec">
+  <div class="wrap center">
+    <h2>같은 방식으로 일해 보고 싶다면</h2>
+    <div class="cta center"><a class="btn primary" href="/start">무료로 시작하기</a><a class="btn" href="/features">기본 기능 보기</a></div>
+  </div>
+</section>`,
+});
+
+// ---------- 블로그 ----------
+const catOrder = Object.keys(CATS).filter((k) => ARTICLES.some((a) => a.cat === k));
+page({
+  file: "blog/index.html", active: "blog",
+  title: "블로그 — 혼자 일하는 사람을 위한 업무 노트 | 마이웍스",
+  desc: "1인 사업자·프리랜서·소규모 팀을 위한 업무관리 글. 파티룸·무인매장 운영, 견적서와 미수금, 세금 일정, 임대관리, 온라인 판매, AI 활용까지 실무에 바로 쓰는 내용을 정리합니다.",
+  crumbs: [["블로그", "/blog/"]],
+  ldNodes: [{ "@type": "Blog", "@id": SITE + "/blog/#blog", name: "마이웍스 블로그", url: SITE + "/blog/", inLanguage: "ko-KR", publisher: { "@id": ORG_ID },
+    blogPost: ARTICLES.map((a) => ({ "@type": "BlogPosting", headline: a.title, url: `${SITE}/blog/${a.slug}`, datePublished: a.date })) }],
+  body: `
+<section class="hero sub">
+  <div class="wrap">
+    <p class="kicker">블로그</p>
+    <h1>혼자 일하는 사람을 위한 업무 노트</h1>
+    <p class="lead">매장과 공간 운영, 외주 거래, 세금과 돈, 임대, 온라인 판매처럼 혼자 챙겨야 하는 일을 실무 순서대로 정리합니다.</p>
+    <div class="guide-quick" role="group" aria-label="주제 고르기">
+      <button type="button" class="pill on" data-filter="all">전체 ${ARTICLES.length}</button>
+      ${catOrder.map((k) => `<button type="button" class="pill" data-filter="${k}">${esc(CATS[k])} ${ARTICLES.filter((a) => a.cat === k).length}</button>`).join("")}
+    </div>
+  </div>
+</section>
+<section class="sec tight">
+  <div class="wrap">
+    <div class="post-grid" id="post-list">${ARTICLES.map(postCard).join("")}</div>
+    <p class="muted small" style="margin-top:22px">새 글은 <a class="inline-link" href="/rss.xml">RSS</a>로 받아 볼 수 있습니다.</p>
+  </div>
+</section>`,
+});
+
+const SVC_LINK = { features: ["마이웍스 기본 기능", "/features"], store: ["마이스토어", "/store"], building: ["마이빌딩", "/building"], tax: ["마이택스", "/tax"], seller: ["마이셀러", "/seller"] };
+ARTICLES.forEach((a) => {
+  // 소제목에 번호 앵커를 붙이고 목차를 만든다
+  const toc = [];
+  const body = a.body.replace(/<h2>([\s\S]*?)<\/h2>/g, (m, t) => { toc.push(t); return `<h2 id="s${toc.length}">${t}</h2>`; });
+  const others = [...ARTICLES.filter((x) => x.slug !== a.slug && x.cat === a.cat), ...ARTICLES.filter((x) => x.slug !== a.slug && x.cat !== a.cat && x.svc.some((v) => a.svc.includes(v)))].slice(0, 3);
+  const rest = others.length < 3 ? ARTICLES.filter((x) => x.slug !== a.slug && !others.includes(x)).slice(0, 3 - others.length) : [];
+  const url = `/blog/${a.slug}`;
+  page({
+    file: `blog/${a.slug}.html`, active: "blog", type: "article", lastmod: a.updated || a.date,
+    title: `${a.title} | 마이웍스 블로그`, ogTitle: a.title, desc: a.desc,
+    crumbs: [["블로그", "/blog/"], [a.title, url]],
+    extra: `<meta property="article:published_time" content="${a.date}T09:00:00+09:00">\n<meta property="article:modified_time" content="${a.updated || a.date}T09:00:00+09:00">\n<meta property="article:section" content="${esc(CATS[a.cat])}">\n${a.tags.map((t) => `<meta property="article:tag" content="${esc(t)}">`).join("\n")}`,
+    ldNodes: [{ "@type": "BlogPosting", "@id": SITE + url + "#post", headline: a.title, description: a.desc, url: SITE + url, mainEntityOfPage: SITE + url,
+      datePublished: `${a.date}T09:00:00+09:00`, dateModified: `${a.updated || a.date}T09:00:00+09:00`, inLanguage: "ko-KR", articleSection: CATS[a.cat], keywords: a.tags.join(", "),
+      image: SITE + "/site/img/og.png", author: { "@type": "Organization", name: "마이웍스 팀", url: SITE + "/about" }, publisher: { "@id": ORG_ID } }, ORG_LD],
+    body: `
+<article class="post">
+  <header class="post-head">
+    <div class="wrap narrow">
+      ${crumbNav([["블로그", "/blog/"], [CATS[a.cat], "/blog/"]])}
+      <h1>${esc(a.title)}</h1>
+      <p class="post-meta"><time datetime="${a.date}">${fmtDate(a.date)}</time> · 읽는 시간 ${readMin(a.body)}분 · <a href="/about">마이웍스 팀</a></p>
+      <p class="lead">${esc(a.desc)}</p>
+    </div>
+  </header>
+  <div class="wrap narrow">
+    ${toc.length > 2 ? `<nav class="post-toc" aria-label="이 글의 순서"><b>이 글의 순서</b><ul>${toc.map((t, i) => `<li><a href="#s${i + 1}">${t.replace(/<[^>]+>/g, "")}</a></li>`).join("")}</ul></nav>` : ""}
+    <div class="doc post-body">${body}
+      ${a.refs && a.refs.length ? `<div class="refs"><b>참고</b><ul>${a.refs.map(([t, u]) => `<li><a href="${esc(u)}" target="_blank" rel="noopener nofollow">${esc(t)}</a></li>`).join("")}</ul></div>` : ""}
+    </div>
+    <div class="post-tags">${a.tags.map((t) => `<span>#${esc(t.replace(/\s+/g, ""))}</span>`).join("")}</div>
+    <aside class="post-cta">
+      <div><b>${a.svc.map((v) => SVC_LINK[v][0]).join(" · ")}</b><p>이 글의 내용을 마이웍스에서 바로 써 볼 수 있습니다. 기본 기능은 무료입니다.</p></div>
+      <div class="cta">${a.svc.slice(0, 1).map((v) => `<a class="btn" href="${SVC_LINK[v][1]}">${SVC_LINK[v][0]} 보기</a>`).join("")}<a class="btn primary" href="/start">무료로 시작하기</a></div>
+    </aside>
+  </div>
+</article>
+<section class="sec alt">
+  <div class="wrap">
+    <h2>다른 글</h2>
+    <div class="post-grid">${[...others, ...rest].map(postCard).join("")}</div>
+    <a class="text-link" href="/blog/">블로그 전체 보기 →</a>
+  </div>
+</section>`,
+  });
+});
+
+// ---------- 404 ----------
+page({
+  file: "404.html", active: "", noindex: true,
+  title: "페이지를 찾을 수 없습니다 — 마이웍스", desc: "주소가 바뀌었거나 없는 페이지입니다.",
+  body: `
+<section class="hero sub"><div class="wrap">
+  <p class="kicker">404</p>
+  <h1>페이지를 찾을 수 없습니다</h1>
+  <p class="lead">주소가 바뀌었거나 없는 페이지입니다. 아래에서 찾는 곳으로 이동해 주세요.</p>
+  <div class="cta"><a class="btn primary" href="/">홈으로</a><a class="btn" href="/app/">로그인</a><a class="btn" href="/guide">가이드</a><a class="btn" href="/blog/">블로그</a></div>
+  <p class="muted small">확인 링크를 받으셨다면 보낸 분께 링크를 다시 요청해 주세요. 링크는 정해진 기간이 지나면 닫힙니다.</p>
+</div></section>`,
+});
+
 // ---------- 확인 링크 안내 페이지 (/link/<토큰> → 앱으로) ----------
 fs.mkdirSync(path.join(OUT, "link"), { recursive: true });
 fs.writeFileSync(path.join(OUT, "link", "index.html"), `<!DOCTYPE html>
@@ -830,13 +1240,37 @@ Disallow: /api/
 
 Sitemap: ${SITE}/sitemap.xml
 `);
-const LASTMOD = DATE.replace(/\s/g, "").replace(/\.$/, "").split(".").map((v, i) => (i ? v.padStart(2, "0") : v)).join("-");
 fs.writeFileSync(path.join(OUT, "sitemap.xml"), `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${PAGES.map((u) => `  <url><loc>${SITE}${u}</loc><lastmod>${LASTMOD}</lastmod></url>`).join("\n")}
+${PAGES.map((u) => `  <url><loc>${SITE}${u.url}</loc><lastmod>${u.lastmod}</lastmod><priority>${u.priority}</priority></url>`).join("\n")}
 </urlset>
 `);
-console.log("written robots.txt, sitemap.xml", PAGES.length);
+// RSS — 네이버 서치어드바이저·피드 리더용. 블로그 글을 최신순으로 싣는다.
+const rfc822 = (iso) => new Date(iso + "T09:00:00+09:00").toUTCString().replace("GMT", "+0000");
+const xml = (t) => String(t).replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]));
+const feedItems = [...ARTICLES].sort((x, y) => (y.date > x.date ? 1 : y.date < x.date ? -1 : 0));
+fs.writeFileSync(path.join(OUT, "rss.xml"), `<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+<channel>
+  <title>마이웍스 블로그</title>
+  <link>${SITE}/blog/</link>
+  <description>1인 사업자·프리랜서·소규모 팀을 위한 업무관리 글 — 매장·공간 운영, 외주 거래, 세금, 임대, 온라인 판매, AI 활용</description>
+  <language>ko</language>
+  <lastBuildDate>${rfc822(ISO_DATE)}</lastBuildDate>
+  <atom:link href="${SITE}/rss.xml" rel="self" type="application/rss+xml"/>
+${feedItems.map((a) => `  <item>
+    <title>${xml(a.title)}</title>
+    <link>${SITE}/blog/${a.slug}</link>
+    <guid isPermaLink="true">${SITE}/blog/${a.slug}</guid>
+    <pubDate>${rfc822(a.date)}</pubDate>
+    <category>${xml(CATS[a.cat])}</category>
+    <description>${xml(a.desc)}</description>
+    <content:encoded><![CDATA[${a.body.replace(/\]\]>/g, "]]&gt;").replace(/href="\//g, `href="${SITE}/`).trim()}]]></content:encoded>
+  </item>`).join("\n")}
+</channel>
+</rss>
+`);
+console.log("written robots.txt, sitemap.xml, rss.xml", PAGES.length);
 
 // ---------- CSS ----------
 // 폭 기준: 폰 ≤600 · 태블릿 601~1100 (≤900은 햄버거 메뉴) · PC ≥1101
@@ -993,9 +1427,65 @@ td.num{white-space:nowrap;font-weight:600}td .sub{display:block;font-weight:400;
 @media (min-width:601px){.legal table.stack.two-col td:first-child{white-space:nowrap;padding-right:20px}}
 .foot-bottom{display:flex;justify-content:space-between;gap:8px 16px;flex-wrap:wrap;margin-top:28px;padding-top:16px;border-top:1px solid var(--line);font-size:13px}
 
+/* 건너뛰기 · 경로 */
+.skip{position:absolute;left:0;top:0;z-index:100;background:var(--ink);color:#fff;padding:10px 14px;border-radius:0 0 8px 0;transform:translateY(-130%)}.skip:focus{transform:none}
+.crumbs{display:flex;flex-wrap:wrap;gap:4px 0;font-size:13.5px;color:var(--muted);margin-bottom:18px}
+.crumbs a,.crumbs span{display:inline-flex;align-items:center;min-height:32px}.crumbs a:hover{color:var(--point)}
+.crumbs a::after{content:"›";margin:0 8px;color:var(--line)}
+.inline-link{color:var(--point);font-weight:600}.inline-link:hover{text-decoration:underline}
+.two.start{align-items:start}
+.narrow{max-width:800px}
+.sec.tight{padding-top:28px}.sec.tight .post-grid{margin-top:0}
+
+/* 이런 분들 · 기능 */
+.who-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:26px}
+.who{display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:20px 18px;transition:transform .15s,box-shadow .15s}
+.who:hover{transform:translateY(-2px);box-shadow:0 12px 30px rgba(28,27,25,.08)}
+.who b{font-size:17px;margin-bottom:6px}.who p{color:var(--ink-2);font-size:14.5px;margin:0 0 10px}.who .more{margin-top:auto;color:var(--point);font-weight:600;font-size:14px}
+.feat-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:48px;align-items:start}
+.checks{list-style:none;padding:0;margin:0;display:grid;gap:10px}
+.checks li{position:relative;padding:13px 16px 13px 44px;background:var(--surface);border:1px solid var(--line);border-radius:10px;font-size:15px;color:var(--ink-2)}
+.checks li::before{content:"";position:absolute;left:17px;top:19px;width:13px;height:7px;border-left:2px solid var(--point);border-bottom:2px solid var(--point);transform:rotate(-45deg)}
+.checks li b{color:var(--ink)}
+.timeline{display:grid;gap:0;margin:22px 0 14px;border-left:2px solid var(--line);padding-left:20px;max-width:760px}
+.timeline>div{position:relative;padding:8px 0 14px}.timeline>div::before{content:"";position:absolute;left:-26px;top:15px;width:10px;height:10px;border-radius:50%;background:var(--point)}
+.timeline time{font-weight:700;font-size:14px;color:var(--point)}.timeline p{margin:2px 0 0;color:var(--ink-2)}
+.faq-page{max-width:820px}.faq-group{margin-bottom:40px}.faq-group h2{font-size:22px;padding-bottom:10px;border-bottom:2px solid var(--ink);margin-bottom:0}
+.two .faq{align-self:start}
+
+/* 블로그 */
+.post-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin:24px 0 16px}
+.post-card{display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:20px 18px;transition:transform .15s,box-shadow .15s}
+.post-card:hover{transform:translateY(-2px);box-shadow:0 12px 30px rgba(28,27,25,.08)}
+.post-card[hidden]{display:none}
+.post-cat{color:var(--point);font-weight:700;font-size:12.5px;margin-bottom:8px}
+.post-card b{font-size:17px;line-height:1.45;margin-bottom:8px}
+.post-card p{color:var(--ink-2);font-size:14.5px;margin:0 0 14px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.post-meta{color:var(--muted);font-size:13px}.post-card .post-meta{margin-top:auto}
+.pill.on{background:var(--ink);border-color:var(--ink);color:#fff}
+button.pill{cursor:pointer;font-family:inherit}
+.post-head{padding:44px 0 8px}
+.post-head h1{font-size:36px;line-height:1.35;margin-bottom:14px}
+.post-head .post-meta{margin-bottom:18px}.post-head .post-meta a{color:var(--ink-2);font-weight:600}
+.post-head .lead{max-width:none;padding:16px 18px;background:var(--paper);border-radius:var(--radius);font-size:16.5px}
+.post-toc{border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px;margin:22px 0 8px;background:var(--surface)}
+.post-toc b{font-size:13px;color:var(--muted)}.post-toc ul{list-style:none;margin:8px 0 0;padding:0}.post-toc li{margin:0;border-top:1px dashed var(--line)}.post-toc li:first-child{border-top:0}
+.post-toc a{display:flex;align-items:center;min-height:36px;color:var(--ink-2)}.post-toc a:hover{color:var(--point)}
+.post-body{max-width:none;font-size:16.5px;line-height:1.8;padding:14px 0 6px}
+.post-body h2{font-size:23px;margin:40px 0 12px}.post-body h2:first-child{margin-top:16px}.post-body p{margin:0 0 16px}
+.post-body li{margin:7px 0}
+.callout{margin:30px 0 8px;padding:18px 20px;border:1px solid var(--line);border-left:4px solid var(--point);border-radius:var(--radius);background:var(--point-soft)}
+.callout b{display:block;margin-bottom:6px;color:var(--point);font-size:14px}.callout p{margin:0;font-size:15.5px;line-height:1.7}
+.refs{margin-top:28px;padding-top:14px;border-top:1px solid var(--line);font-size:13.5px;color:var(--muted)}.refs ul{margin:6px 0 0;padding-left:18px}.refs a{word-break:break-all}
+.post-tags{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0 26px}.post-tags span{font-size:13px;color:var(--muted);background:var(--surface-2);border-radius:999px;padding:4px 11px}
+.post-cta{display:flex;justify-content:space-between;align-items:center;gap:18px;flex-wrap:wrap;border:1px solid var(--line);border-radius:var(--radius);padding:20px;margin:0 0 56px;background:var(--surface)}
+.post-cta b{font-size:17px}.post-cta p{margin:4px 0 0;color:var(--ink-2);font-size:14.5px}.post-cta .cta{margin:0}
+
 /* ── 태블릿 가로·작은 노트북 (≤1100) ── */
 @media (max-width:1100px){
   .svc-grid,.price-row{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .who-grid,.post-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .feat-row{gap:32px}
   .hero-grid{gap:36px}.two{gap:40px}
   .foot-grid{grid-template-columns:1.2fr 1fr 1fr 1.3fr}
 }
@@ -1017,6 +1507,8 @@ td.num{white-space:nowrap;font-weight:600}td .sub{display:block;font-weight:400;
   .hero{padding:44px 0 32px}.hero-grid{grid-template-columns:1fr;gap:28px}
   .hero-shots{max-width:680px;padding-bottom:24px}.hero-shots .phone{width:28%}
   .two{grid-template-columns:1fr;gap:28px}.two.rev>figure{order:2}
+  .feat-row{grid-template-columns:1fr;gap:20px}
+  .post-head h1{font-size:30px}
   .five{grid-template-columns:repeat(3,minmax(0,1fr));row-gap:22px}
   .cases{grid-template-columns:1fr}
   .feat-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
@@ -1039,6 +1531,10 @@ td.num{white-space:nowrap;font-weight:600}td .sub{display:block;font-weight:400;
   .hero-shots .phone{display:none}.hero-shots{padding-bottom:0}
   .five{grid-template-columns:repeat(2,minmax(0,1fr));gap:18px 14px}
   .svc-grid,.price-row,.feat-grid,.calc-grid{grid-template-columns:1fr}
+  .who-grid,.post-grid{grid-template-columns:1fr}
+  .post-head{padding:28px 0 4px}.post-head h1{font-size:25px}.post-body{font-size:16px}.post-body h2{font-size:20px}
+  .post-cta{flex-direction:column;align-items:stretch}.post-cta .cta .btn{flex:1 1 100%}
+  .crumbs span{display:none}.crumbs a:last-of-type::after{display:none}
   .svc-card{padding:18px 16px}
   .wire ul{columns:1}
   .steps li{grid-template-columns:32px minmax(0,1fr);gap:12px;padding:18px 16px}.steps li::before{width:32px;height:32px;font-size:14px}.steps b{margin-top:3px}
@@ -1081,6 +1577,13 @@ fs.writeFileSync(path.join(OUT, "site", "site.js"), `
   window.addEventListener("resize",function(){ if(window.innerWidth>900) setMenu(false); });
   // 가이드 목차: 좁은 화면에서는 접어 둔다
   if(window.matchMedia && window.matchMedia("(max-width:900px)").matches){ document.querySelectorAll("details.guide-toc").forEach(function(d){ d.removeAttribute("open"); d.querySelectorAll("a").forEach(function(a){ a.addEventListener("click",function(){ d.removeAttribute("open"); }); }); }); }
+})();
+// 블로그: 주제별로 보기
+(function(){
+  var btns=[].slice.call(document.querySelectorAll("[data-filter]")), list=document.getElementById("post-list"); if(!btns.length||!list) return;
+  function apply(k){ btns.forEach(function(b){ var on=b.getAttribute("data-filter")===k; b.classList.toggle("on",on); b.setAttribute("aria-pressed",on?"true":"false"); });
+    [].slice.call(list.children).forEach(function(c){ c.hidden = k!=="all" && c.getAttribute("data-cat")!==k; }); }
+  btns.forEach(function(b){ b.addEventListener("click",function(){ apply(b.getAttribute("data-filter")); }); });
 })();
 // 가격 계산기 — 숫자는 서버 상수와 같이 바꾼다
 (function(){
