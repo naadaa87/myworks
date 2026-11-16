@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /app/
+Disallow: /admin
+Disallow: /link/
+Disallow: /api/
+
+Sitemap: https://myworks.ai.kr/sitemap.xml

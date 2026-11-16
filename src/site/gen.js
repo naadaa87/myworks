@@ -151,7 +151,12 @@ function footer() {
 </html>`;
 }
 
+// 검색엔진용: 페이지마다 대표 주소(canonical)를 붙이고, 만든 페이지 목록으로 sitemap.xml을 만든다.
+const PAGES = [];
 function page({ file, title, desc, active, body, extra = "" }) {
+  const urlPath = file === "index.html" ? "/" : "/" + file.replace(/\.html$/, "");
+  PAGES.push(urlPath);
+  extra = `<link rel="canonical" href="${SITE}${urlPath}">\n<meta property="og:url" content="${SITE}${urlPath}">` + (extra ? "\n" + extra : "");
   const html = head(title, desc, extra) + header(active) + `\n<main>${body}\n</main>` + footer();
   fs.writeFileSync(path.join(OUT, file), html);
   console.log("written", file, html.length);
@@ -813,6 +818,25 @@ fs.writeFileSync(path.join(OUT, "admin.html"), `<!DOCTYPE html>
 
 // _redirects
 fs.writeFileSync(path.join(OUT, "_redirects"), `/link/*  /link/index.html  200\n`);
+
+// ---------- 검색엔진 (robots.txt · sitemap.xml) ----------
+// 파일이 없으면 Cloudflare Pages가 첫 화면 HTML을 대신 돌려줘 검색엔진이 사이트맵을 읽지 못한다.
+fs.writeFileSync(path.join(OUT, "robots.txt"), `User-agent: *
+Allow: /
+Disallow: /app/
+Disallow: /admin
+Disallow: /link/
+Disallow: /api/
+
+Sitemap: ${SITE}/sitemap.xml
+`);
+const LASTMOD = DATE.replace(/\s/g, "").replace(/\.$/, "").split(".").map((v, i) => (i ? v.padStart(2, "0") : v)).join("-");
+fs.writeFileSync(path.join(OUT, "sitemap.xml"), `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${PAGES.map((u) => `  <url><loc>${SITE}${u}</loc><lastmod>${LASTMOD}</lastmod></url>`).join("\n")}
+</urlset>
+`);
+console.log("written robots.txt, sitemap.xml", PAGES.length);
 
 // ---------- CSS ----------
 // 폭 기준: 폰 ≤600 · 태블릿 601~1100 (≤900은 햄버거 메뉴) · PC ≥1101
