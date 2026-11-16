@@ -23,7 +23,7 @@ http.createServer(async (req, res) => {
   const url = "http://localhost:" + PORT + req.url;
   const request = new Request(url, { method: req.method, headers: req.headers, body: ["GET", "HEAD"].includes(req.method) ? undefined : body });
   const next = async () => null;
-  const r = await onRequest({ request, env: { DB }, next });
+  const r = await onRequest({ request, env: Object.assign({ DB }, process.env.MW_ADMIN_KEY ? { MW_ADMIN_KEY: process.env.MW_ADMIN_KEY } : {}), next });   // 보안 키 시험: MW_ADMIN_KEY=... node tests/dev-server.mjs
   if (!r) return serveStatic(decodeURIComponent(req.url.split("?")[0]), res);
   const h = {}; r.headers.forEach((v, k) => h[k] = v);
   res.writeHead(r.status, h); res.end(Buffer.from(await r.arrayBuffer()));

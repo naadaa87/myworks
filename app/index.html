@@ -950,6 +950,49 @@ a.linkbtn{display:inline-block;margin-top:6px}
 .adm-grid>.card+.card{margin-top:0}
 #sg-beta::placeholder{font-family:var(--sans);letter-spacing:0;text-transform:none}
 #adm-c-code::placeholder{font-family:var(--sans);text-transform:none}
+/* 총괄관리 — 역할 · 보안 키 · 계정 지원 · 성장 */
+.adm-role{display:inline-flex;align-items:center;margin-left:10px;padding:3px 10px;border-radius:99px;background:var(--accent-soft);color:var(--accent-deep);font-size:12px;font-weight:700;letter-spacing:0;vertical-align:middle;white-space:nowrap}
+.adm-lock{max-width:460px;margin:28px auto 0;text-align:center;padding:30px 28px}
+.adm-lock h2{justify-content:center}
+.adm-lock-ic{font-size:30px;line-height:1;margin-bottom:10px}
+.adm-lock .hint{line-height:1.65}
+.adm-lock-row{display:flex;gap:8px;margin-top:16px}
+.adm-lock-row input{flex:1;min-width:0;font-family:var(--mono)}
+.adm-key-msg{min-height:20px;margin:8px 0 6px;font-size:13px;color:var(--late);font-weight:600}
+.adm-srch{display:flex;gap:8px;flex:1 1 320px;min-width:0}
+.adm-srch input{flex:1;min-width:0}
+.adm-lid{font-size:12.5px;color:var(--sub);font-weight:500}
+.adm-tmp{margin:14px 0;padding:16px;border:1px dashed var(--accent);border-radius:10px;background:var(--accent-soft);color:var(--accent-deep);font-size:24px;font-weight:700;letter-spacing:.08em;text-align:center;user-select:all;overflow-wrap:anywhere}
+.adm-steps{margin:2px 0 0 18px;line-height:1.75;font-size:13.5px}
+.adm-funnel{display:flex;flex-direction:column;gap:10px;margin-top:4px}
+.adm-funnel .fn{display:grid;grid-template-columns:minmax(120px,190px) 1fr 40px 44px;gap:10px;align-items:center;font-size:13px}
+.adm-funnel .fn-l{color:var(--sub);overflow-wrap:anywhere}
+.adm-funnel .fn-bar{height:12px;background:var(--line-soft);border-radius:99px;overflow:hidden}
+.adm-funnel .fn-bar i{display:block;height:100%;background:var(--accent);border-radius:99px}
+.adm-funnel .fn-n{font-family:var(--mono);text-align:right}
+.adm-funnel .fn-p{font-family:var(--mono);font-size:12px;color:var(--faint);text-align:right}
+.adm-bars2{grid-template-columns:repeat(12,1fr)}
+.adm-bars .ab i.ab-ref{background:var(--ink);min-height:0}
+.adm-bars .ab i.ab-ref+i{border-radius:0}
+.adm-legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--sub);margin:-6px 0 8px}
+.adm-legend i{display:inline-block;width:10px;height:10px;border-radius:3px;background:var(--accent);margin-right:5px;vertical-align:-1px}
+.adm-legend i.ref{background:var(--ink)}
+.adm-perm{min-width:560px}
+.adm-perm th.c,.adm-perm td.c{text-align:center;white-space:nowrap}
+.adm-perm td.c{color:var(--accent-deep);font-weight:700}
+.adm-log .lg-a{display:block;font-size:11.5px;color:var(--faint);margin-top:2px}
+.gate-rec{margin-top:10px;text-align:right}
+.gate-rec .linkbtn{font-size:12px;color:var(--faint)}
+.gate-rec .linkbtn:hover{color:var(--accent-deep)}
+@media (max-width:560px){
+  .adm-funnel .fn{grid-template-columns:1fr 40px 44px;row-gap:4px}
+  .adm-funnel .fn-l{grid-column:1/-1}
+  .adm-bars2{gap:2px}
+  .adm-bars2 .ab:nth-child(even) .ab-l{visibility:hidden}
+  .adm-lock{padding:24px 18px;margin-top:12px}
+  .adm-srch{flex-basis:100%}
+  .adm-role{margin-left:6px}
+}
 .sg-agree{display:flex!important;gap:9px;align-items:flex-start;font-size:13px!important;font-weight:500!important;color:var(--sub)!important;margin:18px 0 12px!important;line-height:1.55;cursor:pointer;text-align:left}
 .sg-agree input{width:17px;height:17px;flex:none;margin-top:1px;accent-color:var(--accent);padding:0}
 .sg-agree a{color:var(--accent-deep);text-decoration:underline;text-underline-offset:2px}
@@ -1003,6 +1046,7 @@ a.linkbtn{display:inline-block;margin-top:6px}
       <button class="btn btn-ghost btn-sm" data-act="go-join" style="width:100%;margin-top:8px">초대 코드를 받으셨나요? 합류 신청하기</button>
     </div>
     <div class="gate-foot" id="li-foot">아이디가 없다면 관리자에게 발급을 요청하세요.</div>
+    <div class="gate-rec"><button type="button" class="linkbtn" data-rc="open">운영자 계정 복구</button></div>
   </div>
 </div>
 
@@ -1146,7 +1190,7 @@ let DB=null,ME=null;
 function loadDB(){try{const r=localStorage.getItem(KEY);DB=r?JSON.parse(r):null;}catch(e){DB=null;}if(DB){if(!Array.isArray(DB.stores))DB.stores=[];if(!Array.isArray(DB.finance))DB.finance=[];if(!Array.isArray(DB.routines))DB.routines=[];if(!Array.isArray(DB.templates))DB.templates=[defaultTemplate()];if(!Array.isArray(DB.plans))DB.plans=[];if(!Array.isArray(DB.contacts))DB.contacts=[];if(!Array.isArray(DB.proposals))DB.proposals=[];if(!DB.finCats)DB.finCats={expense:DEFAULT_EXP.slice(),income:DEFAULT_INC.slice()};}}
 /* ═══════════ 클라우드 동기화 ═══════════ */
 let MODE="local",TOKEN="",CLOUD_INIT=false,SNAP={},PENDING={},SYNC_AT="0",pushTimer=null,pollTimer=null,syncBusy=false,OFFLINE=false,needRender=false,refreshing=false;
-let CLOUD={owner:false,ws:null,badges:{},tier:null},ADMIN=null,ADMIN_AT=0,REQS=null,REQS_AT=0,TOKENS=null,WSSET=null;
+let CLOUD={owner:false,op:"",perms:[],ws:null,badges:{},tier:null},ADMIN=null,ADMIN_AT=0,REQS=null,REQS_AT=0,TOKENS=null,WSSET=null;
 const TKEY="mw_token_v1",CKEY="mw_cloud_cache_v1",CMETA="mw_cloud_meta_v1",CPEND="mw_cloud_pending_v1";
 const ID_RE=/^[a-z0-9][a-z0-9._-]{3,19}$/;
 const KINDS=[["member","members"],["project","projects"],["store","stores"],["task","tasks"],["comment","comments"],["fin","finance"],["routine","routines"],["template","templates"],["plan","plans"],["act","activity"],["contact","contacts"],["prop","proposals"]];
@@ -1184,7 +1228,7 @@ function queuePush(){
   clearTimeout(pushTimer);pushTimer=setTimeout(flushPush,700);
 }
 function persistPending(){try{if(Object.keys(PENDING).length)localStorage.setItem(CPEND,JSON.stringify(PENDING));else localStorage.removeItem(CPEND);}catch(e){}}
-function persistMeta(){if(!ME)return;try{localStorage.setItem(CMETA,JSON.stringify({me:ME.id,owner:CLOUD.owner,ws:CLOUD.ws,badges:CLOUD.badges,tier:CLOUD.tier,syncAt:SYNC_AT,at:Date.now()}));}catch(e){}}
+function persistMeta(){if(!ME)return;try{localStorage.setItem(CMETA,JSON.stringify({me:ME.id,owner:CLOUD.owner,op:CLOUD.op,perms:CLOUD.perms,ws:CLOUD.ws,badges:CLOUD.badges,tier:CLOUD.tier,syncAt:SYNC_AT,at:Date.now()}));}catch(e){}}
 function setTier(t){
   const next=t&&typeof t==="object"?{plan:t.plan==="pro"?"pro":"basic",modules:Array.isArray(t.modules)?t.modules.slice():[],limits:Object.assign({brands:2,members:2,tokens:1},t.limits||{}),planUntil:t.planUntil||""}:TIER0();
   const changed=JSON.stringify(next)!==JSON.stringify(CLOUD.tier);
@@ -1267,7 +1311,7 @@ function hydrate(st){
 }
 function applyState(st){
   hydrate(st);
-  CLOUD.owner=!!st.owner;CLOUD.ws=st.ws||null;CLOUD.badges=st.badges||{};
+  CLOUD.owner=!!st.owner;CLOUD.op=st.op||(st.owner?"owner":"");CLOUD.perms=Array.isArray(st.perms)?st.perms:[];CLOUD.ws=st.ws||null;CLOUD.badges=st.badges||{};
   setTier(st.tier);
   if(st.spv!=null){SPACE.onVersion(st.spv);OUTS.onVersion(st.spv);COMM.onVersion(st.spv);}
   ME=DB.members.find(x=>x.id===st.me)||null;
@@ -1283,7 +1327,7 @@ function cloudResume(){
   KINDS.forEach(([k,arr])=>{if(!Array.isArray(DB[arr]))DB[arr]=[];});
   if(!DB.finCats)DB.finCats={expense:DEFAULT_EXP.slice(),income:DEFAULT_INC.slice()};
   ME=memberById(meta.me);if(!ME)return false;
-  CLOUD={owner:!!meta.owner,ws:meta.ws||null,badges:meta.badges||{},tier:null};
+  CLOUD={owner:!!meta.owner,op:meta.op||(meta.owner?"owner":""),perms:Array.isArray(meta.perms)?meta.perms:[],ws:meta.ws||null,badges:meta.badges||{},tier:null};
   setTier(meta.tier);
   buildSnap();PENDING=(pend&&typeof pend==="object")?pend:{};SYNC_AT=meta.syncAt;
   enterApp();startPoll();syncUI();
@@ -1313,7 +1357,7 @@ async function cloudRefresh(){
 function cloudSignOut(reason){
   stopPoll();clearTimeout(pushTimer);TOKEN="";ME=null;PENDING={};
   [TKEY,CKEY,CMETA,CPEND].forEach(k=>{try{localStorage.removeItem(k);}catch(e){}});
-  CLOUD={owner:false,ws:null,badges:{},tier:null};ADMIN=null;REQS=null;ADMIN_AT=0;REQS_AT=0;TOKENS=null;SPACE.reset();OUTS.reset();COMM.reset();ADM.reset();PPL.reset();
+  CLOUD={owner:false,op:"",perms:[],ws:null,badges:{},tier:null};ADMIN=null;REQS=null;ADMIN_AT=0;REQS_AT=0;TOKENS=null;SPACE.reset();OUTS.reset();COMM.reset();ADM.reset();PPL.reset();
   if($("#modal-root").classList.contains("show"))closeModal();
   location.hash="";showGate("login");
   if(reason==="expired")toast("로그인이 만료되었습니다. 다시 로그인하세요.");
@@ -1578,7 +1622,7 @@ function navList(){
     if(modOn("commerce"))mods.push(["commerce","커머스","▧"]);
     L.splice(5,0,...mods);
   }
-  if(MODE==="cloud"&&CLOUD.owner)L.push(["admin","총괄관리","⚙","관리"]);
+  if(MODE==="cloud"&&CLOUD.op)L.push(["admin","총괄관리","⚙","관리"]);
   return L;
 }
 function navBadge(key){if(MODE!=="cloud")return 0;if(key==="admin")return(CLOUD.badges.pendingWs||0)+(CLOUD.badges.fbNew||0);if(key==="members"&&isAdmin())return CLOUD.badges.joinReq||0;return 0;}
@@ -1618,7 +1662,7 @@ function route(){
   if(page==="store"&&arg){const st=storeById(arg);if(st&&canSeeStore(st)){setNav("stores");v.innerHTML=vStoreDetail(st);if(modOn("space"))SPACE.fillStore(st.id);return;}location.hash="#/stores";return;}
   const VIEWS={dashboard:vDashboard,plan:vPlan,projects:vProjects,stores:vStores,board:vBoard,members:vMembers,data:vData,admin:vAdmin};
   let pg=Object.prototype.hasOwnProperty.call(VIEWS,page)?page:"dashboard";
-  if(pg==="admin"&&!(MODE==="cloud"&&CLOUD.owner))pg="dashboard";
+  if(pg==="admin"&&!(MODE==="cloud"&&CLOUD.op))pg="dashboard";
   setNav(pg);
   const sw=$("#side-ws");if(sw)sw.textContent=DB.meta.workspace;
   v.innerHTML=VIEWS[pg]();
@@ -1714,8 +1758,8 @@ function decisionItems(){
   const out=[];
   if(!ME||isField())return{count:0,html:""};
   const partner=ME.role==="partner";
-  if(!partner&&MODE==="cloud"&&CLOUD.owner&&CLOUD.badges.pendingWs)out.push(`<div class="dec-row"><span class="pill p-red">가입 신청</span><span class="dt">새 워크스페이스 개설 신청 ${CLOUD.badges.pendingWs}건</span><span class="da"><button class="btn btn-sm" data-act="brief-admin" data-v="signup">총괄관리</button></span></div>`);
-  if(!partner&&MODE==="cloud"&&CLOUD.owner&&CLOUD.badges.fbNew)out.push(`<div class="dec-row"><span class="pill p-red">문의</span><span class="dt">구성원이 보낸 새 문의 ${CLOUD.badges.fbNew}건</span><span class="da"><button class="btn btn-sm" data-act="brief-admin" data-v="fb">답변하기</button></span></div>`);
+  if(!partner&&MODE==="cloud"&&CLOUD.op&&CLOUD.badges.pendingWs)out.push(`<div class="dec-row"><span class="pill p-red">가입 신청</span><span class="dt">새 워크스페이스 개설 신청 ${CLOUD.badges.pendingWs}건</span><span class="da"><button class="btn btn-sm" data-act="brief-admin" data-v="signup">총괄관리</button></span></div>`);
+  if(!partner&&MODE==="cloud"&&CLOUD.op&&CLOUD.badges.fbNew)out.push(`<div class="dec-row"><span class="pill p-red">문의</span><span class="dt">구성원이 보낸 새 문의 ${CLOUD.badges.fbNew}건</span><span class="da"><button class="btn btn-sm" data-act="brief-admin" data-v="fb">답변하기</button></span></div>`);
   if(MODE==="cloud"&&CLOUD.badges.fbReply)out.push(`<div class="dec-row"><span class="pill p-green">문의 답변</span><span class="dt">운영자가 문의에 답변했습니다${CLOUD.badges.fbReply>1?` (${CLOUD.badges.fbReply}건)`:""}</span><span class="da"><button class="btn btn-sm" data-fb="open">확인</button></span></div>`);
   if(MODE==="cloud"&&isAdmin()&&CLOUD.badges.joinReq)out.push(`<div class="dec-row"><span class="pill p-red">합류 요청</span><span class="dt">초대 링크로 가입한 ${CLOUD.badges.joinReq}명이 승인을 기다립니다</span><span class="da"><button class="btn btn-sm" data-act="brief-req">사람</button></span></div>`);
   const props=partner?[]:(DB.proposals||[]).filter(p=>p.status==="pending").sort((a,b)=>(a.createdAt||"").localeCompare(b.createdAt||""));
@@ -1821,7 +1865,7 @@ function vDashboard(){
       <span class="bchip rev" data-act="brief-review" style="cursor:pointer"><b>${revCnt}</b>검토 대기</span>
       <span class="bchip warn ${dec.count?"":"hidden"}" data-act="brief-dec" style="cursor:pointer"><b>${dec.count}</b>결정할 것</span>
       ${(()=>{const pl=DB.plans.filter(p=>p.memberId===ME.id&&p.scope==="d"&&p.key===todayStr()&&p.type==="item");return pl.length?`<span class="bchip" data-act="brief-plan" style="cursor:pointer"><b>${pl.filter(p=>p.done).length}/${pl.length}</b>오늘 플랜</span>`:"";})()}
-      ${MODE==="cloud"&&CLOUD.owner&&CLOUD.badges.pendingWs?`<span class="bchip warn" data-act="brief-admin"><b>${CLOUD.badges.pendingWs}</b>가입 승인 대기</span>`:""}
+      ${MODE==="cloud"&&CLOUD.op&&CLOUD.badges.pendingWs?`<span class="bchip warn" data-act="brief-admin"><b>${CLOUD.badges.pendingWs}</b>가입 승인 대기</span>`:""}
       ${MODE==="cloud"&&isAdmin()&&CLOUD.badges.joinReq?`<span class="bchip warn" data-act="brief-req"><b>${CLOUD.badges.joinReq}</b>합류 요청</span>`:""}
     </div>
     <div class="h-line">진행중 프로젝트 ${running}개${visStores.length?` · 운영 매장 ${visStores.filter(x=>x.status==="운영중").length}곳`:""} · 이번 주 마감 ${week}건${late?` · <span class="d-late">지연 ${late}건</span>`:""}${chkNeed?` · <span class="d-late">점검 필요 ${chkNeed}곳</span>`:""}</div>
@@ -5698,21 +5742,38 @@ return{view,fillDash,onVersion,reset,refresh,weekText};
    워크스페이스의 업무 내용은 다루지 않습니다. 계정 목록과 기록 개수까지만 봅니다.
    모든 구성원이 쓰는 '운영자에게 문의'와 화면 위 공지 띠도 여기서 그립니다. */
 const ADM=(()=>{
-const A={ov:null,at:0,loading:null,codes:null,pays:null,payYm:"",fb:null,ann:null,logs:null,launch:null,detail:{},busy:false};
-const U={tab:"",q:"",st:"all",pl:"all",sort:"recent",fbF:"new"};
-const TABS=[["","현황"],["ws","워크스페이스"],["signup","가입·베타"],["pay","결제·매출"],["fb","문의"],["ann","공지"],["log","기록"],["launch","오픈 준비"]];
+const A={ov:null,at:0,loading:null,codes:null,pays:null,payYm:"",fb:null,ann:null,logs:null,launch:null,detail:{},busy:false,gate:null,team:null,sys:null,growth:null,acct:null,tmpMsg:""};
+const U={tab:"",want:"",q:"",st:"all",pl:"all",sort:"recent",fbF:"new",aq:"",af:"all"};
+// [탭, 이름, 필요한 권한] — 운영팀 역할마다 보이는 탭이 다릅니다
+const TABS=[["","현황","see"],["ws","워크스페이스","see"],["signup","가입·베타","signup"],["pay","결제·매출","pay"],["acct","계정 지원","acct"],["growth","성장·확산","see"],["fb","문의","fb"],["ann","공지","ann"],["log","기록","see"],["launch","오픈 준비","see"],["team","운영팀·보안","see"]];
+const OP_LB={owner:"총괄",manager:"운영 매니저",support:"고객지원",finance:"재무",viewer:"보기 전용"};
+const OP_ASSIGN=["manager","support","finance","viewer"];
+const PERM_LB=[["see","현황 · 워크스페이스 · 기록 보기"],["ws","가입 승인·반려 · 이용 중지·재개 · 등급·모듈 · 운영 메모"],["extend","프로 기한 연장"],["pay","결제 기록 · 매출 · 가격표"],["signup","가입 방식 · 시작 등급 · 베타 코드"],["fb","문의 답변"],["ann","공지 게시"],["acct","계정 지원 (잠금 풀기 · 로그아웃 · 임시 비밀번호)"],["launch","오픈 준비 체크 · 오류 기록 비우기"],["danger","워크스페이스 삭제 · 전체 백업"],["team","운영팀 역할 정하기"]];
+const can=p=>Array.isArray(CLOUD.perms)&&CLOUD.perms.includes(p);
+const tabs=()=>TABS.filter(t=>can(t[2]));
+const permName=p=>((PERM_LB.find(x=>x[0]===p)||[p,p])[1]).split(" (")[0];
 const POL={approve:["승인제","신청을 받고 운영자가 승인하면 열립니다. 베타 코드가 있으면 바로 열립니다."],code:["베타 코드 전용","베타 코드가 있어야 신청할 수 있습니다. 비공개 베타 기간에 씁니다."],open:["자동 개설","누구나 가입하면 바로 열립니다. 정식 오픈 뒤에 씁니다."],closed:["신청 마감","새 워크스페이스 신청을 받지 않습니다. 기존 워크스페이스의 팀원 초대는 그대로 됩니다."]};
 const FB_KIND={error:["오류","p-red"],inconvenient:["불편","p-amber"],idea:["제안","p-blue"],billing:["결제·요금","p-green"],etc:["기타","p-gray"]};
 const FB_ST={new:["새 문의","p-red"],doing:["처리 중","p-amber"],done:["완료","p-green"]};
 const ANN_LV={info:["안내","p-blue"],important:["중요","p-red"],maint:["점검","p-amber"]};
-const LOG_LB={approve:"개설 승인",reject:"신청 반려",suspend:"이용 중지",activate:"이용 재개",delete:"워크스페이스 삭제",resetpw:"비밀번호 초기화",plan:"등급·모듈",note:"운영 메모",extend:"기한 연장","pay-add":"결제 기록","pay-edit":"결제 수정","pay-delete":"결제 삭제","code-add":"베타 코드","code-toggle":"베타 코드","code-delete":"베타 코드",fb:"문의",ann:"공지",settings:"플랫폼 설정","err-clear":"오류 기록",export:"전체 백업","auto-open":"바로 개설"};
+const LOG_LB={approve:"개설 승인",reject:"신청 반려",suspend:"이용 중지",activate:"이용 재개",delete:"워크스페이스 삭제",resetpw:"비밀번호 초기화",plan:"등급·모듈",note:"운영 메모",extend:"기한 연장","pay-add":"결제 기록","pay-edit":"결제 수정","pay-delete":"결제 삭제","code-add":"베타 코드","code-toggle":"베타 코드","code-delete":"베타 코드",fb:"문의",ann:"공지",settings:"플랫폼 설정","err-clear":"오류 기록",export:"전체 백업","auto-open":"바로 개설",ref:"소개 보상",team:"운영팀","acct-unlock":"잠금 풀기","acct-logout":"강제 로그아웃","acct-resetpw":"임시 비밀번호","key-ok":"보안 키 확인","key-fail":"보안 키 실패",recover:"운영자 복구","recover-fail":"복구 실패"};
 const PAY_ITEMS=["프로 1개월","프로 1년","프로 + 스페이스 1개월","프로 + 커머스 1개월","프로 + 아웃소싱 1개월","추가 좌석","기타"];
 const fmt=n=>Math.round(Number(n)||0).toLocaleString("ko-KR");
 const onPage=()=>/^#\/admin(\/|$)/.test(location.hash);
-const usable=()=>MODE==="cloud"&&!!CLOUD.owner;
+const usable=()=>MODE==="cloud"&&!!CLOUD.op;
+const unlocked=()=>!!(A.gate&&A.gate.admOk);
 const pillOf=(map,k)=>{const x=map[k]||[k,"p-gray"];return`<span class="pill ${x[1]}">${esc(x[0])}</span>`;};
-const ERR={forbidden:"운영자만 쓸 수 있습니다.","not-found":"대상을 찾을 수 없습니다. 새로고침 후 다시 시도하세요.",unlimited:"기한 없는 프로입니다. 기한을 정하려면 등급·모듈에서 날짜를 넣으세요.","bad-period":"기간의 끝이 시작보다 빠릅니다.",taken:"이미 있는 코드입니다. 다른 코드를 넣으세요.","bad-code":"코드는 영문·숫자 4자 이상으로 넣으세요.","bad-request":"입력한 내용을 다시 확인하세요."};
-const failToast=e=>{if(!e||e.code==="unauthorized")return;toast(ERR[e.code]||"처리하지 못했습니다. 잠시 후 다시 시도하세요.");};
+const ERR={forbidden:"권한이 없습니다. 총괄에게 권한을 요청하세요.",self:"자기 계정은 여기서 바꿀 수 없습니다. 설정에서 바꾸세요.",inactive:"사용 중인 계정에만 운영팀 역할을 줄 수 있습니다.","not-found":"대상을 찾을 수 없습니다. 새로고침 후 다시 시도하세요.",unlimited:"기한 없는 프로입니다. 기한을 정하려면 등급·모듈에서 날짜를 넣으세요.","bad-period":"기간의 끝이 시작보다 빠릅니다.",taken:"이미 있는 코드입니다. 다른 코드를 넣으세요.","bad-code":"코드는 영문·숫자 4자 이상으로 넣으세요.","bad-request":"입력한 내용을 다시 확인하세요."};
+function failToast(e){
+  if(!e||e.code==="unauthorized")return;
+  if(e.code==="need-key"){   // 역할이 바뀌었거나 보안 키가 새로 생겼을 때
+    A.gate=Object.assign({},A.gate||{keySet:true},{admOk:false});
+    if(onPage()){closeModal();view(U.want||U.tab);}else toast("총괄관리 보안 키를 다시 확인해야 합니다.");
+    return;
+  }
+  if(e.code==="forbidden"&&e.data&&e.data.need){toast(`이 작업은 ‘${permName(e.data.need)}’ 권한이 있어야 합니다.`);checkGate();return;}
+  toast(ERR[e.code]||"처리하지 못했습니다. 잠시 후 다시 시도하세요.");
+}
 const ws=()=>(A.ov&&A.ov.workspaces)||[];
 const wsById=id=>ws().find(w=>w.id===id)||null;
 const PL=()=>(A.ov&&A.ov.platform)||{signup:"approve",newPlan:{plan:"basic",days:0,modules:[]},contact:"",prices:{pro:12000,space:19000,outsourcing:0,commerce:19000,seat:4900},refDays:0};
@@ -5724,8 +5785,21 @@ function lastActive(w){return w.lastSeen||w.lastActive||"";}
 function active7(w){const t=Date.parse(lastActive(w));return t&&Date.now()-t<7*864e5;}
 
 /* ── 서버 ── */
+async function checkGate(){   // 역할·권한·보안 키 상태를 서버에서 다시 받습니다
+  try{
+    const g=await api("admin/gate");A.gate=g;
+    const changed=g.op!==CLOUD.op||JSON.stringify(g.perms||[])!==JSON.stringify(CLOUD.perms||[]);
+    CLOUD.op=g.op;CLOUD.perms=g.perms||[];
+    if(changed){persistMeta();renderNav();if(onPage()&&unlocked())view(U.want||U.tab);}
+    return g;
+  }catch(e){
+    if(e.code==="forbidden"){A.gate=null;CLOUD.op="";CLOUD.perms=[];persistMeta();renderNav();if(onPage())go("#/dashboard");toast("총괄관리 권한이 없습니다.");}
+    else if(e.code!=="unauthorized"){const el=$("#adm-body");if(el&&onPage())el.innerHTML=`<div class="card"><div class="empty">연결하지 못했습니다. 잠시 후 새로고침하세요.</div></div>`;}
+    return null;
+  }
+}
 async function load(force){
-  if(!usable())return;
+  if(!usable()||!unlocked())return;
   if(A.loading){try{await A.loading;}catch(e){}if(!force)return;}
   if(!force&&A.ov&&Date.now()-A.at<10000)return;
   A.loading=api("admin/overview").then(res=>{
@@ -5744,22 +5818,46 @@ async function loadTab(t,force){
     if(t==="ann"&&(force||!A.ann))A.ann=(await api("admin/ann",{op:"list"})).items;
     if(t==="log"&&(force||!A.logs))A.logs=await api("admin/logs",{op:"list"});
     if(t==="launch"&&(force||!A.launch))A.launch=await api("admin/launch",{op:"get"});
+    if(t==="acct"&&(force||!A.acct))A.acct=(await api("admin/accounts",{op:"search",q:U.aq,f:U.af})).items;
+    if(t==="growth"&&(force||!A.growth))A.growth=await api("admin/growth");
+    if(t==="team"&&(force||!A.team||!A.sys)){const [tm,sy]=await Promise.all([api("admin/team"),api("admin/system")]);A.team=tm;A.sys=sy;}
   }catch(e){failToast(e);}
   if(onPage()&&U.tab===t)paint();
 }
 function refresh(force){load(force).then(()=>{if(U.tab)loadTab(U.tab,true);});}
 
 /* ── 화면 ── */
+function head(){
+  return`<div class="page-head adm-head">
+    <div><h1><span class="bars"></span>총괄관리${CLOUD.op?`<span class="adm-role">${esc(OP_LB[CLOUD.op]||CLOUD.op)}</span>`:""}</h1><div class="desc">마이웍스 플랫폼 전체를 운영합니다. 각 워크스페이스의 업무 내용은 운영팀에게도 보이지 않습니다.</div></div>
+    ${unlocked()?`<button class="btn btn-sm" data-adm="refresh">새로고침</button>`:""}
+  </div>`;
+}
+function lockCard(){
+  return`<div class="card adm-lock">
+    <div class="adm-lock-ic" aria-hidden="true">🔐</div>
+    <h2>보안 키 확인</h2>
+    <p class="hint">총괄관리는 로그인과 별도로 보안 키를 한 번 더 확인합니다. 이번 로그인에서 한 번만 넣으면 됩니다.</p>
+    <div class="adm-lock-row"><input id="adm-key" type="password" autocomplete="off" spellcheck="false" placeholder="보안 키" aria-label="보안 키"><button class="btn btn-pri" data-adm="unlock">확인</button></div>
+    <div id="adm-key-msg" class="adm-key-msg" role="status"></div>
+    <p class="hint">보안 키는 Cloudflare에 넣어 둔 <span class="mono">MW_ADMIN_KEY</span> 값입니다. 모르면 총괄(대표)에게 물어보세요. 다섯 번 틀리면 로그아웃됩니다.</p>
+  </div>`;
+}
 function view(arg){
   if(!usable()){go("#/dashboard");return;}
-  U.tab=TABS.some(t=>t[0]===arg)?arg:"";
-  $("#view").innerHTML=`
-  <div class="page-head adm-head">
-    <div><h1><span class="bars"></span>총괄관리</h1><div class="desc">마이웍스 플랫폼 전체를 운영합니다. 각 워크스페이스의 업무 내용은 운영자에게도 보이지 않습니다.</div></div>
-    <button class="btn btn-sm" data-adm="refresh">새로고침</button>
-  </div>
-  <nav class="sp-tabs adm-tabs">${TABS.map(([k,l])=>`<button data-adm="tab" data-v="${k}" class="${U.tab===k?"on":""}">${l}${tabBadge(k)}</button>`).join("")}</nav>
-  <div id="adm-body">${A.ov?body():`<div class="card"><div class="empty">불러오는 중…</div></div>`}</div>`;
+  U.want=arg||"";
+  if(!unlocked()){
+    $("#view").innerHTML=head()+`<div id="adm-body">${A.gate?lockCard():loadingCard}</div>`;
+    const focusKey=()=>{const i=$("#adm-key");if(i)i.focus();};
+    if(A.gate)focusKey();
+    else checkGate().then(g=>{if(!g||!onPage())return;if(g.admOk)view(U.want);else{const el=$("#adm-body");if(el){el.innerHTML=lockCard();focusKey();}}});
+    return;
+  }
+  const T=tabs();
+  U.tab=T.some(t=>t[0]===arg)?arg:"";
+  $("#view").innerHTML=head()+`
+  <nav class="sp-tabs adm-tabs">${T.map(([k,l])=>`<button data-adm="tab" data-v="${k}" class="${U.tab===k?"on":""}">${l}${tabBadge(k)}</button>`).join("")}</nav>
+  <div id="adm-body">${A.ov?body():loadingCard}</div>`;
   load(false);if(U.tab)loadTab(U.tab,false);
 }
 function tabBadge(k){
@@ -5770,15 +5868,16 @@ function tabBadge(k){
 function paint(){
   const el=$("#adm-body");if(!el)return;
   const ae=document.activeElement;
-  if(ae&&el.contains(ae)&&ae.matches("textarea,input:not([type=checkbox]):not([type=radio])")&&ae.id!=="adm-q"){A.dirty=true;return;}   // 입력 중이면 다시 그리지 않습니다
-  const keep=ae&&ae.id==="adm-q"?ae.selectionStart:null;
+  const free=ae&&(ae.id==="adm-q"||ae.id==="adm-aq");   // 검색창은 그대로 이어서 씁니다
+  if(ae&&el.contains(ae)&&ae.matches("textarea,input:not([type=checkbox]):not([type=radio])")&&!free){A.dirty=true;return;}   // 입력 중이면 다시 그리지 않습니다
+  const keepId=free?ae.id:"",keep=free?ae.selectionStart:null;
   A.dirty=false;el.innerHTML=body();
   $$(".adm-tabs button").forEach(b=>{b.innerHTML=(TABS.find(t=>t[0]===b.dataset.v)||["",""])[1]+tabBadge(b.dataset.v);});
-  if(keep!==null){const q=$("#adm-q");if(q){q.focus();try{q.setSelectionRange(keep,keep);}catch(x){}}}
+  if(keepId){const q=$("#"+keepId);if(q){q.focus();try{q.setSelectionRange(keep,keep);}catch(x){}}}
 }
 function body(){
   if(!A.ov)return`<div class="card"><div class="empty">불러오는 중…</div></div>`;
-  return({"":vHome,ws:vWs,signup:vSignup,pay:vPay,fb:vFb,ann:vAnn,log:vLog,launch:vLaunch}[U.tab]||vHome)();
+  return({"":vHome,ws:vWs,signup:vSignup,pay:vPay,acct:vAcct,growth:vGrowth,fb:vFb,ann:vAnn,log:vLog,launch:vLaunch,team:vTeam}[U.tab]||vHome)();
 }
 const loadingCard=`<div class="card"><div class="empty">불러오는 중…</div></div>`;
 
@@ -5793,14 +5892,16 @@ function vHome(){
   const ym=todayStr().slice(0,7),newM=W.filter(w=>w.status!=="rejected"&&(w.createdAt||"").slice(0,7)===ym).length;
   const L=launchStat();
   const backupOld=!s.lastExport||Date.now()-Date.parse(s.lastExport)>30*864e5;
+  const P=can("pay"),payTab=P?"pay":"ws";
   const todo=[];
-  if(pend.length)todo.push(["p-red","가입 신청",`새 워크스페이스 개설 신청 ${pend.length}건`,"signup","확인"]);
-  if(s.fbNew)todo.push(["p-red","문의",`새 문의 ${s.fbNew}건${s.fbDoing?` · 처리 중 ${s.fbDoing}건`:""}`,"fb","답변"]);
-  if(soon.length)todo.push(["p-amber","기한 임박",`프로 기한이 7일 안에 끝나는 곳 ${soon.length}곳 — ${soon.slice(0,3).map(w=>esc(w.name)).join(", ")}`,"pay","결제·연장"]);
-  if(lapsed.length)todo.push(["p-amber","기한 만료",`프로 기한이 지나 베이직 규칙으로 돌아간 곳 ${lapsed.length}곳`,"pay","확인"]);
+  if(A.gate&&!A.gate.keySet&&can("team"))todo.push(["p-red","보안 키",A.gate.keyShort?"MW_ADMIN_KEY가 8자보다 짧아 꺼져 있습니다":"Cloudflare에 보안 키(MW_ADMIN_KEY)를 아직 넣지 않았습니다","team","설정 방법"]);
+  if(pend.length)todo.push(["p-red","가입 신청",`새 워크스페이스 개설 신청 ${pend.length}건`,can("signup")?"signup":"ws","확인"]);
+  if(s.fbNew&&can("fb"))todo.push(["p-red","문의",`새 문의 ${s.fbNew}건${s.fbDoing?` · 처리 중 ${s.fbDoing}건`:""}`,"fb","답변"]);
+  if(soon.length)todo.push(["p-amber","기한 임박",`프로 기한이 7일 안에 끝나는 곳 ${soon.length}곳 — ${soon.slice(0,3).map(w=>esc(w.name)).join(", ")}`,payTab,P?"결제·연장":"보기"]);
+  if(lapsed.length)todo.push(["p-amber","기한 만료",`프로 기한이 지나 베이직 규칙으로 돌아간 곳 ${lapsed.length}곳`,payTab,"확인"]);
   if(s.err24)todo.push(["p-red","서버 오류",`지난 24시간 서버 오류 ${s.err24}건`,"log","보기"]);
-  if(L.total&&L.done<L.total)todo.push(["p-blue","오픈 준비",`${L.total}개 중 ${L.done}개 완료`,"launch","이어서"]);
-  if(backupOld)todo.push(["p-gray","백업",s.lastExport?`마지막 전체 백업 ${fmtWhen(s.lastExport)} — 30일이 지났습니다`:"아직 전체 백업을 내려받지 않았습니다","launch","백업"]);
+  if(L.total&&L.done<L.total&&can("launch"))todo.push(["p-blue","오픈 준비",`${L.total}개 중 ${L.done}개 완료`,"launch","이어서"]);
+  if(backupOld&&can("danger"))todo.push(["p-gray","백업",s.lastExport?`마지막 전체 백업 ${fmtWhen(s.lastExport)} — 30일이 지났습니다`:"아직 전체 백업을 내려받지 않았습니다","launch","백업"]);
   // 주별 가입 추이 (8주)
   const weeks=[];for(let i=7;i>=0;i--){const st=addDaysStr(mondayOf(todayStr()),-7*i),en=addDaysStr(st,7);weeks.push({st,n:W.filter(w=>w.status!=="rejected"&&(w.createdAt||"").slice(0,10)>=st&&(w.createdAt||"").slice(0,10)<en).length});}
   const mx=Math.max(1,...weeks.map(x=>x.n));
@@ -5811,8 +5912,8 @@ function vHome(){
     ${stat(act.length,"곳","이용 중 워크스페이스",`최근 7일 활동 ${act.filter(active7).length}곳`)}
     ${stat(pend.length,"건","승인 대기","",pend.length>0)}
     ${stat(pro.length,"곳","프로",`유료 ${paid.length} · 무료·운영자 ${pro.length-paid.length}`)}
-    ${stat(fmt(mrr),"원","예상 월 정기 매출","가격표 기준 · 무료 제공 제외")}
-    ${stat(fmt(s.payMonth),"원","이번 달 입금",`지난달 ${fmt(s.payPrev)}원`)}
+    ${P?stat(fmt(mrr),"원","예상 월 정기 매출","가격표 기준 · 무료 제공 제외"):stat(act.filter(w=>w.refBy).length,"곳","소개로 가입","이용 중 워크스페이스 기준")}
+    ${P?stat(fmt(s.payMonth),"원","이번 달 입금",`지난달 ${fmt(s.payPrev)}원`):stat(act.filter(w=>(w.members||0)>=2).length,"곳","팀으로 쓰는 곳","구성원 2명 이상")}
     ${stat(s.fbNew,"건","새 문의","",s.fbNew>0)}
     ${stat(s.accounts,"명","전체 계정",`이번 달 신규 워크스페이스 ${newM}곳`)}
     ${stat(s.err24,"건","서버 오류 (24시간)","",s.err24>0)}
@@ -5838,7 +5939,7 @@ function vHome(){
   </div>`;
 }
 function stat(n,unit,lb,sub,warn){return`<div class="stat ${warn?"warn":""}"><div class="s-num">${n}<em>${unit}</em></div><div class="s-lb">${lb}</div>${sub?`<div class="s-sub">${sub}</div>`:""}</div>`;}
-function logRows(list){return`<div class="adm-log">${list.map(l=>`<div class="lg"><span class="lg-t mono">${fmtWhen(l.at)}</span><span class="pill p-gray">${esc(LOG_LB[l.action]||l.action)}</span><span class="lg-d">${l.ws_name?`<b>${esc(l.ws_name)}</b> `:""}${esc(l.detail||"")}</span></div>`).join("")}</div>`;}
+function logRows(list){return`<div class="adm-log">${list.map(l=>`<div class="lg"><span class="lg-t mono">${fmtWhen(l.at)}</span><span class="pill ${/^(key-fail|recover-fail)$/.test(l.action)?"p-red":"p-gray"}">${esc(LOG_LB[l.action]||l.action)}</span><span class="lg-d">${l.ws_name?`<b>${esc(l.ws_name)}</b> `:""}${esc(l.detail||"")}${l.actor?`<span class="lg-a">처리 ${esc(l.actor)}</span>`:""}</span></div>`).join("")}</div>`;}
 
 /* 워크스페이스 */
 function filtered(){
@@ -5879,7 +5980,7 @@ function wsRow(w){
       ${w.opNote?`<div class="r-note adm-memo">메모 · ${esc(w.opNote)}</div>`:""}
     </div>
     <div class="w-acts">
-      ${w.status==="pending"?`<button class="btn btn-sm btn-pri" data-act="adm-ws" data-op="approve" data-id="${w.id}">승인</button><button class="btn btn-sm btn-ghost" data-act="adm-ws" data-op="reject" data-id="${w.id}">반려</button>`:`<button class="btn btn-sm" data-adm="detail" data-id="${w.id}">상세</button><button class="btn btn-sm" data-act="adm-plan" data-id="${w.id}">등급·모듈</button>`}
+      ${w.status==="pending"?(can("ws")?`<button class="btn btn-sm btn-pri" data-act="adm-ws" data-op="approve" data-id="${w.id}">승인</button><button class="btn btn-sm btn-ghost" data-act="adm-ws" data-op="reject" data-id="${w.id}">반려</button>`:`<span class="hint">승인 대기</span>`):`<button class="btn btn-sm" data-adm="detail" data-id="${w.id}">상세</button>${can("ws")?`<button class="btn btn-sm" data-act="adm-plan" data-id="${w.id}">등급·모듈</button>`:""}`}
     </div>
   </div>`;
 }
@@ -5899,9 +6000,9 @@ async function detail(id){
           <div><span>지금 등급</span><b>${w.planNow==="pro"?"프로":"베이직"}${w.plan==="pro"&&w.planNow!=="pro"?" (기한 만료)":""}</b></div>
           <div><span>프로 기한</span><b>${w.plan==="pro"?(w.planUntil?esc(w.planUntil)+(daysLeft(w.planUntil)>=0?` · D-${daysLeft(w.planUntil)}`:""):"기한 없음"):"-"}</b></div>
           <div><span>모듈</span><b>${esc(modTxt(w.modules)||"-")}</b></div>
-          <div><span>예상 월 이용료</span><b>${w.mine?"운영자 워크스페이스":w.comp?"무료 제공":fmt(mrrOf(w))+"원"}</b></div>
+          ${can("pay")?`<div><span>예상 월 이용료</span><b>${w.mine?"운영자 워크스페이스":w.comp?"무료 제공":fmt(mrrOf(w))+"원"}</b></div>`:""}
         </div>
-        <div class="adm-acts"><button class="btn btn-sm" data-act="adm-plan" data-id="${w.id}">등급·모듈</button><button class="btn btn-sm" data-adm="extend" data-id="${w.id}" data-days="31">+1개월</button><button class="btn btn-sm" data-adm="extend" data-id="${w.id}" data-days="365">+1년</button><button class="btn btn-sm btn-ghost" data-adm="pay-new" data-id="${w.id}">결제 기록 추가</button></div>
+        ${can("ws")||can("extend")||can("pay")?`<div class="adm-acts">${can("ws")?`<button class="btn btn-sm" data-act="adm-plan" data-id="${w.id}">등급·모듈</button>`:""}${can("extend")?`<button class="btn btn-sm" data-adm="extend" data-id="${w.id}" data-days="31">+1개월</button><button class="btn btn-sm" data-adm="extend" data-id="${w.id}" data-days="365">+1년</button>`:""}${can("pay")?`<button class="btn btn-sm btn-ghost" data-adm="pay-new" data-id="${w.id}">결제 기록 추가</button>`:""}</div>`:""}
       </div>
       <div class="adm-sec">
         <h3>기본 정보</h3>
@@ -5916,14 +6017,14 @@ async function detail(id){
       </div>
     </div>
     <div class="adm-sec">
-      <h3>운영 메모 <span class="hint">운영자에게만 보입니다</span></h3>
-      <textarea id="adm-note" maxlength="1000" style="min-height:64px" placeholder="예: 쏘플 지인 소개 · 11월 베타 참여 · 매달 말일 계좌이체">${esc(w.opNote||"")}</textarea>
-      <div class="adm-row"><label class="adm-check"><input type="checkbox" id="adm-comp" ${w.comp?"checked":""}> 무료 제공 (예상 매출에서 뺍니다)</label><button class="btn btn-sm btn-pri" data-adm="note-save" data-id="${w.id}">메모 저장</button></div>
+      <h3>운영 메모 <span class="hint">운영팀에게만 보입니다</span></h3>
+      <textarea id="adm-note" maxlength="1000" style="min-height:64px" placeholder="예: 쏘플 지인 소개 · 11월 베타 참여 · 매달 말일 계좌이체" ${can("ws")?"":"readonly"}>${esc(w.opNote||"")}</textarea>
+      ${can("ws")?`<div class="adm-row"><label class="adm-check"><input type="checkbox" id="adm-comp" ${w.comp?"checked":""}> 무료 제공 (예상 매출에서 뺍니다)</label><button class="btn btn-sm btn-pri" data-adm="note-save" data-id="${w.id}">메모 저장</button></div>`:""}
     </div>
     <div class="adm-sec">
       <h3>계정 <span class="cnt">${d.accounts.length}명</span></h3>
-      <div class="tblwrap"><table class="tbl"><thead><tr><th>이름</th><th>아이디</th><th>역할</th><th>상태</th><th>최근 로그인</th></tr></thead><tbody>
-      ${d.accounts.map(a=>`<tr><td>${esc(a.name)}${a.owner?` <span class="own-badge">운영자</span>`:""}</td><td class="mono">${esc(a.loginId)}</td><td>${esc(ROLES[a.role]||a.role)}</td><td>${{active:"사용",disabled:"비활성",pending:"승인 대기",rejected:"반려"}[a.status]||esc(a.status)}</td><td>${a.lastLogin?fmtWhen(a.lastLogin):"-"}</td></tr>`).join("")}
+      <div class="tblwrap"><table class="tbl"><thead><tr><th>이름</th><th>아이디</th><th>역할</th><th>상태</th><th>최근 로그인</th>${can("acct")?"<th></th>":""}</tr></thead><tbody>
+      ${d.accounts.map(a=>`<tr><td>${esc(a.name)}${a.owner?` <span class="own-badge">운영자</span>`:""}</td><td class="mono">${esc(a.loginId)}</td><td>${esc(ROLES[a.role]||a.role)}</td><td>${{active:"사용",disabled:"비활성",pending:"승인 대기",rejected:"반려"}[a.status]||esc(a.status)}</td><td>${a.lastLogin?fmtWhen(a.lastLogin):"-"}</td>${can("acct")?`<td class="adm-tacts"><button class="btn btn-sm btn-ghost" data-adm="acct-find" data-v="${esc(a.loginId)}">계정 지원</button></td>`:""}</tr>`).join("")}
       </tbody></table></div>
     </div>
     <div class="adm-dgrid">
@@ -5941,14 +6042,16 @@ async function detail(id){
         ${d.tokens.length?`<div class="adm-kv">${d.tokens.slice(0,6).map(t=>`<div><span>${esc(t.name||"이름 없음")} · ${t.scope==="write"?"쓰기":"읽기"}${t.revoked?" · 회수":""}</span><b>${t.lastUsed?fmtWhen(t.lastUsed):"사용 안 함"}</b></div>`).join("")}</div>`:`<div class="hint">발급한 토큰이 없습니다.</div>`}
       </div>
     </div>
-    <div class="adm-sec">
+    ${can("pay")?`<div class="adm-sec">
       <h3>결제 기록 <span class="cnt">${d.payments.length}건 · ${fmt(d.payments.reduce((a,p)=>a+p.amount,0))}원</span></h3>
       ${d.payments.length?payTable(d.payments,false):`<div class="hint">아직 결제 기록이 없습니다.</div>`}
-    </div>
-    ${w.mine?"":`<div class="adm-sec adm-danger"><h3>관리</h3><div class="adm-acts">
-      ${w.status==="active"?`<button class="btn btn-sm" data-act="adm-ws" data-op="resetpw" data-id="${w.id}">관리자 비밀번호 초기화</button><button class="btn btn-sm btn-ghost" data-act="adm-ws" data-op="suspend" data-id="${w.id}">이용 중지</button>`:""}
-      ${w.status==="suspended"?`<button class="btn btn-sm" data-act="adm-ws" data-op="activate" data-id="${w.id}">이용 재개</button>`:""}
-      <button class="btn btn-sm btn-danger" data-act="adm-ws" data-op="delete" data-id="${w.id}">워크스페이스 삭제</button></div></div>`}
+    </div>`:""}
+    ${(()=>{if(w.mine)return"";const B=[];
+      if(w.status==="active"&&can("acct"))B.push(`<button class="btn btn-sm" data-act="adm-ws" data-op="resetpw" data-id="${w.id}">관리자 비밀번호 초기화</button>`);
+      if(w.status==="active"&&can("ws"))B.push(`<button class="btn btn-sm btn-ghost" data-act="adm-ws" data-op="suspend" data-id="${w.id}">이용 중지</button>`);
+      if(w.status==="suspended"&&can("ws"))B.push(`<button class="btn btn-sm" data-act="adm-ws" data-op="activate" data-id="${w.id}">이용 재개</button>`);
+      if(can("danger"))B.push(`<button class="btn btn-sm btn-danger" data-act="adm-ws" data-op="delete" data-id="${w.id}">워크스페이스 삭제</button>`);
+      return B.length?`<div class="adm-sec adm-danger"><h3>관리</h3><div class="adm-acts">${B.join("")}</div></div>`:"";})()}
     <div class="m-foot"><button class="btn btn-ghost" data-g="modal-close">닫기</button></div>
   </div>`;
 }
@@ -6127,7 +6230,7 @@ function vLog(){
   const L=A.logs;if(!L)return loadingCard;
   return`
   <div class="card">
-    <h2><span class="bars"></span>서버 오류 <span class="cnt">${L.errors.length}건</span>${L.errors.length?`<button class="btn btn-sm btn-ghost adm-h-btn" data-adm="err-clear">오류 기록 비우기</button>`:""}</h2>
+    <h2><span class="bars"></span>서버 오류 <span class="cnt">${L.errors.length}건</span>${L.errors.length&&can("launch")?`<button class="btn btn-sm btn-ghost adm-h-btn" data-adm="err-clear">오류 기록 비우기</button>`:""}</h2>
     ${L.errors.length?`<div class="adm-log">${L.errors.map(e=>`<div class="lg"><span class="lg-t mono">${fmtWhen(e.at)}</span><span class="pill p-red mono">${esc(e.path||"-")}</span><span class="lg-d mono">${esc(e.msg||"")}</span></div>`).join("")}</div><div class="hint" style="margin-top:8px">같은 오류가 반복되면 내용을 복사해 제작 담당(클로드)에게 전달하세요.</div>`:`<div class="empty" style="padding:18px">기록된 서버 오류가 없습니다.</div>`}
   </div>
   <div class="card" style="margin-top:14px">
@@ -6160,7 +6263,8 @@ const LAUNCH=[
     ["alimtalk","알림톡 발송 서비스 가입","알림 기능을 붙일 때 필요합니다(제작지시서 WP6). 템플릿은 카카오 검수에 영업일 1~3일 걸립니다.",["솔라피 등 발송 서비스에 가입하고 카카오톡 채널을 연동합니다.","제작 담당이 준비한 템플릿 문구로 검수를 신청합니다."],"https://solapi.com"]
   ]],
   ["보안·운영",[
-    ["sec-owner","운영자 계정 지키기","운영자 계정은 모든 워크스페이스의 등급·삭제를 다룹니다.",["운영자 비밀번호를 12자 이상 고유한 것으로 바꿉니다(설정 → 비밀번호 변경).","운영자 계정은 다른 사람과 같이 쓰지 않습니다. 직원에게는 별도 계정을 줍니다."],""],
+    ["sec-owner","운영자 계정 지키기","운영자 계정은 모든 워크스페이스의 등급·삭제를 다룹니다.",["운영자 비밀번호를 12자 이상 고유한 것으로 바꿉니다(설정 → 비밀번호 변경).","운영자 계정은 다른 사람과 같이 쓰지 않습니다. 직원에게는 별도 계정을 만들고 운영팀·보안 탭에서 필요한 역할만 줍니다."],""],
+    ["sec-adminkey","총괄관리 보안 키 넣기","Cloudflare에 MW_ADMIN_KEY를 넣으면 총괄관리를 열 때 보안 키를 한 번 더 묻고, 운영자 비밀번호를 잊었을 때 로그인 화면의 ‘운영자 계정 복구’로 다시 정할 수 있습니다.",["Cloudflare → Workers & Pages → myworkspro → Settings에서 환경을 Production으로 두고 Variables and Secrets의 Add를 누릅니다.","이름은 MW_ADMIN_KEY, 값은 16자 이상 아무도 모르는 문구로 넣고 Encrypt(암호화)를 고른 뒤 저장합니다.","Deployments에서 최근 배포를 다시 배포(Retry deployment)하면 적용됩니다. 키는 따로 안전하게 적어 둡니다."],"https://dash.cloudflare.com","adminkey"],
     ["sec-2fa","GitHub·Cloudflare·Google 2단계 인증","코드와 서버, 메일 계정이 뚫리면 서비스 전체가 위험합니다.",["GitHub, Cloudflare, Google 계정에 2단계 인증을 켭니다.","복구 코드를 안전한 곳에 보관합니다."],""],
     ["sec-cf-plan","Cloudflare 요금제 점검","무료 한도는 하루 10만 요청입니다. 사용자가 늘면 월 5달러 유료로 올립니다.",["Cloudflare에 결제 수단을 등록해 둡니다.","대시보드에서 하루 요청 수가 한도의 70%를 넘으면 Workers 유료로 전환합니다."],"https://dash.cloudflare.com"],
     ["ops-backup","전체 백업 받기","월 1회 이상 전체 백업을 내려받아 안전한 곳에 보관합니다. 아래 ‘전체 백업 내려받기’를 쓰세요.",["백업 파일에는 계정 정보가 들어 있으니 비밀번호가 걸린 저장소에 둡니다.","1년이 지난 백업 파일은 지웁니다(개인정보처리방침 3번).","Cloudflare D1의 시점 복구(Time Travel)도 함께 확인합니다."],"","backup"],
@@ -6179,6 +6283,7 @@ function autoOf(key){   // 시스템이 확인할 수 있는 항목 — 오픈 �
   const au=A.launch&&A.launch.auto;
   if(key==="contact")return !!PL().contact;
   if(au&&key in au)return !!au[key];
+  if(key==="adminkey")return !!(A.gate&&A.gate.keySet);
   const s=(A.ov&&A.ov.summary)||{};
   if(key==="domain")return !/\.pages\.dev$|^localhost$|^127\./.test(location.hostname);
   if(key==="backup")return !!s.lastExport&&Date.now()-Date.parse(s.lastExport)<30*864e5;
@@ -6202,12 +6307,12 @@ function vLaunch(){
   ${LAUNCH.map(([g,items])=>`<div class="card adm-lgroup">
     <h2>${esc(g)} <span class="cnt">${items.filter(itemDone).length} / ${items.length}</span></h2>
     ${items.map(it=>{const [key,title,why,how,link,auto]=it,x=st[key]||{},a=auto?autoOf(auto):undefined,done=itemDone(it);return`<div class="adm-li ${done?"done":""}">
-      <label class="adm-lcheck"><input type="checkbox" data-adm-in="launch" data-k="${key}" ${x.done||a===true?"checked":""} ${a===true&&!x.done?"disabled":""}><span></span></label>
+      <label class="adm-lcheck"><input type="checkbox" data-adm-in="launch" data-k="${key}" ${x.done||a===true?"checked":""} ${(a===true&&!x.done)||!can("launch")?"disabled":""}><span></span></label>
       <div class="adm-lbody">
         <div class="adm-lt">${esc(title)}${a!==undefined?`<span class="pill ${a?"p-green":"p-gray"}">자동 확인 · ${a?"완료":"아직"}</span>`:""}${x.at&&x.done?`<span class="hint">${fmtWhen(x.at)} 완료</span>`:""}</div>
         ${why?`<div class="adm-lw">${esc(why)}</div>`:""}
         <details class="adm-how"><summary>어떻게 하나요</summary><ol>${how.map(h=>`<li>${esc(h)}</li>`).join("")}</ol>${link?`<a href="${esc(link)}" target="_blank" rel="noopener" class="linkbtn">관련 페이지 열기 →</a>`:""}</details>
-        <div class="adm-lnote"><input data-adm-in="lnote" data-k="${key}" maxlength="500" value="${esc(x.note||"")}" placeholder="메모 (예: 11/10 구청 방문 예정)"></div>
+        <div class="adm-lnote"><input data-adm-in="lnote" data-k="${key}" maxlength="500" value="${esc(x.note||"")}" placeholder="메모 (예: 11/10 구청 방문 예정)" ${can("launch")?"":"readonly"}></div>
       </div>
     </div>`;}).join("")}
   </div>`).join("")}
@@ -6216,7 +6321,7 @@ function vLaunch(){
       <h2><span class="bars"></span>전체 백업</h2>
       <div class="hint">모든 워크스페이스의 데이터·계정·설정을 한 파일(JSON)로 내려받습니다. 로그인 세션과 AI 토큰 비밀값은 빠집니다. 파일에 계정 정보가 들어 있으니 안전한 곳에 보관하세요.</div>
       <div class="adm-kv" style="margin-top:10px"><div><span>마지막 백업</span><b>${A.launch.lastExport?fmtWhen(A.launch.lastExport):"없음"}</b></div></div>
-      <div class="adm-row"><span id="adm-exp-st" class="hint"></span><button class="btn btn-pri btn-sm" data-adm="export" ${A.busy?"disabled":""}>전체 백업 내려받기</button></div>
+      <div class="adm-row"><span id="adm-exp-st" class="hint">${can("danger")?"":"전체 백업은 총괄만 내려받을 수 있습니다."}</span>${can("danger")?`<button class="btn btn-pri btn-sm" data-adm="export" ${A.busy?"disabled":""}>전체 백업 내려받기</button>`:""}</div>
     </div>
     <div class="card">
       <h2>주소 · 접속</h2>
@@ -6228,6 +6333,192 @@ function vLaunch(){
       </div>
     </div>
   </div>`;
+}
+
+/* 계정 지원 — 모든 워크스페이스의 계정 상태만 다룹니다 */
+const ACCT_F=[["all","최근 로그인"],["locked","잠긴 계정"],["pending","승인 대기"],["disabled","비활성·반려"],["ops","운영팀"]];
+const ACC_ST={active:["사용","p-green"],disabled:["비활성","p-gray"],pending:["승인 대기","p-amber"],rejected:["반려","p-gray"]};
+function vAcct(){
+  const L=A.acct;
+  return`
+  <div class="card adm-filters">
+    <div class="adm-srch"><input id="adm-aq" value="${esc(U.aq)}" placeholder="아이디 · 이름 · 워크스페이스 · 관리자 연락처" enterkeyhint="search" aria-label="계정 찾기"><button class="btn btn-sm btn-pri" data-adm="acct-search">찾기</button></div>
+    <div class="adm-chips">${ACCT_F.map(([k,l])=>`<button class="fchip ${U.af===k?"on":""}" data-adm="af" data-v="${k}">${l}</button>`).join("")}</div>
+  </div>
+  <div class="card">
+    <h2><span class="bars"></span>계정 <span class="cnt">${L?L.length+"명"+(L.length>=100?" · 앞 100명":""):""}</span></h2>
+    ${!L?`<div class="empty">불러오는 중…</div>`:L.length?L.map(acctRow).join(""):`<div class="empty" style="padding:20px 10px">${U.aq?"찾는 계정이 없습니다. 아이디나 워크스페이스 이름 일부로 다시 찾아보세요.":"해당하는 계정이 없습니다."}</div>`}
+  </div>
+  <div class="card" style="margin-top:14px">
+    <h2>비밀번호를 잊었다는 연락을 받으면</h2>
+    <ol class="adm-steps">
+      <li>가입 아이디, 워크스페이스 이름, 연락처를 물어 본인인지 확인합니다. 워크스페이스 관리자의 연락처는 이 목록에 보입니다.</li>
+      <li>팀원 계정이면 먼저 그 워크스페이스 관리자에게 부탁하도록 안내합니다. 관리자는 설정 → 구성원에서 비밀번호를 바로 바꿀 수 있습니다.</li>
+      <li>관리자 본인이 잊었거나 관리자와 연락이 안 되면 ‘임시 비밀번호’를 누릅니다. 비밀번호는 한 번만 보이니 전화나 문자로 본인에게만 알려 줍니다.</li>
+      <li>로그인한 뒤 설정 → 비밀번호 변경에서 바로 바꾸도록 안내합니다.</li>
+    </ol>
+    <div class="hint" style="margin-top:8px">비밀번호를 열 번 틀리면 계정이 잠깁니다. 본인이 맞다면 ‘잠금 풀기’만 해도 됩니다. 모든 처리는 운영 기록에 처리한 사람과 함께 남습니다.</div>
+  </div>`;
+}
+function acctRow(a){
+  const st=ACC_ST[a.status]||[a.status,"p-gray"];
+  const self=ME&&a.loginId===ME.loginId,prot=(a.owner||a.op)&&CLOUD.op!=="owner";
+  return`<div class="ws-row">
+    <div class="w-info">
+      <div class="w-nm">${esc(a.name||"-")} <span class="mono adm-lid">${esc(a.loginId)}</span><span class="pill ${st[1]}">${st[0]}</span>${a.locked?`<span class="pill p-red">로그인 잠김</span>`:a.fails?`<span class="pill p-amber">비밀번호 ${a.fails}회 틀림</span>`:""}${a.owner?`<span class="own-badge">운영자</span>`:a.op?`<span class="pill p-blue">${esc(OP_LB[a.op]||a.op)}</span>`:""}</div>
+      <div class="w-sub">${a.wsName?(wsById(a.ws)?`<button class="adm-link" data-adm="detail" data-id="${esc(a.ws)}">${esc(a.wsName)}</button>`:esc(a.wsName)):"-"} · ${esc(ROLES[a.role]||a.role)}${a.contact?` · ${esc(a.contact)}`:""}</div>
+      <div class="w-sub">최근 로그인 ${a.lastLogin?fmtWhen(a.lastLogin):"없음"} · 로그인된 기기 ${a.sessions}개 · 만든 날 ${fmtWhen(a.createdAt)}</div>
+    </div>
+    <div class="w-acts">${self?`<span class="hint">내 계정</span>`:prot?`<span class="hint">총괄만 다룰 수 있습니다</span>`:`${a.locked||a.fails?`<button class="btn btn-sm btn-pri" data-adm="acct-op" data-op="unlock" data-v="${esc(a.loginId)}">잠금 풀기</button>`:""}${a.sessions?`<button class="btn btn-sm btn-ghost" data-adm="acct-op" data-op="logout" data-v="${esc(a.loginId)}">로그아웃</button>`:""}<button class="btn btn-sm" data-adm="acct-op" data-op="resetpw" data-v="${esc(a.loginId)}">임시 비밀번호</button>`}</div>
+  </div>`;
+}
+function tmpPwModal(a,pw){
+  A.tmpMsg=`[마이웍스] ${a.name||a.loginId}님, 임시 비밀번호를 알려 드립니다.\n아이디: ${a.loginId}\n임시 비밀번호: ${pw}\n로그인: ${location.origin}/app\n로그인한 뒤 설정 → 비밀번호 변경에서 새 비밀번호로 바꿔 주세요.`;
+  openModal(`<h2><span class="bars"></span>임시 비밀번호</h2>
+  <div class="hint">이 창을 닫으면 다시 볼 수 없습니다. 본인에게만 전화나 문자로 알려 주세요.</div>
+  <div class="adm-tmp mono">${esc(pw)}</div>
+  <div class="adm-kv"><div><span>계정</span><b>${esc(a.name||"")} <span class="mono">${esc(a.loginId)}</span></b></div><div><span>워크스페이스</span><b>${esc(a.wsName||"-")}</b></div><div><span>로그인된 기기</span><b>모두 로그아웃했습니다</b></div></div>
+  <div class="m-foot"><button class="btn btn-ghost" data-g="modal-close">닫기</button><button class="btn btn-pri" data-adm="tmp-copy">안내 문구 복사</button></div>`);
+}
+
+/* 성장·확산 — 사람이 사람을 데려오는 흐름을 개수로만 봅니다 */
+function vGrowth(){
+  const G=A.growth;if(!G)return loadingCard;
+  const W=ws(),live=W.filter(w=>w.status!=="rejected"),act=W.filter(w=>w.status==="active");
+  const iv=G.invites,pct=(a,b)=>b?Math.round(a/b*100)+"%":"-";
+  const refN=live.filter(w=>w.refBy).length;
+  const F=[
+    ["가입 신청",live.length],
+    ["개설되어 이용 중",act.length],
+    ["최근 7일 안에 씀",act.filter(active7).length],
+    ["프로젝트를 만듦",act.filter(w=>((w.usage||{}).project||0)>0).length],
+    ["팀으로 씀 (구성원 2명 이상)",act.filter(w=>(w.members||0)>=2).length],
+    ["유료 프로",act.filter(w=>w.planNow==="pro"&&!w.comp&&!w.mine).length]
+  ];
+  const fmx=Math.max(1,F[0][1]);
+  const wk=[];for(let i=11;i>=0;i--){const st=addDaysStr(mondayOf(todayStr()),-7*i),en=addDaysStr(st,7),inR=x=>x.d>=st&&x.d<en,sum=L=>L.filter(inR).reduce((a,x)=>a+x.n,0);wk.push({st,dir:sum(G.days.filter(x=>!x.ref)),ref:sum(G.days.filter(x=>x.ref)),join:sum(G.joinDays)});}
+  const wmx=Math.max(1,...wk.map(x=>x.dir+x.ref));
+  const LK=[["invite","초대 수락 링크","처리"],["project","진행 공유 링크","조회"],["quote","견적 확인 링크","처리"],["delivery","납품 확인 링크","처리"],["invoice","청구 확인 링크","처리"]];
+  const E=k=>(G.ent[k]||{n:0,workspaces:0});
+  return`
+  <div class="stats adm-stats">
+    ${stat(fmt(iv.d30),"건","보낸 초대 (30일)",`누적 ${fmt(iv.total)}건 · ${iv.workspaces}곳이 초대를 씀`)}
+    ${stat(pct(iv.opened30,iv.d30),"","초대 열람률",`30일 · 열어 본 초대 ${iv.opened30}건`)}
+    ${stat(pct(iv.joined30,iv.d30),"","초대 참여율",`30일 ${iv.joined30}명 · 누적 ${fmt(iv.joined)}명 참여`)}
+    ${stat(refN,"곳","소개로 가입",`전체 가입의 ${pct(refN,live.length)}`)}
+  </div>
+  <div class="adm-grid">
+    <div class="card">
+      <h2><span class="bars"></span>활성화 단계 <span class="cnt">워크스페이스 기준</span></h2>
+      <div class="adm-funnel">${F.map(([l,n],i)=>`<div class="fn"><span class="fn-l">${l}</span><span class="fn-bar"><i style="width:${n?Math.max(2,Math.round(n/fmx*100)):0}%"></i></span><b class="fn-n">${n}</b><span class="fn-p">${i?pct(n,F[i-1][1]):""}</span></div>`).join("")}</div>
+      <div class="hint" style="margin-top:10px">오른쪽 비율은 바로 위 단계와 비교한 값입니다. 가장 많이 줄어드는 단계부터 손보면 됩니다.</div>
+    </div>
+    <div class="card">
+      <h2>가입 경로 <span class="cnt">주별 · 최근 12주</span></h2>
+      <div class="adm-bars adm-bars2">${wk.map(x=>`<div class="ab" title="직접 ${x.dir} · 소개 ${x.ref} · 초대로 참여 ${x.join}명"><span class="ab-n">${x.dir+x.ref||""}</span>${x.ref?`<i class="ab-ref" style="height:${Math.round(x.ref/wmx*100)}%"></i>`:""}<i style="height:${Math.round(x.dir/wmx*100)}%"></i><span class="ab-l">${Number(x.st.slice(5,7))}/${Number(x.st.slice(8))}</span></div>`).join("")}</div>
+      <div class="adm-legend"><span><i></i>직접 가입</span><span><i class="ref"></i>소개 링크로 가입</span></div>
+      <div class="adm-kv"><div><span>같은 12주 동안 초대로 들어온 사람</span><b>${fmt(wk.reduce((a,x)=>a+x.join,0))}명</b></div></div>
+    </div>
+  </div>
+  <div class="adm-grid" style="margin-top:14px">
+    <div class="card">
+      <h2><span class="bars"></span>많이 소개한 워크스페이스</h2>
+      ${G.refTop.length?`<div class="tblwrap"><table class="tbl"><thead><tr><th>워크스페이스</th><th class="r">소개로 가입</th><th class="r">그중 이용 중</th></tr></thead><tbody>${G.refTop.map(r=>`<tr><td>${wsById(r.id)?`<button class="adm-link" data-adm="detail" data-id="${esc(r.id)}">${esc(r.name)}</button>`:esc(r.name)}</td><td class="r mono">${r.n}</td><td class="r mono">${r.active}</td></tr>`).join("")}</tbody></table></div><div class="hint" style="margin-top:8px">많이 소개해 준 곳에는 감사 연락이나 기한 연장으로 답하면 다음 소개로 이어지기 쉽습니다.</div>`:`<div class="empty" style="padding:18px">아직 소개로 가입한 곳이 없습니다. 소개 보상은 가입·베타 탭에서 정합니다.</div>`}
+    </div>
+    <div class="card">
+      <h2>링크로 이어진 사람들</h2>
+      <div class="adm-kv">${LK.map(([k,l,u])=>{const x=G.links[k]||{n:0,used:0,views:0,workspaces:0};return`<div><span>${l}</span><b>${fmt(x.n)}개 · ${u} ${fmt(u==="조회"?x.views:x.used)}${u==="조회"?"회":"건"} · ${x.workspaces}곳</b></div>`;}).join("")}
+        <div><span>쌓인 연락처</span><b>${fmt(E("contact").n)}명 · ${E("contact").workspaces}곳</b></div>
+        <div><span>프로젝트 · 업무</span><b>${fmt(E("project").n)} · ${fmt(E("task").n)}</b></div>
+      </div>
+      <div class="hint" style="margin-top:8px">초대·공유·확인 링크는 아직 계정이 없는 사람이 마이웍스를 처음 보는 통로입니다. 개수만 세고 내용은 보지 않습니다.</div>
+    </div>
+  </div>`;
+}
+
+/* 운영팀·보안 */
+function keyGuide(set){
+  return`<details class="adm-how" ${set?"":"open"}><summary>${set?"보안 키를 바꾸려면":"Cloudflare에 보안 키 넣는 방법"}</summary><ol>
+    <li><a href="https://dash.cloudflare.com" target="_blank" rel="noopener" class="linkbtn">dash.cloudflare.com</a>에 로그인하고 <b>Workers & Pages</b>에서 <b>myworkspro</b>를 엽니다.</li>
+    <li><b>Settings</b>에서 환경을 <b>Production</b>으로 두고 <b>Variables and Secrets</b>의 <b>Add</b>를 누릅니다. ${set?"이미 있는 <span class='mono'>MW_ADMIN_KEY</span>의 값을 바꿔도 됩니다.":""}</li>
+    <li>이름은 <span class="mono">MW_ADMIN_KEY</span>, 값에는 16자 이상 아무도 모르는 문구를 넣습니다. <b>Encrypt</b>(또는 Type의 <b>Secret</b>)를 골라 암호화한 뒤 <b>Save</b>를 누릅니다.</li>
+    <li><b>Deployments</b>에서 가장 최근 배포의 <b>⋯ → Retry deployment</b>를 누릅니다. 다시 배포되어야 키가 적용됩니다.</li>
+    <li>이 화면을 새로고침하면 보안 키를 묻습니다. 키는 비밀번호 관리 앱이나 종이에 따로 적어 두세요. 잊으면 위 순서대로 새 값을 넣으면 됩니다.</li>
+  </ol></details>`;
+}
+function vTeam(){
+  const T=A.team,S=A.sys;if(!T||!S)return loadingCard;
+  const R=T.roles,keys=Object.keys(R),mine=can("team");
+  const K=S.keySet?["켜짐","p-green","총괄관리를 열 때 보안 키를 한 번 더 확인합니다. 운영자 비밀번호를 잊으면 로그인 화면의 ‘운영자 계정 복구’에서 이 키로 새로 정할 수 있습니다."]
+    :S.keyShort?["너무 짧음","p-amber","MW_ADMIN_KEY가 8자보다 짧아 꺼진 것으로 봅니다. 16자 이상으로 다시 넣으세요."]
+    :["꺼짐","p-gray","지금은 로그인만 하면 총괄관리가 열립니다. 운영자 비밀번호를 잊으면 되찾을 방법도 없습니다. 오픈 전에 꼭 넣어 두세요."];
+  const ops=T.members.filter(m=>m.op).length;
+  return`
+  <div class="card">
+    <h2><span class="bars"></span>운영팀 <span class="cnt">${ops}명</span></h2>
+    <div class="hint" style="margin-bottom:8px">운영자 워크스페이스의 구성원에게 총괄관리 역할을 줍니다. 새 사람은 먼저 설정 → 구성원에서 계정을 만든 뒤 여기서 역할을 정하세요. 역할을 바꾸면 그 사람은 보안 키를 다시 넣어야 합니다.</div>
+    ${T.members.map(m=>`<div class="ws-row">
+      <div class="w-info"><div class="w-nm">${esc(m.name||"-")} <span class="mono adm-lid">${esc(m.loginId)}</span>${m.status!=="active"?`<span class="pill p-gray">비활성</span>`:""}</div>
+      <div class="w-sub">워크스페이스 역할 ${esc(ROLES[m.role]||m.role)} · 최근 로그인 ${m.lastLogin?fmtWhen(m.lastLogin):"없음"}</div></div>
+      <div class="w-acts">${m.op==="owner"?`<span class="pill p-red">총괄</span>`:mine&&m.status==="active"?`<select data-adm-in="team-role" data-v="${esc(m.loginId)}" aria-label="${esc(m.name||m.loginId)} 운영팀 역할"><option value="">운영팀 아님</option>${OP_ASSIGN.map(k=>`<option value="${k}" ${m.op===k?"selected":""}>${esc((R[k]||{}).name||OP_LB[k])}</option>`).join("")}</select>`:m.op?`<span class="pill p-blue">${esc(OP_LB[m.op]||m.op)}</span>`:`<span class="hint">운영팀 아님</span>`}</div>
+    </div>`).join("")}
+    ${T.members.length<2?`<div class="hint" style="margin-top:10px">아직 함께 운영할 사람이 없습니다. 고객지원이나 재무를 맡길 사람이 생기면 계정을 만들어 역할을 주세요.</div>`:""}
+  </div>
+  <div class="card" style="margin-top:14px">
+    <h2>역할별로 할 수 있는 일</h2>
+    <div class="tblwrap"><table class="tbl adm-perm"><thead><tr><th>할 수 있는 일</th>${keys.map(k=>`<th class="c">${esc(R[k].name)}</th>`).join("")}</tr></thead><tbody>
+      ${PERM_LB.map(([p,l])=>`<tr><td>${esc(l)}</td>${keys.map(k=>`<td class="c">${R[k].perms.includes(p)?"✓":`<span class="hint">–</span>`}</td>`).join("")}</tr>`).join("")}
+    </tbody></table></div>
+    <div class="hint" style="margin-top:8px">어느 역할이든 각 워크스페이스의 업무 내용(프로젝트·고객·금액)은 볼 수 없고, 개수와 계정 상태만 봅니다. 운영팀 계정을 다루는 일은 총괄만 할 수 있습니다.</div>
+  </div>
+  <div class="adm-grid" style="margin-top:14px">
+    <div class="card">
+      <h2><span class="bars"></span>보안 키 <span class="pill ${K[1]}">${K[0]}</span></h2>
+      <div class="hint">${K[2]}</div>
+      ${mine?keyGuide(S.keySet):`<div class="hint" style="margin-top:8px">보안 키는 총괄이 관리합니다.</div>`}
+    </div>
+    <div class="card">
+      <h2>시스템</h2>
+      <div class="adm-kv">
+        <div><span>주소</span><b class="mono">${esc(S.host)}</b></div>
+        <div><span>데이터 구조 버전</span><b class="mono">${esc(S.schema||"-")}</b></div>
+        <div><span>운영자 아이디</span><b class="mono">${esc(S.owner||"-")}</b></div>
+        <div><span>최근 7일 로그인 세션</span><b>${fmt(S.sessions7)}개</b></div>
+        <div><span>워크스페이스 · 계정</span><b>${fmt(S.tables.workspaces)} · ${fmt(S.tables.accounts)}</b></div>
+        <div><span>저장된 업무 데이터</span><b>${fmt(S.tables.ent)}건</b></div>
+        <div><span>초대 · 링크 · AI 토큰</span><b>${fmt(S.tables.invites)} · ${fmt(S.tables.links)} · ${fmt(S.tables.api_tokens)}</b></div>
+        <div><span>예약 · 외주 안건 · 주문</span><b>${fmt(S.tables.sp_res)} · ${fmt(S.tables.os_job)} · ${fmt(S.tables.cm_order)}</b></div>
+        <div><span>운영 기록 · 오류 기록</span><b>${fmt(S.tables.adm_log)} · ${fmt(S.tables.err_log)}</b></div>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ── 운영자 계정 복구 (로그인 화면) ── */
+function recoverModal(){
+  openModal(`<h2><span class="bars"></span>운영자 계정 복구</h2>
+  <div class="hint">마이웍스 운영자(총괄)만 쓰는 기능입니다. Cloudflare에 넣어 둔 보안 키(MW_ADMIN_KEY)로 운영자 비밀번호를 새로 정합니다. 일반 사용자는 소속 워크스페이스 관리자에게 비밀번호를 바꿔 달라고 요청하세요.</div>
+  <label for="rc-key">보안 키</label><input id="rc-key" type="password" autocomplete="off" spellcheck="false">
+  <label for="rc-pw">새 비밀번호 <span class="hint">8자 이상</span></label><input id="rc-pw" type="password" autocomplete="new-password">
+  <label for="rc-pw2">새 비밀번호 확인</label><input id="rc-pw2" type="password" autocomplete="new-password">
+  <div id="rc-msg" class="adm-key-msg" role="status"></div>
+  <div class="m-foot"><button class="btn btn-ghost" data-g="modal-close">닫기</button><button class="btn btn-pri" data-rc="send">비밀번호 다시 정하기</button></div>`);
+  setTimeout(()=>{const i=$("#rc-key");if(i)i.focus();},30);
+}
+async function recoverSend(btn){
+  const key=$("#rc-key").value,pw=$("#rc-pw").value,pw2=$("#rc-pw2").value,say=t=>{const m=$("#rc-msg");if(m)m.textContent=t;};
+  if(!key.trim()){say("보안 키를 넣으세요.");return;}
+  if(pw.length<8){say("새 비밀번호는 8자 이상으로 정하세요.");return;}
+  if(pw!==pw2){say("새 비밀번호 두 칸이 서로 다릅니다.");return;}
+  btn.disabled=true;
+  try{
+    const r=await api("owner-recover",{key,pw});
+    closeModal();const li=$("#li-id"),lp=$("#li-pw");if(li)li.value=r.loginId;if(lp){lp.value="";lp.focus();}
+    toast(`운영자 비밀번호를 새로 정했습니다. 아이디 ${r.loginId}로 로그인하세요.`);
+  }catch(e){
+    btn.disabled=false;
+    say({"no-key":"Cloudflare에 보안 키(MW_ADMIN_KEY)가 아직 없습니다. 키를 넣고 다시 배포한 뒤에 쓸 수 있습니다.","bad-key":"보안 키가 맞지 않습니다. 다섯 번 틀리면 30분 동안 막힙니다.",locked:`보안 키를 여러 번 틀려 잠시 막혔습니다. ${e.data&&e.data.minutes?e.data.minutes+"분 뒤":"잠시 뒤"}에 다시 해 보세요.`,"bad-pw":"새 비밀번호는 8자 이상으로 정하세요."}[e.code]||"처리하지 못했습니다. 잠시 후 다시 해 보세요.");
+  }
 }
 
 /* ── 전체 백업 ── */
@@ -6289,6 +6580,10 @@ async function fbSend(btn){
 async function settingsSave(patch,msg){
   try{const r=await api("admin/settings",{op:"save",settings:patch});if(A.ov)A.ov.platform=r.platform;toast(msg||"저장했습니다.");paint();}catch(e){failToast(e);}
 }
+document.addEventListener("click",e=>{
+  const r=e.target.closest("[data-rc]");if(!r)return;
+  if(r.dataset.rc==="open")recoverModal();else if(r.dataset.rc==="send")recoverSend(r);
+});
 document.addEventListener("click",async e=>{
   const f=e.target.closest("[data-fb]");
   if(f){
@@ -6301,7 +6596,33 @@ document.addEventListener("click",async e=>{
   const b=e.target.closest("[data-adm]");if(!b||!usable())return;
   const k=b.dataset.adm,id=b.dataset.id;
   switch(k){
-    case"refresh":A.codes=A.pays=A.fb=A.ann=A.logs=A.launch=null;refresh(true);toast("새로 불러왔습니다.");break;
+    case"refresh":A.codes=A.pays=A.fb=A.ann=A.logs=A.launch=A.team=A.sys=A.growth=A.acct=null;refresh(true);checkGate();toast("새로 불러왔습니다.");break;
+    case"unlock":{
+      const inp=$("#adm-key"),msg=$("#adm-key-msg"),v=inp?inp.value:"";
+      if(!v.trim()){if(msg)msg.textContent="보안 키를 넣으세요.";if(inp)inp.focus();break;}
+      b.disabled=true;
+      try{await api("admin/unlock",{key:v});A.gate=Object.assign({},A.gate||{},{admOk:true});await checkGate();toast("확인했습니다.");if(onPage())view(U.want);}
+      catch(x){
+        b.disabled=false;
+        if(x.code==="bad-key"){if(msg)msg.textContent=`보안 키가 맞지 않습니다.${x.data&&x.data.left?` ${x.data.left}번 더 틀리면 로그아웃됩니다.`:""}`;if(inp){inp.value="";inp.focus();}}
+        else if(x.code==="locked"){cloudSignOut();toast("보안 키를 다섯 번 틀려 로그아웃했습니다.");}
+        else failToast(x);
+      }
+      break;}
+    case"acct-search":U.aq=(($("#adm-aq")||{}).value||"").trim();A.acct=null;paint();loadTab("acct",true);break;
+    case"af":U.af=b.dataset.v;U.aq=(($("#adm-aq")||{}).value||U.aq).trim();A.acct=null;paint();loadTab("acct",true);break;
+    case"acct-find":U.aq=b.dataset.v;U.af="all";A.acct=null;closeModal();if(location.hash==="#/admin/acct"){paint();loadTab("acct",true);}else go("#/admin/acct");break;
+    case"acct-op":{
+      const lid=b.dataset.v,op=b.dataset.op,a=(A.acct||[]).find(x=>x.loginId===lid);if(!a)break;
+      const nm=`${a.name||lid}(${lid})`;
+      const Q={logout:`${nm} 계정을 모든 기기에서 로그아웃할까요?`,resetpw:`${nm} 계정에 임시 비밀번호를 발급할까요?
+지금 쓰던 비밀번호는 더 쓸 수 없고, 로그인된 기기는 모두 로그아웃됩니다.`}[op];
+      if(Q&&!confirm(Q))break;
+      b.disabled=true;
+      try{const r=await api("admin/accounts",{op,loginId:lid});if(op==="resetpw")tmpPwModal(a,r.pw);else toast(op==="unlock"?`${nm} 로그인 잠금을 풀었습니다.`:`${nm} 계정을 모든 기기에서 로그아웃했습니다.`);loadTab("acct",true);}
+      catch(x){b.disabled=false;failToast(x);}
+      break;}
+    case"tmp-copy":copyText(A.tmpMsg,"안내 문구를 복사했습니다. 본인에게만 보내세요.");break;
     case"tab":closeModal();go("#/admin"+(b.dataset.v?"/"+b.dataset.v:""));break;
     case"st":U.st=b.dataset.v;paint();break;
     case"fbf":U.fbF=b.dataset.v;paint();break;
@@ -6345,12 +6666,26 @@ document.addEventListener("click",async e=>{
     case"export":exportAll();break;
   }
 });
-document.addEventListener("keydown",e=>{if((e.key==="Enter"||e.key===" ")&&e.target.matches&&e.target.matches('.adm-fb[data-adm="fb-open"]')){e.preventDefault();fbAdminModal(e.target.dataset.id);}});
+document.addEventListener("keydown",e=>{
+  if((e.key==="Enter"||e.key===" ")&&e.target.matches&&e.target.matches('.adm-fb[data-adm="fb-open"]')){e.preventDefault();fbAdminModal(e.target.dataset.id);return;}
+  if(e.key!=="Enter"||e.isComposing||!e.target)return;
+  const press=sel=>{e.preventDefault();const b=$(sel);if(b&&!b.disabled)b.click();};
+  if(e.target.id==="adm-key")press('[data-adm="unlock"]');
+  else if(e.target.id==="adm-aq")press('[data-adm="acct-search"]');
+  else if(e.target.id==="rc-pw2"||e.target.id==="rc-pw"||e.target.id==="rc-key")press('[data-rc="send"]');
+});
 document.addEventListener("change",async e=>{
   const el=e.target;if(!el.dataset)return;
   const k=el.dataset.admIn;if(!k||!usable())return;
   if(k==="pl"){U.pl=el.value;paint();}
   else if(k==="sort"){U.sort=el.value;paint();}
+  else if(k==="team-role"){
+    const lid=el.dataset.v,role=el.value,m=((A.team&&A.team.members)||[]).find(x=>x.loginId===lid),prev=(m&&m.op)||"";
+    const nm=role?((A.team.roles[role]||{}).name||OP_LB[role]):"운영팀 아님";
+    if(!confirm(`${m?m.name:lid}(${lid})님의 운영팀 역할을 ‘${nm}’(으)로 바꿀까요?`)){el.value=prev;return;}
+    try{const r=await api("admin/team",{op:"set",loginId:lid,role});A.team=r;toast(`${m?m.name:lid}님을 ‘${nm}’(으)로 정했습니다.`);paint();}
+    catch(x){el.value=prev;failToast(x);}
+  }
   else if(k==="launch"||k==="lnote"){
     const key=el.dataset.k,box=$(`input[data-adm-in="launch"][data-k="${key}"]`),note=$(`input[data-adm-in="lnote"][data-k="${key}"]`);
     const done=box?(box.disabled?!!(launchState()[key]||{}).done:box.checked):false;
@@ -6362,8 +6697,8 @@ document.addEventListener("input",e=>{const el=e.target;if(el.dataset&&el.datase
 document.addEventListener("change",e=>{const r=e.target;if(r.name==="adm-pol"){$$(".adm-opt").forEach(o=>o.classList.toggle("on",o.querySelector("input")===r));}});
 
 function onBadges(){if(usable()&&onPage()&&A.ov){const p=CLOUD.badges.pendingWs||0,f=CLOUD.badges.fbNew||0;if(p!==A.ov.workspaces.filter(w=>w.status==="pending").length||f!==A.ov.summary.fbNew)refresh(true);}}
-function reset(){A.ov=null;A.at=0;A.codes=A.pays=A.fb=A.ann=A.logs=A.launch=null;A.detail={};A.payYm="";}
-return{view,refresh,reset,renderAnn,fbModal,onBadges};
+function reset(){A.ov=null;A.at=0;A.codes=A.pays=A.fb=A.ann=A.logs=A.launch=null;A.detail={};A.payYm="";A.gate=null;A.team=A.sys=A.growth=A.acct=null;A.tmpMsg="";U.aq="";U.af="all";}
+return{view,refresh,reset,renderAnn,fbModal,onBadges,fail:failToast};
 })();
 
 /* ═══════════ 사람 잇기 — 연락처 가져오기 · 초대 링크 · 진행 공유 · 소개 ═══════════
@@ -7124,7 +7459,7 @@ document.addEventListener("click",e=>{
       api("admin/ws",{id,action:op,pw}).then(res=>{
         const msg={approve:`"${w.name}" 승인 완료 — ${res.loginId||w.adminLogin} 님이 이제 로그인할 수 있습니다.`,reject:`"${w.name}" 신청을 반려했습니다.`,suspend:`"${w.name}" 이용을 중지했습니다.`,activate:`"${w.name}" 이용을 재개했습니다.`,delete:`"${w.name}"을(를) 삭제했습니다.`,resetpw:`${res.loginId} 비밀번호를 바꿨습니다. 새 비밀번호를 관리자에게 전달하세요.`}[op];
         toast(msg||"처리했습니다.");if((op==="delete"||op==="suspend"||op==="activate"||op==="approve"||op==="reject")&&$("#m-box .adm-wide"))closeModal();loadAdmin(true);
-      }).catch(e=>{b.disabled=false;if(e.code!=="unauthorized")toast(e.code==="self"?"운영자 워크스페이스에는 할 수 없는 작업입니다.":e.code==="bad-state"?"이미 처리된 항목입니다. 새로고침해 주세요.":"처리하지 못했습니다. 잠시 후 다시 시도하세요.");});
+      }).catch(e=>{b.disabled=false;if(e.code==="self")toast("운영자 워크스페이스에는 할 수 없는 작업입니다.");else if(e.code==="bad-state")toast("이미 처리된 항목입니다. 새로고침해 주세요.");else ADM.fail(e);});
       break;}
     case"brief-plan":go("#/plan");break;
     case"pl-mode":F.plMode=b.dataset.v;route();break;

@@ -12,7 +12,7 @@
    · 스페이스: 예약 → 청소 배정 → 체크리스트 → 확인 → 손익. HOSTDB(읽기)는 운영자 워크스페이스에서만, SPACEDB(1회 가져오기)는 운영자만.
    · 무료 요금제 한도(요청당 쿼리 50회)를 넘지 않도록 여러 건의 쓰기는 한 문장으로 묶어 처리합니다. */
 
-const SCHEMA = "7";
+const SCHEMA = "8";
 const PLANS = ["basic", "pro"];
 const MODULES = ["space", "outsourcing", "commerce"];
 const PLAN_LIMITS = { basic: { brands: 2, members: 2, tokens: 1 }, pro: { brands: 1000, members: 10, tokens: 20 } };   // members = 관리자 외 구성원 수
@@ -69,7 +69,12 @@ const ADD_COLS = [
   ["workspaces", "ref_paid INTEGER NOT NULL DEFAULT 0"],
   ["links", "views INTEGER NOT NULL DEFAULT 0"],
   ["links", "last_view TEXT"],
-  ["links", "opts TEXT"]
+  ["links", "opts TEXT"],
+  // v8 — 본사 운영팀 역할, 운영자 보안 키 확인, 운영 기록의 처리자
+  ["accounts", "op_role TEXT"],
+  ["sess", "adm_ok INTEGER NOT NULL DEFAULT 0"],
+  ["sess", "adm_fail INTEGER NOT NULL DEFAULT 0"],
+  ["adm_log", "actor TEXT"]
 ];
 // 칸을 더한 뒤에 만드는 색인
 const POST_DDL = ["CREATE UNIQUE INDEX IF NOT EXISTS idx_ws_ref ON workspaces(ref_code)"];
@@ -239,7 +244,7 @@ async function migrateLegacy(db) {
 /* ───────── 인증 ───────── */
 async function auth(db, req) {
   const t = bearer(req); if (!t) return null;
-  const r = await db.prepare("SELECT s.ws, s.member_id, s.seen, a.login_id, a.status AS ast, a.role, a.is_owner, a.name, w.status AS wst, w.name AS wname, w.invite, w.sp_ver, w.plan, w.modules, w.limits, w.plan_until FROM sess s JOIN accounts a ON a.ws=s.ws AND a.member_id=s.member_id JOIN workspaces w ON w.id=s.ws WHERE s.token=?1").bind(t).first();
+  const r = await db.prepare("SELECT s.ws, s.member_id, s.seen, s.adm_ok, s.adm_fail, a.login_id, a.status AS ast, a.role, a.is_owner, a.op_role, a.name, w.status AS wst, w.name AS wname, w.invite, w.sp_ver, w.plan, w.modules, w.limits, w.plan_until FROM sess s JOIN accounts a ON a.ws=s.ws AND a.member_id=s.member_id JOIN workspaces w ON w.id=s.ws WHERE s.token=?1").bind(t).first();
   if (!r) return null;
   const now = Date.now();
   if (now - Number(r.seen) > SESSION_MS) { await db.prepare("DELETE FROM sess WHERE token=?1").bind(t).run(); return null; }
@@ -251,7 +256,7 @@ async function auth(db, req) {
 }
 function meFrom(r, extra) {
   const tier = tierOf(r);
-  return Object.assign({ ws: r.ws, id: r.member_id, lid: r.login_id, role: roleOk(r.role), owner: !!r.is_owner, name: r.name, wname: r.wname, invite: r.invite, spv: Number(r.sp_ver) || 0, plan: tier.plan, modules: tier.modules, limits: tier.limits, planUntil: tier.planUntil }, extra || {});
+  return Object.assign({ ws: r.ws, id: r.member_id, lid: r.login_id, role: roleOk(r.role), owner: !!r.is_owner, op: opOf(r), admOk: !!Number(r.adm_ok), admFail: Number(r.adm_fail) || 0, name: r.name, wname: r.wname, invite: r.invite, spv: Number(r.sp_ver) || 0, plan: tier.plan, modules: tier.modules, limits: tier.limits, planUntil: tier.planUntil }, extra || {});
 }
 const hasMod = (me, m) => me.plan === "pro" && me.modules.includes(m);
 const tierInfo = me => ({ plan: me.plan, modules: me.modules, limits: me.limits, planUntil: me.planUntil || "" });
@@ -305,10 +310,10 @@ function pick(me, r, vis) {
 const rawJson = (head, extra) => new Response(JSON.stringify(head).slice(0, -1) + extra + "}", { status: 200, headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" } });
 async function badgesFor(db, me) {   // 화면 배지 + 공지 + 문의 답변 — 질의 한 번
   const r = await db.prepare("SELECT (SELECT v FROM mw_meta WHERE k='ann') AS ann, (SELECT COUNT(*) FROM fb WHERE ws=?1 AND member_id=?2 AND reply_at IS NOT NULL AND (seen_at IS NULL OR seen_at<reply_at)) AS fr"
-    + (me.owner ? ", (SELECT COUNT(*) FROM workspaces WHERE status='pending') AS pw, (SELECT COUNT(*) FROM fb WHERE status='new') AS fn" : "")
+    + (me.op ? ", (SELECT COUNT(*) FROM workspaces WHERE status='pending') AS pw, (SELECT COUNT(*) FROM fb WHERE status='new') AS fn" : "")
     + (me.role === "admin" ? ", (SELECT COUNT(*) FROM accounts WHERE ws=?1 AND status='pending') AS jr" : "")).bind(me.ws, me.id).first() || {};
   const out = {};
-  if (me.owner) { out.pendingWs = Number(r.pw) || 0; out.fbNew = Number(r.fn) || 0; }
+  if (me.op) { if (can(me, "ws") || can(me, "signup")) out.pendingWs = Number(r.pw) || 0; if (can(me, "fb")) out.fbNew = Number(r.fn) || 0; }
   if (me.role === "admin") out.joinReq = Number(r.jr) || 0;
   if (Number(r.fr)) out.fbReply = Number(r.fr);
   const ann = annFor(r.ann, me); if (ann.length) out.ann = ann;
@@ -521,7 +526,7 @@ const PRIVATE = {
     }
     const name = meta.workspace || me.wname;
     const entities = Object.entries(parts).map(([k, list]) => JSON.stringify(k) + ":[" + list.join(",") + "]").join(",");
-    return rawJson({ ok: true, me: me.id, role: me.role, owner: me.owner, ws: { id: me.ws, name, invite: me.role === "admin" ? me.invite : undefined }, workspace: name, meta, badges: await badgesFor(db, me), spv: me.spv, tier: tierInfo(me), now: ts(start - MARGIN) }, ',"entities":{' + entities + "}");
+    return rawJson({ ok: true, me: me.id, role: me.role, owner: me.owner, op: me.op || "", perms: me.op ? OP_ROLES[me.op].perms : [], ws: { id: me.ws, name, invite: me.role === "admin" ? me.invite : undefined }, workspace: name, meta, badges: await badgesFor(db, me), spv: me.spv, tier: tierInfo(me), now: ts(start - MARGIN) }, ',"entities":{' + entities + "}");
   },
 
   async sync(db, me, b, req, url) {
@@ -897,10 +902,11 @@ const PRIVATE = {
 
   /* 운영 콘솔 — 운영자 전용 (업무 내용은 다루지 않습니다) */
   async "admin/ws"(db, me, b) {
-    if (!me.owner) return fail("forbidden", 403);
+    const act = String(b.action || "");
+    const need = { plan: "ws", note: "ws", extend: "extend", approve: "ws", reject: "ws", suspend: "ws", activate: "ws", delete: "danger", resetpw: "acct" }[act] || "danger";
+    const no = opNeed(me, need); if (no) return no;
     const w = await db.prepare("SELECT * FROM workspaces WHERE id=?1").bind(String(b.id || "")).first();
     if (!w) return fail("not-found", 404);
-    const act = String(b.action || "");
     if (act === "plan") {   // 등급·모듈·기한·한도 — 운영자 본인 워크스페이스도 바꿀 수 있습니다
       const plan = planOk(b.plan), modules = plan === "pro" ? modulesOk(b.modules) : [];
       const until = dOk(b.until) || null;
@@ -3024,7 +3030,7 @@ function startTier(src) {   // 새 워크스페이스의 시작 등급 — 베�
   const plan = planOk(src.plan), days = clampInt(src.days, 0, 3650, 0);
   return { plan, modules: plan === "pro" ? modulesOk(src.modules) : [], until: plan === "pro" && days > 0 ? addDaysS(kstToday(), days) : null };
 }
-const admLog = (db, action, w, detail) => db.prepare("INSERT INTO adm_log(id,at,action,ws,ws_name,detail) VALUES(?1,?2,?3,?4,?5,?6)").bind(uid("l"), iso(), action, w ? w.id : "", w ? w.name : "", clip(detail, 300));
+const admLog = (db, action, w, detail) => db.prepare("INSERT INTO adm_log(id,at,action,ws,ws_name,detail,actor) VALUES(?1,?2,?3,?4,?5,?6,?7)").bind(uid("l"), iso(), action, w ? w.id : "", w ? w.name : "", clip(detail, 300), db.actor || null);   // actor: 총괄관리 요청이면 처리한 운영자
 const annList = v => { const a = parse(v); return Array.isArray(a) ? a.filter(x => x && x.id) : []; };
 function annNorm(a, prev) {
   return { id: (prev && prev.id) || uid("an"), title: clip(a.title, 80), body: clip(a.body, 600), level: ANN_LV.includes(a.level) ? a.level : "info", aud: a.aud === "admin" ? "admin" : "all", from: dOk(a.from) || kstToday(), to: dOk(a.to) || "", on: a.on !== false && a.on !== 0, created_at: (prev && prev.created_at) || iso(), updated_at: iso() };
@@ -3042,12 +3048,29 @@ const fbOut = f => ({ id: f.id, ws: f.ws, wsName: f.ws_name || "", loginId: f.lo
 // 전체 백업에 넣는 표 — 로그인 세션(sess)과 오류 기록은 빼고, AI 토큰은 해시를 지웁니다
 const EXPORT_TABLES = () => ["mw_meta", "workspaces", "accounts", "ent", "ws_set", "api_tokens", "links", "invites", "mod_set", ...SP_TABLES, ...OS_TABLES, ...CM_TABLES, "adm_pay", "adm_code", "fb", "adm_log"];
 const EXPORT_PAGE = 800;
-const ownerOnly = me => !me.owner ? fail("forbidden", 403) : null;
+/* ───────── 본사 운영팀 — 역할별 권한 ─────────
+   총괄(운영자 계정)이 운영자 워크스페이스의 구성원에게 역할을 줍니다. 모든 역할은 워크스페이스의 업무 내용은 보지 못합니다. */
+const OP_ROLES = {
+  owner: { name: "총괄", perms: ["see", "ws", "extend", "danger", "signup", "pay", "fb", "ann", "acct", "launch", "team"] },
+  manager: { name: "운영 매니저", perms: ["see", "ws", "extend", "signup", "fb", "ann", "acct", "launch"] },
+  support: { name: "고객지원", perms: ["see", "fb", "ann", "acct"] },
+  finance: { name: "재무", perms: ["see", "pay", "extend"] },
+  viewer: { name: "보기 전용", perms: ["see"] }
+};
+const OP_ASSIGN = ["manager", "support", "finance", "viewer"];
+function opOf(r) { if (r && Number(r.is_owner)) return "owner"; const x = r && r.op_role; return OP_ASSIGN.includes(x) ? x : ""; }
+const can = (me, p) => !!(me && me.op && OP_ROLES[me.op] && OP_ROLES[me.op].perms.includes(p));
+const opNeed = (me, p) => can(me, p) ? null : fail("forbidden", 403, { need: p });
+const ownerOnly = me => opNeed(me, "danger");
+// 운영자 보안 키 — Cloudflare Pages 환경 변수 MW_ADMIN_KEY (8자 이상일 때만 켜집니다)
+const adminKeyRaw = env => (env && typeof env.MW_ADMIN_KEY === "string") ? env.MW_ADMIN_KEY.trim() : "";
+const adminKey = env => { const k = adminKeyRaw(env); return k.length >= 8 ? k : ""; };
+async function keyMatch(env, input) { const k = adminKey(env); if (!k || typeof input !== "string" || !input) return false; return same(await sha256("mwk:" + k), await sha256("mwk:" + input.trim())); }
 
 const ADMIN_API = {
   /* 현황 + 워크스페이스 목록 */
   async "admin/overview"(db, me, b, req, url) {
-    const no = ownerOnly(me); if (no) return no;
+    const no = opNeed(me, "see"); if (no) return no;
     const now = Date.now(), ym = kstToday().slice(0, 7), prevYm = addDaysS(ym + "-01", -1).slice(0, 7);
     // 보관 기간이 지난 기록 정리 — 반려된 가입 신청(신청 후 30일), 처리 끝난 문의(3년)
     const cut30 = new Date(now - 30 * 864e5).toISOString(), cut3y = new Date(now - 3 * 365 * 864e5).toISOString();
@@ -3065,7 +3088,7 @@ const ADMIN_API = {
       db.prepare("SELECT ws, COUNT(*) AS n FROM os_job GROUP BY ws"),
       db.prepare("SELECT ws, COUNT(*) AS n FROM cm_order GROUP BY ws"),
       db.prepare("SELECT (SELECT COUNT(*) FROM fb WHERE status='new') AS fb_new, (SELECT COUNT(*) FROM fb WHERE status='doing') AS fb_doing, (SELECT COUNT(*) FROM err_log WHERE at>=?1) AS err24, (SELECT COALESCE(SUM(amount),0) FROM adm_pay WHERE substr(paid_at,1,7)=?2) AS pay_m, (SELECT COALESCE(SUM(amount),0) FROM adm_pay WHERE substr(paid_at,1,7)=?3) AS pay_p, (SELECT COALESCE(SUM(amount),0) FROM adm_pay WHERE substr(paid_at,1,4)=?4) AS pay_y, (SELECT COUNT(*) FROM accounts WHERE status='active') AS acc, (SELECT v FROM mw_meta WHERE k='platform') AS plat, (SELECT v FROM mw_meta WHERE k='launch') AS launch, (SELECT v FROM mw_meta WHERE k='last_export') AS last_export, (SELECT v FROM mw_meta WHERE k='ann') AS ann, (SELECT COUNT(*) FROM adm_code WHERE active=1) AS codes").bind(new Date(now - 864e5).toISOString(), ym, prevYm, ym.slice(0, 4)),
-      db.prepare("SELECT * FROM adm_log ORDER BY at DESC LIMIT 8")
+      db.prepare("SELECT * FROM adm_log WHERE action<>'key-ok' ORDER BY at DESC LIMIT 8")
     ]);
     const rows = r => (r && r.results) || [];
     const roles = new Map(); for (const c of rows(cntR)) { const m = roles.get(c.ws) || {}; m[c.role] = Number(c.n); roles.set(c.ws, m); }
@@ -3082,12 +3105,12 @@ const ADMIN_API = {
       const sMs = seen.get(w.id) || 0, la = w.last_active ? Date.parse(w.last_active) || 0 : 0;
       return { id: w.id, name: w.name, status: w.status, adminLogin: w.admin_login || "", adminName: w.admin_name || "", contact: w.contact || w.admin_contact || "", note: w.note || "", createdAt: w.created_at, approvedAt: w.approved_at || "", lastActive: w.last_active || "", lastSeen: Math.max(sMs, la) ? new Date(Math.max(sMs, la)).toISOString() : "", members: Object.values(rl).reduce((a, n) => a + n, 0), roles: rl, mine: w.id === me.ws, plan: t.planRaw, planNow: t.plan, modules: modulesOk(w.modules), planUntil: w.plan_until || "", limits: parse(w.limits) || {}, opNote: w.op_note || "", comp: !!Number(w.comp), usage: usage.get(w.id) || U(w.id), refBy: w.ref_ws || "", refs: refCnt.get(w.id) || 0, refPaid: !!Number(w.ref_paid) };
     });
-    return json({ ok: true, workspaces, host: url.hostname, summary: { fbNew: Number(s.fb_new) || 0, fbDoing: Number(s.fb_doing) || 0, err24: Number(s.err24) || 0, payMonth: Number(s.pay_m) || 0, payPrev: Number(s.pay_p) || 0, payYear: Number(s.pay_y) || 0, accounts: Number(s.acc) || 0, codes: Number(s.codes) || 0, ann: annList(s.ann).filter(a => a.on).length, lastExport: s.last_export || "" }, platform: platformOf(s.plat), launch: parse(s.launch) || {}, log: rows(logR) });
+    return json({ ok: true, workspaces, host: url.hostname, summary: { fbNew: Number(s.fb_new) || 0, fbDoing: Number(s.fb_doing) || 0, err24: Number(s.err24) || 0, payMonth: can(me, "pay") ? Number(s.pay_m) || 0 : null, payPrev: can(me, "pay") ? Number(s.pay_p) || 0 : null, payYear: can(me, "pay") ? Number(s.pay_y) || 0 : null, accounts: Number(s.acc) || 0, codes: Number(s.codes) || 0, ann: annList(s.ann).filter(a => a.on).length, lastExport: s.last_export || "" }, platform: platformOf(s.plat), launch: parse(s.launch) || {}, log: rows(logR) });
   },
 
   /* 워크스페이스 상세 — 계정·사용량·토큰·확인 링크·결제 (업무 내용은 없음) */
   async "admin/ws-detail"(db, me, b) {
-    const no = ownerOnly(me); if (no) return no;
+    const no = opNeed(me, "see"); if (no) return no;
     const id = String(b.id || "");
     const w = await db.prepare("SELECT id FROM workspaces WHERE id=?1").bind(id).first();
     if (!w) return fail("not-found", 404);
@@ -3099,12 +3122,12 @@ const ADMIN_API = {
       db.prepare("SELECT COUNT(DISTINCT member_id) AS n FROM sess WHERE ws=?1 AND seen>=?2").bind(id, Date.now() - 7 * 864e5)
     ].map((s, i) => i < 4 ? s.bind(id) : s));
     const rows = r => (r && r.results) || [];
-    return json({ ok: true, accounts: rows(acc).map(a => ({ loginId: a.login_id, name: a.name || "", role: roleOk(a.role), status: a.status, owner: !!Number(a.is_owner), createdAt: a.created_at, lastLogin: a.last_login || "", contact: a.contact || "" })), tokens: rows(tok).map(t => ({ name: t.name || "", scope: t.scope, createdAt: t.created_at, lastUsed: t.last_used || "", revoked: !!Number(t.revoked) })), links: rows(lnk).map(l => ({ kind: l.kind, n: Number(l.n), used: Number(l.used) || 0 })), payments: rows(pay).map(payOut), active7: Number((rows(act)[0] || {}).n) || 0 });
+    return json({ ok: true, accounts: rows(acc).map(a => ({ loginId: a.login_id, name: a.name || "", role: roleOk(a.role), status: a.status, owner: !!Number(a.is_owner), createdAt: a.created_at, lastLogin: a.last_login || "", contact: a.contact || "" })), tokens: rows(tok).map(t => ({ name: t.name || "", scope: t.scope, createdAt: t.created_at, lastUsed: t.last_used || "", revoked: !!Number(t.revoked) })), links: rows(lnk).map(l => ({ kind: l.kind, n: Number(l.n), used: Number(l.used) || 0 })), payments: can(me, "pay") ? rows(pay).map(payOut) : [], active7: Number((rows(act)[0] || {}).n) || 0 });
   },
 
   /* 결제 기록 — 결제 연동 전까지 운영자가 직접 적습니다 */
   async "admin/pay"(db, me, b) {
-    const no = ownerOnly(me); if (no) return no;
+    const no = opNeed(me, "pay"); if (no) return no;
     const op = String(b.op || "list");
     if (op === "list") {
       const ym = /^\d{4}-\d{2}$/.test(String(b.ym || "")) ? String(b.ym) : "";
@@ -3146,7 +3169,7 @@ const ADMIN_API = {
 
   /* 베타 코드 — 코드가 있으면 승인 없이 바로 개설되고, 코드에 정한 등급으로 시작합니다 */
   async "admin/codes"(db, me, b) {
-    const no = ownerOnly(me); if (no) return no;
+    const no = opNeed(me, "signup"); if (no) return no;
     const op = String(b.op || "list");
     if (op === "save") {
       let code = codeNorm(b.code);
@@ -3175,7 +3198,7 @@ const ADMIN_API = {
 
   /* 문의·의견 — 목록, 답변(사용자에게 보임), 내부 메모, 상태 */
   async "admin/fb"(db, me, b) {
-    const no = ownerOnly(me); if (no) return no;
+    const no = opNeed(me, "fb"); if (no) return no;
     if (b.op === "save") {
       const f = await db.prepare("SELECT * FROM fb WHERE id=?1").bind(String(b.id || "")).first();
       if (!f) return fail("not-found", 404);
@@ -3196,7 +3219,7 @@ const ADMIN_API = {
 
   /* 앱 안 공지 — 기간·대상을 정해 모든 워크스페이스 화면 위에 띄웁니다 */
   async "admin/ann"(db, me, b) {
-    const no = ownerOnly(me); if (no) return no;
+    const no = opNeed(me, "ann"); if (no) return no;
     const r = await db.prepare("SELECT v FROM mw_meta WHERE k='ann'").first();
     let list = annList(r && r.v);
     const op = String(b.op || "list");
@@ -3219,8 +3242,10 @@ const ADMIN_API = {
 
   /* 플랫폼 설정 — 가입 방식, 새 워크스페이스 시작 등급, 문의 연락처, 매출 계산용 가격표 */
   async "admin/settings"(db, me, b) {
-    const no = ownerOnly(me); if (no) return no;
+    const no = opNeed(me, "see"); if (no) return no;
     if (b.op === "save") {
+      const keys = Object.keys(b.settings && typeof b.settings === "object" ? b.settings : {});
+      const no2 = keys.length && keys.every(k => k === "prices") && can(me, "pay") ? null : opNeed(me, "signup"); if (no2) return no2;   // 가격표만 바꿀 때는 재무 권한으로도 됩니다
       const cur = await platform(db);
       const next = platNorm(Object.assign({}, cur, b.settings && typeof b.settings === "object" ? b.settings : {}, { saved: true }));
       const changes = [];
@@ -3237,7 +3262,7 @@ const ADMIN_API = {
 
   /* 운영 기록·서버 오류 */
   async "admin/logs"(db, me, b) {
-    const no = ownerOnly(me); if (no) return no;
+    const no = opNeed(me, b.op === "clear-err" ? "launch" : "see"); if (no) return no;
     if (b.op === "clear-err") { await db.batch([db.prepare("DELETE FROM err_log"), admLog(db, "err-clear", null, "서버 오류 기록 비움")]); }
     const [a, e] = await db.batch([
       db.prepare("SELECT * FROM adm_log ORDER BY at DESC LIMIT 200"),
@@ -3249,8 +3274,8 @@ const ADMIN_API = {
   },
 
   /* 오픈 준비 체크리스트 — 운영자가 체크한 상태 + 서버가 확인할 수 있는 항목 */
-  async "admin/launch"(db, me, b, req, url) {
-    const no = ownerOnly(me); if (no) return no;
+  async "admin/launch"(db, me, b, req, url, env) {
+    const no = opNeed(me, b.op === "save" ? "launch" : "see"); if (no) return no;
     const r = await db.prepare("SELECT (SELECT v FROM mw_meta WHERE k='launch') AS launch, (SELECT v FROM mw_meta WHERE k='platform') AS plat, (SELECT v FROM mw_meta WHERE k='last_export') AS last_export, (SELECT v FROM mw_meta WHERE k='ann') AS ann, (SELECT COUNT(*) FROM adm_code) AS codes, (SELECT COUNT(*) FROM fb) AS fbs").first();
     let state = parse(r && r.launch) || {};
     if (b.op === "save") {
@@ -3265,14 +3290,15 @@ const ADMIN_API = {
       backup: !!le && Date.now() - (Date.parse(le) || 0) < 30 * 864e5,
       signup: platformOf(r && r.plat).saved,
       codes: Number(r && r.codes) > 0,
-      ann: annList(r && r.ann).length > 0
+      ann: annList(r && r.ann).length > 0,
+      adminkey: !!adminKey(env)
     };
     return json({ ok: true, state, auto, host, lastExport: le });
   },
 
   /* 전체 백업 — 표를 나눠 내려받아 브라우저에서 한 파일로 묶습니다 */
   async "admin/export"(db, me, b) {
-    const no = ownerOnly(me); if (no) return no;
+    const no = opNeed(me, "danger"); if (no) return no;
     if (b.op === "done") {
       const at = iso();
       await db.batch([db.prepare("INSERT OR REPLACE INTO mw_meta(k,v) VALUES('last_export',?1)").bind(at), admLog(db, "export", null, `전체 백업 내려받기 · ${clampInt(b.rows, 0, 1e9, 0)}행`)]);
@@ -3311,6 +3337,147 @@ const ADMIN_API = {
 
 Object.assign(PRIVATE, ADMIN_API);
 
+
+/* ───────── 본사 운영 — 보안 키 확인 · 운영팀 · 계정 지원 · 성장 지표 · 시스템 ───────── */
+const tmpPw = () => { const A = "abcdefghjkmnpqrstuvwxyz23456789"; const a = new Uint8Array(10); crypto.getRandomValues(a); return [...a].map(x => A[x % A.length]).join(""); };
+Object.assign(PRIVATE, {
+  async "admin/gate"(db, me, b, req, url, env) {   // 이 로그인에서 총괄관리를 열 수 있는지
+    const raw = adminKeyRaw(env);
+    return json({ ok: true, op: me.op, role: OP_ROLES[me.op].name, perms: OP_ROLES[me.op].perms, keySet: !!adminKey(env), keyShort: !!raw && raw.length < 8, admOk: me.admOk || !adminKey(env) });
+  },
+  async "admin/unlock"(db, me, b, req, url, env) {
+    if (!adminKey(env)) return json({ ok: true, admOk: true });
+    if (await keyMatch(env, b.key)) {
+      await db.batch([db.prepare("UPDATE sess SET adm_ok=1, adm_fail=0 WHERE token=?1").bind(me.token), admLog(db, "key-ok", null, "보안 키 확인")]);
+      return json({ ok: true, admOk: true });
+    }
+    const n = me.admFail + 1;
+    if (n >= 5) {   // 다섯 번 틀리면 이 로그인을 끝냅니다
+      await db.batch([db.prepare("DELETE FROM sess WHERE token=?1").bind(me.token), admLog(db, "key-fail", null, "보안 키 5회 틀림 — 로그아웃")]);
+      return fail("locked", 429);
+    }
+    await db.prepare("UPDATE sess SET adm_fail=?2 WHERE token=?1").bind(me.token, n).run();
+    return fail("bad-key", 403, { left: 5 - n });
+  },
+  /* 운영팀 — 운영자 워크스페이스 구성원에게 총괄관리 역할을 줍니다 */
+  async "admin/team"(db, me, b) {
+    const no = opNeed(me, "see"); if (no) return no;
+    if (b.op === "set") {
+      const no2 = opNeed(me, "team"); if (no2) return no2;
+      const lid = normId(b.loginId), role = OP_ASSIGN.includes(b.role) ? b.role : "";
+      const a = await db.prepare("SELECT login_id, member_id, name, is_owner, op_role, status FROM accounts WHERE login_id=?1 AND ws=?2").bind(lid, me.ws).first();
+      if (!a) return fail("not-found", 404);
+      if (Number(a.is_owner)) return fail("self");
+      if (role && a.status !== "active") return fail("inactive");
+      await db.batch([
+        db.prepare("UPDATE accounts SET op_role=?1 WHERE login_id=?2").bind(role || null, lid),
+        db.prepare("UPDATE sess SET adm_ok=0 WHERE ws=?1 AND member_id=?2").bind(me.ws, a.member_id),   // 역할이 바뀌면 보안 키를 다시 확인합니다
+        admLog(db, "team", null, `${a.name || lid}(${lid}) — ${role ? OP_ROLES[role].name : "운영팀에서 뺌"}`)
+      ]);
+    }
+    const rs = (await db.prepare("SELECT login_id, name, role, status, is_owner, op_role, last_login FROM accounts WHERE ws=?1 AND status IN ('active','disabled') ORDER BY is_owner DESC, CASE WHEN op_role IS NULL THEN 1 ELSE 0 END, name").bind(me.ws).all()).results || [];
+    return json({ ok: true, roles: Object.fromEntries(Object.entries(OP_ROLES).map(([k, v]) => [k, { name: v.name, perms: v.perms }])), members: rs.map(a => ({ loginId: a.login_id, name: a.name || "", role: roleOk(a.role), status: a.status, op: opOf(a), lastLogin: a.last_login || "" })) });
+  },
+  /* 계정 지원 — 모든 워크스페이스의 계정 찾기 · 잠금 풀기 · 로그아웃 · 임시 비밀번호 */
+  async "admin/accounts"(db, me, b) {
+    const no = opNeed(me, "acct"); if (no) return no;
+    const op = String(b.op || "search");
+    if (op === "search") {
+      const q = clip(b.q, 60).toLowerCase(), f = String(b.f || "all"), now = Date.now();
+      const where = ["1=1"], args = [];
+      if (q) { args.push("%" + q.replace(/[%_]/g, "") + "%"); where.push(`(lower(a.login_id) LIKE ?${args.length} OR lower(a.name) LIKE ?${args.length} OR lower(a.contact) LIKE ?${args.length} OR lower(w.name) LIKE ?${args.length})`); }
+      if (f === "locked") { args.push(now); where.push(`(a.lock_until>?${args.length} OR a.fails>=5)`); }
+      else if (f === "pending") where.push("a.status='pending'");
+      else if (f === "disabled") where.push("a.status IN ('disabled','rejected')");
+      else if (f === "ops") where.push("(a.is_owner=1 OR a.op_role IS NOT NULL)");
+      if (!q && f === "all") where.push("a.last_login IS NOT NULL");
+      const rs = (await db.prepare(`SELECT a.login_id, a.ws, a.name, a.role, a.status, a.is_owner, a.op_role, a.created_at, a.last_login, a.fails, a.lock_until, a.agreed_at, CASE WHEN a.role='admin' THEN a.contact ELSE '' END AS contact, w.name AS wname, w.status AS wst, (SELECT COUNT(*) FROM sess s WHERE s.ws=a.ws AND s.member_id=a.member_id) AS sessions FROM accounts a LEFT JOIN workspaces w ON w.id=a.ws WHERE ${where.join(" AND ")} ORDER BY COALESCE(a.last_login, a.created_at) DESC LIMIT 100`).bind(...args).all()).results || [];
+      return json({ ok: true, items: rs.map(a => ({ loginId: a.login_id, ws: a.ws, wsName: a.wname || "", wsStatus: a.wst || "", name: a.name || "", role: roleOk(a.role), status: a.status, op: opOf(a), owner: !!Number(a.is_owner), contact: a.contact || "", createdAt: a.created_at, lastLogin: a.last_login || "", fails: Number(a.fails) || 0, locked: Number(a.lock_until) > now, sessions: Number(a.sessions) || 0, agreedAt: a.agreed_at || "" })) });
+    }
+    const lid = normId(b.loginId);
+    const a = await db.prepare("SELECT a.*, w.name AS wname FROM accounts a LEFT JOIN workspaces w ON w.id=a.ws WHERE a.login_id=?1").bind(lid).first();
+    if (!a) return fail("not-found", 404);
+    if (lid === me.lid) return fail("self");
+    if ((Number(a.is_owner) || opOf(a)) && me.op !== "owner") return fail("forbidden", 403);   // 운영팀 계정은 총괄만 다룹니다
+    const w = { id: a.ws, name: a.wname || "" };
+    if (op === "unlock") {
+      await db.batch([db.prepare("UPDATE accounts SET fails=0, lock_until=0 WHERE login_id=?1").bind(lid), admLog(db, "acct-unlock", w, `${lid} 로그인 잠금 풀기`)]);
+      return json({ ok: true });
+    }
+    if (op === "logout") {
+      await db.batch([db.prepare("DELETE FROM sess WHERE ws=?1 AND member_id=?2").bind(a.ws, a.member_id), admLog(db, "acct-logout", w, `${lid} 모든 기기 로그아웃`)]);
+      return json({ ok: true });
+    }
+    if (op === "resetpw") {
+      const pw = tmpPw();
+      await db.batch([
+        db.prepare("UPDATE accounts SET pw=?1, fails=0, lock_until=0 WHERE login_id=?2").bind(await makePw(pw), lid),
+        db.prepare("DELETE FROM sess WHERE ws=?1 AND member_id=?2").bind(a.ws, a.member_id),
+        admLog(db, "acct-resetpw", w, `${lid} 임시 비밀번호 발급`)
+      ]);
+      return json({ ok: true, pw });
+    }
+    return fail("bad-request");
+  },
+  /* 성장·확산 지표 — 개수만 셉니다 (업무 내용 없음) */
+  async "admin/growth"(db, me) {
+    const no = opNeed(me, "see"); if (no) return no;
+    const d30 = new Date(Date.now() - 30 * 864e5).toISOString(), d84 = new Date(Date.now() - 84 * 864e5).toISOString();
+    const [inv, lnk, refTop, wk, invWk, ent] = await db.batch([
+      db.prepare("SELECT COUNT(*) AS n, SUM(CASE WHEN created_at>=?1 THEN 1 ELSE 0 END) AS n30, SUM(CASE WHEN created_at>=?1 AND opened_at IS NOT NULL THEN 1 ELSE 0 END) AS o30, SUM(CASE WHEN created_at>=?1 AND used_at IS NOT NULL THEN 1 ELSE 0 END) AS j30, SUM(CASE WHEN used_at IS NOT NULL THEN 1 ELSE 0 END) AS j, COUNT(DISTINCT ws) AS wsn FROM invites").bind(d30),
+      db.prepare("SELECT kind, COUNT(*) AS n, SUM(CASE WHEN used_at IS NOT NULL THEN 1 ELSE 0 END) AS used, SUM(views) AS views, COUNT(DISTINCT ws) AS wsn FROM links GROUP BY kind"),
+      db.prepare("SELECT r.id, r.name, COUNT(*) AS n, SUM(CASE WHEN w.status='active' THEN 1 ELSE 0 END) AS a FROM workspaces w JOIN workspaces r ON r.id=w.ref_ws GROUP BY r.id, r.name ORDER BY n DESC LIMIT 10"),
+      db.prepare("SELECT substr(created_at,1,10) AS d, CASE WHEN ref_ws IS NULL THEN 0 ELSE 1 END AS ref, COUNT(*) AS n FROM workspaces WHERE created_at>=?1 AND status<>'rejected' GROUP BY d, ref").bind(d84),
+      db.prepare("SELECT substr(used_at,1,10) AS d, COUNT(*) AS n FROM invites WHERE used_at>=?1 GROUP BY d").bind(d84),
+      db.prepare("SELECT kind, COUNT(*) AS n, COUNT(DISTINCT ws) AS wsn FROM ent WHERE deleted=0 AND kind IN ('contact','project','task') GROUP BY kind")
+    ]);
+    const R = r => (r && r.results) || [], one = r => R(r)[0] || {};
+    const i = one(inv);
+    return json({
+      ok: true,
+      invites: { total: Number(i.n) || 0, d30: Number(i.n30) || 0, opened30: Number(i.o30) || 0, joined30: Number(i.j30) || 0, joined: Number(i.j) || 0, workspaces: Number(i.wsn) || 0 },
+      links: Object.fromEntries(R(lnk).map(l => [l.kind, { n: Number(l.n) || 0, used: Number(l.used) || 0, views: Number(l.views) || 0, workspaces: Number(l.wsn) || 0 }])),
+      refTop: R(refTop).map(r => ({ id: r.id, name: r.name, n: Number(r.n) || 0, active: Number(r.a) || 0 })),
+      days: R(wk).map(r => ({ d: r.d, ref: Number(r.ref), n: Number(r.n) || 0 })),
+      joinDays: R(invWk).map(r => ({ d: r.d, n: Number(r.n) || 0 })),
+      ent: Object.fromEntries(R(ent).map(r => [r.kind, { n: Number(r.n) || 0, workspaces: Number(r.wsn) || 0 }]))
+    });
+  },
+  /* 시스템 상태 — 표별 행 수, 보안 키, 세션 */
+  async "admin/system"(db, me, b, req, url, env) {
+    const no = opNeed(me, "see"); if (no) return no;
+    const T = ["workspaces", "accounts", "ent", "sess", "invites", "links", "api_tokens", "fb", "adm_log", "err_log", "sp_res", "os_job", "cm_order"];
+    const rs = await db.batch([
+      db.prepare("SELECT " + T.map(t => `(SELECT COUNT(*) FROM ${t}) AS ${t}`).join(", ") + ", (SELECT v FROM mw_meta WHERE k='schema') AS schema, (SELECT COUNT(*) FROM sess WHERE seen>=?1) AS s7, (SELECT login_id FROM accounts WHERE is_owner=1 LIMIT 1) AS owner, (SELECT COUNT(*) FROM accounts WHERE op_role IS NOT NULL) AS ops").bind(Date.now() - 7 * 864e5)
+    ]);
+    const r = ((rs[0] && rs[0].results) || [])[0] || {};
+    const raw = adminKeyRaw(env);
+    return json({ ok: true, schema: r.schema || "", owner: r.owner || "", ops: Number(r.ops) || 0, sessions7: Number(r.s7) || 0, tables: Object.fromEntries(T.map(t => [t, Number(r[t]) || 0])), keySet: !!adminKey(env), keyShort: !!raw && raw.length < 8, host: url.hostname, legacyDb: !!(env && env.SPACEDB) });
+  }
+});
+/* 운영자 비밀번호 복구 — Cloudflare에 넣어 둔 보안 키(MW_ADMIN_KEY)로만. 다섯 번 틀리면 30분 막습니다 */
+PUBLIC["owner-recover"] = async function (db, b, req, url, env) {
+  if (!adminKey(env)) return fail("no-key", 404);
+  const now = Date.now();
+  const st = parse((await db.prepare("SELECT v FROM mw_meta WHERE k='recover_fail'").first() || {}).v) || { n: 0, until: 0 };
+  if (Number(st.until) > now) return fail("locked", 429, { minutes: Math.ceil((Number(st.until) - now) / 60000) });
+  if (!await keyMatch(env, b.key)) {
+    const n = (Number(st.n) || 0) + 1, next = n >= 5 ? { n: 0, until: now + 30 * 60e3 } : { n, until: 0 };
+    await db.batch([db.prepare("INSERT OR REPLACE INTO mw_meta(k,v) VALUES('recover_fail',?1)").bind(JSON.stringify(next)), admLog(db, "recover-fail", null, "운영자 복구 — 보안 키 틀림")]);
+    return fail("bad-key", 403);
+  }
+  if (!pwValid(b.pw) || b.pw.length < 8) return fail("bad-pw");   // 운영자는 8자 이상
+  const a = await db.prepare("SELECT login_id, ws, member_id FROM accounts WHERE is_owner=1 LIMIT 1").first();
+  if (!a) return fail("not-found", 404);
+  await db.batch([
+    db.prepare("UPDATE accounts SET pw=?1, fails=0, lock_until=0, status='active' WHERE login_id=?2").bind(await makePw(b.pw), a.login_id),
+    db.prepare("DELETE FROM sess WHERE ws=?1 AND member_id=?2").bind(a.ws, a.member_id),
+    db.prepare("INSERT OR REPLACE INTO mw_meta(k,v) VALUES('recover_fail',?1)").bind(JSON.stringify({ n: 0, until: 0 })),
+    admLog(db, "recover", null, `운영자 ${a.login_id} 비밀번호를 보안 키로 다시 정함`)
+  ]);
+  return json({ ok: true, loginId: a.login_id });
+};
+
 /* ───────── 진입점 ───────── */
 const CANON_HOST = "myworks.ai.kr", MOVE_HOSTS = new Set(["myworkspro.pages.dev", "www.myworks.ai.kr"]);
 export async function onRequest(context) {
@@ -3329,7 +3496,7 @@ export async function onRequest(context) {
   if (request.method === "POST") { try { body = await request.json(); } catch (e) { body = {}; } if (!body || typeof body !== "object") body = {}; }
   try {
     await ensure(db);
-    if (Object.prototype.hasOwnProperty.call(PUBLIC, path)) return await PUBLIC[path](db, body, request, url);
+    if (Object.prototype.hasOwnProperty.call(PUBLIC, path)) return await PUBLIC[path](db, body, request, url, env);
     if (path.startsWith("ai/")) {   // 외부 AI — 개인 토큰으로 읽기, 쓰기 토큰은 제안
       const fn = path.slice(3);
       if (!Object.prototype.hasOwnProperty.call(AIFN, fn)) return fail("not-found", 404);
@@ -3357,6 +3524,12 @@ export async function onRequest(context) {
     const me = await auth(db, request);
     if (!me) return fail("unauthorized", 401);
     if (me.err) return fail(me.err, 403);
+    if (path.startsWith("admin/")) {   // 총괄관리 — 운영팀만, 보안 키가 설정돼 있으면 이 로그인에서 한 번 확인한 뒤에만
+      if (!me.op) return fail("forbidden", 403);
+      if (adminKey(env) && !me.admOk && path !== "admin/gate" && path !== "admin/unlock") return fail("need-key", 403);
+      const dbA = { prepare: q => db.prepare(q), batch: l => db.batch(l), exec: q => db.exec(q), actor: `${me.name || ""} (${me.lid || ""})` };
+      return await PRIVATE[path](dbA, me, body, request, url, env);
+    }
     return await PRIVATE[path](db, me, body, request, url);
   } catch (e) {
     const msg = String((e && e.message) || e).slice(0, 500);
