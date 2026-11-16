@@ -1,4 +1,8 @@
 
+// 소개 링크(?ref=코드)로 들어오면 60일 동안 기억했다가 앱 가입 화면에 넘깁니다
+(function(){
+  try{ var c=(new URLSearchParams(location.search).get("ref")||"").toUpperCase().replace(/[^A-Z0-9]/g,""); if(c.length>=6&&c.length<=10) localStorage.setItem("mw_ref",JSON.stringify({c:c,at:Date.now()})); }catch(e){}
+})();
 (function(){
   var top=document.querySelector(".top"), burger=document.querySelector(".nav-btn");
   // 모바일·태블릿 메뉴

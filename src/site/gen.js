@@ -199,6 +199,7 @@ function footer() {
 const PAGES = [];
 const urlOf = (file) => file === "index.html" ? "/" : /\/index\.html$/.test(file) ? "/" + file.replace(/index\.html$/, "") : "/" + file.replace(/\.html$/, "");
 // crumbs: [[이름, 주소], …] — 화면 위 경로와 구조화 데이터에 함께 쓴다(홈은 자동으로 붙는다)
+const faqQ = q => { for (const [, list] of FAQ) for (const x of list) if (x[0] === q) return x; throw new Error("FAQ 없음: " + q); };
 function page({ file, title, desc, active, body, extra = "", lastmod = ISO_DATE, crumbs = null, ldNodes = [], type, ogTitle, noindex = false, priority }) {
   const urlPath = urlOf(file);
   if (!noindex) PAGES.push({ url: urlPath, lastmod, priority: priority || (urlPath === "/" ? "1.0" : /^\/blog\/./.test(urlPath) ? "0.7" : "0.8") });
@@ -390,7 +391,7 @@ page({
       <a class="text-link" href="/about">만든 이유와 원칙 →</a><br>
       <a class="text-link" href="/faq">자주 묻는 질문 전체 →</a>
     </div>
-    ${faqHtml([FAQ[0][1][0], FAQ[1][1][3], FAQ[2][1][0], FAQ[3][1][1], FAQ[4][1][1]])}
+    ${faqHtml([FAQ[0][1][0], faqQ("고객이나 거래처도 가입해야 하나요?"), FAQ[2][1][0], FAQ[3][1][1], FAQ[4][1][1]])}
   </div>
 </section>
 
@@ -600,12 +601,15 @@ if (readmePath && fs.existsSync(readmePath)) {
 
 // ---------- 공지 ----------
 page({
-  file: "notice.html", active: "notice",
+  file: "notice.html", active: "notice", lastmod: "2026-11-17",
   title: "공지 — 마이웍스 업데이트 소식", desc: "마이웍스 배포 소식과 바뀐 점을 날짜순으로 남깁니다.",
   crumbs: [["공지", "/notice"]],
   body: `
 <section class="hero sub"><div class="wrap"><p class="kicker">공지</p><h1>바뀐 점</h1><p class="lead">배포할 때마다 한 줄씩 남깁니다. 장애가 있으면 맨 위에 적습니다.</p></div></section>
 <section class="sec"><div class="wrap doc">
+  <div class="notice"><time>2026. 11. 17.</time><h3>연락처 가져오기, 사람마다 초대 링크, 진행 상황 공유를 추가했습니다</h3>
+    <p>사람 → 연락처에서 구글 연락처·아이폰·안드로이드·네이버·엑셀 파일을 올리면 연락처를 한 번에 옮길 수 있습니다. 파일은 브라우저 안에서만 읽고, 고른 사람만 저장합니다.</p>
+    <p>‘사람 초대’에서 연락처를 고르면 사람마다 다른 초대 링크가 만들어집니다. 카카오톡·문자·메일로 보내면 받은 사람이 아이디를 만들고 승인 없이 바로 프로젝트에 참여합니다. 프로젝트 화면의 ‘진행 상황 공유’로는 고객에게 진행률과 업무 목록을 로그인 없이 보여 줄 수 있습니다. 함께 일하는 분께 마이웍스를 소개할 수 있는 소개 링크도 사람 메뉴에 넣었습니다.</p></div>
   <div class="notice"><time>2026. 11. 16.</time><h3>블로그·자주 묻는 질문·기본 기능·회사 소개 페이지를 열었습니다</h3>
     <p><a href="/blog/">블로그</a>에 파티룸·무인매장 운영, 견적서와 미수금, 세금 일정, 임대관리, 온라인 판매, AI 연결에 관한 글 ${ARTICLES.length}편을 올렸습니다. <a href="/features">기본 기능</a> 페이지에서 오늘·일·거래·돈·사람 메뉴를 한 번에 볼 수 있고, <a href="/faq">자주 묻는 질문</a>에 가입·요금·데이터·AI 연결에 관한 답을 모았습니다. 마이웍스를 만드는 회사는 <a href="/about">회사 소개</a>에 적었습니다.</p>
     <p>네이버·구글·Bing 검색에 사이트를 등록하고, 새 글을 받아 볼 수 있는 <a href="/rss.xml">RSS</a>를 추가했습니다. 가격 페이지의 해지·환불 안내를 이용약관과 같은 내용으로 맞췄습니다. 앱과 데이터에는 바뀐 것이 없습니다.</p></div>
@@ -946,12 +950,12 @@ const FEATS = [
   { id: "money", name: "돈", head: "매출과 비용이 한곳으로 모입니다",
     lead: "프로젝트 예산, 매장 매출·비용, 외주 입금, 판매 손익이 재무로 모입니다. 월말에 통장을 다시 계산하지 않아도 됩니다.",
     items: ["재무 기록 — 수입·지출을 프로젝트·매장별로 기록", "이달 재무 — 홈에서 이번 달 수입·지출·손익 확인", "모듈 손익 보내기 — 공간 운영·판매의 월 손익을 버튼 하나로 재무에 기록", "CSV 내보내기 — 세무사에게 보낼 자료를 엑셀로 열 수 있는 형식으로"] },
-  { id: "people", name: "사람", head: "역할에 필요한 만큼만 보여 줍니다",
-    lead: "함께 일하는 사람은 구성원으로 초대하고, 고객·거래처는 연락처로 둡니다. 보이는 범위는 화면에서 숨기지 않고 서버가 애초에 보내지 않는 방식으로 지킵니다.",
-    items: ["초대 — 초대 링크를 보내 합류를 승인하거나 아이디를 바로 발급", "역할 5가지 — 관리자, 직원, 현장 근무자, 시설 담당, 협력사", "현장 근무자 — 오늘 청소·시설 신고·오늘 발송만 보이고 예약자 이름·연락처·금액은 전송되지 않음", "협력사 — 참여 프로젝트와 맡은 업무만 보이고 예산·매출·연락처는 전송되지 않음", "퇴사·계약 종료 — 비활성화하면 즉시 로그아웃, 만든 AI 토큰도 함께 회수"] },
+  { id: "people", name: "사람", head: "연락처를 가져오고, 사람마다 초대 링크로 부릅니다",
+    lead: "구글·휴대폰에 있는 연락처를 한 번에 옮기고, 함께 일할 사람에게는 초대 링크를 보냅니다. 보이는 범위는 화면에서 숨기지 않고 서버가 애초에 보내지 않는 방식으로 지킵니다.",
+    items: ["연락처 가져오기 — 구글 연락처(CSV), 아이폰·안드로이드(vCard), 네이버·아웃룩·엑셀(CSV), 붙여넣기. 같은 이메일·휴대폰은 하나로 합침", "사람 초대 — 사람마다 다른 링크를 카카오톡·문자·메일로 보내고, 받은 사람이 아이디를 만들면 승인 없이 지정한 프로젝트에 바로 참여", "보낸 초대 — 열어 봤는지, 참여했는지 보이고 취소하거나 기한을 다시 열 수 있음", "팀 초대 코드 — 여러 사람에게 같은 주소를 보내고 관리자가 승인하는 방식도 그대로", "역할 5가지 — 관리자, 직원, 현장 근무자, 시설 담당, 협력사", "현장 근무자 — 오늘 청소·시설 신고·오늘 발송만 보이고 예약자 이름·연락처·금액은 전송되지 않음", "협력사 — 참여 프로젝트와 맡은 업무만 보이고 예산·매출·연락처는 전송되지 않음", "퇴사·계약 종료 — 비활성화하면 즉시 로그아웃, 만든 AI 토큰도 함께 회수"] },
   { id: "link", name: "확인 링크", head: "고객은 가입 없이 링크 하나로 승인합니다",
     lead: "견적서, 납품물, 청구서를 링크로 보냅니다. 받은 사람은 로그인 없이 내용을 보고 승인·확인·수정 요청만 할 수 있습니다.",
-    items: ["상대가 누른 결과는 내 ‘오늘 결정할 것’과 활동 기록에 바로 남음", "링크는 30일(견적은 정한 기간) 동안 유효하고, 새 링크를 만들면 이전 링크는 닫힘", "링크 페이지에는 고객 연락처, 내부 메모, 다른 업무 정보가 나가지 않음", "수정 요청이 오면 고친 뒤 같은 링크로 다시 승인받을 수 있음"] },
+    items: ["진행 상황 공유 — 프로젝트 진행률과 업무 목록을 읽기 전용 링크로 보여 주고, 몇 번 열어 봤는지 확인. 예산·메모·의견은 나가지 않음", "상대가 누른 결과는 내 ‘오늘 결정할 것’과 활동 기록에 바로 남음", "링크는 30일(견적은 정한 기간) 동안 유효하고, 새 링크를 만들면 이전 링크는 닫힘", "링크 페이지에는 고객 연락처, 내부 메모, 다른 업무 정보가 나가지 않음", "수정 요청이 오면 고친 뒤 같은 링크로 다시 승인받을 수 있음"] },
   { id: "ai", name: "AI 접속", head: "클로드가 내 데이터로 답하고, 변경은 제안으로 올립니다",
     lead: "개인 토큰으로 클로드를 커넥터(MCP)로 연결하면 “오늘 뭐 해야 해?”, “외주 미수금 얼마야?”에 내 워크스페이스 데이터로 답합니다.",
     items: ["읽기 토큰 — 묻고 정리하는 용도 (베이직 1개)", "쓰기 토큰 — 업무 추가·상태 변경·메모·연락처·외주 안건을 ‘제안’으로 올림 (프로)", "제안 → 승인 — 홈에서 승인해야 반영, 자동 반영은 고른 종류만", "AI가 만든 업무·연락처에는 AI 표시", "토큰은 만든 사람의 권한 범위 안에서만 읽고, 시간당 60회·하루 1,500회까지"] },
@@ -960,7 +964,7 @@ const FEATS = [
     items: ["전체 백업·복원 — 백업 파일 하나로 내려받고 다른 기기에서 복원", "비밀번호·AI 토큰은 복원할 수 없는 해시(PBKDF2)로만 저장", "비밀번호 10회 연속 오류 시 10분 잠금, 30일 미사용 로그인 자동 종료", "모든 통신은 HTTPS, 데이터는 Cloudflare 클라우드에 보관", "이용자 데이터를 AI 학습에 쓰지 않음"] },
 ];
 page({
-  file: "features.html", active: "features",
+  file: "features.html", active: "features", lastmod: "2026-11-17",
   title: "기본 기능 — 1인 사업자·소규모 팀 업무관리 | 마이웍스",
   desc: "마이웍스 기본 기능 소개. 오늘 결정할 것, 프로젝트·업무보드, 견적·납품·청구, 재무, 구성원·연락처, 확인 링크, AI 접속까지 1인 사업자와 소규모 팀이 매일 쓰는 업무관리 기능입니다.",
   crumbs: [["기본 기능", "/features"]],
@@ -1021,7 +1025,7 @@ ${relatedPosts("features", "업무관리에 관한 글")}
 // ---------- 자주 묻는 질문 ----------
 const FAQ_ALL = FAQ.flatMap(([, items]) => items);
 page({
-  file: "faq.html", active: "faq",
+  file: "faq.html", active: "faq", lastmod: "2026-11-17",
   title: "자주 묻는 질문 — 마이웍스",
   desc: "마이웍스 자주 묻는 질문. 어떤 서비스인지, 가입과 초대, 요금과 환불, 데이터 저장과 보안, 클로드 AI 연결까지 한곳에 모았습니다.",
   crumbs: [["자주 묻는 질문", "/faq"]],
@@ -1091,6 +1095,7 @@ page({
       <div><time>2026. 10.</time><p>마이웍스 v4 — 등급, 오늘 결정할 것, 검수, 확인 링크, AI 접속, 아웃소싱·커머스</p></div>
       <div><time>2026. 10.</time><p>공개 홈페이지를 열고 마이스토어·마이빌딩·마이택스·마이셀러 계획 공개</p></div>
       <div><time>2026. 11.</time><p>정식 주소 myworks.ai.kr, 이용약관·개인정보처리방침 확정, 베타 운영 시작</p></div>
+      <div><time>2026. 11.</time><p>연락처 가져오기, 사람마다 초대 링크, 진행 상황 공유, 소개 링크</p></div>
       <div><time>2026. 12. 예정</time><p>마이스토어 일 마감·점검, 마이셀러 수발주·정산 대사</p></div>
       <div><time>2027. 1분기 예정</time><p>마이빌딩, 마이택스 출시</p></div>
     </div>
@@ -1227,7 +1232,7 @@ fs.writeFileSync(path.join(OUT, "admin.html"), `<!DOCTYPE html>
 <body><div><p>총괄관리로 이동하는 중입니다.</p><p style="color:#6B6861;font-size:14px">운영자 계정으로 로그인해야 열립니다. <a href="/app/#/admin">직접 열기</a></p></div></body></html>`);
 
 // _redirects
-fs.writeFileSync(path.join(OUT, "_redirects"), `/link/*  /link/index.html  200\n`);
+fs.writeFileSync(path.join(OUT, "_redirects"), `/link/*  /link/index.html  200\n/join/*  /join/index.html  200\n`);
 
 // ---------- 검색엔진 (robots.txt · sitemap.xml) ----------
 // 파일이 없으면 Cloudflare Pages가 첫 화면 HTML을 대신 돌려줘 검색엔진이 사이트맵을 읽지 못한다.
@@ -1236,6 +1241,7 @@ Allow: /
 Disallow: /app/
 Disallow: /admin
 Disallow: /link/
+Disallow: /join/
 Disallow: /api/
 
 Sitemap: ${SITE}/sitemap.xml
@@ -1562,6 +1568,10 @@ button.pill{cursor:pointer;font-family:inherit}
 
 // ---------- JS ----------
 fs.writeFileSync(path.join(OUT, "site", "site.js"), `
+// 소개 링크(?ref=코드)로 들어오면 60일 동안 기억했다가 앱 가입 화면에 넘깁니다
+(function(){
+  try{ var c=(new URLSearchParams(location.search).get("ref")||"").toUpperCase().replace(/[^A-Z0-9]/g,""); if(c.length>=6&&c.length<=10) localStorage.setItem("mw_ref",JSON.stringify({c:c,at:Date.now()})); }catch(e){}
+})();
 (function(){
   var top=document.querySelector(".top"), burger=document.querySelector(".nav-btn");
   // 모바일·태블릿 메뉴

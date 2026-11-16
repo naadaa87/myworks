@@ -12,7 +12,7 @@
    · 스페이스: 예약 → 청소 배정 → 체크리스트 → 확인 → 손익. HOSTDB(읽기)는 운영자 워크스페이스에서만, SPACEDB(1회 가져오기)는 운영자만.
    · 무료 요금제 한도(요청당 쿼리 50회)를 넘지 않도록 여러 건의 쓰기는 한 문장으로 묶어 처리합니다. */
 
-const SCHEMA = "6";
+const SCHEMA = "7";
 const PLANS = ["basic", "pro"];
 const MODULES = ["space", "outsourcing", "commerce"];
 const PLAN_LIMITS = { basic: { brands: 2, members: 2, tokens: 1 }, pro: { brands: 1000, members: 10, tokens: 20 } };   // members = 관리자 외 구성원 수
@@ -62,8 +62,17 @@ const ADD_COLS = [
   ["workspaces", "plan_until TEXT"],
   ["workspaces", "op_note TEXT"],
   ["workspaces", "comp INTEGER NOT NULL DEFAULT 0"],
-  ["sp_res", "channel TEXT"]
+  ["sp_res", "channel TEXT"],
+  // v7 — 추천(소개) 코드, 공유 링크 열람 수·보기 설정
+  ["workspaces", "ref_code TEXT"],
+  ["workspaces", "ref_ws TEXT"],
+  ["workspaces", "ref_paid INTEGER NOT NULL DEFAULT 0"],
+  ["links", "views INTEGER NOT NULL DEFAULT 0"],
+  ["links", "last_view TEXT"],
+  ["links", "opts TEXT"]
 ];
+// 칸을 더한 뒤에 만드는 색인
+const POST_DDL = ["CREATE UNIQUE INDEX IF NOT EXISTS idx_ws_ref ON workspaces(ref_code)"];
 
 /* ───────── 공통 ───────── */
 const json = (o, s = 200) => new Response(JSON.stringify(o), { status: s, headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" } });
@@ -166,7 +175,7 @@ async function ensure(db) {
   try { const r = await db.prepare("SELECT v FROM mw_meta WHERE k='schema'").first(); v = r && r.v; } catch (e) { v = null; }
   if (v !== SCHEMA) {
     // 표 만들기는 묶음(exec)으로 — 무료 플랜의 요청당 쿼리 수 한도를 넘지 않도록
-    for (const group of [DDL, SP_DDL, OS_DDL, CM_DDL, ADM_DDL]) await db.exec(group.join("\n"));
+    for (const group of [DDL, SP_DDL, OS_DDL, CM_DDL, ADM_DDL, INV_DDL]) await db.exec(group.join("\n"));
     const have = {};
     for (const t of [...new Set(ADD_COLS.map(x => x[0]))]) have[t] = new Set((((await db.prepare(`PRAGMA table_info(${t})`).all()).results) || []).map(c => c.name));
     for (const [t, col] of ADD_COLS) {
@@ -174,6 +183,7 @@ async function ensure(db) {
       try { await db.prepare(`ALTER TABLE ${t} ADD COLUMN ${col}`).run(); }
       catch (e) { if (!/duplicate column/i.test(String((e && e.message) || e))) throw e; }
     }
+    await db.exec(POST_DDL.join("\n"));
     await migrateLegacy(db);
     // 운영자 워크스페이스는 프로 + 스페이스로 시작합니다 (처음 올릴 때 한 번)
     if (v !== "4") await db.prepare("UPDATE workspaces SET plan='pro', modules=CASE WHEN modules='[]' THEN '[\"space\"]' ELSE modules END WHERE id IN (SELECT ws FROM accounts WHERE is_owner=1)").run();
@@ -407,6 +417,7 @@ const PUBLIC = {
     try {
       if (mode === "new") {
         const wsName = clip(b.workspace, 40);
+        const refWs = await refLookup(db, b.ref);   // 소개받은 워크스페이스 (없으면 null)
         if (!wsName || !contact) return fail("bad-request");
         const pl = await platform(db);
         if (pl.signup === "closed") return fail("closed", 403);
@@ -421,18 +432,19 @@ const PUBLIC = {
           const st = startTier(code ? { plan: code.plan, modules: parse(code.modules) || [], days: code.days } : pl.newPlan);
           const member = memberData(mid, lid, name, "admin", wsName, now);
           await db.batch([
-            db.prepare("INSERT INTO workspaces(id,name,status,admin_login,contact,note,invite,created_at,approved_at,last_active,plan,modules,plan_until) VALUES(?1,?2,'active',?3,?4,?5,?6,?7,?7,?7,?8,?9,?10)").bind(ws, wsName, lid, contact, note, await freshInvite(db), now, st.plan, JSON.stringify(st.modules), st.until),
+            db.prepare("INSERT INTO workspaces(id,name,status,admin_login,contact,note,invite,created_at,approved_at,last_active,plan,modules,plan_until,ref_ws) VALUES(?1,?2,'active',?3,?4,?5,?6,?7,?7,?7,?8,?9,?10,?11)").bind(ws, wsName, lid, contact, note, await freshInvite(db), now, st.plan, JSON.stringify(st.modules), st.until, refWs),
             db.prepare("INSERT INTO accounts(login_id,ws,member_id,pw,status,role,is_owner,name,contact,note,created_at,agreed_at) VALUES(?1,?2,?3,?4,'active','admin',0,?5,?6,?7,?8,?9)").bind(lid, ws, mid, pw, name, contact, note, now, agreed),
             ...seedWorkspace(db, ws, wsName, [wsName, "기타"], member),
             ...(code ? [db.prepare("UPDATE adm_code SET uses=uses+1 WHERE code=?1").bind(code.code)] : []),
             admLog(db, "auto-open", { id: ws, name: wsName }, code ? `베타 코드 ${code.code}로 바로 개설` : "자동 개설")
           ]);
-          return json({ ok: true, status: "active", mode, workspace: wsName, plan: st.plan, planUntil: st.until || "" });
+          const rw = await refReward(db, ws);
+          return json({ ok: true, status: "active", mode, workspace: wsName, plan: rw.plan || st.plan, planUntil: rw.until || st.until || "", refDays: rw.days || 0 });
         }
         const c = await db.prepare("SELECT COUNT(*) AS n FROM workspaces WHERE status='pending'").first();
         if (c && Number(c.n) >= MAX_PENDING_WS) return fail("busy", 429);
         await db.batch([
-          db.prepare("INSERT INTO workspaces(id,name,status,admin_login,contact,note,invite,created_at) VALUES(?1,?2,'pending',?3,?4,?5,NULL,?6)").bind(ws, wsName, lid, contact, note, now),
+          db.prepare("INSERT INTO workspaces(id,name,status,admin_login,contact,note,invite,created_at,ref_ws) VALUES(?1,?2,'pending',?3,?4,?5,NULL,?6,?7)").bind(ws, wsName, lid, contact, note, now, refWs),
           db.prepare("INSERT INTO accounts(login_id,ws,member_id,pw,status,role,is_owner,name,contact,note,created_at,agreed_at) VALUES(?1,?2,?3,?4,'pending','admin',0,?5,?6,?7,?8,?9)").bind(lid, ws, mid, pw, name, contact, note, now, agreed)
         ]);
         return json({ ok: true, status: "pending", mode, workspace: wsName });
@@ -780,15 +792,23 @@ const PRIVATE = {
     const days = clampInt(b.days, 1, 180, 30), token = rand(16), now = Date.now();
     await db.batch([
       db.prepare("UPDATE links SET expires_at=?3 WHERE ws=?1 AND kind=?2 AND target=?4 AND used_at IS NULL").bind(me.ws, kind, new Date(now - 1000).toISOString(), target),   // 같은 대상의 이전 링크는 닫습니다
-      db.prepare("INSERT INTO links(token,ws,kind,target,created_by,created_at,expires_at) VALUES(?1,?2,?3,?4,?5,?6,?7)").bind(token, me.ws, kind, target, me.id, iso(), new Date(now + days * 864e5).toISOString())
+      db.prepare("INSERT INTO links(token,ws,kind,target,created_by,created_at,expires_at,opts) VALUES(?1,?2,?3,?4,?5,?6,?7,?8)").bind(token, me.ws, kind, target, me.id, iso(), new Date(now + days * 864e5).toISOString(), kind === "project" ? JSON.stringify({ tasks: b.tasks !== false }) : null)
     ]);
     return json({ ok: true, token, expiresAt: new Date(now + days * 864e5).toISOString() });
+  },
+  async "link/revoke"(db, me, b) {   // 공유 중지 — 링크를 바로 닫습니다 (만든 사람 또는 관리자)
+    if (me.role === "partner" || isField(me)) return fail("forbidden", 403);
+    const t = String(b.token || "");
+    const past = new Date(Date.now() - 1000).toISOString();
+    const r = await db.prepare("UPDATE links SET expires_at=?3 WHERE ws=?1 AND token=?2 AND expires_at>?3" + (me.role === "admin" ? "" : " AND created_by=?4")).bind(...(me.role === "admin" ? [me.ws, t, past] : [me.ws, t, past, me.id])).run();
+    if (!r || !r.meta || !r.meta.changes) return fail("not-found", 404);
+    return json({ ok: true });
   },
   async "link/list"(db, me, b) {
     if (me.role === "partner" || isField(me)) return fail("forbidden", 403);
     const kind = String(b.kind || ""), target = clip(b.target, 60);
-    const rs = (await db.prepare("SELECT token, created_at, expires_at, used_at, result, note FROM links WHERE ws=?1 AND kind=?2 AND target=?3 ORDER BY created_at DESC LIMIT 5").bind(me.ws, kind, target).all()).results || [];
-    return json({ ok: true, links: rs.map(r => ({ token: r.token, createdAt: r.created_at, expiresAt: r.expires_at, usedAt: r.used_at || "", result: r.result || "", note: r.note || "" })) });
+    const rs = (await db.prepare("SELECT token, created_at, expires_at, used_at, result, note, views, last_view, opts FROM links WHERE ws=?1 AND kind=?2 AND target=?3 ORDER BY created_at DESC LIMIT 5").bind(me.ws, kind, target).all()).results || [];
+    return json({ ok: true, links: rs.map(r => ({ token: r.token, createdAt: r.created_at, expiresAt: r.expires_at, usedAt: r.used_at || "", result: r.result || "", note: r.note || "", views: Number(r.views) || 0, lastView: r.last_view || "", opts: parse(r.opts) || {} })) });
   },
 
   /* 백업·복원·초기화 — 관리자 전용 */
@@ -918,7 +938,8 @@ const PRIVATE = {
         ...seedWorkspace(db, w.id, w.name, [w.name, "기타"], member),
         admLog(db, "approve", w, `개설 승인 · ${st.plan === "pro" ? "프로" + (st.until ? " ~" + st.until : "") : "베이직"}으로 시작`)
       ]);
-      return json({ ok: true, loginId: a.login_id });
+      const rw = await refReward(db, w.id);
+      return json({ ok: true, loginId: a.login_id, refDays: rw.days || 0 });
     }
     if (act === "reject") {
       if (w.status !== "pending") return fail("bad-state");
@@ -938,7 +959,7 @@ const PRIVATE = {
       return json({ ok: true });
     }
     if (act === "delete") {
-      await db.exec(SP_TABLES.concat(OS_TABLES, CM_TABLES, ["ws_set", "api_tokens", "links", "mod_set"]).map(t => `DELETE FROM ${t} WHERE ws=${wsLit(w.id)}`).join("\n"));
+      await db.exec(SP_TABLES.concat(OS_TABLES, CM_TABLES, ["ws_set", "api_tokens", "links", "mod_set", "invites"]).map(t => `DELETE FROM ${t} WHERE ws=${wsLit(w.id)}`).join("\n"));
       await db.batch([
         db.prepare("DELETE FROM ent WHERE ws=?1").bind(w.id),
         db.prepare("DELETE FROM sess WHERE ws=?1").bind(w.id),
@@ -2683,6 +2704,36 @@ const LINK_KINDS = {
       await db.prepare("UPDATE os_invoice SET ack_at=?3, ack_by=?4, ack_note=?5 WHERE ws=?1 AND id=?2").bind(l.ws, v.id, iso(), clip(by, 40), clip(note, 300)).run();
       return { ok: true, status: "approved" };
     }
+  },
+  project: {   // 진행 상황 공유 — 계정 없이 보는 읽기 전용 페이지 (금액·메모·의견은 보내지 않습니다)
+    exists: async (db, me, id) => {
+      const d = await entData(db, me.ws, "project", id); if (!d) return false;
+      return me.role === "admin" || d.ownerId === me.id || (Array.isArray(d.memberIds) && d.memberIds.includes(me.id));
+    },
+    view: async (db, l) => {
+      const p = await entData(db, l.ws, "project", l.target); if (!p) return null;
+      const opts = parse(l.opts) || {};
+      const [w, by, tr] = await db.batch([
+        db.prepare("SELECT name FROM workspaces WHERE id=?1").bind(l.ws),
+        db.prepare("SELECT name FROM accounts WHERE ws=?1 AND member_id=?2").bind(l.ws, l.created_by || ""),
+        db.prepare("SELECT data FROM ent WHERE ws=?1 AND kind='task' AND pid=?2 AND deleted=0").bind(l.ws, p.id)
+      ]);
+      const one = r => ((r && r.results) || [])[0] || {};
+      const ORD = { "진행중": 0, "검토": 1, "대기": 2, "완료": 3 };
+      const tasks = (((tr && tr.results) || []).map(r => parse(r.data)).filter(Boolean))
+        .map(t => ({ title: clip(t.title, 120), status: TASK_ST.includes(t.status) ? t.status : "대기", due: dOk(t.due), done: t.status === "완료", at: String(t.updatedAt || t.createdAt || "") }));
+      const done = tasks.filter(t => t.done).length;
+      const last = [p.updatedAt || "", ...tasks.map(t => t.at)].filter(Boolean).sort().pop() || "";
+      const list = opts.tasks === false ? [] : tasks.slice().sort((a, b) => (ORD[a.status] ?? 9) - (ORD[b.status] ?? 9) || (a.due || "9999").localeCompare(b.due || "9999")).slice(0, 200).map(({ title, status, due }) => ({ title, status, due }));
+      return {
+        kind: "project", title: clip(p.name, 80), summary: clip(p.summary, 500), status: clip(p.status, 20), start: dOk(p.startDate), due: dOk(p.dueDate),
+        goals: (Array.isArray(p.goals) ? p.goals : []).map(g => clip(g, 200)).filter(Boolean).slice(0, 10),
+        progress: { done, total: tasks.length, pct: tasks.length ? Math.round(done / tasks.length * 100) : 0 },
+        tasks: list, showTasks: opts.tasks !== false, updatedAt: last,
+        sender: { workspace: one(w).name || "", name: one(by).name || "" }
+      };
+    },
+    act: async () => ({ error: "bad-state" })
   }
 };
 async function entData(db, ws, kind, id) { const r = await db.prepare("SELECT data FROM ent WHERE ws=?1 AND kind=?2 AND id=?3 AND deleted=0").bind(ws, kind, String(id)).first(); return r ? parse(r.data) : null; }
@@ -2699,7 +2750,8 @@ PUBLIC["link/get"] = async function (db, b, req, url) {
   if (expired && !l.used_at) return fail("expired", 410);   // 쓰지 않은 채 기한이 지난(또는 새 링크로 대체된) 링크는 내용도 보여 주지 않습니다
   const v = await LINK_KINDS[l.kind].view(db, l);
   if (!v) return fail("not-found", 404);
-  return json({ ok: true, expired, usedAt: l.used_at || "", result: l.result || "", expiresAt: l.expires_at, view: v });
+  if (!expired) await db.prepare("UPDATE links SET views=views+1, last_view=?2 WHERE token=?1").bind(l.token, iso()).run();
+  return json({ ok: true, expired, usedAt: l.used_at || "", result: l.result || "", expiresAt: l.expires_at, view: v, ref: await wsRef(db, l.ws) });
 };
 PUBLIC["link/act"] = async function (db, b) {
   const l = await linkRow(db, b.t);
@@ -2713,6 +2765,170 @@ PUBLIC["link/act"] = async function (db, b) {
   await db.prepare("UPDATE links SET used_at=?2, result=?3, note=?4 WHERE token=?1").bind(l.token, iso(), r.status, clip(b.note, 500)).run();
   return json({ ok: true, status: r.status });
 };
+
+
+/* ───────── 초대 링크 — 사람마다 하나, 한 번만 쓰는 주소 (myworks.ai.kr/join/<토큰>) ─────────
+   · 관리자는 모든 역할로, 직원은 자기가 참여한 프로젝트에 협력사로만 초대합니다.
+   · 받은 사람이 아이디를 만들면 승인 없이 바로 로그인되고, 지정한 프로젝트의 참여자가 됩니다.
+   · 메시지는 서버가 보내지 않습니다. 보내는 사람이 자기 문자·메일·메신저로 링크를 보냅니다. */
+const INV_DDL = [
+  "CREATE TABLE IF NOT EXISTS invites(token TEXT PRIMARY KEY, ws TEXT NOT NULL, created_by TEXT, role TEXT NOT NULL, projects TEXT NOT NULL DEFAULT '[]', contact_id TEXT, name TEXT, email TEXT, phone TEXT, msg TEXT, created_at TEXT NOT NULL, expires_at TEXT NOT NULL, opened_at TEXT, used_at TEXT, member_id TEXT, login_id TEXT, revoked INTEGER NOT NULL DEFAULT 0)",
+  "CREATE INDEX IF NOT EXISTS idx_inv_ws ON invites(ws, created_at)"
+];
+const INV_ROLES = ["partner", "staff", "worker", "facility", "admin"];
+const INV_OPEN_MAX = 300;   // 워크스페이스당 아직 쓰지 않은 초대 수
+const invState = (r, now) => Number(r.revoked) ? "revoked" : r.used_at ? "joined" : r.expires_at < now ? "expired" : r.opened_at ? "opened" : "sent";
+const invOut = (r, now) => ({ token: r.token, role: roleOk(r.role), projects: parse(r.projects) || [], contactId: r.contact_id || "", name: r.name || "", email: r.email || "", phone: r.phone || "", createdBy: r.created_by || "", createdAt: r.created_at, expiresAt: r.expires_at, openedAt: r.opened_at || "", usedAt: r.used_at || "", memberId: r.member_id || "", loginId: r.login_id || "", status: invState(r, now) });
+async function projectsOf(db, ws, ids) {
+  if (!ids.length) return [];
+  const rs = (await db.prepare("SELECT id, data FROM ent WHERE ws=?1 AND kind='project' AND deleted=0 AND id IN (SELECT value FROM json_each(?2))").bind(ws, JSON.stringify(ids)).all()).results || [];
+  return rs.map(r => ({ id: r.id, d: parse(r.data) || {} }));
+}
+async function invRow(db, t) {
+  if (!/^[0-9a-f]{32}$/.test(String(t || ""))) return null;
+  return await db.prepare("SELECT i.*, w.name AS wname, w.status AS wst FROM invites i JOIN workspaces w ON w.id=i.ws WHERE i.token=?1").bind(t).first();
+}
+Object.assign(PRIVATE, {
+  async "invite/create"(db, me, b) {
+    if (me.role !== "admin" && me.role !== "staff") return fail("forbidden", 403);
+    const role = INV_ROLES.includes(b.role) ? b.role : "partner";
+    if (me.role === "staff" && role !== "partner") return fail("forbidden", 403);
+    const people = (Array.isArray(b.people) ? b.people : []).slice(0, 50).map(x => ({
+      name: clip(x && x.name, 40), email: clip(x && x.email, 120).toLowerCase(), phone: clip(x && x.phone, 40), contactId: clip(x && x.contactId, 120)
+    })).filter(x => x.name || x.email || x.phone);
+    if (!people.length) return fail("bad-request");
+    const pids = [...new Set((Array.isArray(b.projects) ? b.projects : []).map(x => clip(x, 120)).filter(Boolean))].slice(0, 20);
+    if (me.role === "staff" && !pids.length) return fail("bad-request");
+    const ps = await projectsOf(db, me.ws, pids);
+    if (ps.length !== pids.length) return fail("not-found", 404);
+    if (me.role === "staff" && ps.some(x => x.d.ownerId !== me.id && !(Array.isArray(x.d.memberIds) && x.d.memberIds.includes(me.id)))) return fail("forbidden", 403);
+    const now = iso(), days = clampInt(b.days, 1, 60, 14), exp = new Date(Date.now() + days * 864e5).toISOString();
+    const c = await db.prepare("SELECT COUNT(*) AS n FROM invites WHERE ws=?1 AND revoked=0 AND used_at IS NULL AND expires_at>?2").bind(me.ws, now).first();
+    if (c && Number(c.n) + people.length > INV_OPEN_MAX) return fail("too-many", 429, { limit: INV_OPEN_MAX });
+    const msg = clip(b.msg, 600), rows = [];
+    for (const x of people) rows.push({ token: rand(16), ws: me.ws, created_by: me.id, role, projects: JSON.stringify(pids), contact_id: x.contactId || null, name: x.name, email: x.email, phone: x.phone, created_at: now, expires_at: exp, revoked: 0 });
+    await db.batch(rows.map(r => db.prepare("INSERT INTO invites(token,ws,created_by,role,projects,contact_id,name,email,phone,msg,created_at,expires_at) VALUES(?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,?11,?12)").bind(r.token, r.ws, r.created_by, r.role, r.projects, r.contact_id, r.name, r.email, r.phone, msg, r.created_at, r.expires_at)));
+    return json({ ok: true, invites: rows.map(r => invOut(r, now)), seats: { used: await memberCount(db, me.ws), limit: me.limits.members } });
+  },
+  async "invite/list"(db, me) {
+    if (me.role !== "admin" && me.role !== "staff") return fail("forbidden", 403);
+    const rs = (await db.prepare("SELECT * FROM invites WHERE ws=?1" + (me.role === "admin" ? "" : " AND created_by=?2") + " ORDER BY created_at DESC LIMIT 300").bind(...(me.role === "admin" ? [me.ws] : [me.ws, me.id])).all()).results || [];
+    const now = iso();
+    return json({ ok: true, invites: rs.map(r => invOut(r, now)), seats: { used: await memberCount(db, me.ws), limit: me.limits.members } });
+  },
+  async "invite/update"(db, me, b) {   // revoke = 취소, renew = 기한을 오늘부터 다시
+    if (me.role !== "admin" && me.role !== "staff") return fail("forbidden", 403);
+    const t = String(b.token || ""), op = b.op === "renew" ? "renew" : "revoke";
+    const own = me.role === "admin" ? "" : " AND created_by=?3";
+    const exp = new Date(Date.now() + clampInt(b.days, 1, 60, 14) * 864e5).toISOString();
+    const args = me.role === "admin" ? [me.ws, t] : [me.ws, t, me.id];
+    const r = op === "renew"
+      ? await db.prepare("UPDATE invites SET expires_at=?" + (args.length + 1) + ", revoked=0 WHERE ws=?1 AND token=?2 AND used_at IS NULL" + own).bind(...args, exp).run()
+      : await db.prepare("UPDATE invites SET revoked=1 WHERE ws=?1 AND token=?2 AND used_at IS NULL" + own).bind(...args).run();
+    if (!r || !r.meta || !r.meta.changes) return fail("not-found", 404);
+    return json({ ok: true, expiresAt: op === "renew" ? exp : "" });
+  },
+  /* 소개 링크 — 워크스페이스마다 코드 하나. 이 코드로 열린 워크스페이스 수를 보여 줍니다 */
+  async "ref/info"(db, me) {
+    const code = await wsRef(db, me.ws), pl = await platform(db);
+    const out = { ok: true, code, days: pl.refDays };
+    if (me.role === "admin" || me.role === "staff") {
+      const c = await db.prepare("SELECT COUNT(*) AS n, SUM(CASE WHEN status='active' THEN 1 ELSE 0 END) AS a FROM workspaces WHERE ref_ws=?1").bind(me.ws).first() || {};
+      out.signups = Number(c.n) || 0; out.opened = Number(c.a) || 0;
+    }
+    return json(out);
+  }
+});
+PUBLIC["invite/get"] = async function (db, b, req, url) {
+  const r = await invRow(db, url.searchParams.get("t"));
+  if (!r || r.wst !== "active") return fail("not-found", 404);
+  if (Number(r.revoked)) return fail("revoked", 410);
+  const now = iso(), ref = await wsRef(db, r.ws);
+  if (r.used_at) return json({ ok: true, status: "joined", workspace: r.wname, loginId: r.login_id || "", ref });
+  if (r.expires_at < now) return fail("expired", 410, { workspace: r.wname });
+  const pids = parse(r.projects) || [];
+  const [by, ps] = await Promise.all([
+    db.prepare("SELECT name FROM accounts WHERE ws=?1 AND member_id=?2").bind(r.ws, r.created_by || "").first(),
+    projectsOf(db, r.ws, pids)
+  ]);
+  if (!r.opened_at) await db.prepare("UPDATE invites SET opened_at=?2 WHERE token=?1 AND opened_at IS NULL").bind(r.token, now).run();
+  return json({ ok: true, status: "open", workspace: r.wname, inviter: (by && by.name) || "", role: roleOk(r.role), projects: ps.map(x => clip(x.d.name, 80)), name: r.name || "", email: r.email || "", msg: r.msg || "", expiresAt: r.expires_at, ref });
+};
+PUBLIC["invite/accept"] = async function (db, b) {
+  const r = await invRow(db, b.t);
+  if (!r || r.wst !== "active") return fail("not-found", 404);
+  if (Number(r.revoked)) return fail("revoked", 410);
+  if (r.used_at) return fail("used", 409);
+  if (r.expires_at < iso()) return fail("expired", 410);
+  const lid = normId(b.loginId), name = clip(b.name, 20), contact = clip(b.contact, 60);
+  if (!name) return fail("bad-request");
+  if (!ID_RE.test(lid)) return fail("bad-id");
+  if (!pwValid(b.pw)) return fail("bad-pw");
+  if (!b.agree) return fail("need-agree");
+  if (await loginTaken(db, lid)) return fail("taken", 409);
+  const w = await db.prepare("SELECT * FROM workspaces WHERE id=?1").bind(r.ws).first();
+  if (await memberCount(db, r.ws) >= tierOf(w).limits.members) return fail("ws-full", 403);
+  const now = iso(), mid = uid("m"), role = roleOk(r.role), token = rand(24);
+  const member = memberData(mid, lid, name, role, "", now);
+  const pids = parse(r.projects) || [];
+  const ps = await projectsOf(db, r.ws, pids);
+  const items = [{ kind: "member", id: mid, data: member }];
+  for (const x of ps) { const ids = Array.isArray(x.d.memberIds) ? x.d.memberIds : []; if (!ids.includes(mid)) items.push({ kind: "project", id: x.id, data: { ...x.d, memberIds: [...ids, mid], updatedAt: now } }); }
+  if (r.contact_id) { const c = await entData(db, r.ws, "contact", r.contact_id); if (c) items.push({ kind: "contact", id: r.contact_id, data: { ...c, memberId: mid, joinedAt: now, updatedAt: now } }); }
+  const pn = ps.map(x => `"${clip(x.d.name, 40)}"`).join(", ");
+  const aid = uid("a");
+  items.push({ kind: "act", id: aid, own: r.created_by || null, data: { id: aid, ts: now.slice(5, 16).replace("T", " ").replace("-", "/"), who: name, by: mid, createdAt: now, text: `${name}님이 초대를 받아 합류했습니다${pn ? ` — ${pn} 참여` : ""}.` } });
+  try {
+    await db.batch([
+      db.prepare("INSERT INTO accounts(login_id,ws,member_id,pw,status,role,is_owner,name,contact,note,created_at,agreed_at) VALUES(?1,?2,?3,?4,'active',?5,0,?6,?7,?8,?9,?9)").bind(lid, r.ws, mid, await makePw(b.pw), role, name, contact, "초대 링크로 합류", now),
+      ...upserts(db, r.ws, items, ts()),
+      db.prepare("UPDATE invites SET used_at=?2, member_id=?3, login_id=?4 WHERE token=?1").bind(r.token, now, mid, lid),
+      db.prepare("INSERT INTO sess(token,ws,member_id,created_at,seen) VALUES(?1,?2,?3,?4,?5)").bind(token, r.ws, mid, now, Date.now()),
+      db.prepare("UPDATE workspaces SET last_active=?1 WHERE id=?2").bind(now, r.ws)
+    ]);
+  } catch (e) { if (isUnique(e)) return fail("taken", 409); throw e; }
+  for (const k of VIS.keys()) if (k.startsWith(r.ws + "|")) VIS.delete(k);
+  return json({ ok: true, token, workspace: r.wname, projects: ps.map(x => x.id) });
+};
+
+/* ───────── 소개(추천) 코드 ───────── */
+function refCode() { const a = new Uint8Array(7); crypto.getRandomValues(a); return [...a].map(x => INVITE_ABC[x % INVITE_ABC.length]).join(""); }
+async function wsRef(db, wsId) {   // 없으면 만들어 둡니다
+  const r = await db.prepare("SELECT ref_code FROM workspaces WHERE id=?1").bind(wsId).first();
+  if (!r) return "";
+  if (r.ref_code) return r.ref_code;
+  for (let i = 0; i < 6; i++) {
+    try { await db.prepare("UPDATE workspaces SET ref_code=?1 WHERE id=?2 AND ref_code IS NULL").bind(refCode(), wsId).run(); }
+    catch (e) { if (!isUnique(e)) throw e; continue; }
+    const x = await db.prepare("SELECT ref_code FROM workspaces WHERE id=?1").bind(wsId).first();
+    if (x && x.ref_code) return x.ref_code;
+  }
+  return "";
+}
+async function refLookup(db, raw) {
+  const code = String(raw || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+  if (code.length < 6 || code.length > 10) return null;
+  const r = await db.prepare("SELECT id FROM workspaces WHERE ref_code=?1 AND status='active'").bind(code).first();
+  return r ? r.id : null;
+}
+// 소개로 열린 워크스페이스가 생기면 두 곳 모두 프로 기한을 늘립니다 (운영자가 정한 일수, 0이면 없음). 한 번만.
+async function refReward(db, wsId) {
+  const pl = await platform(db), days = pl.refDays;
+  if (!days) return {};
+  const w = await db.prepare("SELECT id, name, plan, plan_until, ref_ws, ref_paid, status FROM workspaces WHERE id=?1").bind(wsId).first();
+  if (!w || !w.ref_ws || Number(w.ref_paid) || w.status !== "active") return {};
+  const r = await db.prepare("SELECT id, name, plan, plan_until, status FROM workspaces WHERE id=?1").bind(w.ref_ws).first();
+  const today = kstToday(), out = { days };
+  const ext = x => (x.plan === "pro" && !x.plan_until) ? null : addDaysS(x.plan === "pro" && x.plan_until && x.plan_until > today ? x.plan_until : today, days);
+  const stmts = [], guard = "AND (SELECT ref_paid FROM workspaces WHERE id=?3)=0";
+  const nu = ext(w);
+  if (nu) { stmts.push(db.prepare(`UPDATE workspaces SET plan='pro', plan_until=?1 WHERE id=?2 ${guard}`).bind(nu, w.id, w.id)); out.plan = "pro"; out.until = nu; }
+  if (r && r.status === "active") { const ru = ext(r); if (ru) stmts.push(db.prepare(`UPDATE workspaces SET plan='pro', plan_until=?1 WHERE id=?2 ${guard}`).bind(ru, r.id, w.id)); }
+  stmts.push(db.prepare("UPDATE workspaces SET ref_paid=1 WHERE id=?1").bind(w.id));
+  stmts.push(admLog(db, "ref", w, `소개 보상 프로 ${days}일 — ${r ? r.name : "소개한 곳 없음"} → ${w.name}`));
+  await db.batch(stmts);
+  return out;
+}
 
 /* ───────── MCP 서버 (/mcp) — 같은 토큰, 같은 함수 ───────── */
 const MCP_TOOLS = [
@@ -2786,7 +3002,7 @@ const FB_KINDS = ["error", "inconvenient", "idea", "billing", "etc"];
 const FB_ST = ["new", "doing", "done"];
 const ANN_LV = ["info", "important", "maint"];
 const PAY_METHODS = ["계좌이체", "카드", "현금", "기타"];
-const PLAT_DEF = () => ({ signup: "approve", newPlan: { plan: "basic", days: 0, modules: [] }, contact: "", prices: { pro: 12000, space: 19000, outsourcing: 0, commerce: 19000, seat: 4900 }, saved: false });
+const PLAT_DEF = () => ({ signup: "approve", newPlan: { plan: "basic", days: 0, modules: [] }, contact: "", prices: { pro: 12000, space: 19000, outsourcing: 0, commerce: 19000, seat: 4900 }, refDays: 0, saved: false });
 function platNorm(p) {
   const d = PLAT_DEF(); p = p && typeof p === "object" ? p : {};
   const np = p.newPlan && typeof p.newPlan === "object" ? p.newPlan : {};
@@ -2797,6 +3013,7 @@ function platNorm(p) {
     newPlan: { plan, days: clampInt(np.days, 0, 3650, 0), modules: plan === "pro" ? modulesOk(np.modules) : [] },
     contact: clip(p.contact, 80),
     prices: Object.fromEntries(PRICE_KEYS.map(k => [k, clampInt(pr[k], 0, 10000000, d.prices[k])])),
+    refDays: clampInt(p.refDays, 0, 365, 0),   // 소개로 열린 워크스페이스와 소개한 워크스페이스에 더해 주는 프로 일수 (0 = 보상 없음)
     saved: !!p.saved
   };
 }
@@ -2823,7 +3040,7 @@ const codeOut = c => ({ code: c.code, label: c.label || "", plan: planOk(c.plan)
 const payOut = p => ({ id: p.id, ws: p.ws || "", wsName: p.ws_name || "", paidAt: p.paid_at, amount: Number(p.amount) || 0, method: p.method || "", item: p.item || "", from: p.period_from || "", to: p.period_to || "", invoice: !!Number(p.invoice), memo: p.memo || "", createdAt: p.created_at });
 const fbOut = f => ({ id: f.id, ws: f.ws, wsName: f.ws_name || "", loginId: f.login_id || "", name: f.name || "", role: f.role || "", kind: f.kind, body: f.body, page: f.page || "", ua: f.ua || "", contact: f.contact || "", status: f.status, reply: f.reply || "", replyAt: f.reply_at || "", memo: f.memo || "", createdAt: f.created_at, updatedAt: f.updated_at || "" });
 // 전체 백업에 넣는 표 — 로그인 세션(sess)과 오류 기록은 빼고, AI 토큰은 해시를 지웁니다
-const EXPORT_TABLES = () => ["mw_meta", "workspaces", "accounts", "ent", "ws_set", "api_tokens", "links", "mod_set", ...SP_TABLES, ...OS_TABLES, ...CM_TABLES, "adm_pay", "adm_code", "fb", "adm_log"];
+const EXPORT_TABLES = () => ["mw_meta", "workspaces", "accounts", "ent", "ws_set", "api_tokens", "links", "invites", "mod_set", ...SP_TABLES, ...OS_TABLES, ...CM_TABLES, "adm_pay", "adm_code", "fb", "adm_log"];
 const EXPORT_PAGE = 800;
 const ownerOnly = me => !me.owner ? fail("forbidden", 403) : null;
 
@@ -2859,10 +3076,11 @@ const ADMIN_API = {
     for (const r of rows(jobR)) U(r.ws).job = Number(r.n);
     for (const r of rows(ordR)) U(r.ws).order = Number(r.n);
     const s = rows(sumR)[0] || {};
+    const refCnt = new Map(); for (const w of rows(wsR)) if (w.ref_ws) refCnt.set(w.ref_ws, (refCnt.get(w.ref_ws) || 0) + 1);
     const workspaces = rows(wsR).map(w => {
       const t = tierOf(w), rl = roles.get(w.id) || {};
       const sMs = seen.get(w.id) || 0, la = w.last_active ? Date.parse(w.last_active) || 0 : 0;
-      return { id: w.id, name: w.name, status: w.status, adminLogin: w.admin_login || "", adminName: w.admin_name || "", contact: w.contact || w.admin_contact || "", note: w.note || "", createdAt: w.created_at, approvedAt: w.approved_at || "", lastActive: w.last_active || "", lastSeen: Math.max(sMs, la) ? new Date(Math.max(sMs, la)).toISOString() : "", members: Object.values(rl).reduce((a, n) => a + n, 0), roles: rl, mine: w.id === me.ws, plan: t.planRaw, planNow: t.plan, modules: modulesOk(w.modules), planUntil: w.plan_until || "", limits: parse(w.limits) || {}, opNote: w.op_note || "", comp: !!Number(w.comp), usage: usage.get(w.id) || U(w.id) };
+      return { id: w.id, name: w.name, status: w.status, adminLogin: w.admin_login || "", adminName: w.admin_name || "", contact: w.contact || w.admin_contact || "", note: w.note || "", createdAt: w.created_at, approvedAt: w.approved_at || "", lastActive: w.last_active || "", lastSeen: Math.max(sMs, la) ? new Date(Math.max(sMs, la)).toISOString() : "", members: Object.values(rl).reduce((a, n) => a + n, 0), roles: rl, mine: w.id === me.ws, plan: t.planRaw, planNow: t.plan, modules: modulesOk(w.modules), planUntil: w.plan_until || "", limits: parse(w.limits) || {}, opNote: w.op_note || "", comp: !!Number(w.comp), usage: usage.get(w.id) || U(w.id), refBy: w.ref_ws || "", refs: refCnt.get(w.id) || 0, refPaid: !!Number(w.ref_paid) };
     });
     return json({ ok: true, workspaces, host: url.hostname, summary: { fbNew: Number(s.fb_new) || 0, fbDoing: Number(s.fb_doing) || 0, err24: Number(s.err24) || 0, payMonth: Number(s.pay_m) || 0, payPrev: Number(s.pay_p) || 0, payYear: Number(s.pay_y) || 0, accounts: Number(s.acc) || 0, codes: Number(s.codes) || 0, ann: annList(s.ann).filter(a => a.on).length, lastExport: s.last_export || "" }, platform: platformOf(s.plat), launch: parse(s.launch) || {}, log: rows(logR) });
   },
@@ -2876,7 +3094,7 @@ const ADMIN_API = {
     const [acc, tok, lnk, pay, act] = await db.batch([
       db.prepare("SELECT login_id, name, role, status, is_owner, created_at, last_login, CASE WHEN role='admin' THEN contact ELSE '' END AS contact FROM accounts WHERE ws=?1 ORDER BY CASE role WHEN 'admin' THEN 0 ELSE 1 END, created_at"),
       db.prepare("SELECT name, scope, created_at, last_used, revoked FROM api_tokens WHERE ws=?1 ORDER BY created_at DESC"),
-      db.prepare("SELECT kind, COUNT(*) AS n, SUM(CASE WHEN used_at IS NOT NULL THEN 1 ELSE 0 END) AS used FROM links WHERE ws=?1 GROUP BY kind"),
+      db.prepare("SELECT kind, COUNT(*) AS n, SUM(CASE WHEN used_at IS NOT NULL THEN 1 ELSE 0 END) AS used FROM links WHERE ws=?1 GROUP BY kind UNION ALL SELECT 'invite' AS kind, COUNT(*) AS n, SUM(CASE WHEN used_at IS NOT NULL THEN 1 ELSE 0 END) AS used FROM invites WHERE ws=?1"),
       db.prepare("SELECT * FROM adm_pay WHERE ws=?1 ORDER BY paid_at DESC, created_at DESC LIMIT 50"),
       db.prepare("SELECT COUNT(DISTINCT member_id) AS n FROM sess WHERE ws=?1 AND seen>=?2").bind(id, Date.now() - 7 * 864e5)
     ].map((s, i) => i < 4 ? s.bind(id) : s));
@@ -3010,6 +3228,7 @@ const ADMIN_API = {
       if (JSON.stringify(next.newPlan) !== JSON.stringify(cur.newPlan)) changes.push("시작 등급 " + (next.newPlan.plan === "pro" ? "프로 체험" + (next.newPlan.days ? ` ${next.newPlan.days}일` : "") : "베이직"));
       if (JSON.stringify(next.prices) !== JSON.stringify(cur.prices)) changes.push("가격표");
       if (next.contact !== cur.contact) changes.push("문의 연락처");
+      if (next.refDays !== cur.refDays) changes.push("소개 보상 " + (next.refDays ? `프로 ${next.refDays}일` : "없음"));
       await db.batch([db.prepare("INSERT OR REPLACE INTO mw_meta(k,v) VALUES('platform',?1)").bind(JSON.stringify(next)), admLog(db, "settings", null, changes.join(" · ") || "변경 없음")]);
       return json({ ok: true, platform: next });
     }
