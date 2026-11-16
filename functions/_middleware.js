@@ -12,7 +12,7 @@
    · 스페이스: 예약 → 청소 배정 → 체크리스트 → 확인 → 손익. HOSTDB(읽기)는 운영자 워크스페이스에서만, SPACEDB(1회 가져오기)는 운영자만.
    · 무료 요금제 한도(요청당 쿼리 50회)를 넘지 않도록 여러 건의 쓰기는 한 문장으로 묶어 처리합니다. */
 
-const SCHEMA = "8";
+const SCHEMA = "9";
 const PLANS = ["basic", "pro"];
 const MODULES = ["space", "outsourcing", "commerce"];
 const BASE_MODULES = ["outsourcing"];          // 거래 — 기본 기능이라 등급과 관계없이 늘 켜져 있습니다
@@ -79,7 +79,11 @@ const ADD_COLS = [
   ["accounts", "op_role TEXT"],
   ["sess", "adm_ok INTEGER NOT NULL DEFAULT 0"],
   ["sess", "adm_fail INTEGER NOT NULL DEFAULT 0"],
-  ["adm_log", "actor TEXT"]
+  ["adm_log", "actor TEXT"],
+  // v9 — 마이스토어: 점검 목록 구분(청소·오픈·마감), 예약형 매장의 담당자·서비스
+  ["sp_chk", "list TEXT"],
+  ["sp_res", "staff TEXT"],
+  ["sp_res", "service TEXT"]
 ];
 // 칸을 더한 뒤에 만드는 색인
 const POST_DDL = ["CREATE UNIQUE INDEX IF NOT EXISTS idx_ws_ref ON workspaces(ref_code)"];
@@ -1021,14 +1025,19 @@ const SP_DDL = [
   "CREATE TABLE IF NOT EXISTS sp_ntc(ws TEXT NOT NULL, id TEXT NOT NULL, date TEXT NOT NULL, body TEXT NOT NULL, created_by TEXT, created_name TEXT, created_at TEXT, PRIMARY KEY(ws,id))",
   "CREATE INDEX IF NOT EXISTS idx_sp_ntc_date ON sp_ntc(ws,date)",
   "CREATE TABLE IF NOT EXISTS sp_read(ws TEXT NOT NULL, notice_id TEXT NOT NULL, member_id TEXT NOT NULL, member_name TEXT, read_at TEXT, PRIMARY KEY(ws,notice_id,member_id))",
-  "CREATE TABLE IF NOT EXISTS sp_log(ws TEXT NOT NULL, ran_at TEXT NOT NULL, by_name TEXT, ok INTEGER, added INTEGER, updated INTEGER, removed INTEGER, skipped INTEGER, message TEXT, PRIMARY KEY(ws,ran_at))"
+  "CREATE TABLE IF NOT EXISTS sp_log(ws TEXT NOT NULL, ran_at TEXT NOT NULL, by_name TEXT, ok INTEGER, added INTEGER, updated INTEGER, removed INTEGER, skipped INTEGER, message TEXT, PRIMARY KEY(ws,ran_at))",
+  // 마이스토어 — 일 마감(매출·시재), 소모품, 리뷰·문의
+  "CREATE TABLE IF NOT EXISTS sp_day(ws TEXT NOT NULL, branch_id TEXT NOT NULL, date TEXT NOT NULL, sales TEXT NOT NULL DEFAULT '{}', guests INTEGER, cash_open INTEGER, cash_out INTEGER, cash_close INTEGER, note TEXT, status TEXT NOT NULL DEFAULT 'closed', closed_by TEXT, closed_name TEXT, closed_at TEXT, check_by TEXT, check_name TEXT, check_at TEXT, PRIMARY KEY(ws,branch_id,date))",
+  "CREATE INDEX IF NOT EXISTS idx_sp_day_date ON sp_day(ws,date)",
+  "CREATE TABLE IF NOT EXISTS sp_sup(ws TEXT NOT NULL, id TEXT NOT NULL, branch_id TEXT, name TEXT NOT NULL, unit TEXT, qty INTEGER NOT NULL DEFAULT 0, min_qty INTEGER NOT NULL DEFAULT 0, vendor TEXT, memo TEXT, sort INTEGER NOT NULL DEFAULT 0, updated_at TEXT, updated_name TEXT, PRIMARY KEY(ws,id))",
+  "CREATE TABLE IF NOT EXISTS sp_rev(ws TEXT NOT NULL, id TEXT NOT NULL, branch_id TEXT, channel TEXT, kind TEXT NOT NULL DEFAULT 'review', rating INTEGER, author TEXT, body TEXT NOT NULL, date TEXT, status TEXT NOT NULL DEFAULT 'todo', reply TEXT, replied_at TEXT, replied_name TEXT, created_at TEXT, PRIMARY KEY(ws,id))"
 ];
-const SP_TABLES = ["sp_prof", "sp_set", "sp_chk", "sp_res", "sp_cln", "sp_iss", "sp_chn", "sp_cost", "sp_asg", "sp_ntc", "sp_read", "sp_log"];
+const SP_TABLES = ["sp_prof", "sp_set", "sp_chk", "sp_res", "sp_cln", "sp_iss", "sp_chn", "sp_cost", "sp_asg", "sp_ntc", "sp_read", "sp_log", "sp_day", "sp_sup", "sp_rev"];
 const SPC = {
   sp_prof: ["sid", "d", "ua"],
   sp_set: ["k", "v"],
-  sp_chk: ["id", "scope", "branch_id", "category", "label", "sort", "active"],
-  sp_res: ["id", "branch_id", "res_date", "slot", "resno", "customer", "phone", "amount", "status", "issue", "memo", "start_t", "end_t", "source", "created_at", "channel"],
+  sp_chk: ["id", "scope", "branch_id", "category", "label", "sort", "active", "list"],
+  sp_res: ["id", "branch_id", "res_date", "slot", "resno", "customer", "phone", "amount", "status", "issue", "memo", "start_t", "end_t", "source", "created_at", "channel", "staff", "service"],
   sp_cln: ["id", "task_key", "branch_id", "clean_date", "kind", "assignee", "status", "checks", "note", "submitted_by", "submitted_name", "submitted_at", "review_by", "review_name", "review_at", "feedback", "manual", "window_label", "created_at"],
   sp_iss: ["id", "branch_id", "category", "equip", "title", "detail", "priority", "status", "reporter", "reporter_name", "assignee", "cost", "comments", "created_at", "resolved_at"],
   sp_chn: ["id", "branch_id", "channel", "url", "status", "owner", "last_check", "memo", "sort"],
@@ -1036,11 +1045,37 @@ const SPC = {
   sp_asg: ["id", "date", "region", "branch_id", "worker", "created_by", "created_at"],
   sp_ntc: ["id", "date", "body", "created_by", "created_name", "created_at"],
   sp_read: ["notice_id", "member_id", "member_name", "read_at"],
-  sp_log: ["ran_at", "by_name", "ok", "added", "updated", "removed", "skipped", "message"]
+  sp_log: ["ran_at", "by_name", "ok", "added", "updated", "removed", "skipped", "message"],
+  sp_day: ["branch_id", "date", "sales", "guests", "cash_open", "cash_out", "cash_close", "note", "status", "closed_by", "closed_name", "closed_at", "check_by", "check_name", "check_at"],
+  sp_sup: ["id", "branch_id", "name", "unit", "qty", "min_qty", "vendor", "memo", "sort", "updated_at", "updated_name"],
+  sp_rev: ["id", "branch_id", "channel", "kind", "rating", "author", "body", "date", "status", "reply", "replied_at", "replied_name", "created_at"]
 };
-const SPJ = { sp_cln: { checks: "{}" }, sp_iss: { comments: "[]" }, sp_prof: { d: "{}" }, sp_set: { v: "null" } };   // JSON으로 저장하는 칸
+const SPJ = { sp_cln: { checks: "{}" }, sp_iss: { comments: "[]" }, sp_prof: { d: "{}" }, sp_set: { v: "null" }, sp_day: { sales: "{}" } };   // JSON으로 저장하는 칸
 const SP_SLOTS = ["day", "night", "allday", "etc"];
-const SP_KINDS = ["day", "night", "allday", "mid", "etc"];
+const SP_KINDS = ["day", "night", "allday", "mid", "etc", "open", "close"];   // open·close = 마이스토어 오픈·마감 점검
+const SP_TYPES = ["space", "food", "retail", "appt"];   // 공간대여·숙박 · 음식·카페 · 소매·무인매장 · 예약형 매장
+const SP_LISTS = ["clean", "open", "close"];
+// 업종별 오픈·마감 점검 기본 항목 [목록, 분류, 항목]
+const SP_DAILY_SEED = {
+  food: [
+    ["open", "위생", "냉장·냉동고 온도 확인(냉장 5℃·냉동 -18℃ 이하)"], ["open", "위생", "식자재 유통기한·상태 확인"], ["open", "위생", "손 세정제·위생장갑·앞치마 준비"],
+    ["open", "매장", "홀·테이블·화장실 청결 확인"], ["open", "기기", "POS·카드 단말기·배달앱 접수 켜기"], ["open", "시재", "시작 시재 확인"],
+    ["close", "위생", "남은 식자재 밀봉·날짜 표시 후 보관"], ["close", "청소", "조리 기구·그릴·튀김기 청소"], ["close", "청소", "음식물·일반 쓰레기 배출"], ["close", "청소", "바닥·테이블 청소"],
+    ["close", "안전", "가스 밸브 잠금·전기 기구 끄기"], ["close", "안전", "냉장·냉동고 문 닫힘 확인"], ["close", "시재", "마감 시재 세기·매출 정리"], ["close", "안전", "출입문·창문 잠금, 보안 설정"]
+  ],
+  retail: [
+    ["open", "진열", "진열대 결품·유통기한 확인"], ["open", "기기", "키오스크·결제기 작동 확인"], ["open", "보안", "CCTV 녹화 확인"], ["open", "매장", "매장 청결·조명 확인"], ["open", "기기", "냉장·냉동 진열장 온도 확인"],
+    ["close", "진열", "진열 정리·결품 채우기"], ["close", "청소", "쓰레기·분리수거 정리"], ["close", "기기", "키오스크 매출·오류 확인"], ["close", "보안", "도난·파손 흔적 확인(CCTV)"], ["close", "보안", "출입문 잠금·조명 타이머 확인"]
+  ],
+  appt: [
+    ["open", "예약", "오늘 예약과 담당자 확인"], ["open", "위생", "시술·수업 공간 정리와 소독"], ["open", "준비", "수건·소모품 준비"], ["open", "매장", "음악·조명·냉난방 켜기"], ["open", "기기", "결제 단말기 확인"],
+    ["close", "위생", "사용한 도구 세척·소독"], ["close", "준비", "수건 세탁·건조"], ["close", "청소", "바닥·거울·대기석 청소"], ["close", "예약", "내일 예약 확인·노쇼 기록"], ["close", "시재", "마감 시재 세기·매출 정리"], ["close", "안전", "전기·온수기 끄기, 출입문 잠금"]
+  ],
+  space: [
+    ["open", "매장", "출입 비밀번호·도어락 작동 확인"], ["open", "기기", "와이파이·TV·음향 작동 확인"], ["open", "매장", "냉난방·조명 상태 확인"],
+    ["close", "안전", "전기·냉난방 끄기 확인"], ["close", "매장", "분리수거·쓰레기 배출 확인"], ["close", "안전", "출입문 잠금 확인"]
+  ]
+};
 const SP_CLN_ST = ["todo", "done", "redo", "confirmed", "skip"];
 const SP_ISS_ST = ["접수", "확인", "진행중", "완료", "보류"];
 const SP_PRIO = ["보통", "긴급", "낮음"];
@@ -1079,7 +1114,9 @@ function spSettings(s) {
     times, clean_before_min: clampInt(s.clean_before_min, 0, 600, 30), mid_deadline: tOk(s.mid_deadline) || "18:30",
     std_minutes: clampInt(s.std_minutes, 10, 720, 120), concurrent_warn: clampInt(s.concurrent_warn, 1, 50, 3),
     quick_items: Array.isArray(s.quick_items) ? s.quick_items.map(x => clip(x, 80)).filter(Boolean).slice(0, 30) : SP_DEF.quick_items.slice(),
-    fees: spFees(s.fees)
+    fees: spFees(s.fees),
+    biz: SP_TYPES.includes(s.biz) ? s.biz : "",
+    reply_tpl: Array.isArray(s.reply_tpl) ? s.reply_tpl.map(x => clip(x, 400)).filter(Boolean).slice(0, 20) : []
   };
 }
 // 예약 채널별 플랫폼 수수료율(%) — 손익에서 실수령액 계산에 씁니다. 비워 두면(모두 0) 월 비용의 수수료율을 씁니다
@@ -1094,21 +1131,27 @@ function spFees(f) {
 async function spAiToday(db, me) {
   const today = kstToday(), tmr = addDaysS(today, 1), mgr = isMgr(me);
   const sc = await spScope(db, me);
-  const [res, cln, iss] = await db.batch([
-    db.prepare("SELECT id, branch_id, res_date, slot, start_t, end_t, customer, amount, status, issue, source FROM sp_res WHERE ws=?1 AND res_date>=?2 AND res_date<=?3 ORDER BY res_date, start_t").bind(me.ws, today, tmr),
+  const [res, cln, iss, day, sup, rev] = await db.batch([
+    db.prepare("SELECT id, branch_id, res_date, slot, start_t, end_t, customer, amount, status, issue, source, staff, service FROM sp_res WHERE ws=?1 AND res_date>=?2 AND res_date<=?3 ORDER BY res_date, start_t").bind(me.ws, today, tmr),
     db.prepare("SELECT id, branch_id, clean_date, kind, status, assignee, submitted_name FROM sp_cln WHERE ws=?1 AND (clean_date=?2 OR status='done') LIMIT 200").bind(me.ws, today),
-    db.prepare("SELECT id, branch_id, title, status, priority, created_at FROM sp_iss WHERE ws=?1 AND status NOT IN ('완료','보류') ORDER BY created_at DESC LIMIT 50").bind(me.ws)
+    db.prepare("SELECT id, branch_id, title, status, priority, created_at FROM sp_iss WHERE ws=?1 AND status NOT IN ('완료','보류') ORDER BY created_at DESC LIMIT 50").bind(me.ws),
+    db.prepare("SELECT branch_id, date, sales, guests, status, closed_name FROM sp_day WHERE ws=?1 AND date>=?2 ORDER BY date DESC LIMIT 200").bind(me.ws, addDaysS(today, -7)),
+    db.prepare("SELECT branch_id, name, unit, qty, min_qty FROM sp_sup WHERE ws=?1 AND qty<=min_qty LIMIT 50").bind(me.ws),
+    db.prepare("SELECT id, branch_id, channel, kind, rating, body, date FROM sp_rev WHERE ws=?1 AND status='todo' ORDER BY date DESC LIMIT 20").bind(me.ws)
   ]);
   const bn = id => { const b = sc.branches.find(x => x.id === id); return b ? b.name : ""; };
   const names = new Map(((await db.prepare("SELECT id, json_extract(data,'$.name') AS name FROM ent WHERE ws=?1 AND kind='member' AND deleted=0").bind(me.ws).all()).results || []).map(r => [r.id, r.name]));
-  const R = ((res && res.results) || []).filter(r => sc.vis.has(r.branch_id) && !String(r.status || "").includes("취소")).map(r => ({ date: r.res_date, branch: bn(r.branch_id), slot: r.slot, start: r.start_t || "", end: r.end_t || "", customer: mgr ? (r.customer || "") : "", amount: mgr ? r.amount : undefined, issue: r.issue || "", source: r.source }));
+  const R = ((res && res.results) || []).filter(r => sc.vis.has(r.branch_id) && !String(r.status || "").includes("취소")).map(r => ({ date: r.res_date, branch: bn(r.branch_id), slot: r.slot, start: r.start_t || "", end: r.end_t || "", customer: mgr ? (r.customer || "") : "", amount: mgr ? r.amount : undefined, issue: r.issue || "", source: r.source, staff: r.staff || "", service: r.service || "", status: r.status || "" }));
   const C = (cln && cln.results) || [];
   return {
     today, reservations: { today: R.filter(r => r.date === today), tomorrow: R.filter(r => r.date === tmr) },
     cleaningToday: C.filter(c => c.clean_date === today).map(c => ({ branch: bn(c.branch_id), kind: c.kind, status: c.status, assignee: names.get(c.assignee) || c.assignee || "" })),
     pendingReview: C.filter(c => c.status === "done").map(c => ({ id: c.id, branch: bn(c.branch_id), date: c.clean_date, by: c.submitted_name || "" })),
     openIssues: ((iss && iss.results) || []).map(i => ({ id: i.id, branch: i.branch_id ? bn(i.branch_id) : "공통", title: i.title, status: i.status, priority: i.priority })),
-    branches: sc.branches.filter(b => b.on).map(b => b.name)
+    branches: sc.branches.filter(b => b.on).map(b => ({ name: b.name, type: b.type || "" })),
+    dayClose: ((day && day.results) || []).filter(d => sc.vis.has(d.branch_id)).map(d => { const sl = parse(d.sales) || {}; return { branch: bn(d.branch_id), date: d.date, total: mgr ? Object.values(sl).reduce((a, v) => a + (+v || 0), 0) : undefined, guests: d.guests, status: d.status, by: d.closed_name || "" }; }),
+    lowSupplies: ((sup && sup.results) || []).filter(x => !x.branch_id || sc.vis.has(x.branch_id)).map(x => ({ branch: x.branch_id ? bn(x.branch_id) : "공통", name: x.name, qty: x.qty, min: x.min_qty, unit: x.unit || "" })),
+    reviewsToAnswer: mgr ? ((rev && rev.results) || []).map(r => ({ id: r.id, branch: r.branch_id ? bn(r.branch_id) : "", channel: r.channel || "", kind: r.kind, rating: r.rating, body: r.body, date: r.date })) : []
   };
 }
 
@@ -1170,7 +1213,7 @@ async function spScope(db, me) {
   for (const r of (st && st.results) || []) {
     const d = parse(r.data); if (!d) continue;
     const p = prof.get(r.id) || {};
-    const b = { id: r.id, name: clip(d.name, 60), region: clip(d.region, 30), status: d.status || "운영중", brand: clip(d.brand, 30), on: p.on ? 1 : 0, alias: p.alias || "", scode: p.scode || "", worker: p.worker || "", std: p.std ?? null, buf: p.buf ?? null, mid: p.mid || "", slots: p.slots || null, rules: p.rules || "", sort: Number(p.sort) || 0 };
+    const b = { id: r.id, name: clip(d.name, 60), region: clip(d.region, 30), status: d.status || "운영중", brand: clip(d.brand, 30), on: p.on ? 1 : 0, alias: p.alias || "", scode: p.scode || "", worker: p.worker || "", std: p.std ?? null, buf: p.buf ?? null, mid: p.mid || "", slots: p.slots || null, rules: p.rules || "", sort: Number(p.sort) || 0, type: SP_TYPES.includes(p.type) ? p.type : "", staff: p.staff || "", hours: p.hours || null, float: p.float ?? null, daily: p.daily ? 1 : 0 };
     if (!isMgr(me) && (!b.on || (allow && !allow.has(b.id)))) continue;
     branches.push(b);
   }
@@ -1217,6 +1260,8 @@ function spResIn(r) {
   if ("start_t" in r) o.start_t = tOk(r.start_t) || null;
   if ("end_t" in r) o.end_t = tOk(r.end_t) || null;
   if ("channel" in r) o.channel = SP_CHANNELS.includes(r.channel) ? r.channel : null;
+  if ("staff" in r) o.staff = clip(r.staff, 40) || null;
+  if ("service" in r) o.service = clip(r.service, 80) || null;
   return o;
 }
 function spChecks(c) {
@@ -1247,16 +1292,22 @@ const SPACE = {
         : db.prepare(spSel("sp_read", "ws=?1 AND member_id=?4 AND notice_id IN (SELECT id FROM sp_ntc WHERE ws=?1 AND date>=?2 AND date<=?3)")).bind(me.ws, f1, t1, me.id),
       db.prepare(spSel("sp_iss", "ws=?1 AND (status NOT IN ('완료','보류') OR created_at>=?2)", "ORDER BY created_at DESC")).bind(me.ws, new Date(Date.now() - 180 * 864e5).toISOString())
     ];
+    q.push(
+      mgr ? db.prepare(spSel("sp_day", "ws=?1 AND date>=?2 AND date<=?3")).bind(me.ws, f1, t1)
+        : db.prepare(spSel("sp_day", "ws=?1 AND date>=?2 AND date<=?3")).bind(me.ws, addDaysS(today, -1), today),
+      db.prepare(spSel("sp_sup", "ws=?1", "ORDER BY sort, name")).bind(me.ws)
+    );
     if (mgr) q.push(
       db.prepare(spSel("sp_chn", "ws=?1")).bind(me.ws),
       db.prepare(spSel("sp_cost", "ws=?1 AND ym>=?2 AND ym<=?3")).bind(me.ws, addDaysS(from, -32).slice(0, 7), to.slice(0, 7)),
-      db.prepare(spSel("sp_log", "ws=?1", "ORDER BY ran_at DESC LIMIT 1")).bind(me.ws)
+      db.prepare(spSel("sp_log", "ws=?1", "ORDER BY ran_at DESC LIMIT 1")).bind(me.ws),
+      db.prepare(spSel("sp_rev", "ws=?1 AND (status='todo' OR date>=?2)", "ORDER BY date DESC, created_at DESC LIMIT 500")).bind(me.ws, addDaysS(from, -60))
     );
     const rs = await db.batch(q);
     const set = new Map(((rs[0] && rs[0].results) || []).map(r => [r.k, r.v]));
     let checks = rawArr(rs[1]);
     if (mgr && !set.has("seeded") && await spSeed(db, me)) checks = rawArr((await db.prepare(spSel("sp_chk", "ws=?1")).bind(me.ws).all()));
-    let res, cln, iss, reads = rawArr(rs[6]);
+    let res, cln, iss, reads = rawArr(rs[6]), days = rawArr(rs[8]), sup = rawArr(rs[9]);
     if (mgr) { res = rawArr(rs[2]); cln = rawArr(rs[3]); iss = rawArr(rs[7]); }
     else {
       const salt = rand(8);   // 같은 응답 안에서만 "같은 고객" 비교가 되도록 — 이름·연락처는 보내지 않습니다
@@ -1266,15 +1317,18 @@ const SPACE = {
       })));
       cln = JSON.stringify(rowsOf(rs[3]).filter(c => sc.vis.has(c.branch_id)));
       iss = JSON.stringify(rowsOf(rs[7]).filter(i => !i.branch_id || sc.vis.has(i.branch_id) || i.reporter === me.id));
+      days = JSON.stringify(rowsOf(rs[8]).filter(d => sc.vis.has(d.branch_id)));
+      sup = JSON.stringify(rowsOf(rs[9]).filter(x => !x.branch_id || sc.vis.has(x.branch_id)).map(x => ({ id: x.id, branch_id: x.branch_id, name: x.name, unit: x.unit, qty: x.qty, min_qty: x.min_qty, sort: x.sort, updated_at: x.updated_at, updated_name: x.updated_name })));
     }
     const host = await hostInfo(db, me, env);
     const head = {
       ok: true, v: me.spv, from, to, today, role: mgr ? "mgr" : me.role, branches: sc.branches,
       settings: spSettings(parse(set.get("settings"))), host, legacy: !!(env && env.SPACEDB) && me.owner,
-      log: mgr ? (rowsOf(rs[10])[0] || null) : null
+      log: mgr ? (rowsOf(rs[12])[0] || null) : null
     };
     return rawJson(head, ',"checks":' + checks + ',"res":' + res + ',"cln":' + cln + ',"asg":' + rawArr(rs[4]) + ',"ntc":' + rawArr(rs[5]) +
-      ',"reads":' + reads + ',"iss":' + iss + ',"chn":' + (mgr ? rawArr(rs[8]) : "[]") + ',"cost":' + (mgr ? rawArr(rs[9]) : "[]"));
+      ',"reads":' + reads + ',"iss":' + iss + ',"chn":' + (mgr ? rawArr(rs[10]) : "[]") + ',"cost":' + (mgr ? rawArr(rs[11]) : "[]") +
+      ',"days":' + days + ',"sup":' + sup + ',"rev":' + (mgr ? rawArr(rs[13]) : "[]"));
   },
 
   /* 지점(매장) 운영 프로필 */
@@ -1285,7 +1339,9 @@ const SPACE = {
     const num = v => v === "" || v == null ? null : clampInt(v, 0, 720, null);
     const slots = {};
     if (b.slots && typeof b.slots === "object") for (const k of ["day", "night", "allday"]) { const v = b.slots[k]; if (Array.isArray(v) && tOk(v[0]) && tOk(v[1])) slots[k] = [tOk(v[0]), tOk(v[1])]; }
-    const d = { on: b.on ? 1 : 0, alias: clip(b.alias, 200), scode: clip(b.scode, 40), worker: clip(b.worker, 60), std: num(b.std), buf: num(b.buf), mid: tOk(b.mid), slots: Object.keys(slots).length ? slots : null, rules: clip(b.rules, 2000), sort: intOr(b.sort, 0) };
+    const hours = Array.isArray(b.hours) && tOk(b.hours[0]) && tOk(b.hours[1]) ? [tOk(b.hours[0]), tOk(b.hours[1])] : null;
+    const d = { on: b.on ? 1 : 0, alias: clip(b.alias, 200), scode: clip(b.scode, 40), worker: clip(b.worker, 60), std: num(b.std), buf: num(b.buf), mid: tOk(b.mid), slots: Object.keys(slots).length ? slots : null, rules: clip(b.rules, 2000), sort: intOr(b.sort, 0),
+      type: SP_TYPES.includes(b.type) ? b.type : "", staff: clip(b.staff, 300), hours, float: b.float === "" || b.float == null ? null : clampInt(b.float, 0, 100000000, null), daily: b.daily ? 1 : 0 };
     const { v } = await spRun(db, me, [db.prepare("INSERT INTO sp_prof(ws,sid,d,ua) VALUES(?1,?2,?3,?4) ON CONFLICT(ws,sid) DO UPDATE SET d=excluded.d, ua=excluded.ua").bind(me.ws, sid, JSON.stringify(d), iso())]);
     return json({ ok: true, v, prof: d });
   },
@@ -1307,6 +1363,7 @@ const SPACE = {
     if ("label" in b) { o.label = clip(b.label, 200); if (!o.label) return fail("bad-request"); }
     if ("sort" in b) o.sort = intOr(b.sort, 0);
     if ("active" in b) o.active = b.active ? 1 : 0;
+    if ("list" in b) o.list = SP_LISTS.includes(b.list) && b.list !== "clean" ? b.list : null;
     if (id) {
       if (!Object.keys(o).length) return fail("bad-request");
       if (!await spOne(db, "sp_chk", me.ws, id)) return fail("not-found", 404);
@@ -1315,10 +1372,23 @@ const SPACE = {
     }
     if (!o.label) return fail("bad-request");
     if (o.scope === "branch" && !await storeOk(db, me, o.branch_id)) return fail("bad-branch");
-    const row = Object.assign({ id: uid("ck"), scope: "common", branch_id: null, category: "기타", label: "", sort: 99, active: 1 }, o);
+    const row = Object.assign({ id: uid("ck"), scope: "common", branch_id: null, category: "기타", label: "", sort: 99, active: 1, list: null }, o);
     if (row.scope === "common") row.branch_id = null;
     const { v } = await spRun(db, me, spBulk(db, "sp_chk", me.ws, [row]));
     return json({ ok: true, v, item: row });
+  },
+  // 업종을 고르면 오픈·마감 점검 기본 항목을 넣습니다 (같은 목록에 공통 항목이 이미 있으면 그 목록은 건너뜀)
+  async "chk/seed"(db, me, b) {
+    if (!isMgr(me)) return fail("forbidden", 403);
+    const type = SP_TYPES.includes(b.type) ? b.type : "";
+    if (!type) return fail("bad-request");
+    const have = new Set(((await db.prepare("SELECT DISTINCT list FROM sp_chk WHERE ws=?1 AND scope='common' AND list IN ('open','close')").bind(me.ws).all()).results || []).map(r => r.list));
+    const rows = SP_DAILY_SEED[type].filter(x => !have.has(x[0])).map((x, i) => ({ id: bulkId("ck"), scope: "common", branch_id: null, category: x[1], label: x[2], sort: i + 1, active: 1, list: x[0] }));
+    const stmts = [db.prepare("INSERT INTO sp_set(ws,k,v) VALUES(?1,'settings',json_set(COALESCE((SELECT v FROM sp_set WHERE ws=?1 AND k='settings'),'{}'),'$.biz',?2)) ON CONFLICT(ws,k) DO UPDATE SET v=json_set(COALESCE(sp_set.v,'{}'),'$.biz',?2)").bind(me.ws, type)];
+    stmts.push(...(rows.length ? spBulk(db, "sp_chk", me.ws, rows) : []));
+    const { v } = await spRun(db, me, stmts);
+    const set = await db.prepare("SELECT v FROM sp_set WHERE ws=?1 AND k='settings'").bind(me.ws).first();
+    return json({ ok: true, v, added: rows.length, items: rows, settings: spSettings(parse(set && set.v)) });
   },
   async "chk/del"(db, me, b) {
     if (!isMgr(me)) return fail("forbidden", 403);
@@ -1452,6 +1522,111 @@ const SPACE = {
   async "cln/del"(db, me, b) {
     if (!isMgr(me)) return fail("forbidden", 403);
     const { v } = await spRun(db, me, [db.prepare("DELETE FROM sp_cln WHERE ws=?1 AND id=?2").bind(me.ws, clip(b.id, 60))]);
+    return json({ ok: true, v });
+  },
+
+  /* 일 마감 — 그날 매출(결제수단별)·객수·시재. 근무자는 담당 지점의 오늘·어제만, 관리자가 확인하면 잠깁니다 */
+  async "day/save"(db, me, b) {
+    const bid = clip(b.branch_id, 60), date = dOk(b.date), mgr = isMgr(me);
+    if (!bid || !date) return fail("bad-request");
+    if (mgr) { if (!await storeOk(db, me, bid)) return fail("bad-branch"); }
+    else {
+      if (me.role !== "worker" && me.role !== "facility") return fail("forbidden", 403);
+      const sc = await spScope(db, me); if (!sc.vis.has(bid)) return fail("forbidden", 403);
+      const today = kstToday(); if (date > today || date < addDaysS(today, -1)) return fail("bad-date");
+    }
+    const ex = await db.prepare(spSel("sp_day", "ws=?1 AND branch_id=?2 AND date=?3")).bind(me.ws, bid, date).first().then(r => r ? parse(r.j) : null);
+    if (ex && ex.status === "checked" && !mgr) return fail("locked", 409);
+    const money = v => v === "" || v == null ? null : Math.max(0, Math.min(10000000000, intOr(String(v).replace(/[^\d-]/g, ""), 0)));
+    const sales = {};
+    if (b.sales && typeof b.sales === "object" && !Array.isArray(b.sales)) for (const [k, v] of Object.entries(b.sales).slice(0, 20)) { const key = clip(k, 20), n = money(v); if (key && n) sales[key] = n; }
+    const row = { branch_id: bid, date, sales: JSON.stringify(sales), guests: b.guests === "" || b.guests == null ? null : clampInt(b.guests, 0, 1000000, null), cash_open: money(b.cash_open), cash_out: money(b.cash_out), cash_close: money(b.cash_close), note: clip(b.note, 1000),
+      status: mgr && b.check ? "checked" : "closed", closed_by: me.id, closed_name: me.name, closed_at: iso(), check_by: null, check_name: null, check_at: null };
+    if (row.status === "checked") { row.check_by = me.id; row.check_name = me.name; row.check_at = iso(); }
+    if (ex && mgr && ex.closed_by && ex.closed_by !== me.id) { row.closed_by = ex.closed_by; row.closed_name = ex.closed_name; row.closed_at = ex.closed_at; }   // 관리자가 고쳐도 마감한 사람은 그대로
+    const cols = SPC.sp_day.filter(c => c !== "branch_id" && c !== "date");
+    const { v } = await spRun(db, me, spBulk(db, "sp_day", me.ws, [row], "ON CONFLICT(ws,branch_id,date) DO UPDATE SET " + cols.map(c => `${c}=excluded.${c}`).join(",")));
+    return json({ ok: true, v, day: Object.assign({}, row, { sales }) });
+  },
+  async "day/check"(db, me, b) {
+    if (!isMgr(me)) return fail("forbidden", 403);
+    const bid = clip(b.branch_id, 60), date = dOk(b.date);
+    const ex = await db.prepare(spSel("sp_day", "ws=?1 AND branch_id=?2 AND date=?3")).bind(me.ws, bid, date).first().then(r => r ? parse(r.j) : null);
+    if (!ex) return fail("not-found", 404);
+    const on = b.undo ? 0 : 1;
+    const { v } = await spRun(db, me, [db.prepare("UPDATE sp_day SET status=?4, check_by=?5, check_name=?6, check_at=?7 WHERE ws=?1 AND branch_id=?2 AND date=?3").bind(me.ws, bid, date, on ? "checked" : "closed", on ? me.id : null, on ? me.name : null, on ? iso() : null)]);
+    return json({ ok: true, v, day: await db.prepare(spSel("sp_day", "ws=?1 AND branch_id=?2 AND date=?3")).bind(me.ws, bid, date).first().then(r => r ? parse(r.j) : null) });
+  },
+  async "day/del"(db, me, b) {
+    if (!isMgr(me)) return fail("forbidden", 403);
+    const { v } = await spRun(db, me, [db.prepare("DELETE FROM sp_day WHERE ws=?1 AND branch_id=?2 AND date=?3").bind(me.ws, clip(b.branch_id, 60), dOk(b.date) || "")]);
+    return json({ ok: true, v });
+  },
+
+  /* 소모품 — 관리자는 항목을 만들고, 근무자는 담당 지점의 남은 수량만 고칩니다 */
+  async "sup/save"(db, me, b) {
+    const id = clip(b.id, 60), mgr = isMgr(me);
+    const ex = id ? await spOne(db, "sp_sup", me.ws, id) : null;
+    if (id && !ex) return fail("not-found", 404);
+    const q = v => clampInt(v, 0, 1000000, 0);
+    if (!mgr) {
+      if (!ex || !("qty" in b)) return fail("forbidden", 403);
+      if (ex.branch_id) { const sc = await spScope(db, me); if (!sc.vis.has(ex.branch_id)) return fail("forbidden", 403); }
+      const { v } = await spRun(db, me, [db.prepare("UPDATE sp_sup SET qty=?3, updated_at=?4, updated_name=?5 WHERE ws=?1 AND id=?2").bind(me.ws, id, q(b.qty), iso(), me.name)]);
+      return json({ ok: true, v, supply: await spOne(db, "sp_sup", me.ws, id) });
+    }
+    const o = {};
+    if ("branch_id" in b) { o.branch_id = clip(b.branch_id, 60) || null; if (o.branch_id && !await storeOk(db, me, o.branch_id)) return fail("bad-branch"); }
+    if ("name" in b) { o.name = clip(b.name, 80); if (!o.name) return fail("bad-request"); }
+    if ("unit" in b) o.unit = clip(b.unit, 20);
+    if ("qty" in b) o.qty = q(b.qty);
+    if ("min_qty" in b) o.min_qty = q(b.min_qty);
+    if ("vendor" in b) o.vendor = clip(b.vendor, 300);
+    if ("memo" in b) o.memo = clip(b.memo, 300);
+    if ("sort" in b) o.sort = intOr(b.sort, 0);
+    o.updated_at = iso(); o.updated_name = me.name;
+    if (ex) {
+      const { v } = await spRun(db, me, [db.prepare(`UPDATE sp_sup SET ${setCols(o, 3)} WHERE ws=?1 AND id=?2`).bind(me.ws, id, ...Object.values(o))]);
+      return json({ ok: true, v, supply: await spOne(db, "sp_sup", me.ws, id) });
+    }
+    if (!o.name) return fail("bad-request");
+    const row = Object.assign({ id: uid("su"), branch_id: null, name: "", unit: "개", qty: 0, min_qty: 0, vendor: "", memo: "", sort: 99 }, o);
+    const { v } = await spRun(db, me, spBulk(db, "sp_sup", me.ws, [row]));
+    return json({ ok: true, v, supply: row });
+  },
+  async "sup/del"(db, me, b) {
+    if (!isMgr(me)) return fail("forbidden", 403);
+    const { v } = await spRun(db, me, [db.prepare("DELETE FROM sp_sup WHERE ws=?1 AND id=?2").bind(me.ws, clip(b.id, 60))]);
+    return json({ ok: true, v });
+  },
+
+  /* 리뷰·문의 — 플랫폼에 달린 리뷰와 문의를 모아 답글을 관리합니다 (관리자·직원) */
+  async "rev/save"(db, me, b) {
+    if (!isMgr(me)) return fail("forbidden", 403);
+    const id = clip(b.id, 60), o = {};
+    if ("branch_id" in b) { o.branch_id = clip(b.branch_id, 60) || null; if (o.branch_id && !await storeOk(db, me, o.branch_id)) return fail("bad-branch"); }
+    if ("channel" in b) o.channel = clip(b.channel, 40);
+    if ("kind" in b) o.kind = b.kind === "question" ? "question" : "review";
+    if ("rating" in b) o.rating = b.rating === "" || b.rating == null ? null : clampInt(b.rating, 1, 5, null);
+    if ("author" in b) o.author = clip(b.author, 40);
+    if ("body" in b) { o.body = clip(b.body, 2000); if (!o.body) return fail("bad-request"); }
+    if ("date" in b) o.date = dOk(b.date) || kstToday();
+    if ("reply" in b) o.reply = clip(b.reply, 2000);
+    if ("status" in b) { o.status = ["todo", "done", "skip"].includes(b.status) ? b.status : "todo"; if (o.status === "done") { o.replied_at = iso(); o.replied_name = me.name; } }
+    if (id) {
+      if (!await spOne(db, "sp_rev", me.ws, id)) return fail("not-found", 404);
+      if (!Object.keys(o).length) return fail("bad-request");
+      const { v } = await spRun(db, me, [db.prepare(`UPDATE sp_rev SET ${setCols(o, 3)} WHERE ws=?1 AND id=?2`).bind(me.ws, id, ...Object.values(o))]);
+      return json({ ok: true, v, review: await spOne(db, "sp_rev", me.ws, id) });
+    }
+    if (!o.body) return fail("bad-request");
+    const row = Object.assign({ id: uid("rv"), branch_id: null, channel: "", kind: "review", rating: null, author: "", body: "", date: kstToday(), status: "todo", reply: "", replied_at: null, replied_name: null }, o, { created_at: iso() });
+    const { v } = await spRun(db, me, spBulk(db, "sp_rev", me.ws, [row]));
+    return json({ ok: true, v, review: row });
+  },
+  async "rev/del"(db, me, b) {
+    if (!isMgr(me)) return fail("forbidden", 403);
+    const { v } = await spRun(db, me, [db.prepare("DELETE FROM sp_rev WHERE ws=?1 AND id=?2").bind(me.ws, clip(b.id, 60))]);
     return json({ ok: true, v });
   },
 
@@ -1917,7 +2092,7 @@ function modRestoreStmts(db, ws, m) {
   return { dels, stmts };
 }
 const spWipeSql = ws => [
-  ...["sp_res", "sp_cln", "sp_iss", "sp_chn", "sp_cost", "sp_asg", "sp_ntc", "sp_read", "sp_log", "sp_prof"].map(t => `DELETE FROM ${t} WHERE ws=${wsLit(ws)}`),
+  ...["sp_res", "sp_cln", "sp_iss", "sp_chn", "sp_cost", "sp_asg", "sp_ntc", "sp_read", "sp_log", "sp_prof", "sp_day", "sp_sup", "sp_rev"].map(t => `DELETE FROM ${t} WHERE ws=${wsLit(ws)}`),
   `DELETE FROM sp_chk WHERE ws=${wsLit(ws)} AND scope<>'common'`,
   `DELETE FROM sp_set WHERE ws=${wsLit(ws)} AND k='legacy'`
 ];
@@ -2953,9 +3128,9 @@ const MCP_TOOLS = [
   { name: "myworks_tasks", description: "업무 목록. q·status·assignee·project·store로 거름", input: { q: "string", status: "string", assignee: "string", project: "string", store: "string" } },
   { name: "myworks_search", description: "프로젝트·매장·업무·연락처를 한 번에 검색", input: { q: "string" }, required: ["q"] },
   { name: "myworks_contacts", description: "연락처(고객·거래처·외주) 목록", input: { q: "string" } },
-  { name: "myworks_space", description: "스페이스 모듈: 오늘·내일 예약, 청소 확인 대기, 시설 이슈", input: {} },
-  { name: "myworks_outsourcing", description: "아웃소싱 모듈: 진행 안건, 견적 회신 대기, 미수금, 이번 주 납기", input: {} },
-  { name: "myworks_commerce", description: "커머스 모듈: 발송할 주문, 답할 문의, 재고 부족, 이달 매출", input: {} },
+  { name: "myworks_space", description: "마이스토어: 오늘·내일 예약, 청소·점검 확인 대기, 최근 일 마감, 시설 이슈, 소모품 부족, 답할 리뷰·문의", input: {} },
+  { name: "myworks_outsourcing", description: "거래: 진행 안건, 견적 회신 대기, 미수금, 이번 주 납기", input: {} },
+  { name: "myworks_commerce", description: "마이셀러: 발송할 주문, 답할 문의, 재고 부족, 발주·입고, 이달 매출", input: {} },
   { name: "myworks_propose", description: "변경 제안 올리기(쓰기 토큰). kind: create-task(title, project|store, detail, due, priority, assignee) · update-status(task, status|due) · add-note(text, project|store|task) · create-contact(name, company, phone, email, kind) · create-job(title, client, detail, due, amount). 관리자가 승인하면 반영됩니다", input: { kind: "string", payload: "object", reason: "string" }, required: ["kind", "payload"] }
 ];
 const mcpSchema = t => ({ type: "object", properties: Object.fromEntries(Object.entries(t.input).map(([k, v]) => [k, v === "object" ? { type: "object" } : { type: "string" }])), required: t.required || [] });
