@@ -15,7 +15,12 @@
 const SCHEMA = "8";
 const PLANS = ["basic", "pro"];
 const MODULES = ["space", "outsourcing", "commerce"];
-const PLAN_LIMITS = { basic: { brands: 2, members: 2, tokens: 1 }, pro: { brands: 1000, members: 10, tokens: 20 } };   // members = 관리자 외 구성원 수
+const BASE_MODULES = ["outsourcing"];          // 거래 — 기본 기능이라 등급과 관계없이 늘 켜져 있습니다
+const EXT_MODULES = ["space", "commerce"];     // 확장판 — 마이스토어 · 마이셀러 (워크스페이스 관리자가 켜고 끕니다)
+const PLAN_LIMITS = { basic: { brands: 2, members: 2, tokens: 1 }, pro: { brands: 1000, members: 10, tokens: 20 }, beta: { brands: 1000, members: 30, tokens: 20 } };   // members = 관리자 외 구성원 수
+/* 무료 공개 기간 — 결제를 붙이기 전까지 모든 워크스페이스가 프로 기능과 확장판을 무료로 씁니다.
+   유료로 바꿀 때 false로 바꾸면 워크스페이스마다 저장된 등급(베이직·프로·기한)이 다시 적용됩니다. 데이터는 그대로입니다. */
+const FREE_BETA = true;
 const AI_HOUR_LIMIT = 60, AI_DAY_LIMIT = 1500;
 const MARGIN = 15000;              // 동기화 누락 방지용 여유(ms)
 const SESSION_MS = 30 * 864e5;     // 마지막 사용 후 세션 유지 기간
@@ -199,11 +204,13 @@ async function ensure(db) {
 /* ───────── 등급·모듈 ───────── */
 const planOk = p => PLANS.includes(p) ? p : "basic";
 const modulesOk = m => [...new Set((Array.isArray(m) ? m : parse(m) || []).filter(x => MODULES.includes(x)))];
-function tierOf(w) {   // 워크스페이스 행 → 지금 적용되는 등급·모듈·한도
+function tierOf(w, raw) {   // 워크스페이스 행 → 지금 적용되는 등급·모듈·한도 (raw: 무료 공개 기간을 빼고 저장된 등급 그대로)
   let plan = planOk(w.plan);
   if (plan === "pro" && w.plan_until && String(w.plan_until) < kstToday()) plan = "basic";   // 기한이 지나면 베이직 규칙 (데이터는 그대로)
-  const lim = Object.assign({}, PLAN_LIMITS[plan], parse(w.limits) || {});
-  return { plan, modules: plan === "pro" ? modulesOk(w.modules) : [], limits: { brands: intOr(lim.brands, 2), members: intOr(lim.members, 2), tokens: intOr(lim.tokens, 1) }, planUntil: w.plan_until || "", planRaw: planOk(w.plan) };
+  const beta = FREE_BETA && !raw, eff = beta ? "pro" : plan;
+  const lim = Object.assign({}, PLAN_LIMITS[beta ? "beta" : plan], parse(w.limits) || {});
+  const ext = eff === "pro" ? modulesOk(w.modules).filter(m => EXT_MODULES.includes(m)) : [];
+  return { plan: eff, beta, modules: [...BASE_MODULES, ...ext], limits: { brands: intOr(lim.brands, 2), members: intOr(lim.members, 2), tokens: intOr(lim.tokens, 1) }, planUntil: beta ? "" : (w.plan_until || ""), planRaw: planOk(w.plan) };
 }
 const limitFail = (what, limit) => fail("plan-limit", 403, { what, limit });
 async function memberCount(db, ws) {   // 본인(첫 관리자)을 뺀 구성원 수 (승인 대기 제외)
@@ -256,10 +263,10 @@ async function auth(db, req) {
 }
 function meFrom(r, extra) {
   const tier = tierOf(r);
-  return Object.assign({ ws: r.ws, id: r.member_id, lid: r.login_id, role: roleOk(r.role), owner: !!r.is_owner, op: opOf(r), admOk: !!Number(r.adm_ok), admFail: Number(r.adm_fail) || 0, name: r.name, wname: r.wname, invite: r.invite, spv: Number(r.sp_ver) || 0, plan: tier.plan, modules: tier.modules, limits: tier.limits, planUntil: tier.planUntil }, extra || {});
+  return Object.assign({ ws: r.ws, id: r.member_id, lid: r.login_id, role: roleOk(r.role), owner: !!r.is_owner, op: opOf(r), admOk: !!Number(r.adm_ok), admFail: Number(r.adm_fail) || 0, name: r.name, wname: r.wname, invite: r.invite, spv: Number(r.sp_ver) || 0, plan: tier.plan, beta: tier.beta, modules: tier.modules, limits: tier.limits, planUntil: tier.planUntil }, extra || {});
 }
-const hasMod = (me, m) => me.plan === "pro" && me.modules.includes(m);
-const tierInfo = me => ({ plan: me.plan, modules: me.modules, limits: me.limits, planUntil: me.planUntil || "" });
+const hasMod = (me, m) => me.modules.includes(m) && (BASE_MODULES.includes(m) || me.plan === "pro");
+const tierInfo = me => ({ plan: me.plan, beta: !!me.beta, modules: me.modules, limits: me.limits, planUntil: me.planUntil || "" });
 
 /* ───────── 열람 범위 (협력사) ───────── */
 function visFrom(me, projects, stores, myPids) {
@@ -444,7 +451,7 @@ const PUBLIC = {
             admLog(db, "auto-open", { id: ws, name: wsName }, code ? `베타 코드 ${code.code}로 바로 개설` : "자동 개설")
           ]);
           const rw = await refReward(db, ws);
-          return json({ ok: true, status: "active", mode, workspace: wsName, plan: rw.plan || st.plan, planUntil: rw.until || st.until || "", refDays: rw.days || 0 });
+          return json({ ok: true, status: "active", mode, workspace: wsName, plan: rw.plan || st.plan, planUntil: rw.until || st.until || "", refDays: rw.days || 0, free: FREE_BETA });
         }
         const c = await db.prepare("SELECT COUNT(*) AS n FROM workspaces WHERE status='pending'").first();
         if (c && Number(c.n) >= MAX_PENDING_WS) return fail("busy", 429);
@@ -745,9 +752,9 @@ const PRIVATE = {
   async "ws/modules"(db, me, b) {
     if (me.role !== "admin") return fail("forbidden", 403);
     if (me.plan !== "pro") return fail("plan-limit", 403, { what: "modules", limit: 0 });
-    const modules = modulesOk(b.modules);
-    await db.prepare("UPDATE workspaces SET modules=?1 WHERE id=?2").bind(JSON.stringify(modules), me.ws).run();
-    return json({ ok: true, modules });
+    const ext = modulesOk(b.modules).filter(m => EXT_MODULES.includes(m));
+    await db.prepare("UPDATE workspaces SET modules=?1 WHERE id=?2").bind(JSON.stringify(ext), me.ws).run();
+    return json({ ok: true, modules: [...BASE_MODULES, ...ext] });
   },
   /* 워크스페이스 설정 (AI 제안 자동 반영 등) — 관리자 */
   async "ws/settings"(db, me, b) {
@@ -908,13 +915,13 @@ const PRIVATE = {
     const w = await db.prepare("SELECT * FROM workspaces WHERE id=?1").bind(String(b.id || "")).first();
     if (!w) return fail("not-found", 404);
     if (act === "plan") {   // 등급·모듈·기한·한도 — 운영자 본인 워크스페이스도 바꿀 수 있습니다
-      const plan = planOk(b.plan), modules = plan === "pro" ? modulesOk(b.modules) : [];
+      const plan = planOk(b.plan), modules = modulesOk(b.modules).filter(m => EXT_MODULES.includes(m));   // 확장판 선택은 등급과 따로 저장합니다 (베이직이면 적용만 안 됨)
       const until = dOk(b.until) || null;
       const lim = {}; const L = b.limits && typeof b.limits === "object" ? b.limits : {};
       for (const k of ["brands", "members", "tokens"]) if (L[k] !== undefined && L[k] !== "" && L[k] !== null) { const n = clampInt(L[k], 0, 100000, null); if (n !== null) lim[k] = n; }
       await db.batch([
         db.prepare("UPDATE workspaces SET plan=?1, modules=?2, plan_until=?3, limits=?4 WHERE id=?5").bind(plan, JSON.stringify(modules), until, Object.keys(lim).length ? JSON.stringify(lim) : null, w.id),
-        admLog(db, "plan", w, `${plan === "pro" ? "프로" : "베이직"}${modules.length ? " · " + modules.map(m => ({ space: "스페이스", outsourcing: "아웃소싱", commerce: "커머스" })[m] || m).join(", ") : ""}${until ? " · ~" + until : ""}`)
+        admLog(db, "plan", w, `${plan === "pro" ? "프로" : "베이직"}${modules.length ? " · " + modules.map(m => ({ space: "마이스토어", outsourcing: "거래", commerce: "마이셀러" })[m] || m).join(", ") : ""}${until ? " · ~" + until : ""}`)
       ]);
       return json({ ok: true, plan, modules, planUntil: until || "", limits: lim });
     }
@@ -3101,11 +3108,11 @@ const ADMIN_API = {
     const s = rows(sumR)[0] || {};
     const refCnt = new Map(); for (const w of rows(wsR)) if (w.ref_ws) refCnt.set(w.ref_ws, (refCnt.get(w.ref_ws) || 0) + 1);
     const workspaces = rows(wsR).map(w => {
-      const t = tierOf(w), rl = roles.get(w.id) || {};
+      const t = tierOf(w, true), rl = roles.get(w.id) || {};
       const sMs = seen.get(w.id) || 0, la = w.last_active ? Date.parse(w.last_active) || 0 : 0;
-      return { id: w.id, name: w.name, status: w.status, adminLogin: w.admin_login || "", adminName: w.admin_name || "", contact: w.contact || w.admin_contact || "", note: w.note || "", createdAt: w.created_at, approvedAt: w.approved_at || "", lastActive: w.last_active || "", lastSeen: Math.max(sMs, la) ? new Date(Math.max(sMs, la)).toISOString() : "", members: Object.values(rl).reduce((a, n) => a + n, 0), roles: rl, mine: w.id === me.ws, plan: t.planRaw, planNow: t.plan, modules: modulesOk(w.modules), planUntil: w.plan_until || "", limits: parse(w.limits) || {}, opNote: w.op_note || "", comp: !!Number(w.comp), usage: usage.get(w.id) || U(w.id), refBy: w.ref_ws || "", refs: refCnt.get(w.id) || 0, refPaid: !!Number(w.ref_paid) };
+      return { id: w.id, name: w.name, status: w.status, adminLogin: w.admin_login || "", adminName: w.admin_name || "", contact: w.contact || w.admin_contact || "", note: w.note || "", createdAt: w.created_at, approvedAt: w.approved_at || "", lastActive: w.last_active || "", lastSeen: Math.max(sMs, la) ? new Date(Math.max(sMs, la)).toISOString() : "", members: Object.values(rl).reduce((a, n) => a + n, 0), roles: rl, mine: w.id === me.ws, plan: t.planRaw, planNow: t.plan, modules: modulesOk(w.modules).filter(m => EXT_MODULES.includes(m)), planUntil: w.plan_until || "", limits: parse(w.limits) || {}, opNote: w.op_note || "", comp: !!Number(w.comp), usage: usage.get(w.id) || U(w.id), refBy: w.ref_ws || "", refs: refCnt.get(w.id) || 0, refPaid: !!Number(w.ref_paid) };
     });
-    return json({ ok: true, workspaces, host: url.hostname, summary: { fbNew: Number(s.fb_new) || 0, fbDoing: Number(s.fb_doing) || 0, err24: Number(s.err24) || 0, payMonth: can(me, "pay") ? Number(s.pay_m) || 0 : null, payPrev: can(me, "pay") ? Number(s.pay_p) || 0 : null, payYear: can(me, "pay") ? Number(s.pay_y) || 0 : null, accounts: Number(s.acc) || 0, codes: Number(s.codes) || 0, ann: annList(s.ann).filter(a => a.on).length, lastExport: s.last_export || "" }, platform: platformOf(s.plat), launch: parse(s.launch) || {}, log: rows(logR) });
+    return json({ ok: true, workspaces, host: url.hostname, summary: { fbNew: Number(s.fb_new) || 0, fbDoing: Number(s.fb_doing) || 0, err24: Number(s.err24) || 0, payMonth: can(me, "pay") ? Number(s.pay_m) || 0 : null, payPrev: can(me, "pay") ? Number(s.pay_p) || 0 : null, payYear: can(me, "pay") ? Number(s.pay_y) || 0 : null, accounts: Number(s.acc) || 0, freeBeta: FREE_BETA, codes: Number(s.codes) || 0, ann: annList(s.ann).filter(a => a.on).length, lastExport: s.last_export || "" }, platform: platformOf(s.plat), launch: parse(s.launch) || {}, log: rows(logR) });
   },
 
   /* 워크스페이스 상세 — 계정·사용량·토큰·확인 링크·결제 (업무 내용은 없음) */

@@ -984,6 +984,73 @@ a.linkbtn{display:inline-block;margin-top:6px}
 .gate-rec{margin-top:10px;text-align:right}
 .gate-rec .linkbtn{font-size:12px;color:var(--faint)}
 .gate-rec .linkbtn:hover{color:var(--accent-deep)}
+/* 돈 */
+.mn-month{display:flex;align-items:center;gap:6px;margin:-4px 0 12px}
+.mn-month b{font-family:var(--mono);font-size:15px;min-width:110px;text-align:center}
+.mn-stats .s-num{font-size:24px;overflow-wrap:anywhere}
+.mn-stats .s-sub{font-size:12px;color:var(--faint);margin-top:2px}
+.mn-chart{display:grid;grid-template-columns:repeat(12,1fr);gap:6px;align-items:end;height:150px;margin-top:4px}
+.mn-col{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:5px;padding:4px 0 0;border-radius:8px;min-width:0}
+.mn-col:hover{background:var(--paper)}
+.mn-col.on{background:var(--accent-soft)}
+.mn-pair{display:flex;align-items:flex-end;gap:3px;height:100%;width:100%;justify-content:center}
+.mn-pair i{display:block;width:40%;max-width:14px;min-height:2px;border-radius:3px 3px 0 0}
+.mn-pair i.in{background:#1E7F4D}
+.mn-pair i.out{background:var(--ink)}
+.mn-k{font-family:var(--mono);font-size:11px;color:var(--faint);white-space:nowrap}
+.mn-col.on .mn-k{color:var(--accent-deep);font-weight:700}
+.mn-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:14px 0}
+.mn-grid>*{min-width:0}
+.mn-grid>.card+.card{margin-top:0}
+.mn-bar{display:grid;grid-template-columns:minmax(70px,130px) 1fr auto;gap:10px;align-items:center;padding:6px 0;font-size:13px}
+.mn-bar .mn-l{color:var(--sub);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mn-bar .mn-t{height:9px;background:var(--line-soft);border-radius:99px;overflow:hidden}
+.mn-bar .mn-t i{display:block;height:100%;background:var(--accent);border-radius:99px}
+.mn-bar b{font-size:12.5px}
+.mn-src{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid var(--line-soft);font-size:13.5px}
+.mn-src:last-of-type{border-bottom:0}
+.mn-src span{color:var(--sub);min-width:0;overflow-wrap:anywhere}
+.mn-src b{font-size:12.5px;white-space:nowrap}
+.mn-src em{font-style:normal}
+.mn-src em.in{color:#1E7F4D}
+.fin-row .mn-from{font-style:normal;font-size:11.5px;color:var(--faint);margin-left:8px}
+/* 확장판 */
+.ext-free{display:flex;flex-wrap:wrap;gap:4px 12px;align-items:baseline;padding:13px 16px;margin-bottom:14px;border:1px solid var(--accent);background:var(--accent-soft);border-radius:var(--r);font-size:13.5px}
+.ext-free b{color:var(--accent-deep)}
+.ext-free span{color:var(--sub)}
+.ext-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:13px}
+.ext-grid>.card+.card{margin-top:0}
+.ext-card{display:flex;flex-direction:column;border-top:3px solid var(--ext)}
+.ext-card.soon{opacity:.72}
+.ext-card.on{box-shadow:0 0 0 1px var(--ext) inset}
+.ext-top{display:flex;align-items:flex-start;gap:12px}
+.ext-top>div{flex:1;min-width:0}
+.ext-ico{flex:none;width:38px;height:38px;border-radius:10px;display:grid;place-items:center;background:var(--ext);color:#fff;font-size:18px}
+.ext-nm{font-size:16px;font-weight:800}
+.ext-who{font-size:12.5px;color:var(--faint);margin-top:1px}
+.ext-one{margin:12px 0 6px;font-weight:600;font-size:14px}
+.ext-pts{margin:0 0 12px 18px;font-size:13px;color:var(--sub);line-height:1.7;flex:1}
+.ext-go{align-self:flex-start}
+.ext-sw{position:relative;flex:none;width:46px;height:26px;cursor:pointer;margin:0!important}
+.ext-sw input{position:absolute;inset:0;opacity:0;margin:0;cursor:pointer;width:46px;height:26px}
+.ext-sw span{position:absolute;inset:0;background:var(--line);border-radius:99px;transition:background .15s;pointer-events:none}
+.ext-sw span::after{content:"";position:absolute;left:3px;top:3px;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.2);transition:transform .15s}
+.ext-sw input:checked+span{background:var(--ext)}
+.ext-sw input:checked+span::after{transform:translateX(20px)}
+.ext-sw input:focus-visible+span{outline:2px solid var(--accent);outline-offset:2px}
+.ext-rec{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px 18px}
+.ext-rec>div{padding:9px 0;border-bottom:1px solid var(--line-soft);font-size:13.5px}
+.ext-rec b{display:block;margin-bottom:2px}
+.ext-rec span{color:var(--sub);line-height:1.6}
+.tier-ext{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;font-size:13.5px}
+@media (max-width:820px){.mn-grid{grid-template-columns:1fr}}
+@media (max-width:560px){
+  .mn-chart{gap:2px;height:130px}
+  .mn-col:nth-child(even) .mn-k{visibility:hidden}
+  .mn-stats .s-num{font-size:20px}
+  .fin-row{flex-wrap:wrap;row-gap:2px}
+  .fin-row .fm{flex-basis:100%;order:5;white-space:normal}
+}
 @media (max-width:560px){
   .adm-funnel .fn{grid-template-columns:1fr 40px 44px;row-gap:4px}
   .adm-funnel .fn-l{grid-column:1/-1}
@@ -1196,13 +1263,17 @@ const ID_RE=/^[a-z0-9][a-z0-9._-]{3,19}$/;
 const KINDS=[["member","members"],["project","projects"],["store","stores"],["task","tasks"],["comment","comments"],["fin","finance"],["routine","routines"],["template","templates"],["plan","plans"],["act","activity"],["contact","contacts"],["prop","proposals"]];
 /* 등급·모듈 — 서버가 state/sync 로 알려 줍니다. 구버전 서버라면 예전처럼 프로 + 스페이스로 봅니다 */
 const TIER0=()=>({plan:"pro",modules:["space"],limits:{brands:1000,members:1000,tokens:0},planUntil:"",legacy:true});
-const MOD_LABEL={space:"스페이스",outsourcing:"아웃소싱",commerce:"커머스"};
-const MOD_DESC={space:"공간대여·숙박 — 예약, 청소 배정·확인, 시설, 손익",outsourcing:"프리랜서 외주 — 고객·안건, 견적, 납품, 청구·입금",commerce:"상품 판매 — 주문·발송, 재고, 문의, 채널 손익"};
+const MOD_LABEL={space:"마이스토어",outsourcing:"거래",commerce:"마이셀러"};
+const MOD_DESC={space:"매장·공간 운영 — 예약·영업, 일 마감, 근무·점검, 시설, 지점별 손익",outsourcing:"고객·안건, 견적 승인, 납품 확인, 청구·입금·미수금",commerce:"온라인 판매 — 주문·발송, 재고·수발주, 문의, 정산·손익"};
+const EXT_ROUTES=["space","commerce"];   // 확장판 (켜고 끄는 것). 거래(outsourcing)는 기본 기능입니다
 const tier=()=>MODE==="cloud"?(CLOUD.tier||TIER0()):{plan:"local",modules:[],limits:{brands:1000,members:1000,tokens:0},planUntil:""};
 const modOn=m=>MODE==="cloud"&&tier().modules.includes(m);
 const isPro=()=>MODE!=="cloud"||tier().plan==="pro";
 const planName=p=>p==="pro"?"마이웍스 프로":p==="basic"?"마이웍스 베이직":"로컬";
-const PLAN_LIMIT_MSG={brands:n=>`베이직은 브랜드를 ${n}개까지 둘 수 있습니다. 더 쓰려면 프로로 올려야 합니다.`,members:n=>`베이직은 구성원을 ${n}명까지 둘 수 있습니다. 더 쓰려면 프로로 올려야 합니다.`,tokens:n=>`AI 접속 토큰은 ${n}개까지 만들 수 있습니다. 쓰지 않는 토큰을 먼저 회수하세요.`,modules:()=>"모듈은 프로에서 켤 수 있습니다.","write-token":()=>"쓰기 토큰은 프로에서 만들 수 있습니다. 베이직은 읽기 토큰만 지원합니다."};
+const isBeta=()=>MODE==="cloud"&&!!tier().beta;
+const planLabel=()=>isBeta()?"무료 공개":planName(tier().plan);
+const moreHint=()=>isBeta()?"더 필요하면 ‘문의’로 알려 주세요.":"더 쓰려면 프로로 올려야 합니다.";
+const PLAN_LIMIT_MSG={brands:n=>`${isBeta()?"지금은":"베이직은"} 브랜드를 ${n}개까지 둘 수 있습니다. ${moreHint()}`,members:n=>`${isBeta()?"지금은":"베이직은"} 구성원을 ${n}명까지 둘 수 있습니다. ${moreHint()}`,tokens:n=>`AI 접속 토큰은 ${n}개까지 만들 수 있습니다. 쓰지 않는 토큰을 먼저 회수하세요.`,modules:()=>"확장판은 프로에서 켤 수 있습니다.","write-token":()=>"쓰기 토큰은 프로에서 만들 수 있습니다. 베이직은 읽기 토큰만 지원합니다."};
 const planLimitMsg=d=>{const f=PLAN_LIMIT_MSG[d&&d.what];return f?f(d.limit):"현재 등급에서는 할 수 없는 작업입니다.";};
 async function api(path,body){
   if(typeof fetch!=="function")throw new Error("no-fetch");
@@ -1230,7 +1301,7 @@ function queuePush(){
 function persistPending(){try{if(Object.keys(PENDING).length)localStorage.setItem(CPEND,JSON.stringify(PENDING));else localStorage.removeItem(CPEND);}catch(e){}}
 function persistMeta(){if(!ME)return;try{localStorage.setItem(CMETA,JSON.stringify({me:ME.id,owner:CLOUD.owner,op:CLOUD.op,perms:CLOUD.perms,ws:CLOUD.ws,badges:CLOUD.badges,tier:CLOUD.tier,syncAt:SYNC_AT,at:Date.now()}));}catch(e){}}
 function setTier(t){
-  const next=t&&typeof t==="object"?{plan:t.plan==="pro"?"pro":"basic",modules:Array.isArray(t.modules)?t.modules.slice():[],limits:Object.assign({brands:2,members:2,tokens:1},t.limits||{}),planUntil:t.planUntil||""}:TIER0();
+  const next=t&&typeof t==="object"?{plan:t.plan==="pro"?"pro":"basic",modules:Array.isArray(t.modules)?t.modules.slice():[],limits:Object.assign({brands:2,members:2,tokens:1},t.limits||{}),planUntil:t.planUntil||"",beta:!!t.beta}:TIER0();
   const changed=JSON.stringify(next)!==JSON.stringify(CLOUD.tier);
   CLOUD.tier=next;
   return changed;
@@ -1551,7 +1622,7 @@ async function doSignup(){
     $("#sg-form").classList.add("hidden");
     const d=$("#sg-done");d.classList.remove("hidden");
     d.innerHTML=SG_MODE==="new"&&res.status==="active"
-      ?`<div class="ok">✓</div><h2>워크스페이스가 열렸습니다</h2><p><b>${esc(res.workspace||body.workspace)}</b> 워크스페이스를 만들었습니다${res.plan==="pro"?` — 마이웍스 프로${res.planUntil?` (${esc(res.planUntil)}까지)`:""}로 시작합니다`:""}.${res.refDays?`<br>소개 혜택으로 프로 ${res.refDays}일이 더해졌습니다.`:""}<br>지금 아이디 <b class="mono">${esc(lid)}</b>로 로그인하세요.</p><button class="btn btn-pri btn-full" data-act="go-login" data-lid="${esc(lid)}">로그인하기</button>`
+      ?`<div class="ok">✓</div><h2>워크스페이스가 열렸습니다</h2><p><b>${esc(res.workspace||body.workspace)}</b> 워크스페이스를 만들었습니다${res.free?". 지금은 무료 공개 기간이라 모든 기능과 확장판을 무료로 씁니다":res.plan==="pro"?` — 마이웍스 프로${res.planUntil?` (${esc(res.planUntil)}까지)`:""}로 시작합니다`:""}.${res.refDays&&!res.free?`<br>소개 혜택으로 프로 ${res.refDays}일이 더해졌습니다.`:""}<br>지금 아이디 <b class="mono">${esc(lid)}</b>로 로그인하세요.</p><button class="btn btn-pri btn-full" data-act="go-login" data-lid="${esc(lid)}">로그인하기</button>`
       :SG_MODE==="new"
       ?`<div class="ok">✓</div><h2>가입 신청이 접수되었습니다</h2><p><b>${esc(body.workspace)}</b> 워크스페이스 개설 신청을 운영자에게 전달했습니다.<br>승인되면 아이디 <b class="mono">${esc(lid)}</b>로 바로 로그인할 수 있습니다.</p><button class="btn btn-pri btn-full" data-act="go-login" data-lid="${esc(lid)}">로그인 화면으로</button>`
       :`<div class="ok">✓</div><h2>합류 요청을 보냈습니다</h2><p><b>${esc(res.workspace||"")}</b> 관리자에게 합류 요청이 전달되었습니다.<br>승인되면 아이디 <b class="mono">${esc(lid)}</b>로 로그인할 수 있습니다.</p><button class="btn btn-pri btn-full" data-act="go-login" data-lid="${esc(lid)}">로그인 화면으로</button>`;
@@ -1614,14 +1685,15 @@ function navList(){
     return L.length?L:[["space","오늘 청소","▦","청소"],["space/fac","시설 신고","⚒","시설"]];
   }
   if(ME&&ME.role==="facility")return[["space","현황","▦"],["space/fac","시설 관리","⚒","시설"],["space/clean","청소 현황","▤","청소"]];
-  const L=NAV.slice();
+  const L=NAV.slice(),mgr=!!ME&&(ME.role==="admin"||ME.role==="staff"),ins=[];
+  if(MODE==="cloud"&&mgr&&modOn("outsourcing"))ins.push(["outsourcing","거래","◇"]);
+  if(mgr)ins.push(["money","돈","₩"]);
   if(MODE==="cloud"&&ME&&ME.role!=="partner"){
-    const mods=[];
-    if(modOn("space"))mods.push(["space","스페이스","▦"]);
-    if(modOn("outsourcing"))mods.push(["outsourcing","아웃소싱","◇","외주"]);
-    if(modOn("commerce"))mods.push(["commerce","커머스","▧"]);
-    L.splice(5,0,...mods);
+    if(modOn("space"))ins.push(["space","마이스토어","▦","스토어"]);
+    if(modOn("commerce"))ins.push(["commerce","마이셀러","▧","셀러"]);
   }
+  L.splice(5,0,...ins);
+  if(MODE==="cloud"&&mgr)L.push(["ext","확장판","⊕"]);
   if(MODE==="cloud"&&CLOUD.op)L.push(["admin","총괄관리","⚙","관리"]);
   return L;
 }
@@ -1660,9 +1732,11 @@ function route(){
   }
   if(page==="project"&&arg){const p=projectById(arg);if(p&&canSeeProject(p)){setNav("projects");v.innerHTML=vProjectDetail(p);PPL.fillProject(p.id);return;}location.hash="#/projects";return;}
   if(page==="store"&&arg){const st=storeById(arg);if(st&&canSeeStore(st)){setNav("stores");v.innerHTML=vStoreDetail(st);if(modOn("space"))SPACE.fillStore(st.id);return;}location.hash="#/stores";return;}
-  const VIEWS={dashboard:vDashboard,plan:vPlan,projects:vProjects,stores:vStores,board:vBoard,members:vMembers,data:vData,admin:vAdmin};
+  const VIEWS={dashboard:vDashboard,plan:vPlan,projects:vProjects,stores:vStores,board:vBoard,members:vMembers,data:vData,admin:vAdmin,money:vMoney,ext:vExt};
   let pg=Object.prototype.hasOwnProperty.call(VIEWS,page)?page:"dashboard";
   if(pg==="admin"&&!(MODE==="cloud"&&CLOUD.op))pg="dashboard";
+  if(pg==="money"&&!canFinance())pg="dashboard";
+  if(pg==="ext"&&!(MODE==="cloud"&&(ME.role==="admin"||ME.role==="staff")))pg="dashboard";
   setNav(pg);
   const sw=$("#side-ws");if(sw)sw.textContent=DB.meta.workspace;
   v.innerHTML=VIEWS[pg]();
@@ -1919,13 +1993,13 @@ function vDashboard(){
       </div>
       ${canFinance()?(()=>{const mk=monKey();const mine=DB.finance.filter(f=>monKey(f.date)===mk);const s=finSum(mine);const over=DB.projects.filter(p=>p.budget>0&&projSpend(p.id)>=p.budget*0.8&&canSeeProject(p));return`
       <div class="card">
-        <h2><span class="bars"></span>이달 재무 <span class="cnt mono">${monLabel(mk)}</span></h2>
+        <h2><span class="bars"></span>이달 손익 <span class="cnt mono">${monLabel(mk)}</span><button class="btn btn-sm btn-ghost" data-nav="money" style="margin-left:auto">돈 열기 →</button></h2>
         <div class="fin-sum">
           <div class="f plus"><div class="v">${fmtWon(s.inc)}</div><div class="l">수입</div></div>
           <div class="f minus"><div class="v">${fmtWon(s.exp)}</div><div class="l">지출</div></div>
           <div class="f ${s.net>=0?"plus":"minus"}"><div class="v">${(s.net>=0?"+":"")+fmtWon(s.net)}</div><div class="l">손익</div></div>
         </div>
-        ${over.length?`<div style="font-size:12.5px;color:var(--late);font-weight:600;margin-bottom:2px">예산 주의 — ${over.map(p=>`<span data-act="open-project" data-id="${p.id}" style="cursor:pointer;text-decoration:underline">${esc(p.name)}</span>`).join(", ")}</div>`:`<div style="font-size:12.5px;color:var(--faint)">각 프로젝트·매장 상세에서 내역을 기록하면 여기에 합산됩니다.</div>`}
+        ${over.length?`<div style="font-size:12.5px;color:var(--late);font-weight:600;margin-bottom:2px">예산 주의 — ${over.map(p=>`<span data-act="open-project" data-id="${p.id}" style="cursor:pointer;text-decoration:underline">${esc(p.name)}</span>`).join(", ")}</div>`:`<div style="font-size:12.5px;color:var(--faint)">돈 메뉴와 프로젝트·매장에서 기록한 내역, 확장판 손익이 여기에 합산됩니다.</div>`}
       </div>`;})():""}
     </div>
     ${visStores.length?`<div class="card">
@@ -2149,6 +2223,98 @@ function finAddForm(scopeAttr){
     <input id="fa-date" type="date" value="${todayStr()}">
     <input id="fa-memo" placeholder="메모 (예: ○○업체 1차 정산)" maxlength="80" class="fw" data-enter="fin-add" ${scopeAttr}>
     <button class="btn btn-pri" data-act="fin-add" ${scopeAttr}>기록</button>
+  </div>`;
+}
+
+/* ═══════════ 돈 — 수입·지출과 월별 손익 ═══════════ */
+function finWhere(f){
+  if(f.projectId){const p=projectById(f.projectId);return["프로젝트",p?p.name:"삭제된 프로젝트"];}
+  if(f.storeId&&f.source!=="space"){const x=storeById(f.storeId);return["매장",x?x.name:"삭제된 매장"];}
+  if(f.source==="space"||/^스페이스 집계|^마이스토어/.test(f.memo||"")){const x=f.storeId?storeById(f.storeId):null;return["마이스토어",x?x.name:""];}
+  if(f.source==="commerce"||/^커머스 |^마이셀러 /.test(f.memo||""))return["마이셀러",""];
+  if(f.source==="outsourcing"||/^외주 입금|^거래 입금/.test(f.memo||""))return["거래",""];
+  return["직접 기록",""];
+}
+function vMoney(){
+  if(!F.mnYm)F.mnYm=monKey();if(!F.mnK)F.mnK="전체";if(F.mnQ===undefined)F.mnQ="";
+  const ym=F.mnYm,yr=ym.slice(0,4),all=DB.finance;
+  const inM=all.filter(f=>monKey(f.date)===ym),s=finSum(inM),ys=finSum(all.filter(f=>(f.date||"").slice(0,4)===yr));
+  const months=[];for(let i=11;i>=0;i--){const k=monShift(ym,-i);months.push({k,...finSum(all.filter(f=>monKey(f.date)===k))});}
+  const mx=Math.max(1,...months.map(m=>Math.max(m.inc,m.exp)));
+  const group=(list,fn)=>{const m=new Map();list.forEach(f=>{const k=fn(f);m.set(k,(m.get(k)||0)+f.amount);});return[...m.entries()].sort((a,b)=>b[1]-a[1]);};
+  const expCat=group(inM.filter(f=>f.kind!=="수입"),f=>f.category||"기타"),incCat=group(inM.filter(f=>f.kind==="수입"),f=>f.category||"기타");
+  const wh=new Map();inM.forEach(f=>{const [k,n]=finWhere(f),key=k+(n?" · "+n:"");const v=wh.get(key)||{inc:0,exp:0};if(f.kind==="수입")v.inc+=f.amount;else v.exp+=f.amount;wh.set(key,v);});
+  const whL=[...wh.entries()].sort((a,b)=>(b[1].inc+b[1].exp)-(a[1].inc+a[1].exp));
+  let list=inM.slice();if(F.mnK!=="전체")list=list.filter(f=>F.mnK==="수입"?f.kind==="수입":f.kind!=="수입");
+  if(F.mnQ){const q=norm(F.mnQ);list=list.filter(f=>norm([f.category,f.memo,...finWhere(f)].join(" ")).includes(q));}
+  list.sort((a,b)=>(b.date||"").localeCompare(a.date||"")||(b.createdAt||"").localeCompare(a.createdAt||""));
+  const bar=(rows,tot)=>rows.length?rows.slice(0,6).map(([k,v])=>`<div class="mn-bar"><span class="mn-l">${esc(k)}</span><span class="mn-t"><i style="width:${Math.max(3,Math.round(v/Math.max(1,tot)*100))}%"></i></span><b class="mono">${fmtWon(v)}</b></div>`).join(""):`<div class="hint" style="padding:6px 0">기록이 없습니다.</div>`;
+  return`
+  <div class="page-head">
+    <div><h1><span class="bars"></span>돈</h1><div class="desc">수입·지출과 월별 손익입니다. 직접 기록한 것, 프로젝트·매장에 적은 것, 거래 입금과 확장판 손익이 모두 여기에 모입니다.</div></div>
+    <button class="btn" data-act="fin-csv">CSV 내려받기</button>
+  </div>
+  <div class="mn-month"><button class="btn btn-sm btn-ghost" data-act="mn-ym" data-d="-1" aria-label="이전 달">‹</button><b>${monLabel(ym)}</b><button class="btn btn-sm btn-ghost" data-act="mn-ym" data-d="1" aria-label="다음 달">›</button>${ym!==monKey()?`<button class="btn btn-sm btn-ghost" data-act="mn-ym" data-d="0">이번 달</button>`:""}</div>
+  <div class="stats mn-stats">
+    <div class="stat"><div class="s-num" style="color:#1E7F4D">${fmtWon(s.inc)}</div><div class="s-lb">수입</div></div>
+    <div class="stat"><div class="s-num">${fmtWon(s.exp)}</div><div class="s-lb">지출</div></div>
+    <div class="stat ${s.net<0?"warn":""}"><div class="s-num">${(s.net>0?"+":"")+fmtWon(s.net)}</div><div class="s-lb">손익</div></div>
+    <div class="stat"><div class="s-num">${(ys.net>0?"+":"")+fmtWon(ys.net)}</div><div class="s-lb">${yr}년 누적 손익</div><div class="s-sub">수입 ${fmtWon(ys.inc)} · 지출 ${fmtWon(ys.exp)}</div></div>
+  </div>
+  <div class="card">
+    <h2><span class="bars"></span>월별 흐름 <span class="cnt">최근 12개월</span></h2>
+    <div class="mn-chart">${months.map(m=>`<button class="mn-col ${m.k===ym?"on":""}" data-act="mn-pick" data-v="${m.k}" title="${monLabel(m.k)} 수입 ${fmtWon(m.inc)} · 지출 ${fmtWon(m.exp)}"><span class="mn-pair"><i class="in" style="height:${Math.round(m.inc/mx*100)}%"></i><i class="out" style="height:${Math.round(m.exp/mx*100)}%"></i></span><span class="mn-k">${Number(m.k.slice(5))}월</span></button>`).join("")}</div>
+    <div class="adm-legend" style="margin:8px 0 0"><span><i style="background:#1E7F4D"></i>수입</span><span><i style="background:var(--ink)"></i>지출</span><span class="hint">막대를 누르면 그 달로 이동합니다</span></div>
+  </div>
+  <div class="mn-grid">
+    <div class="card"><h2>지출 분류</h2>${bar(expCat,s.exp)}${incCat.length?`<h2 style="margin-top:16px">수입 분류</h2>${bar(incCat,s.inc)}`:""}</div>
+    <div class="card"><h2>어디서 생긴 돈인가</h2>${whL.length?whL.slice(0,8).map(([k,v])=>`<div class="mn-src"><span>${esc(k)}</span><b class="mono">${v.inc?`<em class="in">+${fmtWon(v.inc)}</em>`:""}${v.exp?` <em>−${fmtWon(v.exp)}</em>`:""}</b></div>`).join(""):`<div class="hint" style="padding:6px 0">이달 기록이 없습니다.</div>`}
+      <div class="hint" style="margin-top:10px">마이스토어·마이셀러 손익 화면의 ‘돈에 기록’과 거래의 입금 기록이 자동으로 이곳에 들어옵니다.</div></div>
+  </div>
+  <div class="card">
+    <h2><span class="bars"></span>기록하기</h2>
+    ${finAddForm("")}
+    <div class="hint" style="margin-top:6px">특정 프로젝트·매장에 붙는 돈은 그 상세 화면에서 기록하면 함께 묶입니다.</div>
+  </div>
+  <div class="card">
+    <h2><span class="bars"></span>${monLabel(ym)} 내역 <span class="cnt">${list.length}건</span></h2>
+    <div class="filters" style="margin:0 0 10px">${["전체","수입","지출"].map(k=>`<button class="fchip ${F.mnK===k?"on":""}" data-act="mn-k" data-v="${k}">${k}</button>`).join("")}<input type="search" placeholder="분류·메모·출처 검색" value="${esc(F.mnQ)}" data-act="mn-q"></div>
+    ${list.length?list.map(f=>{const [k,n]=finWhere(f);return`<div class="fin-row"><span class="fk ${f.kind==="수입"?"in":"out"}">${f.kind==="수입"?"수입":"지출"}</span><span class="mono" style="font-size:12px;color:var(--faint);white-space:nowrap">${fmtD(f.date)}</span><span class="fc">${esc(f.category)}</span><span class="fm">${esc(f.memo||"")}<em class="mn-from">${esc(k)}${n?" · "+esc(n):""}</em></span><span class="fa" style="color:${f.kind==="수입"?"#1E7F4D":"var(--ink)"}">${f.kind==="수입"?"+":"−"}${fmtWon(f.amount)}</span><button class="tk-x btn-ghost" data-act="fin-del" data-id="${f.id}" aria-label="내역 삭제" style="color:var(--faint)">✕</button></div>`;}).join(""):`<div class="empty" style="padding:18px 6px">${F.mnQ||F.mnK!=="전체"?"조건에 맞는 내역이 없습니다.":"이달 기록이 없습니다. 위에서 바로 기록하거나, 거래·확장판 손익에서 ‘돈에 기록’을 누르세요."}</div>`}
+  </div>`;
+}
+
+/* ═══════════ 확장판 — 업종과 하는 일에 맞춰 필요한 것만 켭니다 ═══════════ */
+const EXT_CAT=[
+  {id:"space",name:"마이스토어",color:"#1F7A5A",ico:"▦",who:"자영업자 · 점주 · 공간 운영자",one:"매장과 공간을 하루 단위로 굴립니다",pts:["업종 4가지 — 음식·카페, 소매·무인매장, 예약형 매장, 공간대여·숙박","예약·영업 달력과 채널별 수수료","일 마감(매출·시재)과 오픈·마감 점검","근무자 화면 — 고객 정보와 금액은 가지 않습니다","시설 신고·처리, 지점별 손익 → 돈"]},
+  {id:"commerce",name:"마이셀러",color:"#0E8A8A",ico:"▧",who:"온라인 판매자 · 부업 셀러 · 소규모 도소매",one:"주문·재고·발송·정산을 하루 한 번에 끝냅니다",pts:["채널별 주문 엑셀을 열 이름으로 자동 맞춤","상품·재고, 공급처 발주와 입고","송장 일괄 처리, 발송 담당 화면(금액 미전송)","문의·반품·교환","채널별 손익과 정산 대사 → 돈"]},
+  {id:"tax",name:"마이택스",color:"#6B4ED6",ico:"₩",who:"사업자 · 3.3% 프리랜서",one:"세금 낼 준비를 평소에 끝내 둡니다",pts:["증빙함, 세금 달력, 예상 세금(참고용)","세무사 읽기 전용 초대와 자료 묶음"],soon:"다음 순서로 준비 중"},
+  {id:"people",name:"마이피플",color:"#C2410C",ico:"◉",who:"아르바이트·직원·건당 근무자를 쓰는 사업자",one:"근무와 급여를 기록으로 남깁니다",pts:["근무표·출퇴근, 급여·건당 정산","명세서 확인 링크, 인건비 → 돈"],soon:"다음 순서로 준비 중"},
+  {id:"edu",name:"마이에듀",color:"#B45309",ico:"✎",who:"학원 · 교습소 · 공방 · 강사",one:"수강생과 수업, 수강료를 한 장부로",pts:["반·시간표·출결, 수강료 청구·수납"],soon:"준비 예정"},
+  {id:"building",name:"마이빌딩",color:"#2B4FD6",ico:"▥",who:"소규모 건물주 · 임대인",one:"임대차와 건물 관리를 혼자서 챙깁니다",pts:["호실·계약·수납·공실·법정 점검"],soon:"준비 예정"}
+];
+function vExt(){
+  const t=tier(),adm=isAdmin(),beta=isBeta();
+  return`
+  <div class="page-head"><div><h1><span class="bars"></span>확장판</h1><div class="desc">기본 마이웍스(오늘·일·거래·돈·사람)에 업종과 하는 일에 맞는 기능을 더합니다. 켜면 왼쪽 메뉴에 바로 생기고, 꺼도 데이터는 남습니다.</div></div></div>
+  ${beta?`<div class="ext-free"><b>지금은 모두 무료입니다</b><span>무료 공개 기간에는 기본 기능과 확장판을 제한 없이 씁니다. 결제를 시작하기 전에 앱 공지로 먼저 알려 드리고, 그때도 데이터는 그대로 남습니다.</span></div>`:""}
+  <div class="ext-grid">${EXT_CAT.map(x=>{const live=!x.soon,on=live&&t.modules.includes(x.id);return`
+    <div class="card ext-card ${on?"on":""} ${live?"":"soon"}" style="--ext:${x.color}">
+      <div class="ext-top"><span class="ext-ico" aria-hidden="true">${x.ico}</span><div><b class="ext-nm">${x.name}</b><div class="ext-who">${esc(x.who)}</div></div>
+        ${live?(adm?`<label class="ext-sw" title="${on?"끄기":"켜기"}"><input type="checkbox" class="mod-ck" value="${x.id}" data-act="mod-toggle" ${on?"checked":""} aria-label="${x.name} ${on?"끄기":"켜기"}"><span></span></label>`:`<span class="pill ${on?"p-green":"p-gray"}">${on?"켜짐":"꺼짐"}</span>`):`<span class="pill p-gray">${x.soon}</span>`}</div>
+      <p class="ext-one">${esc(x.one)}</p>
+      <ul class="ext-pts">${x.pts.map(p=>`<li>${esc(p)}</li>`).join("")}</ul>
+      ${on?`<button class="btn btn-sm ext-go" data-nav="${x.id}">${x.name} 열기 →</button>`:live&&!adm?`<div class="hint">켜고 끄는 것은 워크스페이스 관리자가 합니다.</div>`:""}
+    </div>`;}).join("")}</div>
+  <div class="card" style="margin-top:14px">
+    <h2>무엇을 켜면 될까요</h2>
+    <div class="ext-rec">
+      <div><b>프리랜서·외주</b><span>기본만으로 충분합니다. 거래에서 견적 → 납품 → 청구까지 이어집니다.</span></div>
+      <div><b>카페·식당·무인매장</b><span>마이스토어를 켜고 업종을 ‘음식·카페’나 ‘소매·무인매장’으로 고릅니다.</span></div>
+      <div><b>미용실·필라테스·스튜디오</b><span>마이스토어에서 ‘예약형 매장’을 고르면 담당자별 예약과 마감이 생깁니다.</span></div>
+      <div><b>파티룸·스터디룸·숙박</b><span>마이스토어 ‘공간대여·숙박’ — 예약이 들어오면 청소 일정이 자동으로 생깁니다.</span></div>
+      <div><b>스마트스토어·쿠팡 판매</b><span>마이셀러를 켜고 채널별 주문 엑셀을 올립니다.</span></div>
+      <div><b>매장 + 온라인 판매</b><span>둘 다 켜면 손익이 각각 돈 메뉴로 모입니다.</span></div>
+    </div>
   </div>`;
 }
 
@@ -2393,7 +2559,7 @@ function vMembers(){
   </div>
   ${ctOk?`<nav class="sp-tabs"><button class="${tab==="members"?"on":""}" data-act="people-tab" data-v="members">구성원 <span class="cnt mono" style="font-weight:500;font-size:12px">${DB.members.length}</span></button><button class="${tab==="contacts"?"on":""}" data-act="people-tab" data-v="contacts">연락처 <span class="cnt mono" style="font-weight:500;font-size:12px">${(DB.contacts||[]).length}</span></button></nav>`:""}
   ${tab==="contacts"?vContacts():`<div class="stack">
-  ${cloudAdmin&&lim<1000?`<div class="sp-box ${used>=lim?"warn":"info"}"><b>${planName(tier().plan)} · 구성원 ${used}/${lim}명</b>${used>=lim?"한도에 닿았습니다. 더 초대하려면 프로로 올려야 합니다.":"본인 외에 함께 일할 사람 수입니다. 승인 대기 중인 합류 요청은 포함하지 않습니다."}</div>`:""}
+  ${cloudAdmin&&lim<1000?`<div class="sp-box ${used>=lim?"warn":"info"}"><b>${planLabel()} · 구성원 ${used}/${lim}명</b>${used>=lim?"한도에 닿았습니다. "+moreHint():"본인 외에 함께 일할 사람 수입니다. 승인 대기 중인 합류 요청은 포함하지 않습니다."}</div>`:""}
   ${cloud?PPL.membersTop():""}
   ${cloudAdmin?`<div id="req-slot">${reqCardHtml()}</div>`:""}
   <div class="card">
@@ -2963,11 +3129,11 @@ function finCSV(){
   const rows=[["날짜","구분","분류","금액","대상","이름","메모","기록자"]];
   DB.finance.slice().sort((a,b)=>(a.date||"").localeCompare(b.date||"")).forEach(f=>{
     const p=f.projectId?projectById(f.projectId):null,x=f.storeId?storeById(f.storeId):null;
-    rows.push([f.date,f.kind,f.category,f.amount,p?"프로젝트":"매장",p?p.name:(x?x.name:""),f.memo||"",memberName(f.memberId)]);
+    rows.push([f.date,f.kind,f.category,f.amount,finWhere(f)[0],p?p.name:(x?x.name:""),f.memo||"",memberName(f.memberId)]);
   });
   const csv="\uFEFF"+rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(",")).join("\r\n");
-  download(`마이웍스_재무내역_${todayStr()}.csv`,csv);
-  toast("재무 내역 CSV를 내려받았습니다. 엑셀에서 바로 열립니다.");
+  download(`마이웍스_돈_${todayStr()}.csv`,csv);
+  toast("돈 내역 CSV를 내려받았습니다. 엑셀에서 바로 열립니다.");
 }
 function storeFormModal(st){
   const isNew=!st;
@@ -3056,24 +3222,23 @@ async function mfSave(id){
 }
 /* ═══════════ 등급·모듈 ═══════════ */
 function tierCard(){
-  const t=tier(),pro=t.plan==="pro";
+  const t=tier(),pro=t.plan==="pro",beta=isBeta();
   const used={brands:DB.brands.length,members:DB.members.filter(m=>m.active!==false).length-1};
   const limTxt=k=>t.limits[k]>=1000?"제한 없음":t.limits[k];
+  const on=EXT_ROUTES.filter(m=>t.modules.includes(m));
   return`<div class="tier-card">
-    <label style="margin-top:0">등급과 모듈</label>
-    <div class="tier-head"><b class="tier-name ${pro?"pro":""}">${planName(t.plan)}</b>${pro&&t.planUntil?`<span class="hint">${fmtD(t.planUntil)}까지</span>`:""}${t.legacy?`<span class="hint">서버를 최신으로 올리면 등급이 표시됩니다</span>`:""}</div>
+    <label style="margin-top:0">이용 상태</label>
+    <div class="tier-head"><b class="tier-name ${pro?"pro":""}">${planLabel()}</b>${beta?`<span class="hint">결제를 시작하기 전까지 모든 기능과 확장판을 무료로 씁니다</span>`:pro&&t.planUntil?`<span class="hint">${fmtD(t.planUntil)}까지</span>`:""}${t.legacy?`<span class="hint">서버를 최신으로 올리면 등급이 표시됩니다</span>`:""}</div>
     <div class="tier-lim">브랜드 ${used.brands}/${limTxt("brands")} · 구성원 ${used.members}/${limTxt("members")} · AI 토큰 ${limTxt("tokens")}개</div>
-    <div class="mod-list">
-      ${MOD_ROUTES.map(m=>`<label class="mod-item ${t.modules.includes(m)?"on":""} ${pro?"":"off"}"><input type="checkbox" class="mod-ck" value="${m}" data-act="mod-toggle" ${t.modules.includes(m)?"checked":""} ${pro?"":"disabled"}><span><b>마이웍스 ${MOD_LABEL[m]}</b><em>${MOD_DESC[m]}</em></span></label>`).join("")}
-    </div>
-    <div class="hint">${pro?"모듈을 끄면 메뉴에서 사라질 뿐 데이터는 남습니다. 다시 켜면 그대로 보입니다.":"모듈과 쓰기 토큰, 구성원 추가 한도는 프로에서 열립니다. 프로 전환은 운영자(마이웍스 관리자)가 워크스페이스 단위로 설정합니다."}</div>
+    <div class="tier-ext"><span>확장판 ${on.length?on.map(m=>`<b>${MOD_LABEL[m]}</b>`).join(" · "):"켠 것 없음"}</span><button class="btn btn-sm" data-nav="ext">확장판 관리 →</button></div>
   </div>`;
 }
 async function toggleModule(el){
-  const mods=$$(".mod-ck:checked").map(x=>x.value);
+  const want=new Set(tier().modules.filter(m=>EXT_ROUTES.includes(m)));
+  if(el.checked)want.add(el.value);else want.delete(el.value);
   el.disabled=true;
-  try{const res=await api("ws/modules",{modules:mods});CLOUD.tier.modules=res.modules||[];persistMeta();renderNav();const lab=el.closest(".mod-item");if(lab)lab.classList.toggle("on",el.checked);toast(el.checked?`${MOD_LABEL[el.value]} 모듈을 켰습니다. 메뉴에 추가됐습니다.`:`${MOD_LABEL[el.value]} 모듈을 껐습니다.`);}
-  catch(e){el.checked=!el.checked;if(e.code!=="unauthorized")toast(e.code==="plan-limit"?planLimitMsg(e.data):"변경하지 못했습니다.");}
+  try{const res=await api("ws/modules",{modules:[...want]});CLOUD.tier.modules=res.modules||[];persistMeta();renderNav();toast(el.checked?`${MOD_LABEL[el.value]}을(를) 켰습니다. 왼쪽 메뉴에 추가됐습니다.`:`${MOD_LABEL[el.value]}을(를) 껐습니다. 데이터는 그대로 남습니다.`);if(location.hash.startsWith("#/ext"))route();}
+  catch(e){el.checked=!el.checked;if(e.code!=="unauthorized")toast(e.code==="plan-limit"?planLimitMsg(e.data):e.code==="forbidden"?"확장판은 워크스페이스 관리자가 켜고 끕니다.":"변경하지 못했습니다.");}
   el.disabled=false;
 }
 /* 운영 콘솔 — 워크스페이스 등급 설정 */
@@ -3083,8 +3248,8 @@ function planModal(w){
   <h2><span class="bars"></span>등급 설정 — ${esc(w.name)}</h2>
   <label>등급</label><select id="pl-plan"><option value="basic" ${w.plan!=="pro"?"selected":""}>마이웍스 베이직 (무료)</option><option value="pro" ${w.plan==="pro"?"selected":""}>마이웍스 프로</option></select>
   <label>프로 기한 <span style="font-weight:500;color:var(--faint)">(비우면 무기한)</span></label><input id="pl-until" type="date" value="${esc(w.planUntil||"")}">
-  <label>모듈 (프로에서만 적용)</label>
-  <div class="mod-list">${MOD_ROUTES.map(m=>`<label class="mod-item ${mods.includes(m)?"on":""}"><input type="checkbox" class="pl-mod" value="${m}" ${mods.includes(m)?"checked":""}><span><b>${MOD_LABEL[m]}</b><em>${MOD_DESC[m]}</em></span></label>`).join("")}</div>
+  <label>확장판 ${"<span style='font-weight:500;color:var(--faint)'>(무료 공개 기간에는 등급과 관계없이 켠 대로 씁니다)</span>"}</label>
+  <div class="mod-list">${EXT_ROUTES.map(m=>`<label class="mod-item ${mods.includes(m)?"on":""}"><input type="checkbox" class="pl-mod" value="${m}" ${mods.includes(m)?"checked":""}><span><b>${MOD_LABEL[m]}</b><em>${MOD_DESC[m]}</em></span></label>`).join("")}</div>
   <label>한도 직접 지정 <span style="font-weight:500;color:var(--faint)">(비우면 등급 기본값 — 베이직 2/2/1, 프로 무제한/10/20)</span></label>
   <div class="m-grid3">
     <div><input id="pl-brands" type="number" min="0" placeholder="브랜드" value="${L.brands??""}"></div>
@@ -3141,7 +3306,7 @@ function tokenModal(){
   <label>이름</label><input id="tk-name" maxlength="40" placeholder="예: 클로드 데스크톱, 사무실 노트북">
   <label>권한</label>
   <select id="tk-scope"><option value="read">읽기 — 현황을 묻고 정리만 합니다</option><option value="write" ${pro?"":"disabled"}>쓰기 — 업무·메모·연락처 변경을 제안합니다${pro?"":" (프로)"}</option></select>
-  ${t.modules.length?`<label>모듈 데이터 접근</label><div class="mod-list">${t.modules.map(m=>`<label class="mod-item on"><input type="checkbox" class="tk-mod" value="${m}" checked><span><b>${MOD_LABEL[m]}</b><em>${MOD_DESC[m]}</em></span></label>`).join("")}</div>`:""}
+  ${t.modules.length?`<label>거래·확장판 데이터 접근</label><div class="mod-list">${t.modules.map(m=>`<label class="mod-item on"><input type="checkbox" class="tk-mod" value="${m}" checked><span><b>${MOD_LABEL[m]}</b><em>${MOD_DESC[m]}</em></span></label>`).join("")}</div>`:""}
   <div class="hint" style="margin-top:12px">토큰은 만든 사람의 역할·권한 범위 안에서만 읽습니다. 쓰기 토큰도 데이터를 바로 고치지 않고 '제안'을 올리며, 관리자·직원이 승인해야 반영됩니다. 시간당 60회, 하루 1,500회까지 쓸 수 있습니다.</div>
   <div class="m-foot"><button class="btn btn-ghost" data-g="modal-close">취소</button><button class="btn btn-pri" data-act="tk-create">발급</button></div>`);
 }
@@ -4680,7 +4845,7 @@ const IV_ST={issued:["청구","p-blue"],paid:["입금","p-green"],void:["취소"
 const TAX={vat:"부가세 10% 별도 (세금계산서)",wh33:"원천징수 3.3% 공제",none:"세금 계산 없음"};
 const OS={ready:false,loading:null,err:"",v:-1,at:0,stale:false,settings:null,jobs:[],quotes:[],invoices:[]};
 const U={jobF:"open",q:"",qtF:"all",ivF:"issued",draft:null};
-const ERR={forbidden:"권한이 없습니다.","not-found":"대상을 찾을 수 없습니다. 새로고침 후 다시 시도하세요.",locked:"승인·입금이 끝난 항목은 고칠 수 없습니다.","has-paid":"입금된 청구서가 있는 안건은 삭제할 수 없습니다. 완료로 두세요.","bad-request":"입력 내용을 확인해 주세요.","module-off":"아웃소싱 모듈이 꺼져 있습니다. 설정에서 켜 주세요.","plan-limit":"현재 등급에서는 쓸 수 없습니다."};
+const ERR={forbidden:"권한이 없습니다.","not-found":"대상을 찾을 수 없습니다. 새로고침 후 다시 시도하세요.",locked:"승인·입금이 끝난 항목은 고칠 수 없습니다.","has-paid":"입금된 청구서가 있는 안건은 삭제할 수 없습니다. 완료로 두세요.","bad-request":"입력 내용을 확인해 주세요.","module-off":"거래 기능을 쓸 수 없습니다. 새로고침해 주세요.","plan-limit":"현재 등급에서는 쓸 수 없습니다."};
 const errMsg=e=>e&&e.code==="unauthorized"?"":(e&&ERR[e.code])||"처리하지 못했습니다. 잠시 후 다시 시도하세요.";
 const failToast=e=>{const m=errMsg(e);if(m)toast(m);};
 const fmt=n=>Math.round(Number(n)||0).toLocaleString("ko-KR");
@@ -4725,7 +4890,7 @@ function shell(sub,inner,head){
   const h=head||{};
   $("#view").innerHTML=`
   <div class="page-head">
-    <div><h1><span class="bars"></span>${esc(h.title||"아웃소싱")}</h1><div class="desc">${h.desc||"고객·안건 → 견적 → 진행·납품 → 청구·입금을 한곳에서 관리합니다."}</div></div>
+    <div><h1><span class="bars"></span>${esc(h.title||"거래")}</h1><div class="desc">${h.desc||"고객·안건 → 견적 → 진행·납품 → 청구·입금을 한곳에서 관리합니다."}</div></div>
     ${h.actions||""}
   </div>
   <nav class="sp-tabs">${TABS.map(([k,l])=>`<button class="${sub===k?"on":""}" data-os="go" data-to="${k}">${l}${cnt[k]?`<b class="nbadge">${cnt[k]}</b>`:""}</button>`).join("")}</nav>
@@ -4855,7 +5020,7 @@ function invRow(v,inJob){
     <div class="os-amt num">${fmt(v.net)}원<div class="hint">공급가 ${fmt(v.amount)}</div></div>
     <div class="os-acts">
       ${v.status==="issued"?`<button class="btn btn-sm btn-pri" data-os="inv-paid" data-id="${v.id}">입금 확인</button><button class="btn btn-sm" data-os="inv-link" data-id="${v.id}">청구 링크</button><button class="btn btn-sm" data-os="inv-open" data-id="${v.id}">수정</button>`:""}
-      ${v.status==="paid"&&!v.fin_id?`<button class="btn btn-sm" data-os="inv-fin" data-id="${v.id}">재무에 기록</button>`:""}
+      ${v.status==="paid"&&!v.fin_id?`<button class="btn btn-sm" data-os="inv-fin" data-id="${v.id}">돈에 기록</button>`:""}
       ${v.status==="paid"?`<button class="btn btn-sm btn-ghost" data-os="inv-unpay" data-id="${v.id}">입금 취소</button>`:`<button class="btn btn-sm btn-ghost" data-os="inv-del" data-id="${v.id}">삭제</button>`}
     </div>
   </div>`;
@@ -5057,16 +5222,16 @@ async function invPaid(id,undo){
   const v=invById(id);if(!v)return;
   let paid_at=todayStr();
   if(!undo){const d=prompt("입금일을 입력하세요 (YYYY-MM-DD). 비우면 오늘로 기록합니다.",todayStr());if(d===null)return;paid_at=/^\d{4}-\d{2}-\d{2}$/.test(d.trim())?d.trim():todayStr();}
-  try{const r=await call("invoice/save",undo?{id,status:"issued"}:{id,status:"paid",paid_at});upd(OS.invoices,r.invoice);await load();if(!undo&&U.ivF==="issued")U.ivF="paid";if(onPage())route();toast(undo?"입금 확인을 취소했습니다.":"입금을 확인했습니다. 재무에 수입으로 기록할 수 있습니다.");}
+  try{const r=await call("invoice/save",undo?{id,status:"issued"}:{id,status:"paid",paid_at});upd(OS.invoices,r.invoice);await load();if(!undo&&U.ivF==="issued")U.ivF="paid";if(onPage())route();toast(undo?"입금 확인을 취소했습니다.":"입금을 확인했습니다. 돈에 수입으로 기록할 수 있습니다.");}
   catch(e){failToast(e);}
 }
 async function invToFinance(id){
   const v=invById(id);if(!v||v.status!=="paid"||v.fin_id)return;
   const j=jobById(v.job_id);
   const cats=DB.finCats.income||[];const cat=cats.includes("매출")?"매출":(cats[0]||"매출");
-  const f={id:uid("f"),projectId:"",storeId:"",kind:"수입",amount:Number(v.net)||0,category:cat,date:v.paid_at||todayStr(),memo:`외주 입금 · ${j?j.title:""} ${v.no||""}`.trim(),memberId:ME.id,createdAt:new Date().toISOString()};
-  DB.finance.push(f);logAct(`외주 청구 ${v.no||""} 입금 ${fmtWon(f.amount)}을 재무에 기록했습니다.`);saveDB();
-  try{const r=await call("invoice/save",{id,status:"paid",paid_at:v.paid_at,fin_id:f.id});upd(OS.invoices,r.invoice);if(onPage())route();toast("재무 수입으로 기록했습니다. 홈의 이달 재무에 합산됩니다.");}
+  const f={id:uid("f"),projectId:"",storeId:"",kind:"수입",amount:Number(v.net)||0,category:cat,date:v.paid_at||todayStr(),memo:`거래 입금 · ${j?j.title:""} ${v.no||""}`.trim(),memberId:ME.id,createdAt:new Date().toISOString(),source:"outsourcing"};
+  DB.finance.push(f);logAct(`청구서 ${v.no||""} 입금 ${fmtWon(f.amount)}을 돈에 기록했습니다.`);saveDB();
+  try{const r=await call("invoice/save",{id,status:"paid",paid_at:v.paid_at,fin_id:f.id});upd(OS.invoices,r.invoice);if(onPage())route();toast("돈에 수입으로 기록했습니다. 돈 메뉴와 홈의 이달 손익에 합산됩니다.");}
   catch(e){failToast(e);}
 }
 
@@ -5097,7 +5262,7 @@ document.addEventListener("click",async e=>{
     case"inv-open":{const v=invById(id);if(v)invModal(v);break;}
     case"inv-save":invSave(id,b.dataset.jid);break;
     case"inv-paid":invPaid(id,false);break;
-    case"inv-unpay":if(confirm("입금 확인을 취소할까요? 재무에 기록한 내역은 따로 지워야 합니다."))invPaid(id,true);break;
+    case"inv-unpay":if(confirm("입금 확인을 취소할까요? 돈에 기록한 내역은 돈 메뉴에서 따로 지워야 합니다."))invPaid(id,true);break;
     case"inv-link":makeLink("invoice",id,"청구서 확인 링크");break;
     case"inv-fin":invToFinance(id);break;
     case"inv-del":{const v=invById(id);if(!v)break;if(!confirm(`청구서 ${v.no||""}을(를) 삭제할까요?`))break;try{await call("invoice/del",{id});OS.invoices=OS.invoices.filter(x=>x.id!==id);if(onPage())route();toast("삭제했습니다.");}catch(err){failToast(err);}break;}
@@ -5114,10 +5279,10 @@ document.addEventListener("input",e=>{const el=e.target;if(el.dataset&&el.datase
 /* ── 마이웍스 다른 화면과의 연결 ── */
 function view(arg){
   const parts=String(arg||"").split("/"),sub=parts[0]||"";
-  if(!usable()){$("#view").innerHTML=`<div class="page-head"><div><h1><span class="bars"></span>아웃소싱</h1></div></div><div class="card"><div class="empty"><b>이 계정에서는 쓸 수 없습니다</b>아웃소싱은 관리자·직원이 클라우드 모드에서 씁니다.</div></div>`;return;}
-  if(!modOn("outsourcing")){$("#view").innerHTML=`<div class="page-head"><div><h1><span class="bars"></span>아웃소싱</h1></div></div><div class="card"><div class="empty"><b>아웃소싱 모듈이 꺼져 있습니다</b>${isPro()?"설정 → 등급과 모듈에서 켜면 메뉴에 나타납니다.":"모듈은 마이웍스 프로에서 켤 수 있습니다."}</div></div>`;return;}
+  if(!usable()){$("#view").innerHTML=`<div class="page-head"><div><h1><span class="bars"></span>거래</h1></div></div><div class="card"><div class="empty"><b>이 계정에서는 쓸 수 없습니다</b>거래는 관리자·직원이 클라우드 모드에서 씁니다.</div></div>`;return;}
+  if(!modOn("outsourcing")){$("#view").innerHTML=`<div class="page-head"><div><h1><span class="bars"></span>거래</h1></div></div><div class="card"><div class="empty"><b>거래를 불러오지 못했습니다</b>서버를 최신으로 올리면 거래 메뉴가 켜집니다.</div></div>`;return;}
   if(!OS.ready){
-    $("#view").innerHTML=`<div class="page-head"><div><h1><span class="bars"></span>아웃소싱</h1></div></div><div class="card"><div class="empty">${OS.err?`<b>불러오지 못했습니다</b>${esc(OS.err)}<div style="margin-top:12px"><button class="btn btn-sm" id="os-retry">다시 시도</button></div>`:"불러오는 중…"}</div></div>`;
+    $("#view").innerHTML=`<div class="page-head"><div><h1><span class="bars"></span>거래</h1></div></div><div class="card"><div class="empty">${OS.err?`<b>불러오지 못했습니다</b>${esc(OS.err)}<div style="margin-top:12px"><button class="btn btn-sm" id="os-retry">다시 시도</button></div>`:"불러오는 중…"}</div></div>`;
     const rb=$("#os-retry");if(rb)rb.onclick=()=>{OS.err="";view(arg);};
     if(!OS.loading&&!OS.err)ensure().then(()=>{if(onPage())route();}).catch(e=>{if(e.code==="unauthorized")return;OS.err=errMsg(e)||"잠시 후 다시 시도해 주세요.";if(onPage())route();});
     return;
@@ -5135,8 +5300,8 @@ function fillDash(){
   const awaiting=OS.quotes.filter(q=>q.status==="sent").length,replies=OS.quotes.filter(q=>q.status==="changed");
   const issued=OS.invoices.filter(v=>v.status==="issued"),unpaid=issued.reduce((s,v)=>s+Number(v.net||0),0),overdue=issued.filter(v=>v.due_date&&v.due_date<today);
   const due=open.filter(j=>j.due&&j.due>=today&&j.due<=wk).length,late=open.filter(j=>j.due&&j.due<today).length;
-  if(!OS.jobs.length){el.innerHTML=`<div class="card" style="padding:14px 20px;display:flex;gap:12px;align-items:center;flex-wrap:wrap"><span style="font-size:13.5px;color:var(--sub);flex:1;min-width:220px"><b style="color:var(--ink)">아웃소싱</b> — 들어온 문의를 안건으로 올리고 견적·청구서를 링크로 보내 보세요.</span><button class="btn btn-sm" data-nav="outsourcing">시작하기 →</button></div>`;}
-  else el.innerHTML=`<div class="card"><h2><span class="bars"></span>외주 현황 <span class="cnt">${open.length}건 진행</span><button class="btn btn-sm btn-ghost" data-nav="outsourcing" style="margin-left:auto">아웃소싱 열기 →</button></h2>
+  if(!OS.jobs.length){el.innerHTML=`<div class="card" style="padding:14px 20px;display:flex;gap:12px;align-items:center;flex-wrap:wrap"><span style="font-size:13.5px;color:var(--sub);flex:1;min-width:220px"><b style="color:var(--ink)">거래</b> — 들어온 문의를 안건으로 올리고 견적·청구서를 링크로 보내 보세요.</span><button class="btn btn-sm" data-nav="outsourcing">시작하기 →</button></div>`;}
+  else el.innerHTML=`<div class="card"><h2><span class="bars"></span>거래 현황 <span class="cnt">${open.length}건 진행</span><button class="btn btn-sm btn-ghost" data-nav="outsourcing" style="margin-left:auto">거래 열기 →</button></h2>
     <div class="sp-today"><span class="bchip ${late?"warn":""}" data-os="go" data-to="jobs"><b>${late}</b>납기 지남</span><span class="bchip" data-os="go" data-to="jobs"><b>${due}</b>7일 내 납기</span><span class="bchip ${replies.length?"warn":awaiting?"rev":""}" data-os="go" data-to="quotes"><b>${awaiting+replies.length}</b>견적 회신 대기</span><span class="bchip ${overdue.length?"warn":""}" data-os="go" data-to="bills"><b>${fmt(unpaid)}</b>미수금(원)</span></div></div>`;
   if(dec){
     const rows=[];
@@ -5155,7 +5320,7 @@ function weekText(s0,s1){
   const open=OS.jobs.filter(j=>!["done","hold"].includes(j.status));
   const paid=OS.invoices.filter(v=>v.status==="paid"&&v.paid_at>=s0&&v.paid_at<=s1).reduce((s,v)=>s+Number(v.net),0);
   const unpaid=OS.invoices.filter(v=>v.status==="issued").reduce((s,v)=>s+Number(v.net),0);
-  return`\n## 외주 (아웃소싱)\n- 진행 중 안건 ${open.length}건 · 견적 회신 대기 ${OS.quotes.filter(q=>["sent","changed"].includes(q.status)).length}건\n- 이번 주 입금 ${fmtWon(paid)} · 미수금 ${fmtWon(unpaid)}\n`;
+  return`\n## 거래 (수주·납품)\n- 진행 중 안건 ${open.length}건 · 견적 회신 대기 ${OS.quotes.filter(q=>["sent","changed"].includes(q.status)).length}건\n- 이번 주 입금 ${fmtWon(paid)} · 미수금 ${fmtWon(unpaid)}\n`;
 }
 return{view,fillDash,onVersion,reset,refresh,weekText};
 })();
@@ -5595,7 +5760,7 @@ function pnlToFinance(){
   if(!confirm(`${ymLabel(ym)} 커머스 손익을 재무에 기록할까요?\n수입 ${fmt(T.rev)}원 · 지출 ${fmt(T.fee+T.ship+T.cogs+T.ads+T.misc)}원`))return;
   const date=ym+"-"+pad2(Math.min(daysIn(ym),Number(todayStr().slice(8))||1));const tag=`커머스 ${ymLabel(ym)}`;
   const inc=DB.finCats.income,exp=DB.finCats.expense;const pick=(list,want,def)=>list.includes(want)?want:(list[0]||def);
-  const add=(kind,amount,cat,what)=>{if(amount>0)DB.finance.push({id:uid("f"),projectId:"",storeId:"",kind,amount:Math.round(amount),category:cat,date,memo:`${tag} ${what}`,memberId:ME.id,createdAt:new Date().toISOString()});};
+  const add=(kind,amount,cat,what)=>{if(amount>0)DB.finance.push({id:uid("f"),projectId:"",storeId:"",kind,amount:Math.round(amount),category:cat,date,memo:`${tag} ${what}`,memberId:ME.id,createdAt:new Date().toISOString(),source:"commerce"});};
   add("수입",T.rev,pick(inc,"매출","매출"),"매출");add("지출",T.fee,pick(exp,"수수료","기타"),"채널 수수료");add("지출",T.ship,pick(exp,"기타","기타"),"배송비");add("지출",T.cogs,pick(exp,"자재·비품","기타"),"상품 원가");add("지출",T.ads,pick(exp,"마케팅","기타"),"광고비");add("지출",T.misc,pick(exp,"기타","기타"),"기타 비용");
   logAct(`${tag} 손익을 재무에 기록했습니다.`);saveDB();route();toast("재무에 기록했습니다. 홈의 이달 재무에 합산됩니다.");
 }
@@ -5757,7 +5922,7 @@ const FB_KIND={error:["오류","p-red"],inconvenient:["불편","p-amber"],idea:[
 const FB_ST={new:["새 문의","p-red"],doing:["처리 중","p-amber"],done:["완료","p-green"]};
 const ANN_LV={info:["안내","p-blue"],important:["중요","p-red"],maint:["점검","p-amber"]};
 const LOG_LB={approve:"개설 승인",reject:"신청 반려",suspend:"이용 중지",activate:"이용 재개",delete:"워크스페이스 삭제",resetpw:"비밀번호 초기화",plan:"등급·모듈",note:"운영 메모",extend:"기한 연장","pay-add":"결제 기록","pay-edit":"결제 수정","pay-delete":"결제 삭제","code-add":"베타 코드","code-toggle":"베타 코드","code-delete":"베타 코드",fb:"문의",ann:"공지",settings:"플랫폼 설정","err-clear":"오류 기록",export:"전체 백업","auto-open":"바로 개설",ref:"소개 보상",team:"운영팀","acct-unlock":"잠금 풀기","acct-logout":"강제 로그아웃","acct-resetpw":"임시 비밀번호","key-ok":"보안 키 확인","key-fail":"보안 키 실패",recover:"운영자 복구","recover-fail":"복구 실패"};
-const PAY_ITEMS=["프로 1개월","프로 1년","프로 + 스페이스 1개월","프로 + 커머스 1개월","프로 + 아웃소싱 1개월","추가 좌석","기타"];
+const PAY_ITEMS=["프로 1개월","프로 1년","프로 + 마이스토어 1개월","프로 + 마이셀러 1개월","추가 좌석","기타"];
 const fmt=n=>Math.round(Number(n)||0).toLocaleString("ko-KR");
 const onPage=()=>/^#\/admin(\/|$)/.test(location.hash);
 const usable=()=>MODE==="cloud"&&!!CLOUD.op;
@@ -5895,6 +6060,7 @@ function vHome(){
   const P=can("pay"),payTab=P?"pay":"ws";
   const todo=[];
   if(A.gate&&!A.gate.keySet&&can("team"))todo.push(["p-red","보안 키",A.gate.keyShort?"MW_ADMIN_KEY가 8자보다 짧아 꺼져 있습니다":"Cloudflare에 보안 키(MW_ADMIN_KEY)를 아직 넣지 않았습니다","team","설정 방법"]);
+  if(s.freeBeta&&PL().signup!=="open"&&can("signup"))todo.push(["p-amber","무료 공개",`가입 방식이 ‘${(POL[PL().signup]||["승인제"])[0]}’입니다. 누구나 바로 시작하게 하려면 ‘자동 개설’로 바꾸세요`,"signup","바꾸기"]);
   if(pend.length)todo.push(["p-red","가입 신청",`새 워크스페이스 개설 신청 ${pend.length}건`,can("signup")?"signup":"ws","확인"]);
   if(s.fbNew&&can("fb"))todo.push(["p-red","문의",`새 문의 ${s.fbNew}건${s.fbDoing?` · 처리 중 ${s.fbDoing}건`:""}`,"fb","답변"]);
   if(soon.length)todo.push(["p-amber","기한 임박",`프로 기한이 7일 안에 끝나는 곳 ${soon.length}곳 — ${soon.slice(0,3).map(w=>esc(w.name)).join(", ")}`,payTab,P?"결제·연장":"보기"]);
@@ -5905,9 +6071,10 @@ function vHome(){
   // 주별 가입 추이 (8주)
   const weeks=[];for(let i=7;i>=0;i--){const st=addDaysStr(mondayOf(todayStr()),-7*i),en=addDaysStr(st,7);weeks.push({st,n:W.filter(w=>w.status!=="rejected"&&(w.createdAt||"").slice(0,10)>=st&&(w.createdAt||"").slice(0,10)<en).length});}
   const mx=Math.max(1,...weeks.map(x=>x.n));
-  const modUse=MOD_ROUTES.map(m=>[m,pro.filter(w=>(w.modules||[]).includes(m)).length]);
+  const modUse=EXT_ROUTES.map(m=>[m,W.filter(w=>w.status==="active"&&(w.modules||[]).includes(m)).length]);
   const tot=k=>W.reduce((a,w)=>a+((w.usage||{})[k]||0),0);
   return`
+  ${s.freeBeta?`<div class="ext-free"><b>무료 공개 기간</b><span>모든 워크스페이스가 프로 기능과 확장판을 무료로 씁니다. 아래 등급·예상 매출은 결제를 시작한 뒤 적용될 기준입니다.</span></div>`:""}
   <div class="stats adm-stats">
     ${stat(act.length,"곳","이용 중 워크스페이스",`최근 7일 활동 ${act.filter(active7).length}곳`)}
     ${stat(pend.length,"건","승인 대기","",pend.length>0)}
@@ -6071,7 +6238,7 @@ function vSignup(){
     <div class="adm-form">
       <div><label>등급</label><select id="adm-np-plan"><option value="basic" ${p.newPlan.plan!=="pro"?"selected":""}>베이직 (무료)</option><option value="pro" ${p.newPlan.plan==="pro"?"selected":""}>프로 체험</option></select></div>
       <div><label>체험 기간 (일, 0이면 기한 없음)</label><input id="adm-np-days" type="number" min="0" max="3650" value="${p.newPlan.days||0}"></div>
-      <div class="full"><label>체험에 켤 모듈</label><div class="adm-mods">${MOD_ROUTES.map(m=>`<label class="adm-check"><input type="checkbox" class="adm-np-mod" value="${m}" ${(p.newPlan.modules||[]).includes(m)?"checked":""}> ${MOD_LABEL[m]}</label>`).join("")}</div></div>
+      <div class="full"><label>체험에 켤 확장판</label><div class="adm-mods">${EXT_ROUTES.map(m=>`<label class="adm-check"><input type="checkbox" class="adm-np-mod" value="${m}" ${(p.newPlan.modules||[]).includes(m)?"checked":""}> ${MOD_LABEL[m]}</label>`).join("")}</div></div>
       <div class="full"><label>고객 문의 연락처 <span class="hint">가입 화면과 문의 창에 보입니다</span></label><input id="adm-contact" maxlength="80" value="${esc(p.contact||"")}" placeholder="예: help@myworks.ai.kr 또는 카카오톡 채널 주소"></div>
       <div class="full"><label>소개 보상 <span class="hint">사용자의 소개 링크로 열린 워크스페이스와 소개한 워크스페이스 모두에 프로 기한을 더합니다 · 0이면 보상 없음</span></label><div style="display:flex;align-items:center;gap:8px"><input id="adm-ref-days" type="number" min="0" max="365" value="${Number(p.refDays)||0}" style="max-width:120px"><span class="hint">일</span></div></div>
     </div>
@@ -6085,7 +6252,7 @@ function vSignup(){
       <div><label>코드 직접 정하기 <span class="hint">(선택)</span></label><input id="adm-c-code" maxlength="16" placeholder="비우면 자동 생성" style="text-transform:uppercase;font-family:var(--mono)"></div>
       <div><label>등급</label><select id="adm-c-plan"><option value="pro">프로</option><option value="basic">베이직</option></select></div>
       <div><label>프로 기간 (일, 0이면 기한 없음)</label><input id="adm-c-days" type="number" min="0" max="3650" value="90"></div>
-      <div class="full"><label>켤 모듈</label><div class="adm-mods">${MOD_ROUTES.map(m=>`<label class="adm-check"><input type="checkbox" class="adm-c-mod" value="${m}"> ${MOD_LABEL[m]}</label>`).join("")}</div></div>
+      <div class="full"><label>켤 확장판</label><div class="adm-mods">${EXT_ROUTES.map(m=>`<label class="adm-check"><input type="checkbox" class="adm-c-mod" value="${m}"> ${MOD_LABEL[m]}</label>`).join("")}</div></div>
       <div><label>최대 사용 횟수 (0이면 제한 없음)</label><input id="adm-c-max" type="number" min="0" value="20"></div>
       <div><label>만료일 <span class="hint">(선택)</span></label><input id="adm-c-exp" type="date"></div>
     </div>
@@ -6131,7 +6298,7 @@ function vPay(){
   <div class="card" style="margin-top:14px">
     <h2>가격표</h2><div class="hint" style="margin:-6px 0 4px">예상 월 정기 매출 계산에만 씁니다. 실제 청구 금액이 아닙니다.</div>
     <div class="adm-form adm-prices">
-      ${[["pro","마이웍스 프로"],["space","스페이스 (마이스토어)"],["commerce","커머스 (마이셀러)"],["outsourcing","아웃소싱 (거래)"],["seat","추가 좌석 1명"]].map(([k,l])=>`<div><label>${l}</label><input type="number" min="0" class="adm-price" data-k="${k}" value="${p[k]||0}"></div>`).join("")}
+      ${[["pro","마이웍스 프로"],["space","마이스토어"],["commerce","마이셀러"],["outsourcing","거래 (기본)"],["seat","추가 좌석 1명"]].map(([k,l])=>`<div><label>${l}</label><input type="number" min="0" class="adm-price" data-k="${k}" value="${p[k]||0}"></div>`).join("")}
     </div>
     <div class="adm-row"><span></span><button class="btn btn-sm btn-pri" data-adm="price-save">가격표 저장</button></div>
   </div>`;
@@ -7039,7 +7206,7 @@ function drawInvite(){
     <div><label>링크 유효 기간</label><select id="iv-days">${[7,14,30].map(d=>`<option value="${d}" ${d===V.days?"selected":""}>${d}일</option>`).join("")}</select></div>
     <div style="display:flex;align-items:flex-end"><label class="pp-chk" style="margin-bottom:9px"><input type="checkbox" id="iv-save" ${V.save?"checked":""}> 새로 적은 사람은 연락처에도 저장</label></div>
   </div>
-  ${lim<1000?`<div class="sp-box ${used+V.people.length>lim?"warn":"info"}" style="margin-top:12px">${planName(tier().plan)} · 구성원 ${used}/${lim}명. ${used+V.people.length>lim?"초대한 사람이 모두 들어오면 한도를 넘습니다. 한도를 넘은 사람은 참여할 수 없으니 먼저 등급을 확인하세요.":"초대한 사람이 아이디를 만들면 구성원 수에 들어갑니다."}</div>`:""}
+  ${lim<1000?`<div class="sp-box ${used+V.people.length>lim?"warn":"info"}" style="margin-top:12px">${planLabel()} · 구성원 ${used}/${lim}명. ${used+V.people.length>lim?"초대한 사람이 모두 들어오면 한도를 넘습니다. 한도를 넘은 사람은 참여할 수 없으니 먼저 등급을 확인하세요.":"초대한 사람이 아이디를 만들면 구성원 수에 들어갑니다."}</div>`:""}
   <div class="m-foot"><button class="btn btn-ghost" data-g="modal-close">취소</button><button class="btn btn-pri" data-pp="iv-go" ${V.people.length?"":"disabled"}>${V.people.length?V.people.length+"명에게 ":""}초대 링크 만들기</button></div>
   </div>`);
 }
@@ -7399,7 +7566,7 @@ document.addEventListener("click",e=>{
   const g=e.target.closest("[data-g]");
   if(g){const v=g.dataset.g;if(v==="logout")doLogout();else if(v==="settings")settingsModal();else if(v==="modal-close")closeModal();return;}
   const nb=e.target.closest("[data-nav]");
-  if(nb){go("#/"+nb.dataset.nav);return;}
+  if(nb){if($("#modal-root").classList.contains("show"))closeModal();go("#/"+nb.dataset.nav);return;}
   const b=e.target.closest("[data-act]");
   if(!b)return;
   const act=b.dataset.act,id=b.dataset.id;
@@ -7471,9 +7638,12 @@ document.addEventListener("click",e=>{
     case"pl-note-save":{const tx=$("#pl-note").value;let n=plNote();if(n){n.text=tx;n.updatedAt=new Date().toISOString();}else if(tx.trim()){DB.plans.push({id:uid("p"),memberId:ME.id,scope:F.plMode,key:plKey(),type:"note",text:tx,done:false,createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()});}saveDB();toast("노트를 저장했습니다.");break;}
     case"dash-mine":F.dashMine=b.dataset.v==="1";route();break;
     case"st-mon":{const nk=monShift(F.stMonth,Number(b.dataset.d));if(nk>monKey())break;F.stMonth=nk;route();break;}
-    case"fin-add":{if(!canFinance())break;const pid=b.dataset.pid||"",sid=b.dataset.sid||"";const amt=Math.round(Number($("#fa-amt").value)||0);if(amt<=0){toast("금액을 입력하세요.");break;}const kind=$("#fa-kind").value,cat=$("#fa-cat").value,date=$("#fa-date").value||todayStr(),memo=$("#fa-memo").value.trim();DB.finance.push({id:uid("f"),projectId:pid,storeId:sid,kind,amount:amt,category:cat,date,memo,memberId:ME.id,createdAt:new Date().toISOString()});const tgt=pid?projectById(pid):storeById(sid);if(tgt)tgt.updatedAt=new Date().toISOString();logAct(`${pid?`"${tgt?tgt.name:""}"`:`매장 "${tgt?tgt.name:""}"`}에 ${kind} ${fmtWon(amt)}을 기록했습니다.`);saveDB();route();break;}
+    case"fin-add":{if(!canFinance())break;const pid=b.dataset.pid||"",sid=b.dataset.sid||"";const amt=Math.round(Number($("#fa-amt").value)||0);if(amt<=0){toast("금액을 입력하세요.");break;}const kind=$("#fa-kind").value,cat=$("#fa-cat").value,date=$("#fa-date").value||todayStr(),memo=$("#fa-memo").value.trim();DB.finance.push({id:uid("f"),projectId:pid,storeId:sid,kind,amount:amt,category:cat,date,memo,memberId:ME.id,createdAt:new Date().toISOString()});const tgt=pid?projectById(pid):sid?storeById(sid):null;if(tgt)tgt.updatedAt=new Date().toISOString();logAct(`${pid?`"${tgt?tgt.name:""}"에 `:sid?`매장 "${tgt?tgt.name:""}"에 `:""}${kind} ${fmtWon(amt)}을 기록했습니다.`);saveDB();route();if(!pid&&!sid)toast(`${kind} ${fmtWon(amt)}을 기록했습니다.`);break;}
     case"fin-del":{if(!canFinance())break;const f=DB.finance.find(x=>x.id===id);if(!f)break;if(!confirm(`${f.kind} ${fmtWon(f.amount)} (${f.category}) 내역을 삭제할까요?`))break;DB.finance=DB.finance.filter(x=>x.id!==id);saveDB();route();break;}
     case"fin-csv":if(canFinance())finCSV();break;
+    case"mn-ym":{const d=b.dataset.d;F.mnYm=d==="0"?monKey():monShift(F.mnYm||monKey(),Number(d));route();break;}
+    case"mn-pick":F.mnYm=b.dataset.v;route();break;
+    case"mn-k":F.mnK=b.dataset.v;route();break;
     case"sync-now":Promise.resolve(flushPush()).then(()=>pollSync()).then(()=>toast("동기화했습니다.")).catch(()=>{});break;
     case"report-copy":reportCopy(Number(b.dataset.off)||0);break;
     case"open-routine":{const sc=b.dataset.pid?{projectId:b.dataset.pid}:{storeId:b.dataset.sid};routineModal(sc);break;}
@@ -7563,10 +7733,10 @@ document.addEventListener("change",e=>{
   }
 });
 document.addEventListener("input",e=>{
-  const el=e.target.closest('[data-act="f-pj-q"],[data-act="f-st-q"],[data-act="f-ct-q"]');
+  const el=e.target.closest('[data-act="f-pj-q"],[data-act="f-st-q"],[data-act="f-ct-q"],[data-act="mn-q"]');
   if(!el)return;
   const act=el.dataset.act;
-  if(act==="f-pj-q")F.pjQ=el.value;else if(act==="f-ct-q")F.ctQ=el.value;else F.stQ=el.value;
+  if(act==="f-pj-q")F.pjQ=el.value;else if(act==="f-ct-q")F.ctQ=el.value;else if(act==="mn-q")F.mnQ=el.value;else F.stQ=el.value;
   route();
   const again=$(`[data-act="${act}"]`);
   if(again){again.focus();const L=again.value.length;again.setSelectionRange(L,L);}

@@ -112,6 +112,7 @@ r = await call("admin/overview", null, A); ok(!r.j.workspaces.find(w => w.name =
 await call("admin/settings", { op: "save", settings: { signup: "open", refDays: 0 } }, A);
 r = await call("signup", { mode: "new", workspace: "베이직팀", name: "팀장", loginId: "basic01", pw: "pw123456", contact: "1", agree: true });
 const B = (await call("login", { loginId: "basic01", pw: "pw123456" })).j.token;
+{ const bw = (await call("admin/overview", null, A)).j.workspaces.find(w => w.name === "베이직팀"); await call("admin/ws", { id: bw.id, action: "plan", plan: "basic", limits: { members: 2 } }, A); }   // 무료 공개 기간에는 한도를 직접 정해 시험합니다
 r = await call("invite/create", { people: [{ name: "a" }, { name: "b" }, { name: "c" }], role: "staff" }, B);
 ok(r.s === 200 && r.j.seats.limit === 2, "basic invite create");
 const bi = r.j.invites;
