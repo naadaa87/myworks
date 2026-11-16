@@ -12,7 +12,7 @@
    · 스페이스: 예약 → 청소 배정 → 체크리스트 → 확인 → 손익. HOSTDB(읽기)는 운영자 워크스페이스에서만, SPACEDB(1회 가져오기)는 운영자만.
    · 무료 요금제 한도(요청당 쿼리 50회)를 넘지 않도록 여러 건의 쓰기는 한 문장으로 묶어 처리합니다. */
 
-const SCHEMA = "9";
+const SCHEMA = "10";
 const PLANS = ["basic", "pro"];
 const MODULES = ["space", "outsourcing", "commerce"];
 const BASE_MODULES = ["outsourcing"];          // 거래 — 기본 기능이라 등급과 관계없이 늘 켜져 있습니다
@@ -83,7 +83,11 @@ const ADD_COLS = [
   // v9 — 마이스토어: 점검 목록 구분(청소·오픈·마감), 예약형 매장의 담당자·서비스
   ["sp_chk", "list TEXT"],
   ["sp_res", "staff TEXT"],
-  ["sp_res", "service TEXT"]
+  ["sp_res", "service TEXT"],
+  // v10 — 마이셀러: 반품·교환, 옵션 단위 상품, 기본 공급처
+  ["cm_order", "claim TEXT"],
+  ["cm_product", "option TEXT"],
+  ["cm_product", "supplier_id TEXT"]
 ];
 // 칸을 더한 뒤에 만드는 색인
 const POST_DDL = ["CREATE UNIQUE INDEX IF NOT EXISTS idx_ws_ref ON workspaces(ref_code)"];
@@ -2317,16 +2321,30 @@ const CM_DDL = [
   "CREATE INDEX IF NOT EXISTS idx_cm_order_date ON cm_order(ws,order_date)",
   "CREATE INDEX IF NOT EXISTS idx_cm_order_no ON cm_order(ws,order_no)",
   "CREATE TABLE IF NOT EXISTS cm_inquiry(ws TEXT NOT NULL, id TEXT NOT NULL, channel_id TEXT, order_no TEXT, customer TEXT, text TEXT NOT NULL, due TEXT, status TEXT NOT NULL DEFAULT 'open', answer TEXT, answered_at TEXT, created_at TEXT, PRIMARY KEY(ws,id))",
-  "CREATE TABLE IF NOT EXISTS cm_cost(ws TEXT NOT NULL, ym TEXT NOT NULL, channel_id TEXT NOT NULL, ads INTEGER NOT NULL DEFAULT 0, misc INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(ws,ym,channel_id))"
+  "CREATE TABLE IF NOT EXISTS cm_cost(ws TEXT NOT NULL, ym TEXT NOT NULL, channel_id TEXT NOT NULL, ads INTEGER NOT NULL DEFAULT 0, misc INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(ws,ym,channel_id))",
+  // 마이셀러 — 공급처·발주·재고 기록·정산 대사
+  "CREATE TABLE IF NOT EXISTS cm_supplier(ws TEXT NOT NULL, id TEXT NOT NULL, name TEXT NOT NULL, contact TEXT, phone TEXT, email TEXT, memo TEXT, created_at TEXT, PRIMARY KEY(ws,id))",
+  "CREATE TABLE IF NOT EXISTS cm_po(ws TEXT NOT NULL, id TEXT NOT NULL, no TEXT, supplier_id TEXT, status TEXT NOT NULL DEFAULT 'draft', items TEXT NOT NULL DEFAULT '[]', total INTEGER NOT NULL DEFAULT 0, ordered_at TEXT, expected TEXT, received_at TEXT, memo TEXT, reply_note TEXT, replied_by TEXT, replied_at TEXT, created_at TEXT, updated_at TEXT, PRIMARY KEY(ws,id))",
+  "CREATE TABLE IF NOT EXISTS cm_stock(ws TEXT NOT NULL, id TEXT NOT NULL, product_id TEXT NOT NULL, delta INTEGER NOT NULL, reason TEXT, ref TEXT, at TEXT NOT NULL, by_name TEXT, PRIMARY KEY(ws,id))",
+  "CREATE INDEX IF NOT EXISTS idx_cm_stock_p ON cm_stock(ws,product_id,at)",
+  "CREATE TABLE IF NOT EXISTS cm_settle(ws TEXT NOT NULL, ym TEXT NOT NULL, channel_id TEXT NOT NULL, expected INTEGER, received INTEGER, received_at TEXT, memo TEXT, PRIMARY KEY(ws,ym,channel_id))"
 ];
-const CM_TABLES = ["cm_channel", "cm_product", "cm_order", "cm_inquiry", "cm_cost"];
+const CM_TABLES = ["cm_channel", "cm_product", "cm_order", "cm_inquiry", "cm_cost", "cm_supplier", "cm_po", "cm_stock", "cm_settle"];
 Object.assign(SPC, {
   cm_channel: ["id", "name", "fee_pct", "settle_days", "sort", "active"],
-  cm_product: ["id", "name", "sku", "price", "cost", "stock", "safety", "active", "memo", "created_at", "updated_at"],
-  cm_order: ["id", "channel_id", "order_no", "order_date", "product_id", "product_name", "option", "qty", "amount", "ship_fee", "status", "receiver", "phone", "address", "tracking", "carrier", "memo", "settle_date", "settle_amt", "source", "created_at", "updated_at", "shipped_at"],
+  cm_product: ["id", "name", "sku", "price", "cost", "stock", "safety", "active", "memo", "created_at", "updated_at", "option", "supplier_id"],
+  cm_order: ["id", "channel_id", "order_no", "order_date", "product_id", "product_name", "option", "qty", "amount", "ship_fee", "status", "receiver", "phone", "address", "tracking", "carrier", "memo", "settle_date", "settle_amt", "source", "created_at", "updated_at", "shipped_at", "claim"],
   cm_inquiry: ["id", "channel_id", "order_no", "customer", "text", "due", "status", "answer", "answered_at", "created_at"],
-  cm_cost: ["ym", "channel_id", "ads", "misc"]
+  cm_cost: ["ym", "channel_id", "ads", "misc"],
+  cm_supplier: ["id", "name", "contact", "phone", "email", "memo", "created_at"],
+  cm_po: ["id", "no", "supplier_id", "status", "items", "total", "ordered_at", "expected", "received_at", "memo", "reply_note", "replied_by", "replied_at", "created_at", "updated_at"],
+  cm_stock: ["id", "product_id", "delta", "reason", "ref", "at", "by_name"],
+  cm_settle: ["ym", "channel_id", "expected", "received", "received_at", "memo"]
 });
+Object.assign(SPJ, { cm_order: { claim: "null" }, cm_po: { items: "[]" } });
+const CM_PO_ST = ["draft", "sent", "confirmed", "changed", "received", "cancel"];
+// 재고가 움직일 때마다 남기는 기록 (여러 건은 한 문장으로)
+const cmLogRows = (rows, by) => rows.filter(r => r.product_id && r.delta).map(r => ({ id: bulkId("sk"), product_id: r.product_id, delta: r.delta, reason: clip(r.reason, 40), ref: clip(r.ref, 60), at: iso(), by_name: clip(by, 40) }));
 const CM_ORDER_ST = ["new", "packed", "shipped", "done", "cancel", "return"];
 const CM_SHIPPED = new Set(["shipped", "done"]);
 const CM_SEED_CH = [["네이버 스마트스토어", 3.5, 7], ["쿠팡", 10.8, 14], ["자사몰", 3.4, 3], ["오프라인 · 직접 판매", 0, 0]];
@@ -2360,12 +2378,14 @@ async function cmSeed(db, me) {
 }
 async function cmAiSummary(db, me) {
   const ym = kstToday().slice(0, 7);
-  const [ship, inq, low, rev, ch] = await db.batch([
+  const [ship, inq, low, rev, ch, po, cl] = await db.batch([
     db.prepare("SELECT status, COUNT(*) AS n FROM cm_order WHERE ws=?1 AND status IN ('new','packed') GROUP BY status").bind(me.ws),
     db.prepare("SELECT id, customer, text, due, order_no FROM cm_inquiry WHERE ws=?1 AND status='open' ORDER BY due LIMIT 50").bind(me.ws),
     db.prepare("SELECT id, name, stock, safety FROM cm_product WHERE ws=?1 AND active=1 AND stock<=safety ORDER BY stock LIMIT 50").bind(me.ws),
     db.prepare("SELECT channel_id, SUM(amount) AS rev, COUNT(*) AS n FROM cm_order WHERE ws=?1 AND order_date>=?2 AND status NOT IN ('cancel','return') GROUP BY channel_id").bind(me.ws, ym + "-01"),
-    db.prepare("SELECT id, name FROM cm_channel WHERE ws=?1").bind(me.ws)
+    db.prepare("SELECT id, name FROM cm_channel WHERE ws=?1").bind(me.ws),
+    db.prepare("SELECT no, status, expected, total FROM cm_po WHERE ws=?1 AND status IN ('sent','confirmed','changed') ORDER BY created_at DESC LIMIT 30").bind(me.ws),
+    db.prepare("SELECT order_no, product_name, json_extract(claim,'$.type') AS t, json_extract(claim,'$.status') AS s FROM cm_order WHERE ws=?1 AND claim IS NOT NULL AND json_extract(claim,'$.status')<>'done' LIMIT 30").bind(me.ws)
   ]);
   const C = new Map(((ch && ch.results) || []).map(c => [c.id, c.name]));
   const st = {}; for (const r of (ship && ship.results) || []) st[r.status] = Number(r.n);
@@ -2373,10 +2393,15 @@ async function cmAiSummary(db, me) {
     toShip: (st.new || 0) + (st.packed || 0), byStatus: st,
     inquiriesOpen: ((inq && inq.results) || []).map(i => ({ id: i.id, customer: i.customer || "", text: clip(i.text, 200), due: i.due || "", orderNo: i.order_no || "" })),
     lowStock: ((low && low.results) || []).map(p => ({ id: p.id, name: p.name, stock: p.stock, safety: p.safety })),
+    purchaseOrdersOpen: ((po && po.results) || []).map(x => ({ no: x.no, status: x.status, expected: x.expected || "", total: x.total })),
+    claimsOpen: ((cl && cl.results) || []).map(x => ({ orderNo: x.order_no, product: x.product_name, type: x.t, status: x.s })),
     monthRevenue: { ym, byChannel: ((rev && rev.results) || []).map(r => ({ channel: C.get(r.channel_id) || "미지정", revenue: Number(r.rev), orders: Number(r.n) })), total: ((rev && rev.results) || []).reduce((s, r) => s + Number(r.rev), 0) }
   };
 }
-const cmWorkerOrder = r => ({ id: r.id, channel_id: r.channel_id, order_no: r.order_no, order_date: r.order_date, product_id: r.product_id, product_name: r.product_name, option: r.option, qty: r.qty, status: r.status, receiver: r.receiver, phone: r.phone, address: r.address, tracking: r.tracking, carrier: r.carrier, memo: r.memo, shipped_at: r.shipped_at });
+const cmWorkerOrder = r => {   // 발송이 끝난 주문은 수령인 이름을 가리고 연락처·주소를 보내지 않습니다
+  const open = r.status === "new" || r.status === "packed", nm = String(r.receiver || "");
+  return { id: r.id, channel_id: r.channel_id, order_no: r.order_no, order_date: r.order_date, product_id: r.product_id, product_name: r.product_name, option: r.option, qty: r.qty, status: r.status, receiver: open ? nm : (nm ? nm.slice(0, 1) + "*".repeat(Math.min(2, Math.max(1, nm.length - 1))) : ""), phone: open ? r.phone : "", address: open ? r.address : "", tracking: r.tracking, carrier: r.carrier, memo: r.memo, shipped_at: r.shipped_at };
+};
 const COMM = {
   async data(db, me, b, req, url) {
     const today = kstToday(), mgr = isMgr(me);
@@ -2393,12 +2418,16 @@ const COMM = {
     ];
     if (mgr) q.push(
       db.prepare(spSel("cm_inquiry", "ws=?1 AND (status='open' OR created_at>=?2)", "ORDER BY created_at DESC LIMIT 500")).bind(me.ws, new Date(Date.now() - 90 * 864e5).toISOString()),
-      db.prepare(spSel("cm_cost", "ws=?1 AND ym>=?2 AND ym<=?3")).bind(me.ws, addDaysS(from, -32).slice(0, 7), to.slice(0, 7))
+      db.prepare(spSel("cm_cost", "ws=?1 AND ym>=?2 AND ym<=?3")).bind(me.ws, addDaysS(from, -32).slice(0, 7), to.slice(0, 7)),
+      db.prepare(spSel("cm_supplier", "ws=?1", "ORDER BY name")).bind(me.ws),
+      db.prepare(spSel("cm_po", "ws=?1 AND (status NOT IN ('received','cancel') OR created_at>=?2)", "ORDER BY created_at DESC LIMIT 300")).bind(me.ws, new Date(Date.now() - 180 * 864e5).toISOString()),
+      db.prepare(spSel("cm_settle", "ws=?1 AND ym>=?2 AND ym<=?3")).bind(me.ws, addDaysS(from, -62).slice(0, 7), to.slice(0, 7)),
+      db.prepare(spSel("cm_order", "ws=?1 AND claim IS NOT NULL AND status NOT IN ('new','packed') AND (json_extract(claim,'$.status')<>'done' OR updated_at>=?2) AND NOT (order_date>=?3 AND order_date<=?4)", "LIMIT 300")).bind(me.ws, new Date(Date.now() - 60 * 864e5).toISOString(), from, to)
     );
     const rs = await db.batch(q);
     const set = {}; for (const r of (rs[0] && rs[0].results) || []) set[r.k] = parse(r.v);
     const head = { ok: true, v: me.spv + (seeded ? 1 : 0), from, to, today, role: mgr ? "mgr" : me.role, settings: cmNorm(set.settings) };
-    if (mgr) return rawJson(head, ',"channels":' + rawArr(rs[1]) + ',"products":' + rawArr(rs[2]) + ',"orders":' + rawArr(rs[3]) + ',"inquiries":' + rawArr(rs[4]) + ',"costs":' + rawArr(rs[5]));
+    if (mgr) { const extra = rawArr(rs[9]), ord = rawArr(rs[3]); return rawJson(head, ',"channels":' + rawArr(rs[1]) + ',"products":' + rawArr(rs[2]) + ',"orders":' + (extra === "[]" ? ord : ord.slice(0, -1) + (ord === "[]" ? "" : ",") + extra.slice(1)) + ',"inquiries":' + rawArr(rs[4]) + ',"costs":' + rawArr(rs[5]) + ',"suppliers":' + rawArr(rs[6]) + ',"pos":' + rawArr(rs[7]) + ',"settles":' + rawArr(rs[8])); }
     return rawJson(head, ',"channels":' + JSON.stringify(rowsOf(rs[1]).map(c => ({ id: c.id, name: c.name }))) + ',"products":' + JSON.stringify((rs[2] && rs[2].results) || []) + ',"orders":' + JSON.stringify(rowsOf(rs[3]).map(cmWorkerOrder)) + ',"inquiries":[],"costs":[]');
   },
   async "order/save"(db, me, b) {
@@ -2419,11 +2448,13 @@ const COMM = {
     const stmts = [];
     const was = ex ? CM_SHIPPED.has(ex.status) : false, will = CM_SHIPPED.has(o.status || (ex ? ex.status : "new"));
     const pidOld = ex ? ex.product_id : null, pidNew = "product_id" in o ? o.product_id : pidOld, qOld = ex ? ex.qty : 0, qNew = "qty" in o ? o.qty : (ex ? ex.qty : 1);
-    const stockAdj = (pid, n) => { if (pid && n) stmts.push(db.prepare("UPDATE cm_product SET stock=stock-?3, updated_at=?4 WHERE ws=?1 AND id=?2").bind(me.ws, pid, n, now)); };
+    const ref = ("order_no" in o ? o.order_no : ex && ex.order_no) || "", logs = [];
+    const stockAdj = (pid, n, why) => { if (pid && n) { stmts.push(db.prepare("UPDATE cm_product SET stock=stock-?3, updated_at=?4 WHERE ws=?1 AND id=?2").bind(me.ws, pid, n, now)); logs.push({ product_id: pid, delta: -n, reason: why, ref }); } };
     if (o.status && !was && will) o.shipped_at = now;
-    if (!was && will) stockAdj(pidNew, qNew);                       // 발송하면 재고 차감
-    else if (was && !will) stockAdj(pidOld, -qOld);                 // 발송을 되돌리거나 취소·반품이면 복구
-    else if (was && will) { if (pidOld !== pidNew) { stockAdj(pidOld, -qOld); stockAdj(pidNew, qNew); } else stockAdj(pidOld, qNew - qOld); }   // 발송된 채 상품·수량이 바뀌면 그 차이만
+    if (!was && will) stockAdj(pidNew, qNew, "발송");                       // 발송하면 재고 차감
+    else if (was && !will) stockAdj(pidOld, -qOld, "발송 취소·반품");       // 발송을 되돌리거나 취소·반품이면 복구
+    else if (was && will) { if (pidOld !== pidNew) { stockAdj(pidOld, -qOld, "상품 변경"); stockAdj(pidNew, qNew, "상품 변경"); } else stockAdj(pidOld, qNew - qOld, "수량 변경"); }   // 발송된 채 상품·수량이 바뀌면 그 차이만
+    stmts.push(...spBulk(db, "cm_stock", me.ws, cmLogRows(logs, me.name)));
     if (ex) {
       stmts.unshift(db.prepare(`UPDATE cm_order SET ${setCols(o, 3)} WHERE ws=?1 AND id=?2`).bind(me.ws, ex.id, ...Object.values(o)));
       const { v } = await spRun(db, me, stmts);
@@ -2447,9 +2478,10 @@ const COMM = {
     if (!rows.length) return fail("empty");
     const months = [...new Set(rows.map(r => r.order_date.slice(0, 7)).concat(Array.isArray(b.months) ? b.months.map(ymOk).filter(Boolean) : []))];
     // 상품 이름이 같으면 상품에 연결합니다
-    const prods = (await db.prepare("SELECT id, name FROM cm_product WHERE ws=?1").bind(me.ws).all()).results || [];
-    const byName = new Map(prods.map(p => [normNm(p.name), p.id]));
-    for (const r of rows) if (!r.product_id && r.product_name && byName.has(normNm(r.product_name))) r.product_id = byName.get(normNm(r.product_name));
+    const prods = (await db.prepare("SELECT id, name, option FROM cm_product WHERE ws=?1").bind(me.ws).all()).results || [];
+    const byFull = new Map(prods.filter(p => p.option).map(p => [normNm(p.name) + "|" + normNm(p.option), p.id]));
+    const byName = new Map(prods.filter(p => !p.option).map(p => [normNm(p.name), p.id]));
+    for (const r of rows) if (!r.product_id && r.product_name) { const k = normNm(r.product_name); r.product_id = byFull.get(k + "|" + normNm(r.option)) || byName.get(k) || null; }
     const stmts = [];
     let skipped = 0, out = rows;
     if (mode === "replace") stmts.push(db.prepare("DELETE FROM cm_order WHERE ws=?1 AND source='excel' AND status IN ('new','cancel','return','done') AND substr(order_date,1,7) IN (SELECT value FROM json_each(?2))").bind(me.ws, JSON.stringify(months)));   // 발송 작업 중인 주문은 남깁니다
@@ -2473,13 +2505,15 @@ const COMM = {
     const o = {};
     if ("name" in b || !ex) { o.name = clip(b.name, 120); if (!o.name) return fail("bad-request"); }
     if ("sku" in b) o.sku = clip(b.sku, 60);
-    for (const k of ["price", "cost", "stock", "safety"]) if (k in b) o[k] = Math.max(k === "stock" ? -100000 : 0, intOr(b[k], 0));
+    if ("option" in b) o.option = clip(b.option, 120);
+    if ("supplier_id" in b) o.supplier_id = clip(b.supplier_id, 60) || null;
+    for (const k of ["price", "cost", "stock", "safety"]) if (k in b && !(k === "stock" && ex)) o[k] = Math.max(k === "stock" ? -100000 : 0, intOr(b[k], 0));
     if ("active" in b) o.active = b.active ? 1 : 0;
     if ("memo" in b) o.memo = clip(b.memo, 500);
     o.updated_at = now;
     if (ex) { const { v } = await spRun(db, me, [db.prepare(`UPDATE cm_product SET ${setCols(o, 3)} WHERE ws=?1 AND id=?2`).bind(me.ws, ex.id, ...Object.values(o))]); return json({ ok: true, v, product: await spOne(db, "cm_product", me.ws, ex.id) }); }
-    const row = Object.assign({ id: uid("p"), sku: "", price: 0, cost: 0, stock: 0, safety: 0, active: 1, memo: "", created_at: now }, o);
-    const { v } = await spRun(db, me, spBulk(db, "cm_product", me.ws, [row]));
+    const row = Object.assign({ id: uid("p"), sku: "", price: 0, cost: 0, stock: 0, safety: 0, active: 1, memo: "", created_at: now, option: "", supplier_id: null }, o);
+    const { v } = await spRun(db, me, spBulk(db, "cm_product", me.ws, [row]).concat(spBulk(db, "cm_stock", me.ws, cmLogRows([{ product_id: row.id, delta: row.stock, reason: "처음 재고" }], me.name))));
     return json({ ok: true, v, product: await spOne(db, "cm_product", me.ws, row.id) });
   },
   async "product/del"(db, me, b) {
@@ -2493,7 +2527,7 @@ const COMM = {
     const id = clip(b.id, 60), ex = await spOne(db, "cm_product", me.ws, id);
     if (!ex) return fail("not-found", 404);
     const stock = b.stock !== undefined && b.stock !== "" ? intOr(b.stock, ex.stock) : ex.stock + intOr(b.delta, 0);
-    const { v } = await spRun(db, me, [db.prepare("UPDATE cm_product SET stock=?3, updated_at=?4 WHERE ws=?1 AND id=?2").bind(me.ws, id, stock, iso())]);
+    const { v } = await spRun(db, me, [db.prepare("UPDATE cm_product SET stock=?3, updated_at=?4 WHERE ws=?1 AND id=?2").bind(me.ws, id, stock, iso())].concat(spBulk(db, "cm_stock", me.ws, cmLogRows([{ product_id: id, delta: stock - ex.stock, reason: clip(b.reason, 40) || "실사 조정", ref: "" }], me.name))));
     return json({ ok: true, v, product: await spOne(db, "cm_product", me.ws, id) });
   },
   async "inquiry/save"(db, me, b) {
@@ -2550,6 +2584,151 @@ const COMM = {
     const { v } = await spRun(db, me, spBulk(db, "cm_cost", me.ws, rows, "ON CONFLICT(ws,ym,channel_id) DO UPDATE SET ads=excluded.ads, misc=excluded.misc"));
     return json({ ok: true, v, saved: rows.length });
   },
+  /* 송장 일괄 처리 — 주문번호(또는 id)와 송장번호 목록으로 한 번에 발송 처리 */
+  async "ship/bulk"(db, me, b) {
+    if (!isMgr(me)) return fail("forbidden", 403);
+    const rows = (Array.isArray(b.rows) ? b.rows : []).slice(0, 3000).map(r => ({ id: clip(r && r.id, 60), no: clip(r && r.order_no, 60), carrier: clip(r && r.carrier, 30), tracking: clip(r && r.tracking, 40) })).filter(r => (r.id || r.no) && r.tracking);
+    if (!rows.length) return fail("empty");
+    const open = rowsOf(await db.prepare(spSel("cm_order", "ws=?1 AND status IN ('new','packed')")).bind(me.ws).all());
+    const byId = new Map(open.map(o => [o.id, o])), byNo = new Map();
+    for (const o of open) if (o.order_no) { if (!byNo.has(o.order_no)) byNo.set(o.order_no, []); byNo.get(o.order_no).push(o); }
+    const now = iso(), upd = [], seen = new Set(), unmatched = [], stock = new Map(), logs = [];
+    for (const r of rows) {
+      const list = r.id && byId.has(r.id) ? [byId.get(r.id)] : (byNo.get(r.no) || []);
+      if (!list.length) { unmatched.push(r.no || r.id); continue; }
+      for (const o of list) {
+        if (seen.has(o.id)) continue; seen.add(o.id);
+        upd.push({ id: o.id, t: r.tracking, c: r.carrier || o.carrier || clip(b.carrier, 30) || "" });
+        if (o.product_id && o.qty) { stock.set(o.product_id, (stock.get(o.product_id) || 0) + o.qty); logs.push({ product_id: o.product_id, delta: -o.qty, reason: "발송", ref: o.order_no }); }
+      }
+    }
+    if (!upd.length) return json({ ok: true, v: null, shipped: 0, unmatched: unmatched.slice(0, 50) });
+    const stmts = [db.prepare("UPDATE cm_order SET status='shipped', tracking=(SELECT json_extract(value,'$.t') FROM json_each(?2) WHERE json_extract(value,'$.id')=cm_order.id), carrier=(SELECT json_extract(value,'$.c') FROM json_each(?2) WHERE json_extract(value,'$.id')=cm_order.id), shipped_at=?3, updated_at=?3 WHERE ws=?1 AND status IN ('new','packed') AND id IN (SELECT json_extract(value,'$.id') FROM json_each(?2))").bind(me.ws, JSON.stringify(upd), now)];
+    if (stock.size) {
+      const arr = JSON.stringify([...stock.entries()].map(([p, q]) => ({ p, q })));
+      stmts.push(db.prepare("UPDATE cm_product SET stock=stock-(SELECT json_extract(value,'$.q') FROM json_each(?2) WHERE json_extract(value,'$.p')=cm_product.id), updated_at=?3 WHERE ws=?1 AND id IN (SELECT json_extract(value,'$.p') FROM json_each(?2))").bind(me.ws, arr, now));
+      stmts.push(...spBulk(db, "cm_stock", me.ws, cmLogRows(logs, me.name)));
+    }
+    const { v } = await spRun(db, me, stmts);
+    return json({ ok: true, v, shipped: upd.length, unmatched: unmatched.slice(0, 50) });
+  },
+  /* 반품·교환 — 접수 → 회수 → 완료. 완료할 때 재입고 여부에 따라 재고를 되돌리고, 교환은 재발송 주문을 만듭니다 */
+  async "order/claim"(db, me, b) {
+    if (!isMgr(me)) return fail("forbidden", 403);
+    const ex = await spOne(db, "cm_order", me.ws, clip(b.id, 60));
+    if (!ex) return fail("not-found", 404);
+    const prev = ex.claim && typeof ex.claim === "object" ? ex.claim : null, now = iso();
+    if (b.clear) {
+      if (prev && prev.status === "done") return fail("bad-state", 409);
+      const { v } = await spRun(db, me, [db.prepare("UPDATE cm_order SET claim=NULL, updated_at=?3 WHERE ws=?1 AND id=?2").bind(me.ws, ex.id, now)]);
+      return json({ ok: true, v, order: await spOne(db, "cm_order", me.ws, ex.id) });
+    }
+    if (prev && prev.status === "done") return fail("bad-state", 409);
+    const type = b.type === "exchange" ? "exchange" : "return", st = ["requested", "collected", "done"].includes(b.status) ? b.status : "requested";
+    const claim = { type, status: st, reason: clip(b.reason, 300), refund: type === "return" ? Math.max(0, intOr(b.refund, 0)) : 0, restock: !!b.restock, pickup: clip(b.pickup, 40), at: (prev && prev.at) || now, done_at: st === "done" ? now : null, by: me.name, new_id: null };
+    const stmts = [], logs = [];
+    if (st === "done") {
+      const shipped = CM_SHIPPED.has(ex.status);
+      if (claim.restock && ex.product_id && ex.qty && shipped) { stmts.push(db.prepare("UPDATE cm_product SET stock=stock+?3, updated_at=?4 WHERE ws=?1 AND id=?2").bind(me.ws, ex.product_id, ex.qty, now)); logs.push({ product_id: ex.product_id, delta: ex.qty, reason: type === "return" ? "반품 입고" : "교환 회수 입고", ref: ex.order_no }); }
+      if (type === "return") stmts.push(db.prepare("UPDATE cm_order SET status='return' WHERE ws=?1 AND id=?2").bind(me.ws, ex.id));
+      else {
+        const nid = uid("o"); claim.new_id = nid;
+        stmts.push(...spBulk(db, "cm_order", me.ws, [Object.assign({}, ex, { id: nid, amount: 0, ship_fee: 0, status: "new", tracking: "", carrier: "", memo: clip(`교환 재발송 · 원주문 ${ex.order_no || ""}${claim.reason ? " · " + claim.reason : ""}`, 500), settle_date: null, settle_amt: null, source: "exchange", created_at: now, updated_at: now, shipped_at: null, claim: null })]));
+      }
+    }
+    stmts.unshift(db.prepare("UPDATE cm_order SET claim=?3, updated_at=?4 WHERE ws=?1 AND id=?2").bind(me.ws, ex.id, JSON.stringify(claim), now));
+    stmts.push(...spBulk(db, "cm_stock", me.ws, cmLogRows(logs, me.name)));
+    const { v } = await spRun(db, me, stmts);
+    return json({ ok: true, v, order: await spOne(db, "cm_order", me.ws, ex.id), created: claim.new_id ? await spOne(db, "cm_order", me.ws, claim.new_id) : null });
+  },
+  async "stock/log"(db, me, b) {
+    if (!isMgr(me)) return fail("forbidden", 403);
+    const rs = rowsOf(await db.prepare(spSel("cm_stock", "ws=?1 AND product_id=?2", "ORDER BY at DESC LIMIT 100")).bind(me.ws, clip(b.id, 60)).all());
+    return json({ ok: true, items: rs });
+  },
+  /* 공급처 · 발주 · 입고 */
+  async "supplier/save"(db, me, b) {
+    if (!isMgr(me)) return fail("forbidden", 403);
+    const id = clip(b.id, 60), ex = id ? await spOne(db, "cm_supplier", me.ws, id) : null;
+    if (id && !ex) return fail("not-found", 404);
+    const o = {};
+    if ("name" in b || !ex) { o.name = clip(b.name, 80); if (!o.name) return fail("bad-request"); }
+    for (const [k, n] of [["contact", 40], ["phone", 40], ["email", 80], ["memo", 500]]) if (k in b) o[k] = clip(b[k], n);
+    if (ex) { const { v } = await spRun(db, me, [db.prepare(`UPDATE cm_supplier SET ${setCols(o, 3)} WHERE ws=?1 AND id=?2`).bind(me.ws, id, ...Object.values(o))]); return json({ ok: true, v, supplier: await spOne(db, "cm_supplier", me.ws, id) }); }
+    const row = Object.assign({ id: uid("sp"), contact: "", phone: "", email: "", memo: "", created_at: iso() }, o);
+    const { v } = await spRun(db, me, spBulk(db, "cm_supplier", me.ws, [row]));
+    return json({ ok: true, v, supplier: row });
+  },
+  async "supplier/del"(db, me, b) {
+    if (!isMgr(me)) return fail("forbidden", 403);
+    const id = clip(b.id, 60);
+    if (await db.prepare("SELECT 1 AS x FROM cm_po WHERE ws=?1 AND supplier_id=?2 AND status NOT IN ('received','cancel') LIMIT 1").bind(me.ws, id).first()) return fail("in-use", 409);
+    const { v } = await spRun(db, me, [db.prepare("DELETE FROM cm_supplier WHERE ws=?1 AND id=?2").bind(me.ws, id), db.prepare("UPDATE cm_product SET supplier_id=NULL WHERE ws=?1 AND supplier_id=?2").bind(me.ws, id)]);
+    return json({ ok: true, v });
+  },
+  async "po/save"(db, me, b) {
+    if (!isMgr(me)) return fail("forbidden", 403);
+    const id = clip(b.id, 60), ex = id ? await spOne(db, "cm_po", me.ws, id) : null, now = iso();
+    if (id && !ex) return fail("not-found", 404);
+    if (ex && !["draft", "changed"].includes(ex.status)) return fail("locked", 409);   // 보낸 발주서는 변경 요청을 받았을 때만 고칩니다
+    const o = { updated_at: now };
+    if ("supplier_id" in b) { o.supplier_id = clip(b.supplier_id, 60) || null; if (o.supplier_id && !await spOne(db, "cm_supplier", me.ws, o.supplier_id)) return fail("not-found", 404); }
+    if ("items" in b) {
+      const items = (Array.isArray(b.items) ? b.items : []).slice(0, 100).map(x => ({ product_id: clip(x && x.product_id, 60) || null, name: clip(x && x.name, 120), option: clip(x && x.option, 120), qty: clampInt(x && x.qty, 0, 1000000, 0), cost: Math.max(0, intOr(x && x.cost, 0)) })).filter(x => x.name && x.qty > 0);
+      if (!items.length) return fail("empty");
+      o.items = JSON.stringify(items); o.total = items.reduce((a, x) => a + x.qty * x.cost, 0);
+    }
+    if ("expected" in b) o.expected = dOk(b.expected) || null;
+    if ("memo" in b) o.memo = clip(b.memo, 1000);
+    if (ex) { const { v } = await spRun(db, me, [db.prepare(`UPDATE cm_po SET ${setCols(o, 3)} WHERE ws=?1 AND id=?2`).bind(me.ws, id, ...Object.values(o))]); return json({ ok: true, v, po: await spOne(db, "cm_po", me.ws, id) }); }
+    if (!o.items) return fail("empty");
+    const n = Number((await db.prepare("SELECT COUNT(*) AS n FROM cm_po WHERE ws=?1 AND substr(created_at,1,10)=?2").bind(me.ws, now.slice(0, 10)).first() || {}).n) || 0;
+    const row = Object.assign({ id: uid("po"), no: `PO-${kstToday().slice(2).replace(/-/g, "")}-${String(n + 1).padStart(2, "0")}`, supplier_id: null, status: "draft", ordered_at: null, expected: null, received_at: null, memo: "", reply_note: "", replied_by: "", replied_at: null, created_at: now }, o);
+    const { v } = await spRun(db, me, spBulk(db, "cm_po", me.ws, [row]));
+    return json({ ok: true, v, po: await spOne(db, "cm_po", me.ws, row.id) });
+  },
+  async "po/status"(db, me, b) {   // 보냄 표시 · 취소 · 다시 작성
+    if (!isMgr(me)) return fail("forbidden", 403);
+    const ex = await spOne(db, "cm_po", me.ws, clip(b.id, 60)); if (!ex) return fail("not-found", 404);
+    const st = ["sent", "cancel", "draft", "confirmed"].includes(b.status) ? b.status : "";
+    if (!st || ex.status === "received") return fail("bad-state", 409);
+    const now = iso();
+    const { v } = await spRun(db, me, [db.prepare("UPDATE cm_po SET status=?3, ordered_at=CASE WHEN ?3='sent' AND ordered_at IS NULL THEN ?4 ELSE ordered_at END, updated_at=?4 WHERE ws=?1 AND id=?2").bind(me.ws, ex.id, st, now)]);
+    return json({ ok: true, v, po: await spOne(db, "cm_po", me.ws, ex.id) });
+  },
+  async "po/receive"(db, me, b) {   // 입고 — 연결된 상품의 재고를 늘립니다 (받은 수량을 따로 적으면 그 수량으로)
+    if (!isMgr(me)) return fail("forbidden", 403);
+    const ex = await spOne(db, "cm_po", me.ws, clip(b.id, 60)); if (!ex) return fail("not-found", 404);
+    if (ex.status === "received" || ex.status === "cancel") return fail("bad-state", 409);
+    const got = new Map((Array.isArray(b.qty) ? b.qty : []).map((q, i) => [i, clampInt(q, 0, 1000000, 0)]));
+    const items = (ex.items || []).map((x, i) => Object.assign({}, x, { got: got.has(i) ? got.get(i) : x.qty }));
+    const now = iso(), stock = new Map(), logs = [];
+    for (const x of items) if (x.product_id && x.got) { stock.set(x.product_id, (stock.get(x.product_id) || 0) + x.got); logs.push({ product_id: x.product_id, delta: x.got, reason: "입고", ref: ex.no }); }
+    const stmts = [db.prepare("UPDATE cm_po SET status='received', received_at=?3, items=?4, updated_at=?3 WHERE ws=?1 AND id=?2").bind(me.ws, ex.id, now, JSON.stringify(items))];
+    if (stock.size) {
+      stmts.push(db.prepare("UPDATE cm_product SET stock=stock+(SELECT json_extract(value,'$.q') FROM json_each(?2) WHERE json_extract(value,'$.p')=cm_product.id), updated_at=?3 WHERE ws=?1 AND id IN (SELECT json_extract(value,'$.p') FROM json_each(?2))").bind(me.ws, JSON.stringify([...stock.entries()].map(([p, q]) => ({ p, q }))), now));
+      stmts.push(...spBulk(db, "cm_stock", me.ws, cmLogRows(logs, me.name)));
+    }
+    const { v } = await spRun(db, me, stmts);
+    return json({ ok: true, v, po: await spOne(db, "cm_po", me.ws, ex.id), added: [...stock.values()].reduce((a, q) => a + q, 0) });
+  },
+  async "po/del"(db, me, b) {
+    if (!isMgr(me)) return fail("forbidden", 403);
+    const ex = await spOne(db, "cm_po", me.ws, clip(b.id, 60)); if (!ex) return fail("not-found", 404);
+    if (!["draft", "cancel"].includes(ex.status)) return fail("bad-state", 409);
+    const { v } = await spRun(db, me, [db.prepare("DELETE FROM cm_po WHERE ws=?1 AND id=?2").bind(me.ws, ex.id), db.prepare("UPDATE links SET expires_at=?3 WHERE ws=?1 AND kind='po' AND target=?2").bind(me.ws, ex.id, new Date(Date.now() - 1000).toISOString())]);
+    return json({ ok: true, v });
+  },
+  /* 정산 대사 — 채널별 정산 예정액과 실제 입금액 */
+  async "settle/save"(db, me, b) {
+    if (!isMgr(me)) return fail("forbidden", 403);
+    const ym = ymOk(b.ym), ch = clip(b.channel_id, 60);
+    if (!ym || !ch) return fail("bad-request");
+    const num = v => v === "" || v == null ? null : intOr(String(v).replace(/[^\d-]/g, ""), 0);
+    const row = { ym, channel_id: ch, expected: num(b.expected), received: num(b.received), received_at: num(b.received) == null ? null : iso(), memo: clip(b.memo, 300) };
+    const { v } = await spRun(db, me, spBulk(db, "cm_settle", me.ws, [row], "ON CONFLICT(ws,ym,channel_id) DO UPDATE SET expected=excluded.expected, received=excluded.received, received_at=excluded.received_at, memo=excluded.memo"));
+    return json({ ok: true, v, settle: row });
+  },
   async settings(db, me, b) {
     if (!isMgr(me)) return fail("forbidden", 403);
     if (b.set !== undefined) {
@@ -2564,7 +2743,9 @@ function cmNorm(s) {
   s = s && typeof s === "object" ? s : {};
   const maps = {};
   if (s.maps && typeof s.maps === "object") for (const [k, v] of Object.entries(s.maps).slice(0, 10)) if (v && typeof v === "object") maps[clip(k, 40)] = Object.fromEntries(Object.entries(v).slice(0, 30).map(([a, c]) => [clip(a, 30), clip(c, 60)]));
-  return { ship_fee_default: Math.max(0, intOr(s.ship_fee_default, 0)), maps, memo: clip(s.memo, 1000) };
+  const SELLER = ["market", "own", "b2b", "group"];
+  return { ship_fee_default: Math.max(0, intOr(s.ship_fee_default, 0)), maps, memo: clip(s.memo, 1000), seller: SELLER.includes(s.seller) ? s.seller : "", carrier: clip(s.carrier, 30),
+    ans_tpl: Array.isArray(s.ans_tpl) ? s.ans_tpl.map(x => clip(x, 400)).filter(Boolean).slice(0, 20) : [] };
 }
 
 /* ═════════ AI 접속 · 제안 · 확인 링크 ═════════
@@ -2891,6 +3072,23 @@ const LINK_KINDS = {
       if (action === "change") { await db.prepare("UPDATE os_invoice SET ack_note=?3 WHERE ws=?1 AND id=?2").bind(l.ws, v.id, clip(note, 300)).run(); return { ok: true, status: "changed" }; }
       await db.prepare("UPDATE os_invoice SET ack_at=?3, ack_by=?4, ack_note=?5 WHERE ws=?1 AND id=?2").bind(l.ws, v.id, iso(), clip(by, 40), clip(note, 300)).run();
       return { ok: true, status: "approved" };
+    }
+  },
+  po: {   // 발주서 확인 — 공급처가 계정 없이 발주 내용을 보고 확인·변경 요청
+    exists: async (db, me, id) => isMgr(me) && !!(await db.prepare("SELECT 1 AS x FROM cm_po WHERE ws=?1 AND id=?2 AND status<>'cancel'").bind(me.ws, id).first()),
+    view: async (db, l) => {
+      const p = await spOneT(db, "cm_po", l.ws, l.target); if (!p) return null;
+      const [w, sp] = await db.batch([db.prepare("SELECT name FROM workspaces WHERE id=?1").bind(l.ws), db.prepare("SELECT name, contact FROM cm_supplier WHERE ws=?1 AND id=?2").bind(l.ws, p.supplier_id || "")]);
+      const one = r => ((r && r.results) || [])[0] || {};
+      const st = p.status === "confirmed" || p.status === "received" ? "approved" : p.status === "changed" ? "changed" : p.status === "sent" ? "pending" : p.status === "cancel" ? "cancel" : "draft";
+      return { kind: "po", title: `발주서 ${p.no || ""}`, client: one(sp).name || "", company: one(sp).contact || "", sender: { workspace: one(w).name || "" }, po: { no: p.no, items: (p.items || []).map(x => ({ name: x.name, option: x.option || "", qty: x.qty, cost: x.cost })), total: p.total, expected: p.expected || "", memo: p.memo || "", ordered_at: p.ordered_at || "" }, status: st, reply_note: p.reply_note || "" };
+    },
+    act: async (db, l, action, note, by) => {
+      const p = await spOneT(db, "cm_po", l.ws, l.target); if (!p) return { error: "not-found" };
+      if (!["sent", "changed"].includes(p.status) || (p.status === "changed" && action === "change")) return { error: "bad-state" };
+      const st = action === "approve" ? "confirmed" : "changed", now = iso();
+      await db.batch([db.prepare("UPDATE cm_po SET status=?3, reply_note=?4, replied_by=?5, replied_at=?6, updated_at=?6 WHERE ws=?1 AND id=?2").bind(l.ws, p.id, st, clip(note, 500), clip(by, 40), now), db.prepare("UPDATE workspaces SET sp_ver=sp_ver+1 WHERE id=?1").bind(l.ws)]);
+      return { ok: true, status: st === "confirmed" ? "approved" : "changed" };
     }
   },
   project: {   // 진행 상황 공유 — 계정 없이 보는 읽기 전용 페이지 (금액·메모·의견은 보내지 않습니다)

@@ -660,7 +660,7 @@ table.tbl{border-collapse:collapse;width:100%;font-size:13.5px;min-width:560px}
   .bday{break-inside:avoid;border-color:#bbb}
 }
 
-/* ── 아웃소싱·커머스 공통 ───────────────────────── */
+/* ── 거래·마이셀러 공통 ───────────────────────── */
 .os-row{display:flex;align-items:flex-start;gap:14px;padding:12px 2px;border-bottom:1px solid var(--line-soft)}
 .os-row:last-child{border-bottom:0}
 .os-row .os-main{flex:1;min-width:0}
@@ -680,6 +680,34 @@ table.tbl{border-collapse:collapse;width:100%;font-size:13.5px;min-width:560px}
 .cu-map label{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--sub);margin:0}
 .cu-map label span{width:64px;flex:none;font-weight:600}
 .cu-map select{padding:5px 26px 5px 8px;font-size:12.5px}
+/* 마이셀러 — 송장 입력 · 발주 제안 · 발주 품목 · 정산 대사 */
+.cm-car{display:flex;align-items:center;gap:6px;margin:0}
+.cm-car select{padding:5px 26px 5px 8px;font-size:12.5px}
+.cm-ship input.cm-trk{text-align:left;min-width:130px;font-family:var(--mono)}
+.cm-sug{padding:11px 0;border-top:1px solid var(--line-soft)}
+.cm-sug:first-of-type{border-top:0;padding-top:2px}
+.cm-sug-h{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:7px}
+.cm-sug-h .btn{margin-left:auto}
+.cm-sug-l{display:flex;gap:6px;flex-wrap:wrap}
+.po-its{display:flex;flex-direction:column;gap:8px}
+.po-it{border:1px solid var(--line);border-radius:10px;padding:9px 10px;background:var(--paper)}
+.po-it1{display:flex;gap:6px;align-items:center;margin-bottom:7px}
+.po-it1 select{flex:1;min-width:0;padding:6px 26px 6px 9px;font-size:13px}
+.po-it2{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(0,1.1fr) 72px 92px 86px;gap:6px;align-items:end}
+.po-it2 label{margin:0;display:flex;flex-direction:column;gap:3px;font-size:11.5px;color:var(--faint);font-weight:600}
+.po-it2 input{padding:6px 8px;font-size:13px;min-width:0}
+.po-it2 input[type=number]{text-align:right}
+.po-amt{display:flex;flex-direction:column;gap:3px;font-size:11.5px;color:var(--faint);font-weight:600;text-align:right}
+.po-amt b{font-size:13.5px;color:var(--ink);padding:6px 0}
+.po-sum{display:flex;gap:12px;align-items:flex-start;justify-content:space-between;margin-top:8px}
+.po-sum>b{white-space:nowrap;font-size:14px}
+@media (max-width:560px){.po-it2{grid-template-columns:1fr 1fr}.po-it2 label:first-child{grid-column:1/-1}.po-amt{text-align:left}.po-sum{flex-direction:column}}
+.cm-st{min-width:760px}
+.cm-pl{min-width:900px}
+.cm-pl td.num{white-space:nowrap}
+.cm-pl td:first-child{min-width:150px}
+.cm-pl input.mini{min-width:0;width:104px}
+.cm-st input.mini{min-width:0;width:112px}
 @media (max-width:820px){
   .os-row{flex-wrap:wrap}
   .os-row .os-amt{order:2}
@@ -1537,7 +1565,7 @@ function progressOf(pid){const ts=projectTasks(pid);if(!ts.length)return{d:0,n:0
 
 /* ═══════════ 권한 ═══════════ */
 const isAdmin=()=>ME&&ME.role==="admin";
-const isField=()=>!!ME&&(ME.role==="worker"||ME.role==="facility");   // 현장 근무자·시설 담당은 모듈 화면(마이스토어·커머스 발송)만 씁니다
+const isField=()=>!!ME&&(ME.role==="worker"||ME.role==="facility");   // 현장 근무자·시설 담당은 모듈 화면(마이스토어·마이셀러 발송)만 씁니다
 function visibleProjects(){if(isAdmin())return DB.projects.slice();const myTasks=new Set(DB.tasks.filter(t=>t.assigneeId===ME.id).map(t=>t.projectId));return DB.projects.filter(p=>p.ownerId===ME.id||(p.memberIds||[]).includes(ME.id)||myTasks.has(p.id));}
 function canSeeProject(p){return isAdmin()||p.ownerId===ME.id||(p.memberIds||[]).includes(ME.id)||DB.tasks.some(t=>t.projectId===p.id&&t.assigneeId===ME.id);}
 function canEditProject(p){return isAdmin()||p.ownerId===ME.id;}
@@ -3442,7 +3470,7 @@ function renderLink(){
   if(v.kind==="project")return renderShare();
   $("#lk-label").textContent="확인 요청";
   $("#lk-foot").innerHTML=`이 페이지는 보낸 분이 마이웍스에서 만든 확인 링크입니다. 로그인 없이 내용 확인과 승인·수정 요청만 할 수 있습니다. <a href="./" style="margin-left:6px">마이웍스 열기</a>`;
-  const kindT={quote:"견적서",delivery:"납품 확인",invoice:"청구서"}[v.kind]||"확인";
+  const kindT={quote:"견적서",delivery:"납품 확인",invoice:"청구서",po:"발주서"}[v.kind]||"확인";
   const done=L.usedAt&&L.result;
   const sender=v.sender||{};
   const head=`<div class="lk-head"><span class="pill p-line">${kindT}</span><h1>${esc(v.title||kindT)}</h1><div class="hint">${esc(sender.company||sender.workspace||"")}${sender.name?` · ${esc(sender.name)}`:""}${v.client?` → ${esc(v.client)}${v.company?` (${esc(v.company)})`:""}`:""}</div></div>`;
@@ -3463,27 +3491,38 @@ function renderLink(){
       ${iv.bank?`<div class="sp-box info"><b>입금 계좌</b>${esc(iv.bank)}</div>`:""}
       ${iv.pay_link?`<a class="btn btn-pri" href="${esc(iv.pay_link)}" target="_blank" rel="noopener" style="margin-bottom:12px">결제 링크 열기 ↗</a>`:""}
       ${iv.memo?`<div class="notes-view">${esc(iv.memo)}</div>`:""}`;
+  }else if(v.kind==="po"){
+    const po=v.po||{};
+    body=`<div class="tblwrap"><table class="tbl lk-tbl"><thead><tr><th>품목</th><th class="r">수량</th><th class="r">단가</th><th class="r">금액</th></tr></thead><tbody>${(po.items||[]).map(it=>`<tr><td>${esc(it.name)}${it.option?`<div class="hint">${esc(it.option)}</div>`:""}</td><td class="r num">${Number(it.qty||0).toLocaleString("ko-KR")}</td><td class="r num">${fmtWon(it.cost)}</td><td class="r num">${fmtWon(it.qty*it.cost)}</td></tr>`).join("")}</tbody>
+      <tfoot><tr class="sum"><td colspan="3" class="r">합계</td><td class="r num">${fmtWon(po.total)}</td></tr></tfoot></table></div>
+      <div class="lk-meta">${po.no?`<span>발주번호 <b class="mono">${esc(po.no)}</b></span>`:""}${po.ordered_at?`<span>보낸 날 <b>${fmtD((d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"))(new Date(po.ordered_at)))}</b></span>`:""}${po.expected?`<span>입고 희망일 <b>${fmtD(po.expected)}</b></span>`:""}</div>
+      ${po.memo?`<div class="sp-box info" style="white-space:pre-wrap">${esc(po.memo)}</div>`:""}`;
   }
   let foot="";
   const status=v.kind==="quote"?(v.quote||{}).status:v.status;   // quote: sent·changed·approved·draft·void / delivery·invoice: pending·changed·approved
   const note=v.kind==="quote"?(v.quote||{}).reply_note:v.reply_note;
-  const okT=v.kind==="invoice"?"내용을 확인했습니다":v.kind==="quote"?"견적을 승인합니다":"결과물을 확인했습니다";
+  const okT=v.kind==="invoice"?"내용을 확인했습니다":v.kind==="quote"?"견적을 승인합니다":v.kind==="po"?"발주 내용을 확인했습니다":"결과물을 확인했습니다";
   const form=(allowChange)=>`<div class="lk-act">
       <label>이름</label><input id="lk-by" maxlength="40" placeholder="확인하시는 분 성함 (선택)">
-      ${allowChange?`<label>수정 요청 내용 <span style="font-weight:500;color:var(--faint)">(수정을 요청할 때만)</span></label><textarea id="lk-note" maxlength="500" style="min-height:80px" placeholder="바꾸고 싶은 항목, 수량, 조건 등을 적어 주세요"></textarea>`:""}
-      <div class="m-foot" style="justify-content:flex-start"><button class="btn btn-pri" data-act="lk-approve">${okT}</button>${allowChange?`<button class="btn" data-act="lk-change">수정을 요청합니다</button>`:""}</div>
+      ${allowChange?`<label>${v.kind==="po"?"변경 요청 내용":"수정 요청 내용"} <span style="font-weight:500;color:var(--faint)">(${v.kind==="po"?"변경을":"수정을"} 요청할 때만)</span></label><textarea id="lk-note" maxlength="500" style="min-height:80px" placeholder="${v.kind==="po"?"가능한 수량, 단가, 출고일 등을 적어 주세요":"바꾸고 싶은 항목, 수량, 조건 등을 적어 주세요"}"></textarea>`:""}
+      ${v.kind==="po"?`<label>출고 예정·전달 사항 <span style="font-weight:500;color:var(--faint)">(선택)</span></label><input id="lk-memo" maxlength="200" placeholder="예: 11/20 오전 출고합니다">`:""}
+      <div class="m-foot" style="justify-content:flex-start"><button class="btn btn-pri" data-act="lk-approve">${okT}</button>${allowChange?`<button class="btn" data-act="lk-change">${v.kind==="po"?"변경을 요청합니다":"수정을 요청합니다"}</button>`:""}</div>
       <div class="hint" style="margin-top:10px">버튼을 누르면 보낸 분의 마이웍스에 바로 기록됩니다.</div>
     </div>`;
-  if(status==="approved"||(v.kind==="invoice"&&L.result==="approved"))foot=`<div class="sp-box ok"><b>${v.kind==="invoice"?"확인하셨습니다":"승인하셨습니다"}</b>${L.usedAt?fmtWhen(L.usedAt)+" 처리":""}${note?` — ${esc(note)}`:""}</div>`;
+  if(status==="approved"||(v.kind==="invoice"&&L.result==="approved"))foot=`<div class="sp-box ok"><b>${v.kind==="invoice"||v.kind==="po"?"확인하셨습니다":"승인하셨습니다"}</b>${L.usedAt?fmtWhen(L.usedAt)+" 처리":""}${note?` — ${esc(note)}`:""}</div>`;
   else if(L.expired)foot=`<div class="sp-box warn"><b>기한이 지난 링크입니다</b>보낸 분에게 새 링크를 요청해 주세요.</div>`;
   else if(v.kind==="quote"&&!["sent","changed"].includes(status))foot=`<div class="sp-box info">아직 보내지 않은 견적입니다. 보낸 분이 발송하면 여기서 승인할 수 있습니다.</div>`;
+  else if(v.kind==="po"&&status==="cancel")foot=`<div class="sp-box warn"><b>취소된 발주입니다</b>보낸 분이 이 발주를 취소했습니다. 따로 처리하실 일은 없습니다.</div>`;
+  else if(v.kind==="po"&&status==="draft")foot=`<div class="sp-box info">보낸 분이 발주서를 고치는 중입니다. 다시 보내면 여기서 확인할 수 있습니다.</div>`;
+  else if(status==="changed"&&v.kind==="po")foot=`<div class="sp-box warn"><b>변경을 요청하셨습니다</b>${L.usedAt?fmtWhen(L.usedAt)+" 처리":""}${note?` — ${esc(note)}`:""}</div><div class="hint" style="margin-bottom:6px">보낸 분이 발주서를 고쳐 다시 보내면 새 링크로 안내를 받으십니다. 지금 내용 그대로 진행해도 괜찮으면 아래 버튼을 눌러 주세요.</div>`+form(false);
   else if(status==="changed")foot=`<div class="sp-box warn"><b>수정을 요청하셨습니다</b>${L.usedAt?fmtWhen(L.usedAt)+" 처리":""}${note?` — ${esc(note)}`:""}</div><div class="hint" style="margin-bottom:6px">보낸 분이 내용을 고치면 이 링크에서 바로 확인할 수 있습니다. ${v.kind==="quote"?"고쳐진 견적을 그대로 승인하려면 아래 버튼을 누르세요.":"고쳐진 결과물을 확인하면 아래 버튼을 눌러 주세요."}</div>`+form(v.kind!=="quote");
   else foot=form(v.kind!=="invoice");
   box.innerHTML=head+body+foot+lkCta();
 }
 async function linkAct(action){
   if(!LINK)return;
-  const by=($("#lk-by")||{}).value||"",note=($("#lk-note")||{}).value||"";
+  const by=($("#lk-by")||{}).value||"";let note=($("#lk-note")||{}).value||"";
+  if(action==="approve"&&$("#lk-memo"))note=$("#lk-memo").value||"";
   if(action==="change"&&!note.trim())return toast("수정을 요청할 내용을 적어 주세요.");
   $$("#lk-box button").forEach(b=>b.disabled=true);
   try{
@@ -5745,18 +5784,41 @@ function weekText(s0,s1){
 return{view,fillDash,onVersion,reset,refresh,weekText};
 })();
 
-/* ═══════════ 커머스 — 상품 판매 운영 (주문 → 발송 → 재고 → 문의 → 채널 손익) ═══════════
+/* ═══════════ 마이셀러 — 상품 판매 운영 (주문 → 송장·발송 → 재고·발주 → 반품·교환 → 문의 → 손익·정산) ═══════════
    주문은 엑셀 업로드나 직접 입력으로 들어오고, 발송 담당(현장 근무자)은 오늘 발송할 주문만 봅니다.
-   발송 담당 기기에는 금액·매입가·정산 정보가 가지 않고, 수령인 정보는 발송 전 주문에만 내려옵니다. */
+   발송 담당 기기에는 금액·매입가·정산·공급처 정보가 가지 않고, 수령인 정보는 발송 전 주문에만 내려옵니다. */
 const COMM=(()=>{
 const OR_ST={new:["신규","p-red"],packed:["포장","p-amber"],shipped:["발송","p-blue"],done:["완료","p-green"],cancel:["취소","p-gray"],return:["반품","p-gray"]};
 const OR_ORDER=["new","packed","shipped","done","cancel","return"];
 const CARRIERS=["CJ대한통운","한진택배","롯데택배","로젠택배","우체국택배","쿠팡 로켓","편의점택배","직접 전달","기타"];
 const XLSX_URL="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js";
 const FIELDS=[["order_no","주문번호",/주문\s*번호|주문no|order\s*(no|id|number)|주문id/i],["order_date","주문일",/주문\s*일|결제\s*일|주문\s*시각|주문일시|date|일자/i],["product_name","상품명",/상품\s*명|제품\s*명|품목|product|item/i],["option","옵션",/옵션|option/i],["qty","수량",/수량|qty|quantity|개수/i],["amount","결제금액",/총\s*결제|결제\s*금액|판매\s*금액|상품\s*금액|주문\s*금액|금액|amount|total|price/i],["ship_fee","배송비",/배송\s*비|shipping/i],["receiver","수령인",/수취인|수령인|받는\s*(사람|분)|receiver|recipient/i],["phone","연락처",/수취인\s*연락처|수령인\s*연락처|휴대폰|연락처|전화|phone|mobile|tel/i],["address","주소",/주소|address/i],["tracking","송장번호",/송장|운송장|tracking|invoice\s*no/i],["carrier","택배사",/택배사|carrier|배송사/i],["memo","메모",/배송\s*메(시지|모)|요청\s*사항|메모|memo|note/i]];
-const CM={ready:false,loading:null,err:"",v:-1,at:0,stale:false,role:"",from:"",to:"",today:"",settings:null,channels:[],products:[],orders:[],inquiries:[],costs:[]};
-const U={ordF:"open",ordCh:"",q:"",pnlYM:"",upload:null,inqF:"open",costDraft:null};
-const ERR={forbidden:"권한이 없습니다.","not-found":"대상을 찾을 수 없습니다. 새로고침 후 다시 시도하세요.","bad-date":"주문일을 확인해 주세요.","bad-request":"입력 내용을 확인해 주세요.",empty:"반영할 행이 없습니다.","module-off":"커머스 모듈이 꺼져 있습니다. 설정에서 켜 주세요."};
+const TR_FIELDS=[["order_no","주문번호",/주문\s*번호|주문no|order\s*(no|id|number)/i],["tracking","송장번호",/운송장|송장|tracking|invoice/i],["carrier","택배사",/택배사|carrier|배송사/i]];
+const CLAIM_T={return:"반품",exchange:"교환"};
+const CLAIM_ST={requested:["접수","p-red"],collected:["회수 완료","p-amber"],done:["처리 완료","p-green"]};
+const REASONS=["단순 변심","상품 불량","오배송","배송 중 파손","옵션 변경"];
+const PO_ST={draft:["작성 중","p-gray"],sent:["회신 대기","p-blue"],confirmed:["공급처 확인","p-green"],changed:["변경 요청","p-red"],received:["입고 완료","p-line"],cancel:["취소","p-gray"]};
+const ADJ_WHY=["실사 조정","파손·폐기","증정·샘플","직접 판매","기타"];
+const ANS_TPL=[
+  "안녕하세요, 문의 주셔서 감사합니다. 주문하신 상품은 오늘 출고 예정이고, 송장번호가 나오면 바로 안내드리겠습니다.",
+  "불편을 드려 죄송합니다. 받으신 상품 사진을 보내 주시면 확인한 뒤 교환이나 환불을 바로 도와드리겠습니다.",
+  "반품 접수해 드렸습니다. 회수 일정이 잡히면 다시 안내드리겠습니다. 받으신 포장 그대로 준비해 주시면 됩니다.",
+  "찾으시는 옵션은 지금 재입고를 기다리고 있습니다. 입고되는 대로 주문 순서에 맞춰 보내 드리겠습니다."
+];
+const SELLER={
+  market:{name:"오픈마켓 판매",ico:"▤",ex:"스마트스토어 · 쿠팡 · 11번가",desc:"채널별 주문 엑셀을 올리고, 송장을 한 번에 넣은 뒤 채널마다 송장 파일을 내려받습니다.",add:[],
+    steps:[["주문 엑셀 올리기","주문 탭에서 채널을 고르고, 판매자센터에서 받은 엑셀을 그대로 올립니다."],["송장 한 번에 넣기","택배 접수 파일을 받아 택배사에 올리고, 송장이 붙은 파일을 다시 올립니다."],["채널에 송장 등록","채널별 송장 파일을 받아 각 판매자센터의 송장 일괄 등록에 올립니다."]]},
+  own:{name:"자사몰 운영",ico:"◎",ex:"카페24 · 아임웹 · 식스샵",desc:"자사몰 주문과 고객 문의, 재고와 발주를 중심으로 씁니다.",add:[["자사몰",0,0]],
+    steps:[["상품과 재고 등록","옵션별로 상품을 등록하고 안전 재고를 정해 둡니다."],["주문 받아 발송","자사몰 주문 엑셀을 올리거나 직접 넣고, 송장을 적어 발송 처리합니다."],["문의·반품 챙기기","답변 문구를 정해 두고, 반품·교환은 접수부터 재입고까지 기록합니다."]]},
+  b2b:{name:"도매·납품",ico:"▣",ex:"거래처 납품 · 정기 공급 · 위탁 판매",desc:"거래처 주문을 직접 넣고, 공급처 발주와 월별 정산 대사를 챙깁니다.",add:[["거래처 납품",0,30]],
+    steps:[["공급처와 상품 등록","받아 오는 곳을 공급처로 등록하고 상품에 연결합니다."],["발주서 보내기","발주서를 만들어 링크로 보내면 공급처가 계정 없이 확인합니다."],["정산 맞춰 보기","손익·정산에서 거래처별 정산 예정액과 실제 입금액을 비교합니다."]]},
+  group:{name:"공동구매·SNS",ico:"✦",ex:"인스타그램 · 스레드 · 카카오 공동구매",desc:"모집 기간 주문을 모아 한 번에 발송하고, 문의 답변을 빠르게 처리합니다.",add:[["공동구매",0,0],["인스타그램 · DM 주문",0,0]],
+    steps:[["주문 모으기","구글폼·스프레드시트로 받은 주문을 엑셀로 올리거나 직접 넣습니다."],["한 번에 발송","택배 접수 파일을 받아 접수하고, 송장 파일을 올려 발송 처리합니다."],["문의 답하기","자주 묻는 질문은 답변 문구로 저장해 두고 골라서 씁니다."]]}
+};
+const CM={ready:false,loading:null,err:"",v:-1,at:0,stale:false,role:"",from:"",to:"",today:"",settings:null,channels:[],products:[],orders:[],inquiries:[],costs:[],suppliers:[],pos:[],settles:[]};
+const U0=()=>({ordF:"open",ordCh:"",q:"",pnlYM:"",upload:null,inqF:"open",costDraft:null,trk:{},carrier:"",shipDays:3,trUp:null,claimF:"open",poF:"open",po:null});
+const U=U0();
+const ERR={forbidden:"권한이 없습니다.","not-found":"대상을 찾을 수 없습니다. 새로고침 후 다시 시도하세요.","bad-date":"주문일을 확인해 주세요.","bad-request":"입력 내용을 확인해 주세요.",empty:"반영할 행이 없습니다.","module-off":"마이셀러가 꺼져 있습니다. 확장판 화면에서 켜 주세요.","in-use":"진행 중인 발주가 있는 공급처는 지울 수 없습니다.",locked:"보낸 발주서는 공급처가 변경을 요청했을 때만 고칠 수 있습니다.","bad-state":"이미 처리된 항목입니다. 새로고침해 주세요."};
 const errMsg=e=>e&&e.code==="unauthorized"?"":(e&&ERR[e.code])||"처리하지 못했습니다. 잠시 후 다시 시도하세요.";
 const failToast=e=>{const m=errMsg(e);if(m)toast(m);};
 const fmt=n=>Math.round(Number(n)||0).toLocaleString("ko-KR");
@@ -5765,15 +5827,32 @@ const mgr=()=>!!ME&&(ME.role==="admin"||ME.role==="staff");
 const usable=()=>MODE==="cloud"&&!!ME&&ME.role!=="partner"&&ME.role!=="facility";
 const onPage=()=>/^#\/commerce(\/|$)/.test(location.hash);
 const pill=k=>{const x=OR_ST[k]||[k,"p-gray"];return`<span class="pill ${x[1]}">${esc(x[0])}</span>`;};
+const poPill=k=>{const x=PO_ST[k]||[k,"p-gray"];return`<span class="pill ${x[1]}">${esc(x[0])}</span>`;};
+const claimPill=c=>`<span class="pill ${c.status==="done"?"p-green":c.type==="exchange"?"p-blue":"p-red"}">${CLAIM_T[c.type]||"반품"} · ${(CLAIM_ST[c.status]||["접수"])[0]}</span>`;
 const chName=id=>{const c=CM.channels.find(x=>x.id===id);return c?c.name:"미지정";};
 const chById=id=>CM.channels.find(x=>x.id===id)||null;
 const prodById=id=>CM.products.find(p=>p.id===id)||null;
 const orderById=id=>CM.orders.find(o=>o.id===id)||null;
 const inqById=id=>CM.inquiries.find(i=>i.id===id)||null;
+const supById=id=>CM.suppliers.find(s=>s.id===id)||null;
+const poById=id=>CM.pos.find(p=>p.id===id)||null;
+const pName=p=>p?p.name+(p.option?" · "+p.option:""):"";
 const upd=(arr,row)=>{if(!row)return;const i=arr.findIndex(x=>x.id===row.id);if(i>-1)arr[i]=row;else arr.push(row);};
 const ymLabel=ym=>`${ym.slice(0,4)}년 ${+ym.slice(5,7)}월`;
 const daysIn=ym=>new Date(+ym.slice(0,4),+ym.slice(5,7),0).getDate();
 const live=o=>!["cancel","return"].includes(o.status);
+const dOf=s=>{if(!s)return"";const d=new Date(s);return isNaN(d)?"":d.getFullYear()+"-"+pad2(d.getMonth()+1)+"-"+pad2(d.getDate());};
+const carrierNow=()=>U.carrier||(CM.settings||{}).carrier||"CJ대한통운";
+const toShipList=()=>CM.orders.filter(o=>["new","packed"].includes(o.status)).sort((a,b)=>(a.order_date||"").localeCompare(b.order_date||"")||(a.created_at||"").localeCompare(b.created_at||""));
+const lowList=()=>CM.products.filter(p=>p.active!==0&&p.stock<=p.safety).sort((a,b)=>a.stock-b.stock);
+const claimOpen=()=>CM.orders.filter(o=>o.claim&&o.claim.status!=="done");
+const poOpen=()=>CM.pos.filter(p=>["draft","sent","confirmed","changed"].includes(p.status));
+const poAct=()=>CM.pos.filter(p=>p.status==="changed"||p.status==="confirmed");
+const sugQty=p=>Math.max(1,p.safety*2-p.stock);
+function dlCsv(name,H,rows){
+  const csv="﻿"+[H].concat(rows).map(r=>r.map(c=>`"${String(c??"").replace(/"/g,'""')}"`).join(",")).join("\n");
+  const b=new Blob([csv],{type:"text/csv;charset=utf-8"});const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},400);
+}
 function serialToDate(v){const d=new Date(Math.round((v-25569)*86400)*1000);return d.getUTCFullYear()+"-"+pad2(d.getUTCMonth()+1)+"-"+pad2(d.getUTCDate());}
 function parseAnyDate(v){
   if(v==null||v==="")return"";
@@ -5786,6 +5865,15 @@ function parseAnyDate(v){
   return"";
 }
 function loadScript(src){return new Promise((res,rej)=>{const ex=[...document.scripts].find(s=>s.src===src);if(ex&&ex.dataset.ok)return res();const s=document.createElement("script");s.src=src;s.onload=()=>{s.dataset.ok="1";res();};s.onerror=()=>{s.remove();rej(new Error("load"));};document.head.appendChild(s);});}
+async function readBook(f){   // CSV는 UTF-8 → 안 되면 EUC-KR(택배사·판매자센터 CSV에 흔함)로 읽고, 엑셀은 그대로 읽습니다
+  if(!window.XLSX)await loadScript(XLSX_URL);
+  const buf=await f.arrayBuffer();
+  if(/\.csv$/i.test(f.name)||/^text\//.test(f.type||"")){
+    let t;try{t=new TextDecoder("utf-8",{fatal:true}).decode(buf);}catch(e){t=new TextDecoder("euc-kr").decode(buf);}
+    return XLSX.read(t.replace(/^\ufeff/,""),{type:"string",raw:true});
+  }
+  return XLSX.read(buf,{type:"array",cellDates:false});
+}
 
 /* ── 서버 ── */
 /* 받기는 한 번에 하나씩 — 겹치면 앞 요청이 끝난 뒤 이어서 받고, 기간을 안 주면 그 시점의 받아 둔 기간을 다시 받습니다 */
@@ -5793,7 +5881,7 @@ async function load(from,to){
   if(CM.loading){try{await CM.loading;}catch(e){}}
   if(!from||!to){from=CM.from;to=CM.to;}
   const q=from&&to?`?from=${from}&to=${to}`:"";
-  const p=api("cm/data"+q).then(d=>{Object.assign(CM,{role:d.role,from:d.from,to:d.to,today:d.today,settings:d.settings,channels:d.channels||[],products:d.products||[],orders:d.orders||[],inquiries:d.inquiries||[],costs:d.costs||[],v:d.v,ready:true,err:"",at:Date.now(),stale:false});});
+  const p=api("cm/data"+q).then(d=>{Object.assign(CM,{role:d.role,from:d.from,to:d.to,today:d.today,settings:d.settings,channels:d.channels||[],products:d.products||[],orders:d.orders||[],inquiries:d.inquiries||[],costs:d.costs||[],suppliers:d.suppliers||[],pos:d.pos||[],settles:d.settles||[],v:d.v,ready:true,err:"",at:Date.now(),stale:false});});
   CM.loading=p;
   try{await p;}finally{if(CM.loading===p)CM.loading=null;}
 }
@@ -5809,7 +5897,7 @@ async function call(path,body){
   return r;
 }
 function onVersion(v){if(v==null||!CM.ready||v===CM.v)return;CM.stale=true;if(onPage()||location.hash==="#/dashboard")refresh(true);}
-function reset(){Object.assign(CM,{ready:false,loading:null,err:"",v:-1,at:0,stale:false,role:"",from:"",to:"",today:"",settings:null,channels:[],products:[],orders:[],inquiries:[],costs:[]});Object.assign(U,{ordF:"open",ordCh:"",q:"",pnlYM:"",upload:null,inqF:"open",costDraft:null});}
+function reset(){Object.assign(CM,{ready:false,loading:null,err:"",v:-1,at:0,stale:false,role:"",from:"",to:"",today:"",settings:null,channels:[],products:[],orders:[],inquiries:[],costs:[],suppliers:[],pos:[],settles:[]});Object.assign(U,U0());}
 async function ensureRange(from,to){   // 손익·주문 조회 기간이 받아 둔 범위를 벗어나면 다시 받습니다
   const covers=()=>CM.ready&&CM.from<=from&&CM.to>=to;
   if(covers())return;
@@ -5819,16 +5907,13 @@ async function ensureRange(from,to){   // 손익·주문 조회 기간이 받아
 }
 
 /* ── 화면 뼈대 ── */
-const TABS=[["","현황"],["orders","주문"],["products","상품·재고"],["inq","문의"],["pnl","손익"],["set","설정"]];
+const TABS=[["","현황"],["orders","주문"],["ship","송장·발송"],["products","상품·재고"],["po","발주·입고"],["claims","반품·교환"],["inq","문의"],["pnl","손익·정산"],["set","설정"]];
 function shell(sub,inner,head){
-  const toShip=CM.orders.filter(o=>["new","packed"].includes(o.status)).length;
-  const inq=CM.inquiries.filter(i=>i.status==="open").length;
-  const low=CM.products.filter(p=>p.active!==0&&p.stock<=p.safety).length;
-  const cnt={orders:toShip,inq,products:low};
+  const cnt={ship:toShipList().length,products:lowList().length,po:poAct().length,claims:claimOpen().length,inq:CM.inquiries.filter(i=>i.status==="open").length};
   const h=head||{};
   $("#view").innerHTML=`
   <div class="page-head">
-    <div><h1><span class="bars"></span>${esc(h.title||"커머스")}</h1><div class="desc">${h.desc||"주문 → 발송 → 재고 → 문의 → 채널별 손익을 한곳에서 관리합니다."}</div></div>
+    <div><h1><span class="bars"></span>${esc(h.title||"마이셀러")}</h1><div class="desc">${h.desc||"주문 → 송장·발송 → 재고·발주 → 반품·교환 → 채널별 손익과 정산까지 한곳에서 챙깁니다."}</div></div>
     ${h.actions||""}
   </div>
   ${mgr()?`<nav class="sp-tabs">${TABS.map(([k,l])=>`<button class="${sub===k?"on":""}" data-cm="go" data-to="${k}">${l}${cnt[k]?`<b class="nbadge">${cnt[k]}</b>`:""}</button>`).join("")}</nav>`:""}
@@ -5836,34 +5921,76 @@ function shell(sub,inner,head){
 }
 const empty=(t,s)=>`<div class="sp-empty"><b>${t}</b>${s||""}</div>`;
 
+/* ── 판매 방식 ── */
+function sellerPicker(){
+  const cur=(CM.settings||{}).seller||"";
+  return`<div class="bt-grid">${Object.entries(SELLER).map(([k,t])=>`<button class="bt-card ${cur===k?"on":""}" data-cm="seller" data-v="${k}"><span class="bt-ico" aria-hidden="true">${t.ico}</span><b>${t.name}</b><em>${t.ex}</em><span>${t.desc}</span></button>`).join("")}</div>`;
+}
+function stepsHtml(k){
+  const t=SELLER[k]||SELLER.market;
+  return`<div class="sp-start">${t.steps.map(([h,p],i)=>`<div class="f-step"><div class="f-no">${i+1}</div><b>${h}</b><p>${p}</p></div>`).join("")}</div>`;
+}
+async function pickSeller(k){
+  const t=SELLER[k];if(!t)return;
+  try{
+    const s=CM.settings||{};const r=await call("settings",{set:Object.assign({},s,{seller:k})});CM.settings=r.settings;
+    let added=0;
+    for(const [name,fee,days] of t.add){
+      if(CM.channels.some(c=>norm(c.name)===norm(name)))continue;
+      try{const x=await call("channel/save",{name,fee_pct:fee,settle_days:days});upd(CM.channels,x.channel);added++;}catch(e){}
+    }
+    toast(`판매 방식을 ‘${t.name}’(으)로 정했습니다.${added?` 판매 채널 ${added}개를 더했습니다. 수수료율은 설정에서 계약 조건대로 적어 주세요.`:""}`);
+    if(onPage())route();
+  }catch(e){failToast(e);}
+}
+function startCard(){
+  const s=CM.settings||{},cur=s.seller||"";
+  if(!cur)return`<div class="card welcome"><h2><span class="bars"></span>마이셀러 시작하기</h2>
+    <div style="font-size:13.5px;color:var(--sub);margin:-4px 0 12px;line-height:1.7">혼자 또는 작은 팀으로 상품을 파는 분을 위한 확장판입니다. 주로 어떻게 파는지 고르면 거기에 맞는 채널과 시작 순서를 준비해 드립니다. 나중에 설정에서 바꿀 수 있습니다.</div>
+    ${sellerPicker()}</div>`;
+  if(CM.orders.length||CM.products.length)return"";
+  return`<div class="card welcome"><h2><span class="bars"></span>${esc(SELLER[cur].name)} — 이렇게 시작하세요</h2>${stepsHtml(cur)}
+    <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-pri btn-sm" data-cm="prod-new">상품 등록</button><button class="btn btn-sm" data-cm="upload">주문 엑셀 올리기</button><button class="btn btn-sm" data-cm="order-new">주문 직접 넣기</button>${cur==="b2b"?`<button class="btn btn-sm" data-cm="sup-new">공급처 등록</button>`:""}</div></div>`;
+}
+
 /* ── 현황 ── */
 function vDash(){
   const today=todayStr(),ym=today.slice(0,7);
-  const toShip=CM.orders.filter(o=>["new","packed"].includes(o.status)).sort((a,b)=>(a.order_date||"").localeCompare(b.order_date||""));
+  const toShip=toShipList();
   const inq=CM.inquiries.filter(i=>i.status==="open").sort((a,b)=>(a.due||"").localeCompare(b.due||""));
-  const low=CM.products.filter(p=>p.active!==0&&p.stock<=p.safety).sort((a,b)=>a.stock-b.stock);
+  const low=lowList(),claims=claimOpen();
+  const poChg=CM.pos.filter(p=>p.status==="changed"),poIn=CM.pos.filter(p=>["sent","confirmed"].includes(p.status)&&p.expected&&p.expected<=addDaysStr(today,1));
   const mo=CM.orders.filter(o=>o.order_date.startsWith(ym)&&live(o));
   const rev=mo.reduce((s,o)=>s+Number(o.amount||0),0);
   const byCh={};mo.forEach(o=>{byCh[o.channel_id]=(byCh[o.channel_id]||0)+Number(o.amount||0);});
   const late=toShip.filter(o=>o.order_date<addDaysStr(today,-1)).length;
+  const chips=[];
+  if(poChg.length)chips.push(`<span class="bchip warn" data-cm="go" data-to="po"><b>${poChg.length}</b>발주 변경 요청</span>`);
+  if(poIn.length)chips.push(`<span class="bchip" data-cm="go" data-to="po"><b>${poIn.length}</b>입고 예정</span>`);
+  if(claims.length)chips.push(`<span class="bchip warn" data-cm="go" data-to="claims"><b>${claims.length}</b>반품·교환 진행</span>`);
   shell("",`
+  ${startCard()}
   <div class="sp-kpis">
     <div class="stat ${late?"warn":""}"><div class="s-num">${toShip.length}<em>건</em></div><div class="s-lb">발송할 주문</div><div class="s-sub">${late?`이틀 넘은 주문 ${late}건`:"신규 + 포장 완료"}</div></div>
     <div class="stat ${inq.some(i=>i.due&&i.due<today)?"warn":""}"><div class="s-num">${inq.length}<em>건</em></div><div class="s-lb">답할 문의</div><div class="s-sub">${inq.filter(i=>i.due&&i.due<=today).length}건은 오늘까지</div></div>
     <div class="stat ${low.length?"warn":""}"><div class="s-num">${low.length}<em>개</em></div><div class="s-lb">재고 부족 상품</div><div class="s-sub">안전 재고 이하</div></div>
-    <div class="stat"><div class="s-num">${fmt(rev)}<em>원</em></div><div class="s-lb">${+ym.slice(5)}월 매출 · ${mo.length}건</div><div class="s-sub">${Object.entries(byCh).sort((a,b)=>b[1]-a[1]).slice(0,2).map(([id,v])=>`${chName(id)} ${fmt(v)}`).join(" · ")||"취소·반품 제외"}</div></div>
+    <div class="stat"><div class="s-num">${fmt(rev)}<em>원</em></div><div class="s-lb">${+ym.slice(5)}월 매출 · ${mo.length}건</div><div class="s-sub">${Object.entries(byCh).sort((a,b)=>b[1]-a[1]).slice(0,2).map(([id,v])=>`${esc(chName(id))} ${fmt(v)}`).join(" · ")||"취소·반품 제외"}</div></div>
   </div>
+  ${chips.length?`<div class="sp-today" style="margin:-4px 0 16px">${chips.join("")}</div>`:""}
   <div class="sp-grid2">
-    <div class="card"><h2><span class="bars"></span>오늘 발송 <span class="cnt">${toShip.length}건</span><button class="btn btn-sm btn-ghost" data-cm="go" data-to="orders" style="margin-left:auto">주문 전체 →</button></h2>
+    <div class="card"><h2><span class="bars"></span>오늘 발송 <span class="cnt">${toShip.length}건</span><button class="btn btn-sm btn-ghost" data-cm="go" data-to="ship" style="margin-left:auto">송장 넣기 →</button></h2>
       ${toShip.length?toShip.slice(0,8).map(o=>`<div class="pj-line" data-cm="order-open" data-id="${o.id}"><span class="pj-nm">${esc(o.product_name||"상품 미지정")}${o.option?` <span class="hint">${esc(o.option)}</span>`:""} × ${o.qty}</span><span class="tag">${esc(chName(o.channel_id))}</span>${pill(o.status)}<span class="pj-fr" style="width:auto">${esc(o.receiver||"")}</span></div>`).join("")+(toShip.length>8?`<div class="hint" style="margin-top:8px">외 ${toShip.length-8}건</div>`:""):`<div class="empty">발송할 주문이 없습니다.</div>`}
     </div>
     <div>
-      <div class="card"><h2><span class="bars"></span>재고 부족 <span class="cnt">${low.length}개</span></h2>
-        ${low.length?low.slice(0,6).map(p=>`<div class="pj-line" data-cm="prod-open" data-id="${p.id}"><span class="pj-nm">${esc(p.name)}</span><span class="d-late" style="font-size:12.5px">재고 ${p.stock}</span><span class="hint">안전 ${p.safety}</span></div>`).join(""):`<div class="empty" style="padding:18px">안전 재고 아래로 내려간 상품이 없습니다.</div>`}
+      <div class="card"><h2><span class="bars"></span>재고 부족 <span class="cnt">${low.length}개</span>${low.length?`<button class="btn btn-sm btn-ghost" data-cm="go" data-to="po" style="margin-left:auto">발주 →</button>`:""}</h2>
+        ${low.length?low.slice(0,6).map(p=>`<div class="pj-line" data-cm="prod-open" data-id="${p.id}"><span class="pj-nm">${esc(pName(p))}</span><span class="d-late" style="font-size:12.5px">재고 ${p.stock}</span><span class="hint">안전 ${p.safety}</span></div>`).join(""):`<div class="empty" style="padding:18px">안전 재고 아래로 내려간 상품이 없습니다.</div>`}
       </div>
       <div class="card"><h2><span class="bars"></span>답할 문의 <span class="cnt">${inq.length}건</span></h2>
         ${inq.length?inq.slice(0,6).map(i=>`<div class="pj-line" data-cm="inq-open" data-id="${i.id}"><span class="pj-nm">${esc(i.text)}</span><span class="hint">${esc(i.customer||"")}</span>${i.due?`<span class="mono ${i.due<today?"d-late":""}" style="font-size:12px">${fmtD(i.due)}</span>`:""}</div>`).join(""):`<div class="empty" style="padding:18px">미답변 문의가 없습니다.</div>`}
       </div>
+      ${claims.length?`<div class="card"><h2><span class="bars"></span>반품·교환 <span class="cnt">${claims.length}건 진행 중</span></h2>
+        ${claims.slice(0,5).map(o=>`<div class="pj-line" data-cm="claim-open" data-id="${o.id}"><span class="pj-nm">${esc(o.product_name||"상품")} × ${o.qty}</span>${claimPill(o.claim)}<span class="hint">${esc(o.claim.reason||"")}</span></div>`).join("")}
+      </div>`:""}
     </div>
   </div>`);
 }
@@ -5891,17 +6018,19 @@ function vOrders(){
   <div class="hint" style="margin:-6px 0 10px">${fmtD(CM.from)} ~ ${fmtD(CM.to)} 주문 ${CM.orders.length}건을 받아 두었습니다 · 표시 ${list.length}건 · 합계 ${fmt(sum)}원 <button class="btn btn-sm btn-ghost" data-cm="range">기간 바꾸기</button></div>
   <div class="card">
     ${list.length?`<div class="tblwrap"><table class="tbl cm-tbl"><thead><tr><th>주문일</th><th>채널</th><th>주문번호</th><th>상품</th><th class="r">수량</th><th class="r">금액</th><th>수령인</th><th>상태</th><th>송장</th></tr></thead><tbody>
-    ${list.slice(0,400).map(o=>`<tr data-cm="order-open" data-id="${o.id}" style="cursor:pointer"><td class="mono nw">${fmtD(o.order_date)}</td><td class="nw">${esc(chName(o.channel_id))}</td><td class="mono">${esc(o.order_no||"")}</td><td><b>${esc(o.product_name||"")}</b>${o.option?`<div class="hint">${esc(o.option)}</div>`:""}${o.product_id?"":o.product_name?`<div class="hint" style="color:var(--amber)">상품 미연결</div>`:""}</td><td class="r num">${o.qty}</td><td class="r num">${fmt(o.amount)}</td><td class="nw">${esc(o.receiver||"")}</td><td>${pill(o.status)}</td><td class="mono" style="font-size:12px">${o.tracking?esc((o.carrier||"")+" "+o.tracking):""}</td></tr>`).join("")}
+    ${list.slice(0,400).map(o=>`<tr data-cm="order-open" data-id="${o.id}" style="cursor:pointer"><td class="mono nw">${fmtD(o.order_date)}</td><td class="nw">${esc(chName(o.channel_id))}</td><td class="mono">${esc(o.order_no||"")}</td><td><b>${esc(o.product_name||"")}</b>${o.option?`<div class="hint">${esc(o.option)}</div>`:""}${o.product_id?"":o.product_name?`<div class="hint" style="color:var(--amber)">상품 미연결</div>`:""}${o.source==="exchange"?`<div class="hint">교환 재발송</div>`:""}</td><td class="r num">${o.qty}</td><td class="r num">${fmt(o.amount)}</td><td class="nw">${esc(o.receiver||"")}</td><td>${pill(o.status)}${o.claim?`<div style="margin-top:4px">${claimPill(o.claim)}</div>`:""}</td><td class="mono" style="font-size:12px">${o.tracking?esc((o.carrier||"")+" "+o.tracking):""}</td></tr>`).join("")}
     </tbody></table></div>${list.length>400?`<div class="hint" style="margin-top:8px">400건까지만 표시합니다. 검색이나 기간으로 좁혀 주세요.</div>`:""}`:empty("조건에 맞는 주문이 없습니다","엑셀 업로드로 한 달치 주문을 한 번에 넣거나, 직접 추가하세요.")}
   </div>`,{actions:`<div style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn" data-cm="upload">엑셀 업로드</button><button class="btn" data-cm="csv">CSV 내보내기</button><button class="btn btn-pri" data-cm="order-new">＋ 주문</button></div>`});
 }
-function prodOpts(sel){return`<option value="">상품 선택 안 함</option>`+CM.products.filter(p=>p.active!==0||p.id===sel).map(p=>`<option value="${esc(p.id)}" ${p.id===sel?"selected":""}>${esc(p.name)}${p.sku?` (${esc(p.sku)})`:""}</option>`).join("");}
+function prodOpts(sel){return`<option value="">상품 선택 안 함</option>`+CM.products.filter(p=>p.active!==0||p.id===sel).map(p=>`<option value="${esc(p.id)}" ${p.id===sel?"selected":""}>${esc(pName(p))}${p.sku?` (${esc(p.sku)})`:""}</option>`).join("");}
 function chOpts(sel){return CM.channels.filter(c=>c.active!==0||c.id===sel).map(c=>`<option value="${esc(c.id)}" ${c.id===sel?"selected":""}>${esc(c.name)}</option>`).join("");}
 function orderModal(o){
   const isNew=!o;const s=CM.settings||{};
   o=o||{channel_id:(CM.channels[0]||{}).id||"",order_no:"",order_date:todayStr(),product_id:"",product_name:"",option:"",qty:1,amount:0,ship_fee:s.ship_fee_default||0,status:"new",receiver:"",phone:"",address:"",tracking:"",carrier:"",memo:""};
+  const c=o.claim||null;
   openModal(`
   <h2><span class="bars"></span>${isNew?"주문 추가":"주문 "+esc(o.order_no||"")} ${isNew?"":pill(o.status)}</h2>
+  ${c?`<div class="sp-box ${c.status==="done"?"ok":"warn"}"><b>${CLAIM_T[c.type]||"반품"} ${(CLAIM_ST[c.status]||["접수"])[0]}</b>${esc(c.reason||"사유 미기재")}${c.pickup?` · 회수 송장 ${esc(c.pickup)}`:""}${c.type==="return"&&c.refund?` · 환불 ${fmt(c.refund)}원`:""}</div>`:""}
   <div class="m-grid2">
     <div><label>채널</label><select id="co-ch">${chOpts(o.channel_id)}</select></div>
     <div><label>주문일</label><input id="co-date" type="date" value="${esc(o.order_date||"")}"></div>
@@ -5928,8 +6057,8 @@ function orderModal(o){
     <div><label>송장번호</label><input id="co-track" value="${esc(o.tracking||"")}" maxlength="40"></div>
   </div>
   <label>메모·배송 요청</label><input id="co-memo" value="${esc(o.memo||"")}" maxlength="500">
-  <div class="m-foot">${isNew?"":`<button class="btn btn-ghost left" data-cm="order-del" data-id="${o.id}">삭제</button>`}<button class="btn btn-ghost" data-g="modal-close">취소</button><button class="btn btn-pri" data-cm="order-save" data-id="${isNew?"":o.id}">저장</button></div>`);
-  $("#co-prod").onchange=()=>{const p=prodById($("#co-prod").value);if(p){$("#co-pname").value=p.name;if(!Number($("#co-amt").value))$("#co-amt").value=p.price*(Number($("#co-qty").value)||1);}};
+  <div class="m-foot">${isNew?"":`<button class="btn btn-ghost left" data-cm="order-del" data-id="${o.id}">삭제</button>`}${!isNew&&(["shipped","done"].includes(o.status)||c)?`<button class="btn" data-cm="claim-open" data-id="${o.id}">${c?"반품·교환 보기":"반품·교환 접수"}</button>`:""}<button class="btn btn-ghost" data-g="modal-close">취소</button><button class="btn btn-pri" data-cm="order-save" data-id="${isNew?"":o.id}">저장</button></div>`);
+  $("#co-prod").onchange=()=>{const p=prodById($("#co-prod").value);if(p){$("#co-pname").value=p.name;if(p.option&&!$("#co-opt").value)$("#co-opt").value=p.option;if(!Number($("#co-amt").value))$("#co-amt").value=p.price*(Number($("#co-qty").value)||1);}};
 }
 async function orderSave(id){
   const b={channel_id:$("#co-ch").value,order_date:$("#co-date").value,order_no:$("#co-no").value.trim(),status:$("#co-status").value,product_id:$("#co-prod").value,product_name:$("#co-pname").value.trim(),option:$("#co-opt").value.trim(),qty:Number($("#co-qty").value)||0,amount:Number($("#co-amt").value)||0,ship_fee:Number($("#co-ship").value)||0,receiver:$("#co-recv").value.trim(),phone:$("#co-phone").value.trim(),address:$("#co-addr").value.trim(),carrier:$("#co-carrier").value.trim(),tracking:$("#co-track").value.trim(),memo:$("#co-memo").value.trim()};
@@ -5948,11 +6077,115 @@ function rangeModal(){
 }
 function csvExport(){
   const list=orderList();
-  const H=["주문일","채널","주문번호","상품명","옵션","수량","결제금액","배송비","상태","수령인","연락처","주소","택배사","송장번호","메모"];
-  const rows=list.map(o=>[o.order_date,chName(o.channel_id),o.order_no,o.product_name,o.option,o.qty,o.amount,o.ship_fee,OR_ST[o.status]?OR_ST[o.status][0]:o.status,o.receiver,o.phone,o.address,o.carrier,o.tracking,o.memo]);
-  const csv="﻿"+[H].concat(rows).map(r=>r.map(c=>`"${String(c??"").replace(/"/g,'""')}"`).join(",")).join("\n");
-  const b=new Blob([csv],{type:"text/csv;charset=utf-8"});const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=`myworks-orders-${todayStr()}.csv`;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},400);
+  dlCsv(`myworks-orders-${todayStr()}.csv`,["주문일","채널","주문번호","상품명","옵션","수량","결제금액","배송비","상태","수령인","연락처","주소","택배사","송장번호","메모"],
+    list.map(o=>[o.order_date,chName(o.channel_id),o.order_no,o.product_name,o.option,o.qty,o.amount,o.ship_fee,OR_ST[o.status]?OR_ST[o.status][0]:o.status,o.receiver,o.phone,o.address,o.carrier,o.tracking,o.memo]));
   toast("주문 CSV를 내려받았습니다.");
+}
+
+/* ── 송장·발송 ── 택배 접수 파일 → 송장 파일 올리기(또는 직접 입력) → 채널별 송장 등록 파일 */
+function vShip(){
+  const list=toShipList(),car=carrierNow();
+  const since=addDaysStr(todayStr(),-(U.shipDays-1));
+  const sh=CM.orders.filter(o=>o.status==="shipped"&&o.tracking&&dOf(o.shipped_at)>=since);
+  const byCh={};sh.forEach(o=>{(byCh[o.channel_id]=byCh[o.channel_id]||[]).push(o);});
+  Object.keys(U.trk).forEach(id=>{if(!list.some(o=>o.id===id))delete U.trk[id];});
+  const typed=Object.values(U.trk).filter(v=>String(v||"").trim()).length;
+  shell("ship",`
+  <div class="sp-start">
+    <div class="f-step"><div class="f-no">1</div><b>택배 접수 파일 받기</b><p>발송 대기 주문을 택배사 대량 접수에 쓸 수 있는 CSV로 받습니다. 주문번호 열이 같이 들어갑니다.</p></div>
+    <div class="f-step"><div class="f-no">2</div><b>송장 파일 올리기</b><p>택배사에서 송장이 붙은 파일을 받으면 그대로 올리세요. 주문번호로 찾아 한 번에 발송 처리하고 재고를 뺍니다.</p></div>
+    <div class="f-step"><div class="f-no">3</div><b>채널에 송장 등록</b><p>아래에서 채널별 송장 파일을 받아 각 판매자센터의 송장 일괄 등록에 올립니다.</p></div>
+  </div>
+  <div class="card">
+    <h2><span class="bars"></span>발송 대기 <span class="cnt">${list.length}건</span><span style="margin-left:auto;display:flex;gap:6px;flex-wrap:wrap"><button class="btn btn-sm" data-cm="book-csv" ${list.length?"":"disabled"}>택배 접수 파일</button><button class="btn btn-sm btn-pri" data-cm="trk-upload">송장 파일 올리기</button></span></h2>
+    ${list.length?`<div class="filters" style="margin-bottom:8px;align-items:center"><label class="hint cm-car">기본 택배사 <select data-cmc="carrier">${CARRIERS.map(c=>`<option ${c===car?"selected":""}>${c}</option>`).join("")}</select></label><span class="hint">송장번호를 여기에 바로 적어도 됩니다. 적은 주문만 발송 처리합니다.</span></div>
+    <div class="tblwrap"><table class="tbl cm-tbl cm-ship"><thead><tr><th>주문일</th><th>채널</th><th>주문번호</th><th>상품</th><th>수령인</th><th>상태</th><th>송장번호</th></tr></thead><tbody>
+    ${list.slice(0,300).map(o=>`<tr><td class="mono nw">${fmtD(o.order_date)}</td><td class="nw">${esc(chName(o.channel_id))}</td><td class="mono">${esc(o.order_no||"")}</td><td><b>${esc(o.product_name||"")}</b>${o.option?` <span class="hint">${esc(o.option)}</span>`:""} × ${o.qty}${o.source==="exchange"?` <span class="tag">교환 재발송</span>`:""}</td><td class="nw">${esc(o.receiver||"")}</td><td>${pill(o.status)}</td><td><input class="mini cm-trk" data-cm-trk="${o.id}" value="${esc(U.trk[o.id]||"")}" placeholder="송장번호" inputmode="numeric" maxlength="40" aria-label="송장번호"></td></tr>`).join("")}
+    </tbody></table></div>${list.length>300?`<div class="hint" style="margin-top:8px">300건까지만 표시합니다. 나머지는 송장 파일로 올려 주세요.</div>`:""}
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:12px"><button class="btn btn-pri btn-sm" data-cm="trk-go" id="cm-trk-go" ${typed?"":"disabled"}>입력한 송장으로 발송 처리${typed?` (${typed}건)`:""}</button><span class="hint">발송 처리하면 재고가 빠지고 발송 담당 화면에서도 내려갑니다.</span></div>`
+    :empty("발송할 주문이 없습니다","주문 탭에서 엑셀을 올리거나 직접 넣으면 여기에 모입니다.")}
+  </div>
+  <div class="card">
+    <h2><span class="bars"></span>채널에 송장 등록 <span class="cnt">${U.shipDays===1?"오늘":`최근 ${U.shipDays}일`} 발송 ${sh.length}건</span><span class="seg" style="margin-left:auto">${[1,3,7].map(d=>`<button class="${U.shipDays===d?"on":""}" data-cm="ship-days" data-v="${d}">${d===1?"오늘":d+"일"}</button>`).join("")}</span></h2>
+    ${Object.keys(byCh).length?Object.entries(byCh).map(([id,os])=>`<div class="pj-line"><span class="pj-nm"><b>${esc(chName(id))}</b></span><span class="hint">${os.length}건</span><button class="btn btn-sm" data-cm="ch-trk-csv" data-ch="${esc(id)}">송장 파일 받기</button></div>`).join("")+`<div class="hint" style="margin-top:8px">열은 주문번호 · 택배사 · 송장번호 순입니다. 판매자센터 양식의 열 이름이 다르면 올리기 전에 맞춰 주세요.</div>`:`<div class="empty" style="padding:18px">이 기간에 송장을 넣어 발송한 주문이 없습니다.</div>`}
+  </div>`);
+}
+function bookCsv(){
+  const list=toShipList();if(!list.length)return;
+  dlCsv(`myworks-courier-${todayStr()}.csv`,["받는분","받는분 연락처","받는분 주소","품목명","수량","배송 메시지","주문번호","판매 채널"],
+    list.map(o=>[o.receiver,o.phone,o.address,(o.product_name||"")+(o.option?" / "+o.option:""),o.qty,o.memo,o.order_no,chName(o.channel_id)]));
+  toast(`발송 대기 ${list.length}건을 택배 접수 파일로 받았습니다.`);
+}
+function trkSync(){
+  const n=Object.values(U.trk).filter(v=>String(v||"").trim()).length,b=$("#cm-trk-go");
+  if(b){b.disabled=!n;b.textContent=`입력한 송장으로 발송 처리${n?` (${n}건)`:""}`;}
+}
+async function trkGo(){
+  const rows=Object.entries(U.trk).map(([id,t])=>({id,tracking:String(t||"").trim()})).filter(r=>r.tracking&&orderById(r.id));
+  if(!rows.length)return toast("송장번호를 먼저 적어 주세요.");
+  const b=$("#cm-trk-go");if(b)b.disabled=true;
+  try{const r=await call("ship/bulk",{rows,carrier:carrierNow()});U.trk={};await load();if(onPage())route();toast(`${r.shipped}건을 발송 처리했습니다.`);}
+  catch(e){if(b)b.disabled=false;failToast(e);}
+}
+function trkUploadModal(){
+  openModal(`<h2><span class="bars"></span>송장 파일 올리기</h2>
+  <div class="hint">택배사 대량 접수 결과 파일(엑셀·CSV)을 올리면 주문번호와 송장번호 열을 찾아 발송 대기 주문과 맞춥니다. 판매자센터에서 받은 발송 처리 파일도 됩니다.</div>
+  <label>파일</label><input id="ct-file" type="file" accept=".xlsx,.xls,.csv">
+  <div id="ct-result" style="margin-top:12px"></div>
+  <div class="m-foot"><button class="btn btn-ghost" data-g="modal-close">닫기</button></div>`);
+  U.trUp=null;
+  $("#ct-file").onchange=()=>{const f=$("#ct-file").files[0];if(f)parseTrk(f);};
+}
+async function parseTrk(f){
+  const out=$("#ct-result");out.innerHTML=`<p class="hint">읽는 중…</p>`;
+  try{
+    const wb=await readBook(f);
+    const rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,raw:true,defval:""});
+    let hi=-1,best=0;
+    for(let i=0;i<Math.min(rows.length,15);i++){const r=rows[i].map(c=>String(c).replace(/\s/g,""));const sc=TR_FIELDS.filter(([,,re])=>r.some(c=>re.test(c))).length;if(sc>best){best=sc;hi=i;}}
+    if(hi<0||best<2)throw new Error("주문번호와 송장번호 열을 찾지 못했습니다. 두 열이 들어 있는 파일인지 확인해 주세요.");
+    const headers=rows[hi].map(c=>String(c).trim());
+    const map={};TR_FIELDS.forEach(([k,,re])=>{const h=headers.find(x=>re.test(x.replace(/\s/g,""))&&!Object.values(map).includes(x));if(h)map[k]=h;});
+    U.trUp={file:f.name,headers,data:rows.slice(hi+1).filter(r=>r&&r.some(c=>String(c).trim()!=="")),map};
+    trkPreview();
+  }catch(e){out.innerHTML=`<div class="sp-box red">${esc(e.message==="load"?"엑셀 모듈을 불러오지 못했습니다. 인터넷 연결을 확인해 주세요.":(e.message||"파일을 읽지 못했습니다."))}</div>`;}
+}
+function trkRows(){
+  const X=U.trUp;if(!X)return[];
+  const ix=k=>X.map[k]?X.headers.indexOf(X.map[k]):-1,io=ix("order_no"),it=ix("tracking"),ic=ix("carrier");
+  const out=[];
+  X.data.forEach(r=>{const no=io<0?"":String(r[io]).trim(),t=it<0?"":String(r[it]).trim().replace(/\.0$/,"");if(no&&t)out.push({order_no:no,tracking:t,carrier:ic<0?"":String(r[ic]).trim()});});
+  return out;
+}
+function trkPreview(){
+  const X=U.trUp,out=$("#ct-result");if(!X||!out)return;
+  const rows=trkRows();
+  const open=new Set(toShipList().map(o=>o.order_no).filter(Boolean));
+  const done=new Set(CM.orders.filter(o=>!["new","packed"].includes(o.status)).map(o=>o.order_no).filter(Boolean));
+  const hit=rows.filter(r=>open.has(r.order_no)),was=rows.filter(r=>!open.has(r.order_no)&&done.has(r.order_no)),miss=rows.filter(r=>!open.has(r.order_no)&&!done.has(r.order_no));
+  out.innerHTML=`
+  <div class="sp-box info"><b style="display:inline">${esc(X.file)}</b> · 송장이 적힌 ${rows.length}행 · 발송 대기 주문과 맞은 <b style="display:inline">${hit.length}건</b>${was.length?` · 이미 발송된 ${was.length}건`:""}${miss.length?` · <span style="color:var(--amber)">못 찾은 ${miss.length}건</span>`:""}</div>
+  <div class="cu-map">${TR_FIELDS.map(([k,l])=>`<label><span>${l}</span><select data-ct-map="${k}"><option value="">—</option>${X.headers.map(h=>`<option value="${esc(h)}" ${X.map[k]===h?"selected":""}>${esc(h)}</option>`).join("")}</select></label>`).join("")}</div>
+  ${miss.length?`<div class="hint" style="margin-top:8px">못 찾은 주문번호: ${miss.slice(0,8).map(r=>esc(r.order_no)).join(", ")}${miss.length>8?` 외 ${miss.length-8}건`:""}</div>`:""}
+  ${hit.length?`<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:12px"><button class="btn btn-pri" data-cm="trk-up-go">${hit.length}건 발송 처리</button><span class="hint">${X.map.carrier?"택배사 칸이 빈 행은":"택배사 열이 없어"} ${esc(carrierNow())}로 넣습니다.</span></div>`:""}`;
+  out.querySelectorAll("[data-ct-map]").forEach(s=>s.onchange=()=>{X.map[s.dataset.ctMap]=s.value;trkPreview();});
+}
+async function trkUpGo(){
+  const open=new Set(toShipList().map(o=>o.order_no).filter(Boolean));
+  const rows=trkRows().filter(r=>open.has(r.order_no));if(!rows.length)return;
+  const b=$('[data-cm="trk-up-go"]');if(b)b.disabled=true;
+  try{
+    let n=0;for(let i=0;i<rows.length;i+=2500){const r=await call("ship/bulk",{rows:rows.slice(i,i+2500),carrier:carrierNow()});n+=r.shipped;}
+    await load();closeModal();if(onPage())route();toast(`${n}건을 발송 처리했습니다. 채널별 송장 파일도 바로 받을 수 있습니다.`);
+  }catch(e){if(b)b.disabled=false;failToast(e);}
+}
+function chTrkCsv(id){
+  const since=addDaysStr(todayStr(),-(U.shipDays-1));
+  const os=CM.orders.filter(o=>o.channel_id===id&&o.status==="shipped"&&o.tracking&&dOf(o.shipped_at)>=since);
+  if(!os.length)return;
+  const nm=chName(id),slug=/스마트스토어/.test(nm)?"smartstore":/쿠팡/.test(nm)?"coupang":/11번가/.test(nm)?"11st":/지마켓|G마켓|옥션/.test(nm)?"gmarket":/자사몰/.test(nm)?"ownmall":"ch"+(CM.channels.findIndex(c=>c.id===id)+1);
+  dlCsv(`myworks-tracking-${slug}-${todayStr()}.csv`,["주문번호","택배사","송장번호","상품명","수령인"],os.map(o=>[o.order_no,o.carrier,o.tracking,(o.product_name||"")+(o.option?" / "+o.option:""),o.receiver]));
+  toast(`${chName(id)} 송장 ${os.length}건을 받았습니다.`);
 }
 
 /* ── 엑셀 업로드 ── */
@@ -5981,8 +6214,7 @@ function guessMap(headers,chName0){
 async function parseExcel(f){
   const out=$("#cu-result");out.innerHTML=`<p class="hint">읽는 중…</p>`;
   try{
-    if(!window.XLSX)await loadScript(XLSX_URL);
-    const wb=XLSX.read(await f.arrayBuffer(),{type:"array",cellDates:false});
+    const wb=await readBook(f);
     const ws=wb.Sheets[wb.SheetNames[0]];
     const rows=XLSX.utils.sheet_to_json(ws,{header:1,raw:true,defval:""});
     let hi=-1,best=0;
@@ -6047,45 +6279,266 @@ async function uploadGo(mode){
 
 /* ── 상품·재고 ── */
 function vProducts(){
-  const list=CM.products.slice().sort((a,b)=>(b.active-a.active)||((a.stock<=a.safety?0:1)-(b.stock<=b.safety?0:1))||a.name.localeCompare(b.name));
+  const list=CM.products.slice().sort((a,b)=>(b.active-a.active)||((a.stock<=a.safety?0:1)-(b.stock<=b.safety?0:1))||a.name.localeCompare(b.name)||String(a.option||"").localeCompare(String(b.option||"")));
   const stockVal=list.filter(p=>p.active!==0).reduce((s,p)=>s+Math.max(0,p.stock)*p.cost,0);
+  const low=lowList();
   shell("products",`
-  <div class="hint" style="margin:-6px 0 10px">발송 처리하면 재고가 빠지고, 발송 뒤 취소·반품이면 되돌아옵니다. 실사 재고와 다르면 '재고 조정'으로 맞추세요. 재고 자산(매입가 기준) ${fmt(stockVal)}원</div>
+  <div class="hint" style="margin:-6px 0 10px">발송하면 재고가 빠지고, 반품을 재입고하거나 발주를 입고하면 늘어납니다. 움직임은 상품마다 ‘기록’에서 볼 수 있습니다. 재고 자산(매입가 기준) ${fmt(stockVal)}원</div>
   <div class="card">
     ${list.length?`<div class="tblwrap"><table class="tbl"><thead><tr><th>상품</th><th>SKU</th><th class="r">판매가</th><th class="r">매입가</th><th class="r">재고</th><th class="r">안전</th><th></th></tr></thead><tbody>
-    ${list.map(p=>`<tr class="${p.active===0?"off":""}"><td><b>${esc(p.name)}</b>${p.active===0?` <span class="tag">판매 중지</span>`:""}${p.memo?`<div class="hint">${esc(p.memo)}</div>`:""}</td><td class="mono">${esc(p.sku||"")}</td><td class="r num">${fmt(p.price)}</td><td class="r num">${fmt(p.cost)}</td><td class="r num ${p.stock<=p.safety&&p.active!==0?"d-late":""}">${p.stock}</td><td class="r num hint">${p.safety}</td><td class="r" style="white-space:nowrap"><button class="btn btn-sm" data-cm="stock-adj" data-id="${p.id}">재고 조정</button> <button class="btn btn-sm btn-ghost" data-cm="prod-open" data-id="${p.id}">수정</button></td></tr>`).join("")}
-    </tbody></table></div>`:empty("상품이 없습니다","상품을 등록하면 주문과 연결되어 재고와 마진이 자동으로 계산됩니다.")}
-  </div>`,{actions:`<button class="btn btn-pri" data-cm="prod-new">＋ 상품</button>`});
+    ${list.map(p=>{const sp=p.supplier_id?supById(p.supplier_id):null;return`<tr class="${p.active===0?"off":""}"><td><b>${esc(p.name)}</b>${p.option?` <span class="tag">${esc(p.option)}</span>`:""}${p.active===0?` <span class="tag">판매 중지</span>`:""}${sp||p.memo?`<div class="hint">${sp?`공급 ${esc(sp.name)}`:""}${sp&&p.memo?" · ":""}${esc(p.memo||"")}</div>`:""}</td><td class="mono">${esc(p.sku||"")}</td><td class="r num">${fmt(p.price)}</td><td class="r num">${fmt(p.cost)}</td><td class="r num ${p.stock<=p.safety&&p.active!==0?"d-late":""}">${p.stock}</td><td class="r num hint">${p.safety}</td><td class="r" style="white-space:nowrap"><button class="btn btn-sm" data-cm="stock-adj" data-id="${p.id}">재고 조정</button> <button class="btn btn-sm btn-ghost" data-cm="stock-log" data-id="${p.id}">기록</button> <button class="btn btn-sm btn-ghost" data-cm="prod-open" data-id="${p.id}">수정</button></td></tr>`;}).join("")}
+    </tbody></table></div>`:empty("상품이 없습니다","상품을 등록하면 주문과 연결되어 재고와 마진이 자동으로 계산됩니다. 옵션마다 따로 등록하면 옵션별 재고를 따로 셉니다.")}
+  </div>`,{actions:`<div style="display:flex;gap:6px;flex-wrap:wrap">${low.length?`<button class="btn" data-cm="go" data-to="po">부족 상품 발주 →</button>`:""}<button class="btn btn-pri" data-cm="prod-new">＋ 상품</button></div>`});
 }
 function prodModal(p){
-  const isNew=!p;p=p||{name:"",sku:"",price:0,cost:0,stock:0,safety:0,active:1,memo:""};
+  const isNew=!p;p=p||{name:"",option:"",sku:"",price:0,cost:0,stock:0,safety:0,active:1,memo:"",supplier_id:""};
   openModal(`
   <h2><span class="bars"></span>${isNew?"상품 등록":"상품 수정"}</h2>
   <div class="m-grid2">
     <div><label>상품명</label><input id="cp-name" value="${esc(p.name)}" maxlength="120" placeholder="주문 엑셀의 상품명과 같게 적으면 자동 연결"></div>
+    <div><label>옵션 <span style="font-weight:500;color:var(--faint)">(선택)</span></label><input id="cp-opt" value="${esc(p.option||"")}" maxlength="120" placeholder="예: 초코 / 250g"></div>
     <div><label>SKU·코드</label><input id="cp-sku" value="${esc(p.sku||"")}" maxlength="60"></div>
+    <div><label>공급처</label><select id="cp-sup"><option value="">없음</option>${CM.suppliers.map(s=>`<option value="${esc(s.id)}" ${s.id===p.supplier_id?"selected":""}>${esc(s.name)}</option>`).join("")}</select></div>
     <div><label>판매가(원)</label><input id="cp-price" type="number" min="0" step="100" value="${p.price||""}"></div>
     <div><label>매입가·원가(원)</label><input id="cp-cost" type="number" min="0" step="100" value="${p.cost||""}"></div>
     <div><label>현재 재고</label><input id="cp-stock" type="number" value="${p.stock}" ${isNew?"":"disabled"}></div>
     <div><label>안전 재고</label><input id="cp-safety" type="number" min="0" value="${p.safety}"></div>
   </div>
-  ${isNew?"":`<div class="hint">재고 수량은 '재고 조정'에서 바꿉니다.</div>`}
+  <div class="hint">${isNew?"옵션을 적으면 주문 엑셀의 상품명과 옵션이 모두 같을 때 이 상품으로 연결됩니다.":"재고 수량은 ‘재고 조정’에서 바꿉니다."}${CM.suppliers.length?"":" 공급처는 발주·입고 탭에서 등록합니다."}</div>
   <label>메모</label><input id="cp-memo" value="${esc(p.memo||"")}" maxlength="500">
   ${isNew?"":`<label class="checkline"><input type="checkbox" id="cp-active" ${p.active!==0?"checked":""}>판매 중</label>`}
   <div class="m-foot">${isNew?"":`<button class="btn btn-ghost left" data-cm="prod-del" data-id="${p.id}">삭제</button>`}<button class="btn btn-ghost" data-g="modal-close">취소</button><button class="btn btn-pri" data-cm="prod-save" data-id="${isNew?"":p.id}">저장</button></div>`);
 }
 async function prodSave(id){
-  const b={name:$("#cp-name").value.trim(),sku:$("#cp-sku").value.trim(),price:Number($("#cp-price").value)||0,cost:Number($("#cp-cost").value)||0,safety:Number($("#cp-safety").value)||0,memo:$("#cp-memo").value.trim()};
+  const b={name:$("#cp-name").value.trim(),option:$("#cp-opt").value.trim(),sku:$("#cp-sku").value.trim(),supplier_id:$("#cp-sup").value,price:Number($("#cp-price").value)||0,cost:Number($("#cp-cost").value)||0,safety:Number($("#cp-safety").value)||0,memo:$("#cp-memo").value.trim()};
   if(!b.name)return toast("상품명을 입력하세요.");
   if(id){b.id=id;b.active=$("#cp-active").checked;}else b.stock=Number($("#cp-stock").value)||0;
   try{const r=await call("product/save",b);upd(CM.products,r.product);closeModal();if(onPage())route();toast("저장했습니다.");}catch(e){failToast(e);}
 }
-async function stockAdjust(id){
+function stockModal(id){
   const p=prodById(id);if(!p)return;
-  const v=prompt(`"${p.name}" 실제 재고 수량을 입력하세요. (현재 ${p.stock})\n+5, -3처럼 적으면 더하거나 뺍니다.`,String(p.stock));
-  if(v===null)return;const s=v.trim();if(!s)return;
-  const body=/^[+-]/.test(s)?{id,delta:Number(s)||0}:{id,stock:Number(s)||0};
-  try{const r=await call("stock/adjust",body);upd(CM.products,r.product);if(onPage())route();toast(`재고를 ${r.product.stock}개로 맞췄습니다.`);}catch(e){failToast(e);}
+  openModal(`<h2><span class="bars"></span>재고 조정 — ${esc(pName(p))}</h2>
+  <div class="sp-box info"><b style="display:inline">지금 재고 ${p.stock}개</b> · 안전 재고 ${p.safety}개</div>
+  <div class="m-grid2"><div><label>방법</label><select id="sa-mode"><option value="set">실제 수량으로 맞추기</option><option value="add">더하기</option><option value="sub">빼기</option></select></div><div><label>수량</label><input id="sa-n" type="number" min="0" value="${p.stock}"></div></div>
+  <label>사유</label><select id="sa-why">${ADJ_WHY.map(w=>`<option>${w}</option>`).join("")}</select>
+  <div class="m-foot"><button class="btn btn-ghost" data-g="modal-close">취소</button><button class="btn btn-pri" data-cm="stock-save" data-id="${p.id}">저장</button></div>`);
+  $("#sa-mode").onchange=()=>{$("#sa-n").value=$("#sa-mode").value==="set"?p.stock:"";$("#sa-n").focus();};
+}
+async function stockSave(id){
+  const m=$("#sa-mode").value,n=Math.max(0,Math.round(Number($("#sa-n").value)||0)),reason=$("#sa-why").value;
+  if(m!=="set"&&!n)return toast("수량을 적어 주세요.");
+  const body=m==="set"?{id,stock:n,reason}:{id,delta:m==="add"?n:-n,reason};
+  try{const r=await call("stock/adjust",body);upd(CM.products,r.product);closeModal();if(onPage())route();toast(`재고를 ${r.product.stock}개로 맞췄습니다.`);}catch(e){failToast(e);}
+}
+async function logModal(id){
+  const p=prodById(id);if(!p)return;
+  openModal(`<h2><span class="bars"></span>재고 기록 — ${esc(pName(p))}</h2><div id="sl-box"><div class="empty">불러오는 중…</div></div><div class="m-foot"><button class="btn btn-ghost" data-g="modal-close">닫기</button></div>`);
+  try{
+    const r=await call("stock/log",{id});const box=$("#sl-box");if(!box)return;
+    box.innerHTML=r.items.length?`<div class="tblwrap"><table class="tbl" style="min-width:0;font-size:13px"><thead><tr><th>일시</th><th class="r">변동</th><th>사유</th><th>참조</th><th>처리</th></tr></thead><tbody>${r.items.map(x=>`<tr><td class="mono nw">${esc(fmtWhen(x.at))}</td><td class="r num" style="color:${x.delta<0?"var(--late)":"var(--ok)"};font-weight:700">${x.delta>0?"+":""}${x.delta}</td><td>${esc(x.reason||"")}</td><td class="mono">${esc(x.ref||"")}</td><td class="hint">${esc(x.by_name||"")}</td></tr>`).join("")}</tbody></table></div><div class="hint" style="margin-top:8px">최근 100건까지 보여 줍니다. 지금 재고 ${p.stock}개</div>`
+      :`<div class="empty">아직 기록이 없습니다. 이 기능을 쓰기 전의 움직임은 남아 있지 않습니다.</div>`;
+  }catch(e){const box=$("#sl-box");if(box)box.innerHTML=`<div class="sp-box red">${esc(errMsg(e)||"불러오지 못했습니다.")}</div>`;}
+}
+
+/* ── 발주·입고 ── 공급처 → 발주서 → 확인 링크 → 공급처 회신 → 입고(재고 증가) */
+function vPO(){
+  const today=todayStr();
+  let list=CM.pos.slice();
+  if(U.poF==="open")list=list.filter(p=>!["received","cancel"].includes(p.status));else if(U.poF==="done")list=list.filter(p=>["received","cancel"].includes(p.status));
+  list.sort((a,b)=>(b.created_at||"").localeCompare(a.created_at||""));
+  const low=lowList(),g={};
+  low.forEach(p=>{const k=p.supplier_id&&supById(p.supplier_id)?p.supplier_id:"";(g[k]=g[k]||[]).push(p);});
+  const busy=new Set(poOpen().flatMap(p=>(p.items||[]).map(x=>x.product_id)).filter(Boolean));
+  shell("po",`
+  ${low.length?`<div class="card"><h2><span class="bars"></span>발주가 필요한 상품 <span class="cnt">안전 재고 이하 ${low.length}개</span></h2>
+    ${Object.entries(g).map(([sid,ps])=>`<div class="cm-sug"><div class="cm-sug-h"><b>${sid?esc(supById(sid).name):"공급처 미지정"}</b><span class="hint">${ps.length}개 상품</span><button class="btn btn-sm ${sid?"btn-pri":""}" data-cm="po-sug" data-sup="${esc(sid)}">발주서 만들기</button></div><div class="cm-sug-l">${ps.map(p=>`<span class="tag">${esc(pName(p))} · 재고 ${p.stock}/${p.safety}${busy.has(p.id)?" · 발주 진행 중":""}</span>`).join("")}</div></div>`).join("")}
+    <div class="hint" style="margin-top:8px">제안 수량은 안전 재고의 두 배까지 채우는 양입니다. 발주서에서 고칠 수 있습니다.</div></div>`:""}
+  <div class="filters">${[["open","진행 중"],["done","입고·취소"],["all","전체"]].map(([k,l])=>`<button class="fchip ${U.poF===k?"on":""}" data-cm="po-f" data-v="${k}">${l}</button>`).join("")}</div>
+  <div class="card">
+    ${list.length?`<div class="tblwrap"><table class="tbl"><thead><tr><th>발주번호</th><th>공급처</th><th>품목</th><th class="r">금액</th><th>상태</th><th>입고 희망</th><th>공급처 회신</th></tr></thead><tbody>
+    ${list.map(p=>`<tr data-cm="po-open" data-id="${p.id}" style="cursor:pointer"><td class="mono nw">${esc(p.no)}</td><td class="nw">${esc((supById(p.supplier_id)||{}).name||"—")}</td><td>${esc(((p.items||[])[0]||{}).name||"")}${(p.items||[]).length>1?` 외 ${(p.items||[]).length-1}개`:""}</td><td class="r num">${fmt(p.total)}</td><td>${poPill(p.status)}</td><td class="mono nw ${p.expected&&p.expected<today&&!["received","cancel"].includes(p.status)?"d-late":""}">${p.expected?fmtD(p.expected):""}</td><td class="hint">${esc(p.reply_note||"")}</td></tr>`).join("")}
+    </tbody></table></div>`:empty(U.poF==="open"?"진행 중인 발주가 없습니다":"발주서가 없습니다","공급처를 등록하고 발주서를 만들면 공급처가 링크에서 확인하고, 입고 처리 때 재고가 자동으로 늘어납니다.")}
+  </div>
+  <div class="card"><h2><span class="bars"></span>공급처 <span class="cnt">${CM.suppliers.length}곳</span><button class="btn btn-sm" data-cm="sup-new" style="margin-left:auto">＋ 공급처</button></h2>
+    ${CM.suppliers.length?CM.suppliers.slice().sort((a,b)=>a.name.localeCompare(b.name)).map(s=>{const np=CM.products.filter(p=>p.supplier_id===s.id).length,no=poOpen().filter(p=>p.supplier_id===s.id).length;return`<div class="pj-line" data-cm="sup-open" data-id="${s.id}"><span class="pj-nm"><b>${esc(s.name)}</b>${s.contact?` <span class="hint">${esc(s.contact)}</span>`:""}</span><span class="hint">${esc(s.phone||"")}</span><span class="tag">상품 ${np}</span>${no?`<span class="tag">발주 ${no}</span>`:""}</div>`;}).join(""):`<div class="empty" style="padding:18px">등록된 공급처가 없습니다. 상품을 받아 오는 곳을 등록해 두면 상품과 발주서에 연결됩니다.</div>`}
+  </div>`,{actions:`<button class="btn btn-pri" data-cm="po-new">＋ 발주서</button>`});
+}
+function supModal(s){
+  const isNew=!s;s=s||{name:"",contact:"",phone:"",email:"",memo:""};
+  openModal(`<h2><span class="bars"></span>${isNew?"공급처 추가":"공급처 수정"}</h2>
+  <div class="m-grid2">
+    <div><label>이름</label><input id="sx-name" value="${esc(s.name)}" maxlength="80" placeholder="예: 하루제과 공방"></div>
+    <div><label>담당자</label><input id="sx-contact" value="${esc(s.contact||"")}" maxlength="40"></div>
+    <div><label>연락처</label><input id="sx-phone" value="${esc(s.phone||"")}" maxlength="40"></div>
+    <div><label>이메일</label><input id="sx-email" value="${esc(s.email||"")}" maxlength="80"></div>
+  </div>
+  <label>메모</label><input id="sx-memo" value="${esc(s.memo||"")}" maxlength="500" placeholder="결제 조건, 최소 주문 수량, 발주 마감 시간 등">
+  <div class="m-foot">${isNew?"":`<button class="btn btn-ghost left" data-cm="sup-del" data-id="${s.id}">삭제</button>`}<button class="btn btn-ghost" data-g="modal-close">취소</button><button class="btn btn-pri" data-cm="sup-save" data-id="${isNew?"":s.id}">저장</button></div>`);
+}
+async function supSave(id){
+  const b={name:$("#sx-name").value.trim(),contact:$("#sx-contact").value.trim(),phone:$("#sx-phone").value.trim(),email:$("#sx-email").value.trim(),memo:$("#sx-memo").value.trim()};
+  if(!b.name)return toast("공급처 이름을 입력하세요.");
+  if(id)b.id=id;
+  try{const r=await call("supplier/save",b);upd(CM.suppliers,r.supplier);closeModal();if(onPage())route();toast("저장했습니다.");}catch(e){failToast(e);}
+}
+function poModal(p,pre){
+  const ed=!p||["draft","changed"].includes(p.status),sid=p?p.supplier_id||"":(pre&&pre.supplier_id)||"",sup=supById(sid);
+  U.po={id:p?p.id:"",items:p?(p.items||[]).map(x=>Object.assign({},x)):((pre&&pre.items&&pre.items.length)?pre.items:[{product_id:"",name:"",option:"",qty:1,cost:0}])};
+  const info=p?[sup?`공급처 <b>${esc(sup.name)}</b>`:"",p.ordered_at?`보낸 날 <b>${fmtD(dOf(p.ordered_at))}</b>`:"",p.expected?`입고 희망 <b>${fmtD(p.expected)}</b>`:"",p.received_at?`입고 <b>${fmtD(dOf(p.received_at))}</b>`:""].filter(Boolean).join(" · "):"";
+  openModal(`
+  <h2><span class="bars"></span>${p?`발주서 ${esc(p.no)}`:"발주서 만들기"} ${p?poPill(p.status):""}</h2>
+  ${p&&p.status==="changed"?`<div class="sp-box warn"><b>공급처가 변경을 요청했습니다</b>${esc(p.reply_note||"")}${p.replied_by?` — ${esc(p.replied_by)}`:""}${p.replied_at?` · ${esc(fmtWhen(p.replied_at))}`:""}<br><span class="hint">요청대로 고친 뒤 ‘고친 내용으로 다시 보내기’를 누르면 새 링크와 메시지가 만들어집니다.</span></div>`:""}
+  ${p&&["confirmed","received"].includes(p.status)&&(p.reply_note||p.replied_by)?`<div class="sp-box ok"><b>공급처가 발주 내용을 확인했습니다</b>${esc(p.reply_note||"")}${p.replied_by?` — ${esc(p.replied_by)}`:""}${p.replied_at?` · ${esc(fmtWhen(p.replied_at))}`:""}</div>`:""}
+  ${ed?`<div class="m-grid2"><div><label>공급처</label><select id="po-sup"><option value="">선택 안 함</option>${CM.suppliers.map(s=>`<option value="${esc(s.id)}" ${s.id===sid?"selected":""}>${esc(s.name)}</option>`).join("")}</select></div><div><label>입고 희망일</label><input id="po-exp" type="date" value="${esc(p&&p.expected||"")}"></div></div>
+  <label>품목</label><div id="po-items"></div>
+  <button class="btn btn-sm" data-cm="po-add" style="margin-top:8px">＋ 품목</button>
+  <label>메모 <span style="font-weight:500;color:var(--faint)">— 공급처도 링크에서 봅니다</span></label><input id="po-memo" value="${esc(p&&p.memo||"")}" maxlength="1000" placeholder="예: 박스당 20개씩 포장 부탁드립니다">`
+  :`${info?`<div class="hint" style="margin-bottom:10px">${info}</div>`:""}${poTable(p)}${p.memo?`<div class="sp-note">메모 — ${esc(p.memo)}</div>`:""}`}
+  <div class="m-foot">${poFoot(p)}</div>`);
+  if(ed)poItemsRender();
+}
+function poTable(p){
+  const got=p.status==="received";
+  return`<div class="tblwrap"><table class="tbl" style="min-width:0"><thead><tr><th>품목</th><th class="r">수량</th><th class="r">단가</th><th class="r">금액</th>${got?`<th class="r">받은 수량</th>`:""}</tr></thead><tbody>
+  ${(p.items||[]).map(x=>`<tr><td><b>${esc(x.name)}</b>${x.option?` <span class="hint">${esc(x.option)}</span>`:""}</td><td class="r num">${fmt(x.qty)}</td><td class="r num">${fmt(x.cost)}</td><td class="r num">${fmt(x.qty*x.cost)}</td>${got?`<td class="r num ${x.got!=null&&x.got<x.qty?"d-late":""}">${x.got!=null?fmt(x.got):"—"}</td>`:""}</tr>`).join("")}
+  </tbody><tfoot><tr class="sum"><td colspan="3" class="r">합계</td><td class="r num">${fmt(p.total)}</td>${got?"<td></td>":""}</tr></tfoot></table></div>`;
+}
+function poItemsRender(){
+  const box=$("#po-items");if(!box||!U.po)return;
+  const it=U.po.items;
+  box.innerHTML=`<div class="po-its">${it.map((x,i)=>`<div class="po-it">
+    <div class="po-it1"><select data-pi="product_id" data-i="${i}" aria-label="상품 연결">${prodOpts(x.product_id).replace("상품 선택 안 함","상품과 연결 안 함")}</select><button class="btn btn-xs btn-ghost" data-cm="po-rm" data-i="${i}" aria-label="품목 빼기">✕</button></div>
+    <div class="po-it2"><label><span>품목명</span><input data-pi="name" data-i="${i}" value="${esc(x.name)}" maxlength="120"></label><label><span>옵션</span><input data-pi="option" data-i="${i}" value="${esc(x.option||"")}" maxlength="120"></label><label><span>수량</span><input type="number" min="0" data-pi="qty" data-i="${i}" value="${x.qty}"></label><label><span>단가</span><input type="number" min="0" step="10" data-pi="cost" data-i="${i}" value="${x.cost||""}"></label><div class="po-amt"><span>금액</span><b class="num" data-pi-amt="${i}">${fmt(x.qty*x.cost)}</b></div></div>
+  </div>`).join("")}</div>
+  <div class="po-sum"><span class="hint">상품과 연결한 품목만 입고 때 재고에 더해집니다. 포장재처럼 재고로 세지 않는 품목은 연결하지 않아도 됩니다.</span><b>합계 <span class="num" id="po-total">${fmt(it.reduce((a,x)=>a+x.qty*x.cost,0))}</span>원</b></div>`;
+  box.querySelectorAll("[data-pi]").forEach(el=>{
+    el.addEventListener(el.tagName==="SELECT"?"change":"input",()=>{
+      const i=+el.dataset.i,k=el.dataset.pi,x=U.po.items[i];if(!x)return;
+      if(k==="product_id"){x.product_id=el.value;const p=prodById(el.value);if(p){x.name=p.name;x.option=p.option||"";if(!x.cost)x.cost=p.cost||0;}poItemsRender();return;}
+      x[k]=k==="qty"||k==="cost"?Math.max(0,Number(el.value)||0):el.value;
+      const a=box.querySelector(`[data-pi-amt="${i}"]`);if(a)a.textContent=fmt(x.qty*x.cost);
+      const t=$("#po-total");if(t)t.textContent=fmt(U.po.items.reduce((s,y)=>s+y.qty*y.cost,0));
+    });
+  });
+}
+function poFoot(p){
+  const st=p?p.status:"new",close=`<button class="btn btn-ghost" data-g="modal-close">닫기</button>`,id=p?p.id:"";
+  const cancel=`<button class="btn btn-ghost left" data-cm="po-st" data-id="${id}" data-st="cancel">발주 취소</button>`;
+  if(st==="new")return`${close}<button class="btn" data-cm="po-save">저장</button><button class="btn btn-pri" data-cm="po-save" data-send="1">저장하고 보내기</button>`;
+  if(st==="draft")return`<button class="btn btn-ghost left" data-cm="po-del" data-id="${id}">삭제</button>${close}<button class="btn" data-cm="po-save" data-id="${id}">저장</button><button class="btn btn-pri" data-cm="po-save" data-id="${id}" data-send="1">저장하고 보내기</button>`;
+  if(st==="changed")return`${cancel}${close}<button class="btn" data-cm="po-save" data-id="${id}">저장</button><button class="btn btn-pri" data-cm="po-save" data-id="${id}" data-send="1">고친 내용으로 다시 보내기</button>`;
+  if(st==="sent")return`${cancel}${close}<button class="btn" data-cm="po-link" data-id="${id}">링크·메시지 다시 만들기</button><button class="btn" data-cm="po-st" data-id="${id}" data-st="confirmed">확인받은 것으로 표시</button><button class="btn btn-pri" data-cm="po-recv" data-id="${id}">입고 처리</button>`;
+  if(st==="confirmed")return`${cancel}${close}<button class="btn btn-pri" data-cm="po-recv" data-id="${id}">입고 처리</button>`;
+  if(st==="cancel")return`<button class="btn btn-ghost left" data-cm="po-del" data-id="${id}">삭제</button>${close}<button class="btn" data-cm="po-st" data-id="${id}" data-st="draft">다시 작성</button>`;
+  return close;
+}
+async function poSave(id,send){
+  const items=((U.po&&U.po.items)||[]).map(x=>({product_id:x.product_id||null,name:String(x.name||"").trim(),option:String(x.option||"").trim(),qty:Math.round(Number(x.qty)||0),cost:Math.round(Number(x.cost)||0)})).filter(x=>x.name&&x.qty>0);
+  if(!items.length)return toast("품목 이름과 수량을 적어 주세요.");
+  const b={supplier_id:$("#po-sup").value,expected:$("#po-exp").value,memo:$("#po-memo").value.trim(),items};
+  if(send&&!b.supplier_id)return toast("보낼 공급처를 골라 주세요.");
+  if(id)b.id=id;
+  const btns=[...document.querySelectorAll("#m-box .m-foot button")];btns.forEach(x=>x.disabled=true);
+  try{
+    let r=await call("po/save",b);upd(CM.pos,r.po);
+    if(send){r=await call("po/status",{id:r.po.id,status:"sent"});upd(CM.pos,r.po);if(onPage())route();await poSend(r.po);}
+    else{closeModal();if(onPage())route();toast("발주서를 저장했습니다.");}
+  }catch(e){btns.forEach(x=>x.disabled=false);failToast(e);}
+}
+async function poSend(p){
+  const sup=supById(p.supplier_id)||{};
+  let url="";
+  try{const r=await api("link/create",{kind:"po",target:p.id,days:30});url=location.origin+location.pathname+"#/link/"+r.token;}
+  catch(e){closeModal();if(e.code!=="unauthorized")toast("확인 링크를 만들지 못했습니다. 발주서는 보낸 것으로 표시했습니다.");return;}
+  const items=p.items||[];
+  const msg=`안녕하세요${sup.contact?`, ${sup.contact}님`:""}. ${(DB.meta&&DB.meta.workspace)||""}입니다.\n발주서 ${p.no} 보내드립니다. ${items.length}개 품목, 합계 ${fmtWon(p.total)}${p.expected?`이고 입고 희망일은 ${fmtD(p.expected)}`:""}입니다.\n아래 링크에서 내용을 보시고 ‘발주 내용을 확인했습니다’를 눌러 주세요. 바꿀 부분이 있으면 ‘변경을 요청합니다’에 적어 주시면 됩니다.\n${url}`;
+  openModal(`<h2><span class="bars"></span>발주서 ${esc(p.no)} 보내기</h2>
+  <div class="hint" style="margin-bottom:10px">${esc(sup.name||"공급처")}에 아래 메시지를 문자·카카오톡·메일로 보내세요. 공급처가 링크에서 확인하거나 변경을 요청하면 발주·입고 화면에 바로 표시됩니다. 링크는 30일 동안 열리고, 새로 만들면 이전 링크는 닫힙니다.</div>
+  <label>보낼 메시지</label><textarea id="po-msg" style="min-height:150px">${esc(msg)}</textarea>
+  <div class="linkbox mono">${esc(url)}</div>
+  <div class="m-foot"><button class="btn btn-ghost" data-g="modal-close">닫기</button><button class="btn" data-act="copy-text" data-text="${esc(url)}" data-msg="링크를 복사했습니다.">링크만 복사</button><button class="btn btn-pri" data-cm="po-msg-copy">메시지 복사</button></div>`);
+}
+function recvModal(p){
+  openModal(`<h2><span class="bars"></span>입고 처리 — ${esc(p.no)}</h2>
+  <div class="hint" style="margin-bottom:10px">실제로 받은 수량을 확인하세요. 상품과 연결된 품목은 받은 수량만큼 재고가 늘어납니다.</div>
+  <div class="tblwrap"><table class="tbl" style="min-width:0"><thead><tr><th>품목</th><th class="r">발주</th><th class="r">받은 수량</th></tr></thead><tbody>
+  ${(p.items||[]).map((x,i)=>`<tr><td><b>${esc(x.name)}</b>${x.option?` <span class="hint">${esc(x.option)}</span>`:""}${x.product_id&&prodById(x.product_id)?"":`<div class="hint" style="color:var(--amber)">상품 미연결 · 재고에 더하지 않음</div>`}</td><td class="r num">${fmt(x.qty)}</td><td class="r"><input class="mini" type="number" min="0" data-rq="${i}" value="${x.qty}"></td></tr>`).join("")}
+  </tbody></table></div>
+  <div class="m-foot"><button class="btn btn-ghost" data-g="modal-close">취소</button><button class="btn btn-pri" data-cm="po-recv-go" data-id="${p.id}">입고 완료</button></div>`);
+}
+async function recvGo(id){
+  const qty=[...document.querySelectorAll("[data-rq]")].map(el=>Math.max(0,Math.round(Number(el.value)||0)));
+  const b=$('[data-cm="po-recv-go"]');if(b)b.disabled=true;
+  try{const r=await call("po/receive",{id,qty});upd(CM.pos,r.po);await load();closeModal();if(onPage())route();toast(`입고 처리했습니다.${r.added?` 재고에 ${fmt(r.added)}개를 더했습니다.`:""}`);}
+  catch(e){if(b)b.disabled=false;failToast(e);}
+}
+
+/* ── 반품·교환 ── 접수 → 회수 완료 → 처리 완료(반품: 주문 '반품' / 교환: 재발송 주문) */
+function vClaims(){
+  let list=CM.orders.filter(o=>o.claim);
+  if(U.claimF==="open")list=list.filter(o=>o.claim.status!=="done");else if(U.claimF==="done")list=list.filter(o=>o.claim.status==="done");
+  list.sort((a,b)=>(b.claim.at||"").localeCompare(a.claim.at||""));
+  shell("claims",`
+  <div class="hint" style="margin:-6px 0 10px">반품은 처리 완료 때 주문이 ‘반품’으로 바뀌어 매출에서 빠집니다. 교환은 처리 완료 때 0원짜리 재발송 주문이 생겨 송장·발송으로 넘어갑니다. 회수한 상품을 다시 팔 수 있으면 재입고에 체크하세요.</div>
+  <div class="filters">${[["open","진행 중"],["done","처리 완료"],["all","전체"]].map(([k,l])=>`<button class="fchip ${U.claimF===k?"on":""}" data-cm="claim-f" data-v="${k}">${l}</button>`).join("")}</div>
+  <div class="card">
+    ${list.length?list.map(o=>{const c=o.claim;return`<div class="os-row" data-cm="claim-open" data-id="${o.id}" style="cursor:pointer"><div class="os-main"><div class="os-t">${claimPill(c)} <b>${esc(o.product_name||"상품")}${o.option?` · ${esc(o.option)}`:""} × ${o.qty}</b></div>
+      <div class="hint">${esc(chName(o.channel_id))} · 주문 ${esc(o.order_no||"")} · ${esc(o.receiver||"")}${c.reason?` · ${esc(c.reason)}`:""}${c.pickup?` · 회수 송장 ${esc(c.pickup)}`:""}${c.type==="return"&&c.refund?` · 환불 ${fmt(c.refund)}원`:""}</div>
+      ${c.status==="done"?`<div class="hint">${esc(fmtWhen(c.done_at))} 처리${c.restock?" · 재입고":" · 재입고 안 함"}${c.type==="exchange"&&c.new_id?" · 재발송 주문 생성":""}</div>`:""}</div></div>`;}).join(""):empty(U.claimF==="open"?"진행 중인 반품·교환이 없습니다":"기록이 없습니다","고객이 반품이나 교환을 요청하면 ‘＋ 반품·교환 접수’에서 주문을 찾아 등록하세요.")}
+  </div>`,{actions:`<button class="btn btn-pri" data-cm="claim-new">＋ 반품·교환 접수</button>`});
+}
+function pickModal(){
+  openModal(`<h2><span class="bars"></span>반품·교환 접수 — 주문 찾기</h2>
+  <input id="cl-q" type="search" placeholder="주문번호·수령인·상품·송장으로 찾기" autocomplete="off">
+  <div id="cl-list" style="margin-top:10px;max-height:46vh;overflow:auto"></div>
+  <div class="hint" style="margin-top:8px">발송했거나 완료된 주문만 나옵니다. 받아 둔 기간(${fmtD(CM.from)} ~ ${fmtD(CM.to)}) 밖의 주문은 주문 탭에서 기간을 바꾼 뒤 찾으세요.</div>
+  <div class="m-foot"><button class="btn btn-ghost" data-g="modal-close">닫기</button></div>`);
+  const draw=()=>{
+    const q=norm(($("#cl-q")||{}).value||"");
+    const os=CM.orders.filter(o=>["shipped","done"].includes(o.status)&&!(o.claim&&o.claim.status==="done")).filter(o=>!q||norm([o.order_no,o.receiver,o.product_name,o.option,o.tracking].join(" ")).includes(q)).sort((a,b)=>(b.order_date||"").localeCompare(a.order_date||"")).slice(0,30);
+    $("#cl-list").innerHTML=os.length?os.map(o=>`<div class="pj-line" data-cm="claim-pick" data-id="${o.id}"><span class="pj-nm">${esc(o.product_name||"")}${o.option?` <span class="hint">${esc(o.option)}</span>`:""} × ${o.qty}</span><span class="mono hint">${esc(o.order_no||"")}</span><span class="hint">${esc(o.receiver||"")}</span>${o.claim?claimPill(o.claim):""}</div>`).join(""):`<div class="empty" style="padding:18px">맞는 주문이 없습니다.</div>`;
+  };
+  $("#cl-q").addEventListener("input",draw);draw();setTimeout(()=>{const q=$("#cl-q");if(q)q.focus();},60);
+}
+function claimModal(o){
+  const c=o.claim||null;
+  const head=`<div class="sp-box info"><b>${esc(o.product_name||"상품")}${o.option?` · ${esc(o.option)}`:""} × ${o.qty}</b>${esc(chName(o.channel_id))} · 주문 ${esc(o.order_no||"")} · ${esc(o.receiver||"")} · 결제 ${fmt(o.amount)}원${o.tracking?`<br><span class="hint">보낸 송장 ${esc((o.carrier||"")+" "+o.tracking)}</span>`:""}</div>`;
+  if(c&&c.status==="done"){
+    const nw=c.new_id?orderById(c.new_id):null;
+    openModal(`<h2><span class="bars"></span>${CLAIM_T[c.type]||"반품"} 처리 완료</h2>${head}
+    <div class="sp-box ok"><b>${esc(fmtWhen(c.done_at))} 처리${c.by?` · ${esc(c.by)}`:""}</b>${c.reason?`사유: ${esc(c.reason)}<br>`:""}${c.type==="return"?`환불 ${fmt(c.refund)}원 · `:""}${c.restock?"회수 상품 재입고":"재입고 안 함"}${c.pickup?` · 회수 송장 ${esc(c.pickup)}`:""}</div>
+    ${c.type==="exchange"?`<div class="hint">재발송 주문: ${nw?`${pill(nw.status)} ${nw.tracking?esc((nw.carrier||"")+" "+nw.tracking):"송장 대기"}`:"송장·발송 탭에서 확인하세요."}</div>`:""}
+    <div class="m-foot"><button class="btn btn-ghost" data-g="modal-close">닫기</button></div>`);
+    return;
+  }
+  const t=c?c.type:"return",st=c?c.status:"requested";
+  openModal(`<h2><span class="bars"></span>반품·교환 ${c?"":"접수"}</h2>${head}
+  <div class="m-grid2">
+    <div><label>종류</label><select id="cl-type"><option value="return" ${t==="return"?"selected":""}>반품 (환불)</option><option value="exchange" ${t==="exchange"?"selected":""}>교환 (재발송)</option></select></div>
+    <div><label>진행 단계</label><select id="cl-st">${Object.entries(CLAIM_ST).map(([k,v])=>`<option value="${k}" ${st===k?"selected":""}>${v[0]}</option>`).join("")}</select></div>
+    <div><label>사유</label><input id="cl-why" list="cl-whys" value="${esc(c&&c.reason||"")}" maxlength="300" placeholder="예: 단순 변심"><datalist id="cl-whys">${REASONS.map(r=>`<option value="${r}">`).join("")}</datalist></div>
+    <div><label>회수 송장 <span style="font-weight:500;color:var(--faint)">(선택)</span></label><input id="cl-pick" value="${esc(c&&c.pickup||"")}" maxlength="40"></div>
+  </div>
+  <div id="cl-refund-w"><label>환불 금액(원)</label><input id="cl-refund" type="number" min="0" step="100" value="${c&&c.type==="return"?c.refund:o.amount}"></div>
+  <label class="checkline"><input type="checkbox" id="cl-restock" ${!c||c.restock?"checked":""}>회수한 상품을 재고에 다시 넣기</label>
+  <div class="hint" id="cl-hint" style="margin-top:6px"></div>
+  <div class="m-foot">${c?`<button class="btn btn-ghost left" data-cm="claim-clear" data-id="${o.id}">접수 취소</button>`:""}<button class="btn btn-ghost" data-g="modal-close">닫기</button><button class="btn btn-pri" data-cm="claim-save" data-id="${o.id}">저장</button></div>`);
+  const sync=()=>{
+    const ty=$("#cl-type").value,s=$("#cl-st").value;$("#cl-refund-w").style.display=ty==="return"?"":"none";
+    $("#cl-hint").textContent=s==="done"?(ty==="return"?"처리 완료로 저장하면 주문이 ‘반품’으로 바뀌고 되돌릴 수 없습니다.":"처리 완료로 저장하면 0원짜리 재발송 주문이 생겨 송장·발송으로 넘어갑니다. 되돌릴 수 없습니다."):"지금은 단계만 기록합니다. 재고와 주문 상태는 처리 완료 때 바뀝니다.";
+  };
+  $("#cl-type").onchange=sync;$("#cl-st").onchange=sync;sync();
+  $("#cl-why").addEventListener("change",()=>{if(/불량|파손/.test($("#cl-why").value))$("#cl-restock").checked=false;});
+}
+async function claimSave(id){
+  const b={id,type:$("#cl-type").value,status:$("#cl-st").value,reason:$("#cl-why").value.trim(),pickup:$("#cl-pick").value.trim(),refund:Number($("#cl-refund").value)||0,restock:$("#cl-restock").checked};
+  if(b.status==="done"&&!confirm(b.type==="return"?"반품을 처리 완료할까요? 주문이 ‘반품’으로 바뀌고 되돌릴 수 없습니다.":"교환을 처리 완료할까요? 재발송 주문이 새로 생깁니다."))return;
+  try{
+    const r=await call("order/claim",b);upd(CM.orders,r.order);if(r.created)upd(CM.orders,r.created);
+    if(b.status==="done")await load();
+    closeModal();if(onPage())route();
+    toast(b.status==="done"?(b.type==="exchange"?"교환을 처리했습니다. 재발송 주문이 송장·발송에 들어갔습니다.":"반품을 처리했습니다."):"저장했습니다.");
+  }catch(e){failToast(e);}
 }
 
 /* ── 문의 ── */
@@ -6106,6 +6559,7 @@ function vInq(){
 }
 function inqModal(i){
   const isNew=!i;i=i||{channel_id:"",order_no:"",customer:"",text:"",due:addDaysStr(todayStr(),1),status:"open",answer:""};
+  const s=CM.settings||{},tpl=s.ans_tpl&&s.ans_tpl.length?s.ans_tpl:ANS_TPL;
   openModal(`
   <h2><span class="bars"></span>${isNew?"문의 등록":"문의"}</h2>
   <div class="m-grid2">
@@ -6115,8 +6569,18 @@ function inqModal(i){
     <div><label>답변 기한</label><input id="ci-due" type="date" value="${esc(i.due||"")}"></div>
   </div>
   <label>문의 내용</label><textarea id="ci-text" style="min-height:80px">${esc(i.text||"")}</textarea>
-  <label>답변</label><textarea id="ci-answer" style="min-height:80px" placeholder="답변을 적고 '답변 완료'를 누르면 처리됩니다.">${esc(i.answer||"")}</textarea>
+  <label>답변</label>
+  <select id="ci-tpl" style="margin-bottom:6px"><option value="">자주 쓰는 답변에서 고르기</option>${tpl.map((t,k)=>`<option value="${k}">${esc(t.slice(0,44))}${t.length>44?"…":""}</option>`).join("")}</select>
+  <textarea id="ci-answer" style="min-height:80px" placeholder="답변을 적고 ‘답변 완료’를 누르면 처리됩니다.">${esc(i.answer||"")}</textarea>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:6px"><button type="button" class="btn btn-xs" id="ci-ai">클로드에게 초안 부탁할 문장 복사</button><span class="hint">복사해서 클로드에 붙여 넣으면 답변 초안을 받을 수 있습니다. 보내기 전에 꼭 직접 확인하세요.</span></div>
   <div class="m-foot">${isNew?"":`<button class="btn btn-ghost left" data-cm="inq-del" data-id="${i.id}">삭제</button>`}<button class="btn btn-ghost" data-g="modal-close">취소</button><button class="btn" data-cm="inq-save" data-id="${isNew?"":i.id}" data-st="open">저장</button><button class="btn btn-pri" data-cm="inq-save" data-id="${isNew?"":i.id}" data-st="done">답변 완료</button></div>`);
+  $("#ci-tpl").onchange=e=>{const k=e.target.value;if(k==="")return;const ta=$("#ci-answer");ta.value=(ta.value?ta.value+"\n":"")+tpl[+k];e.target.value="";};
+  $("#ci-ai").onclick=()=>{
+    const text=$("#ci-text").value.trim();if(!text)return toast("문의 내용을 먼저 넣으세요.");
+    const no=$("#ci-no").value.trim(),ord=no?CM.orders.find(o=>o.order_no===no):null,ch=$("#ci-ch").value?chName($("#ci-ch").value):"";
+    const txt=`${(DB.meta&&DB.meta.workspace)||"우리 쇼핑몰"}에 ${ch?ch+" ":""}고객 문의가 들어왔어. 판매자가 직접 쓴 것처럼 정중하고 짧게(3~4문장) 답변 초안을 써 줘. 확인되지 않은 배송일이나 보상은 약속하지 말고, 더 필요한 정보가 있으면 고객에게 물어봐 줘.${ord?`\n\n주문 정보: ${ord.product_name||""}${ord.option?" / "+ord.option:""} ${ord.qty}개, 지금 상태 ${(OR_ST[ord.status]||[ord.status])[0]}${ord.tracking?`, ${ord.carrier||""} 송장 ${ord.tracking}`:""}`:""}\n\n문의 내용:\n${text}`;
+    copyText(txt,"클로드에 붙여 넣을 문장을 복사했습니다.");
+  };
 }
 async function inqSave(id,st){
   const b={customer:$("#ci-cust").value.trim(),order_no:$("#ci-no").value.trim(),channel_id:$("#ci-ch").value,due:$("#ci-due").value,text:$("#ci-text").value.trim(),answer:$("#ci-answer").value.trim(),status:st};
@@ -6126,12 +6590,12 @@ async function inqSave(id,st){
   try{const r=await call("inquiry/save",b);upd(CM.inquiries,r.inquiry);closeModal();if(onPage())route();toast(st==="done"?"답변 완료로 처리했습니다.":"저장했습니다.");}catch(e){failToast(e);}
 }
 
-/* ── 손익 ── */
+/* ── 손익·정산 ── */
 function pnlRows(ym){
   const mo=CM.orders.filter(o=>o.order_date.startsWith(ym));
   const cost=k=>{const c=CM.costs.find(x=>x.ym===ym&&x.channel_id===k);return c||{ads:0,misc:0};};
   const draft=U.costDraft&&U.costDraft.ym===ym?U.costDraft.rows:null;
-  const rows=CM.channels.map(ch=>{
+  return CM.channels.map(ch=>{
     const os=mo.filter(o=>o.channel_id===ch.id),ok=os.filter(live);
     const rev=ok.reduce((s,o)=>s+Number(o.amount||0),0),ship=ok.reduce((s,o)=>s+Number(o.ship_fee||0),0);
     const cogs=ok.reduce((s,o)=>{const p=o.product_id?prodById(o.product_id):null;return s+(p?p.cost*o.qty:0);},0);
@@ -6140,17 +6604,27 @@ function pnlRows(ym){
     const c=draft&&draft[ch.id]?draft[ch.id]:cost(ch.id);
     const ads=Number(c.ads)||0,misc=Number(c.misc)||0;
     return{ch,orders:ok.length,cancel:os.length-ok.length,rev,fee,ship,cogs,unlinked,ads,misc,profit:rev-fee-ship-cogs-ads-misc};
-  }).filter(r=>r.orders||r.cancel||r.ads||r.misc||r.ch.active!==0);
-  return rows;
+  }).filter(r=>r.orders||r.cancel||r.ads||r.misc||r.ch.active!==0||CM.settles.some(x=>x.ym===ym&&x.channel_id===r.ch.id));
 }
+function prodPnl(ym){
+  const g={};
+  CM.orders.filter(o=>o.order_date.startsWith(ym)&&live(o)).forEach(o=>{
+    const p=o.product_id?prodById(o.product_id):null,ch=chById(o.channel_id),k=p?p.id:"n:"+(o.product_name||"")+"|"+(o.option||"");
+    const r=g[k]=g[k]||{name:p?pName(p):(o.product_name||"상품 미지정")+(o.option?" · "+o.option:""),linked:!!p,qty:0,rev:0,fee:0,cogs:0};
+    const amt=Number(o.amount||0);r.qty+=o.qty;r.rev+=amt;r.fee+=Math.round(amt*(Number(ch&&ch.fee_pct)||0)/100);r.cogs+=p?p.cost*o.qty:0;
+  });
+  return Object.values(g).map(r=>Object.assign(r,{margin:r.rev-r.fee-r.cogs})).sort((a,b)=>b.rev-a.rev);
+}
+const finTagged=ym=>DB.finance.some(x=>x.memo&&(x.memo.startsWith(`마이셀러 ${ymLabel(ym)}`)||x.memo.startsWith(`커머스 ${ymLabel(ym)}`)));
 function vPnl(){
   const ym=U.pnlYM||todayStr().slice(0,7);U.pnlYM=ym;
   const f=ym+"-01",t=ym+"-"+pad2(daysIn(ym));
   if(!(CM.from<=f&&CM.to>=t)){shell("pnl",`<div class="card"><div class="empty">불러오는 중…</div></div>`);ensureRange(f,t).then(()=>{if(onPage())route();}).catch(failToast);return;}
-  const rows=pnlRows(ym);
+  const rows=pnlRows(ym),pp=prodPnl(ym);
   const T=rows.reduce((a,r)=>{["orders","rev","fee","ship","cogs","ads","misc","profit"].forEach(k=>a[k]=(a[k]||0)+r[k]);return a;},{});
   const unlinked=rows.reduce((s,r)=>s+r.unlinked,0);
-  const alreadyFin=DB.finance.some(x=>x.memo&&x.memo.startsWith(`커머스 ${ymLabel(ym)}`));
+  const alreadyFin=finTagged(ym);
+  const stRows=rows.filter(r=>r.rev||CM.settles.some(x=>x.ym===ym&&x.channel_id===r.ch.id));
   shell("pnl",`
   <div class="sp-bar"><div class="seg"><button data-cm="pnl-mon" data-d="-1">◀</button><button class="on">${ymLabel(ym)}</button><button data-cm="pnl-mon" data-d="1" ${ym>=todayStr().slice(0,7)?"disabled":""}>▶</button></div><span class="sp-sp"></span><span class="hint">매출은 취소·반품을 뺀 결제금액, 원가는 연결된 상품의 매입가 × 수량입니다.</span></div>
   <div class="sp-kpis">
@@ -6161,43 +6635,69 @@ function vPnl(){
   </div>
   <div class="card">
     <h2><span class="bars"></span>채널별 손익</h2>
-    <div class="tblwrap"><table class="tbl"><thead><tr><th>채널</th><th class="r">주문</th><th class="r">매출</th><th class="r">수수료</th><th class="r">배송비</th><th class="r">원가</th><th class="r">광고비</th><th class="r">기타</th><th class="r">손익</th></tr></thead><tbody>
+    <div class="tblwrap"><table class="tbl cm-pl"><thead><tr><th>채널</th><th class="r">주문</th><th class="r">매출</th><th class="r">수수료</th><th class="r">배송비</th><th class="r">원가</th><th class="r">광고비</th><th class="r">기타</th><th class="r">손익</th></tr></thead><tbody>
     ${rows.map(r=>`<tr><td><b>${esc(r.ch.name)}</b><div class="hint">수수료 ${r.ch.fee_pct}%${r.cancel?` · 취소·반품 ${r.cancel}`:""}</div></td><td class="r num">${r.orders}</td><td class="r num">${fmt(r.rev)}</td><td class="r num">${fmt(r.fee)}</td><td class="r num">${fmt(r.ship)}</td><td class="r num">${fmt(r.cogs)}</td><td class="r"><input class="mini" type="number" min="0" step="1000" value="${r.ads||""}" placeholder="0" data-cm-cost="ads" data-ch="${esc(r.ch.id)}"></td><td class="r"><input class="mini" type="number" min="0" step="1000" value="${r.misc||""}" placeholder="0" data-cm-cost="misc" data-ch="${esc(r.ch.id)}"></td><td class="r num ${r.profit<0?"d-late":""}"><b>${fmt(r.profit)}</b></td></tr>`).join("")}
     <tr class="sum"><td>합계</td><td class="r num">${T.orders||0}</td><td class="r num">${fmt(T.rev)}</td><td class="r num">${fmt(T.fee)}</td><td class="r num">${fmt(T.ship)}</td><td class="r num">${fmt(T.cogs)}</td><td class="r num">${fmt(T.ads)}</td><td class="r num">${fmt(T.misc)}</td><td class="r num ${T.profit<0?"d-late":""}">${fmt(T.profit)}</td></tr>
     </tbody></table></div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;align-items:center"><button class="btn btn-pri btn-sm" data-cm="cost-save">광고비·기타 저장</button><button class="btn btn-sm" data-cm="pnl-fin" ${alreadyFin?"disabled":""}>${alreadyFin?"재무에 기록됨":"이달 손익을 재무에 기록"}</button><span class="hint">재무 기록은 매출을 수입으로, 수수료·배송비·원가·광고비를 지출로 넣습니다.</span></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;align-items:center"><button class="btn btn-pri btn-sm" data-cm="cost-save">광고비·기타 저장</button><button class="btn btn-sm" data-cm="pnl-fin" ${alreadyFin?"disabled":""}>${alreadyFin?"돈에 기록됨":"이달 손익을 돈에 기록"}</button><span class="hint">매출은 수입으로, 수수료·배송비·원가·광고비는 지출로 들어갑니다.</span></div>
+  </div>
+  <div class="card">
+    <h2><span class="bars"></span>상품별 손익 <span class="cnt">수수료·원가까지 · 광고비와 배송비는 채널 단위라 빠져 있습니다</span></h2>
+    ${pp.length?`<div class="tblwrap"><table class="tbl"><thead><tr><th>상품</th><th class="r">판매 수량</th><th class="r">매출</th><th class="r">수수료</th><th class="r">원가</th><th class="r">마진</th><th class="r">마진율</th></tr></thead><tbody>
+    ${pp.slice(0,15).map(r=>`<tr><td><b>${esc(r.name)}</b>${r.linked?"":`<div class="hint" style="color:var(--amber)">상품 미연결 · 원가 0으로 계산</div>`}</td><td class="r num">${fmt(r.qty)}</td><td class="r num">${fmt(r.rev)}</td><td class="r num">${fmt(r.fee)}</td><td class="r num">${fmt(r.cogs)}</td><td class="r num ${r.margin<0?"d-late":""}"><b>${fmt(r.margin)}</b></td><td class="r num">${r.rev?Math.round(r.margin/r.rev*100)+"%":"—"}</td></tr>`).join("")}
+    </tbody></table></div>${pp.length>15?`<div class="hint" style="margin-top:8px">매출 상위 15개만 보여 줍니다. 외 ${pp.length-15}개</div>`:""}`:`<div class="empty" style="padding:18px">이달 판매 기록이 없습니다.</div>`}
+  </div>
+  <div class="card">
+    <h2><span class="bars"></span>정산 대사 <span class="cnt">${ymLabel(ym)} 주문분</span></h2>
+    <div class="hint" style="margin:-4px 0 10px">예상 정산액은 매출에서 채널 수수료를 뺀 값으로 채워 둡니다. 채널 정산서 금액이 다르면 고쳐 적고, 통장에 들어온 금액을 적으면 차이가 바로 보입니다.</div>
+    ${stRows.length?`<div class="tblwrap"><table class="tbl cm-st"><thead><tr><th>채널</th><th class="r">매출</th><th class="r">예상 정산액</th><th class="r">입금액</th><th>대사</th><th>메모</th><th></th></tr></thead><tbody>
+    ${stRows.map(r=>{const st=CM.settles.find(x=>x.ym===ym&&x.channel_id===r.ch.id)||null,exp=st&&st.expected!=null?st.expected:r.rev-r.fee,diff=st&&st.received!=null?st.received-exp:null;
+      return`<tr><td><b>${esc(r.ch.name)}</b><div class="hint">정산 주기 ${r.ch.settle_days||0}일</div></td><td class="r num">${fmt(r.rev)}</td><td class="r"><input class="mini" type="number" step="100" data-st-f="expected" data-ch="${esc(r.ch.id)}" value="${exp}"></td><td class="r"><input class="mini" type="number" step="100" data-st-f="received" data-ch="${esc(r.ch.id)}" value="${st&&st.received!=null?st.received:""}" placeholder="입금 전"></td><td class="nw">${diff==null?`<span class="pill p-gray">입금 대기</span>`:diff===0?`<span class="pill p-green">일치</span>`:`<span class="pill p-red">${diff>0?"+":""}${fmt(diff)}원</span>`}</td><td><input data-st-f="memo" data-ch="${esc(r.ch.id)}" value="${esc(st&&st.memo||"")}" maxlength="300" placeholder="예: 반품 배송비 차감" style="min-width:150px"></td><td><button class="btn btn-sm" data-cm="settle-save" data-ch="${esc(r.ch.id)}">저장</button></td></tr>`;}).join("")}
+    </tbody></table></div>`:`<div class="empty" style="padding:18px">이달 매출이 생기면 채널별로 정산을 맞춰 볼 수 있습니다.</div>`}
   </div>`);
-  $$("[data-cm-cost]").forEach(inp=>inp.addEventListener("input",()=>{if(!U.costDraft||U.costDraft.ym!==ym)U.costDraft={ym,rows:{}};const ch=inp.dataset.ch;const cur=U.costDraft.rows[ch]||Object.assign({},(CM.costs.find(x=>x.ym===ym&&x.channel_id===ch)||{ads:0,misc:0}));cur[inp.dataset.cmCost]=Number(inp.value)||0;U.costDraft.rows[ch]=cur;}));
+  document.querySelectorAll("[data-cm-cost]").forEach(inp=>inp.addEventListener("input",()=>{if(!U.costDraft||U.costDraft.ym!==ym)U.costDraft={ym,rows:{}};const ch=inp.dataset.ch;const cur=U.costDraft.rows[ch]||Object.assign({},(CM.costs.find(x=>x.ym===ym&&x.channel_id===ch)||{ads:0,misc:0}));cur[inp.dataset.cmCost]=Number(inp.value)||0;U.costDraft.rows[ch]=cur;}));
 }
 async function costSave(){
   const ym=U.pnlYM;const rows=$$("[data-cm-cost]").reduce((m,inp)=>{const ch=inp.dataset.ch;m[ch]=m[ch]||{channel_id:ch,ads:0,misc:0};m[ch][inp.dataset.cmCost]=Number(inp.value)||0;return m;},{});
   const list=Object.values(rows);if(!list.length)return;
   try{await call("cost/save",{ym,rows:list});list.forEach(r=>{const i=CM.costs.findIndex(x=>x.ym===ym&&x.channel_id===r.channel_id);const row={ym,channel_id:r.channel_id,ads:r.ads,misc:r.misc};if(i>-1)CM.costs[i]=row;else CM.costs.push(row);});U.costDraft=null;toast("저장했습니다.");if(onPage())route();}catch(e){failToast(e);}
 }
+async function settleSave(ch){
+  const ym=U.pnlYM,g=k=>{const el=[...document.querySelectorAll(`[data-st-f="${k}"]`)].find(x=>x.dataset.ch===ch);return el?el.value:"";};
+  const b={ym,channel_id:ch,expected:g("expected"),received:g("received"),memo:g("memo").trim()};
+  try{const r=await call("settle/save",b);const i=CM.settles.findIndex(x=>x.ym===ym&&x.channel_id===ch);if(i>-1)CM.settles[i]=r.settle;else CM.settles.push(r.settle);if(onPage())route();toast(r.settle.received!=null?"입금액을 기록했습니다.":"저장했습니다.");}catch(e){failToast(e);}
+}
 function pnlToFinance(){
   const ym=U.pnlYM,rows=pnlRows(ym);const T=rows.reduce((a,r)=>{["rev","fee","ship","cogs","ads","misc"].forEach(k=>a[k]=(a[k]||0)+r[k]);return a;},{});
   if(!T.rev&&!T.ads)return toast("기록할 금액이 없습니다.");
-  if(!confirm(`${ymLabel(ym)} 커머스 손익을 재무에 기록할까요?\n수입 ${fmt(T.rev)}원 · 지출 ${fmt(T.fee+T.ship+T.cogs+T.ads+T.misc)}원`))return;
-  const date=ym+"-"+pad2(Math.min(daysIn(ym),Number(todayStr().slice(8))||1));const tag=`커머스 ${ymLabel(ym)}`;
+  if(!confirm(`${ymLabel(ym)} 마이셀러 손익을 돈에 기록할까요?\n수입 ${fmt(T.rev)}원 · 지출 ${fmt(T.fee+T.ship+T.cogs+T.ads+T.misc)}원`))return;
+  const date=ym+"-"+pad2(Math.min(daysIn(ym),Number(todayStr().slice(8))||1));const tag=`마이셀러 ${ymLabel(ym)}`;
   const inc=DB.finCats.income,exp=DB.finCats.expense;const pick=(list,want,def)=>list.includes(want)?want:(list[0]||def);
   const add=(kind,amount,cat,what)=>{if(amount>0)DB.finance.push({id:uid("f"),projectId:"",storeId:"",kind,amount:Math.round(amount),category:cat,date,memo:`${tag} ${what}`,memberId:ME.id,createdAt:new Date().toISOString(),source:"commerce"});};
   add("수입",T.rev,pick(inc,"매출","매출"),"매출");add("지출",T.fee,pick(exp,"수수료","기타"),"채널 수수료");add("지출",T.ship,pick(exp,"기타","기타"),"배송비");add("지출",T.cogs,pick(exp,"자재·비품","기타"),"상품 원가");add("지출",T.ads,pick(exp,"마케팅","기타"),"광고비");add("지출",T.misc,pick(exp,"기타","기타"),"기타 비용");
-  logAct(`${tag} 손익을 재무에 기록했습니다.`);saveDB();route();toast("재무에 기록했습니다. 홈의 이달 재무에 합산됩니다.");
+  logAct(`${tag} 손익을 돈에 기록했습니다.`);saveDB();route();toast("돈에 기록했습니다. 홈의 이달 손익에 합산됩니다.");
 }
 
 /* ── 설정 ── */
 function vSet(){
-  const s=CM.settings||{};
+  const s=CM.settings||{},car=s.carrier||"CJ대한통운";
   shell("set",`
   <div class="card">
-    <h2><span class="bars"></span>판매 채널 <span class="cnt">수수료율은 손익 계산에 쓰입니다</span><button class="btn btn-sm btn-pri" data-cm="ch-new" style="margin-left:auto">＋ 채널</button></h2>
+    <h2><span class="bars"></span>판매 방식 <span class="cnt">현황의 시작 안내와 기본 채널이 여기에 맞춰집니다</span></h2>
+    ${sellerPicker()}
+  </div>
+  <div class="card">
+    <h2><span class="bars"></span>판매 채널 <span class="cnt">수수료율은 손익과 정산 계산에 쓰입니다</span><button class="btn btn-sm btn-pri" data-cm="ch-new" style="margin-left:auto">＋ 채널</button></h2>
     <div class="tblwrap"><table class="tbl" style="min-width:0"><thead><tr><th>채널</th><th class="r">수수료 %</th><th class="r">정산 주기(일)</th><th></th></tr></thead><tbody>
     ${CM.channels.map(c=>`<tr class="${c.active===0?"off":""}"><td><b>${esc(c.name)}</b>${c.active===0?` <span class="tag">사용 안 함</span>`:""}</td><td class="r num">${c.fee_pct}</td><td class="r num">${c.settle_days}</td><td class="r" style="white-space:nowrap"><button class="btn btn-sm" data-cm="ch-edit" data-id="${c.id}">수정</button> <button class="btn btn-sm btn-ghost" data-cm="ch-del" data-id="${c.id}">삭제</button></td></tr>`).join("")}
     </tbody></table></div>
+    <div class="hint" style="margin-top:8px">기본으로 넣어 둔 수수료율은 대략적인 값입니다. 판매자센터의 계약 조건대로 고쳐 두면 손익이 정확해집니다.</div>
   </div>
   <div class="card">
     <h2><span class="bars"></span>기본값</h2>
-    <div class="m-grid2"><div><label>기본 배송비(원)</label><input id="cs-ship" type="number" min="0" step="100" value="${s.ship_fee_default||""}"></div></div>
+    <div class="m-grid2"><div><label>기본 배송비(원)</label><input id="cs-ship" type="number" min="0" step="100" value="${s.ship_fee_default||""}"></div><div><label>기본 택배사</label><select id="cs-carrier">${CARRIERS.map(c=>`<option ${c===car?"selected":""}>${c}</option>`).join("")}</select></div></div>
+    <label>자주 쓰는 답변 <span style="font-weight:500;color:var(--faint)">— 한 줄에 하나씩, 비워 두면 기본 문구를 씁니다</span></label>
+    <textarea id="cs-tpl" style="min-height:110px" placeholder="${esc(ANS_TPL.join("\n"))}">${esc((s.ans_tpl||[]).join("\n"))}</textarea>
     <label>메모</label><textarea id="cs-memo" style="min-height:70px" placeholder="정산일, 포장 규칙 등 운영 메모">${esc(s.memo||"")}</textarea>
     <div style="display:flex;justify-content:flex-end;margin-top:12px"><button class="btn btn-pri" data-cm="set-save">저장</button></div>
   </div>`);
@@ -6229,7 +6729,7 @@ function vWorker(){
     <div class="l2"><span>${esc(o.receiver||"")}</span><span>${esc(o.address||"")}</span>${o.memo?`<span>요청: ${esc(o.memo)}</span>`:""}</div>
   </div>`).join(""):empty("발송할 주문이 없습니다","새 주문이 들어오면 여기에 나타납니다.")}</div>
   <div class="sp-sect">최근 발송 <span class="cnt">${done.length}건</span></div>
-  <div class="sp-list">${done.slice(0,20).map(o=>`<div class="sp-task st-confirmed" data-cm="ship-open" data-id="${o.id}"><div class="l1"><span class="bn">${esc(o.product_name||"상품")} × ${o.qty}</span>${pill(o.status)}<span class="pill p-line">${esc((o.carrier||"")+" "+(o.tracking||""))}</span></div><div class="l2"><span>${esc(o.receiver||"")}</span><span>${String(o.shipped_at||"").slice(5,16).replace("T"," ")}</span></div></div>`).join("")||`<div class="hint">최근 이틀 안에 발송한 주문이 없습니다.</div>`}</div>`,{title:"오늘 발송",desc:"포장이 끝나면 '포장 완료', 송장을 붙이면 송장번호를 적고 '발송 완료'를 누르세요."});
+  <div class="sp-list">${done.slice(0,20).map(o=>`<div class="sp-task st-confirmed" data-cm="ship-open" data-id="${o.id}"><div class="l1"><span class="bn">${esc(o.product_name||"상품")} × ${o.qty}</span>${pill(o.status)}<span class="pill p-line">${esc((o.carrier||"")+" "+(o.tracking||""))}</span></div><div class="l2"><span>${esc(o.receiver||"")}</span><span>${o.shipped_at?(d=>`${pad2(d.getMonth()+1)}-${pad2(d.getDate())} ${pad2(d.getHours())}:${pad2(d.getMinutes())}`)(new Date(o.shipped_at)):""}</span></div></div>`).join("")||`<div class="hint">최근 이틀 안에 발송한 주문이 없습니다.</div>`}</div>`,{title:"오늘 발송",desc:"포장이 끝나면 '포장 완료', 송장을 붙이면 송장번호를 적고 '발송 완료'를 누르세요."});
 }
 function shipModal(o){
   openModal(`<h2><span class="bars"></span>${esc(o.product_name||"상품")} × ${o.qty} ${pill(o.status)}</h2>
@@ -6250,8 +6750,11 @@ document.addEventListener("click",async e=>{
   const act=b.dataset.cm,id=b.dataset.id;
   switch(act){
     case"go":go("#/commerce"+(b.dataset.to?"/"+b.dataset.to:""));break;
+    case"seller":pickSeller(b.dataset.v);break;
     case"ord-f":U.ordF=b.dataset.v;route();break;
     case"inq-f":U.inqF=b.dataset.v;route();break;
+    case"po-f":U.poF=b.dataset.v;route();break;
+    case"claim-f":U.claimF=b.dataset.v;route();break;
     case"order-new":orderModal(null);break;
     case"order-open":{e.stopPropagation();const o=orderById(id);if(!o)break;if(mgr())orderModal(o);else shipModal(o);break;}
     case"order-save":orderSave(id);break;
@@ -6261,44 +6764,81 @@ document.addEventListener("click",async e=>{
     case"csv":csvExport();break;
     case"upload":uploadModal();break;
     case"up-go":uploadGo(b.dataset.mode);break;
+    case"book-csv":bookCsv();break;
+    case"trk-go":trkGo();break;
+    case"trk-upload":trkUploadModal();break;
+    case"trk-up-go":trkUpGo();break;
+    case"ship-days":U.shipDays=Number(b.dataset.v)||3;route();break;
+    case"ch-trk-csv":chTrkCsv(b.dataset.ch);break;
     case"prod-new":prodModal(null);break;
     case"prod-open":{const p=prodById(id);if(p)prodModal(p);break;}
     case"prod-save":prodSave(id);break;
-    case"prod-del":{const p=prodById(id);if(!p)break;if(!confirm(`"${p.name}" 상품을 삭제할까요? 주문 기록은 남고 연결만 풀립니다.`))break;try{await call("product/del",{id});CM.products=CM.products.filter(x=>x.id!==id);closeModal();if(onPage())route();toast("삭제했습니다.");}catch(err){failToast(err);}break;}
-    case"stock-adj":stockAdjust(id);break;
+    case"prod-del":{const p=prodById(id);if(!p)break;if(!confirm(`"${pName(p)}" 상품을 삭제할까요? 주문 기록은 남고 연결만 풀립니다.`))break;try{await call("product/del",{id});CM.products=CM.products.filter(x=>x.id!==id);closeModal();if(onPage())route();toast("삭제했습니다.");}catch(err){failToast(err);}break;}
+    case"stock-adj":stockModal(id);break;
+    case"stock-save":stockSave(id);break;
+    case"stock-log":logModal(id);break;
+    case"sup-new":supModal(null);break;
+    case"sup-open":{const s=supById(id);if(s)supModal(s);break;}
+    case"sup-save":supSave(id);break;
+    case"sup-del":{const s=supById(id);if(!s)break;if(!confirm(`"${s.name}" 공급처를 삭제할까요? 연결된 상품은 공급처 없음으로 바뀝니다.`))break;try{await call("supplier/del",{id});CM.suppliers=CM.suppliers.filter(x=>x.id!==id);CM.products.forEach(p=>{if(p.supplier_id===id)p.supplier_id=null;});closeModal();if(onPage())route();toast("삭제했습니다.");}catch(err){failToast(err);}break;}
+    case"po-new":poModal(null);break;
+    case"po-sug":{const sid=b.dataset.sup||"";const ps=lowList().filter(p=>sid?p.supplier_id===sid:!(p.supplier_id&&supById(p.supplier_id)));poModal(null,{supplier_id:sid,items:ps.map(p=>({product_id:p.id,name:p.name,option:p.option||"",qty:sugQty(p),cost:p.cost||0}))});break;}
+    case"po-open":{const p=poById(id);if(p)poModal(p);break;}
+    case"po-add":if(U.po){U.po.items.push({product_id:"",name:"",option:"",qty:1,cost:0});poItemsRender();}break;
+    case"po-rm":if(U.po){U.po.items.splice(+b.dataset.i,1);if(!U.po.items.length)U.po.items.push({product_id:"",name:"",option:"",qty:1,cost:0});poItemsRender();}break;
+    case"po-save":poSave(id,b.dataset.send==="1");break;
+    case"po-link":{const p=poById(id);if(p)poSend(p);break;}
+    case"po-msg-copy":{const t=$("#po-msg");if(t)copyText(t.value,"메시지를 복사했습니다. 공급처에 보내 주세요.");break;}
+    case"po-st":{const p=poById(id);if(!p)break;const st=b.dataset.st;
+      if(st==="cancel"&&!confirm(`발주서 ${p.no}를 취소할까요? 공급처 링크에서는 취소된 발주로 보입니다.`))break;
+      try{const r=await call("po/status",{id,status:st});upd(CM.pos,r.po);closeModal();if(onPage())route();toast(st==="cancel"?"발주를 취소했습니다.":st==="confirmed"?"공급처 확인으로 표시했습니다.":"다시 고칠 수 있게 바꿨습니다.");}catch(err){failToast(err);}break;}
+    case"po-recv":{const p=poById(id);if(p)recvModal(p);break;}
+    case"po-recv-go":recvGo(id);break;
+    case"po-del":{const p=poById(id);if(!p)break;if(!confirm(`발주서 ${p.no}를 삭제할까요?`))break;try{await call("po/del",{id});CM.pos=CM.pos.filter(x=>x.id!==id);closeModal();if(onPage())route();toast("삭제했습니다.");}catch(err){failToast(err);}break;}
+    case"claim-new":pickModal();break;
+    case"claim-pick":{const o=orderById(id);if(o)claimModal(o);break;}
+    case"claim-open":{e.stopPropagation();const o=orderById(id);if(o)claimModal(o);break;}
+    case"claim-save":claimSave(id);break;
+    case"claim-clear":{if(!confirm("이 반품·교환 접수를 취소할까요? 주문은 그대로 남습니다."))break;try{const r=await call("order/claim",{id,clear:true});upd(CM.orders,r.order);closeModal();if(onPage())route();toast("접수를 취소했습니다.");}catch(err){failToast(err);}break;}
     case"inq-new":inqModal(null);break;
     case"inq-open":{e.stopPropagation();const i=inqById(id);if(i)inqModal(i);break;}
     case"inq-save":inqSave(id,b.dataset.st);break;
     case"inq-del":{if(!confirm("이 문의를 삭제할까요?"))break;try{await call("inquiry/del",{id});CM.inquiries=CM.inquiries.filter(x=>x.id!==id);closeModal();if(onPage())route();}catch(err){failToast(err);}break;}
     case"pnl-mon":{const d=Number(b.dataset.d);const ym=U.pnlYM||todayStr().slice(0,7);const nk=monShift(ym,d);if(nk>todayStr().slice(0,7))break;U.pnlYM=nk;U.costDraft=null;route();break;}
     case"cost-save":costSave();break;
+    case"settle-save":settleSave(b.dataset.ch);break;
     case"pnl-fin":pnlToFinance();break;
     case"ch-new":chModal(null);break;
     case"ch-edit":{const c=chById(id);if(c)chModal(c);break;}
     case"ch-save":chSave(id);break;
     case"ch-del":{const c=chById(id);if(!c)break;if(!confirm(`"${c.name}" 채널을 삭제할까요? 주문이 있으면 '사용 안 함'으로만 바뀝니다.`))break;try{const r=await call("channel/del",{id});if(r.deactivated){c.active=0;toast("주문이 있어 '사용 안 함'으로 바꿨습니다.");}else{CM.channels=CM.channels.filter(x=>x.id!==id);toast("삭제했습니다.");}if(onPage())route();}catch(err){failToast(err);}break;}
-    case"set-save":{try{const s=CM.settings||{};const r=await call("settings",{set:Object.assign({},s,{ship_fee_default:Number($("#cs-ship").value)||0,memo:$("#cs-memo").value})});CM.settings=r.settings;toast("저장했습니다.");}catch(err){failToast(err);}break;}
+    case"set-save":{try{const s=CM.settings||{};const tpl=$("#cs-tpl").value.split("\n").map(x=>x.trim()).filter(Boolean);const r=await call("settings",{set:Object.assign({},s,{ship_fee_default:Number($("#cs-ship").value)||0,carrier:$("#cs-carrier").value,ans_tpl:tpl,memo:$("#cs-memo").value})});CM.settings=r.settings;toast("저장했습니다.");}catch(err){failToast(err);}break;}
     case"ship-open":{const o=orderById(id);if(o)shipModal(o);break;}
     case"ship-save":shipSave(id,b.dataset.st);break;
   }
 });
-document.addEventListener("change",e=>{const el=e.target;if(el.dataset&&el.dataset.cmc==="ord-ch"){U.ordCh=el.value;route();}});
-document.addEventListener("input",e=>{const el=e.target;if(el.dataset&&el.dataset.cmi==="q"){U.q=el.value;route();const a=$('[data-cmi="q"]');if(a){a.focus();const L=a.value.length;a.setSelectionRange(L,L);}}});
+document.addEventListener("change",e=>{const el=e.target;if(!el.dataset)return;if(el.dataset.cmc==="ord-ch"){U.ordCh=el.value;route();}else if(el.dataset.cmc==="carrier"){U.carrier=el.value;}});
+document.addEventListener("input",e=>{
+  const el=e.target;if(!el.dataset)return;
+  if(el.dataset.cmi==="q"){U.q=el.value;route();const a=$('[data-cmi="q"]');if(a){a.focus();const L=a.value.length;a.setSelectionRange(L,L);}}
+  else if(el.dataset.cmTrk){U.trk[el.dataset.cmTrk]=el.value;trkSync();}
+});
 
 /* ── 마이웍스 다른 화면과의 연결 ── */
 function view(arg){
   const parts=String(arg||"").split("/"),sub=parts[0]||"";
-  if(!usable()){$("#view").innerHTML=`<div class="page-head"><div><h1><span class="bars"></span>커머스</h1></div></div><div class="card"><div class="empty"><b>이 계정에서는 쓸 수 없습니다</b>커머스는 관리자·직원·발송 담당이 클라우드 모드에서 씁니다.</div></div>`;return;}
-  if(!modOn("commerce")){$("#view").innerHTML=`<div class="page-head"><div><h1><span class="bars"></span>커머스</h1></div></div><div class="card"><div class="empty"><b>커머스 모듈이 꺼져 있습니다</b>${isPro()?"설정 → 등급과 모듈에서 켜면 메뉴에 나타납니다.":"모듈은 마이웍스 프로에서 켤 수 있습니다."}</div></div>`;return;}
+  const head=t=>`<div class="page-head"><div><h1><span class="bars"></span>${t}</h1></div></div>`;
+  if(!usable()){$("#view").innerHTML=`${head("마이셀러")}<div class="card"><div class="empty"><b>이 계정에서는 쓸 수 없습니다</b>마이셀러는 관리자·직원·발송 담당이 클라우드 모드에서 씁니다.</div></div>`;return;}
+  if(!modOn("commerce")){$("#view").innerHTML=`${head("마이셀러")}<div class="card"><div class="empty"><b>마이셀러가 꺼져 있습니다</b>${mgr()?`확장판 화면에서 켜면 메뉴에 나타납니다. 지금은 무료로 쓸 수 있습니다.<div style="margin-top:12px"><button class="btn btn-sm" data-nav="ext">확장판 열기</button></div>`:"관리자에게 켜 달라고 요청하세요."}</div></div>`;return;}
   if(!CM.ready){
-    $("#view").innerHTML=`<div class="page-head"><div><h1><span class="bars"></span>${mgr()?"커머스":"오늘 발송"}</h1></div></div><div class="card"><div class="empty">${CM.err?`<b>불러오지 못했습니다</b>${esc(CM.err)}<div style="margin-top:12px"><button class="btn btn-sm" id="cm-retry">다시 시도</button></div>`:"불러오는 중…"}</div></div>`;
+    $("#view").innerHTML=`${head(mgr()?"마이셀러":"오늘 발송")}<div class="card"><div class="empty">${CM.err?`<b>불러오지 못했습니다</b>${esc(CM.err)}<div style="margin-top:12px"><button class="btn btn-sm" id="cm-retry">다시 시도</button></div>`:"불러오는 중…"}</div></div>`;
     const rb=$("#cm-retry");if(rb)rb.onclick=()=>{CM.err="";view(arg);};
     if(!CM.loading&&!CM.err)ensure().then(()=>{if(onPage())route();}).catch(e=>{if(e.code==="unauthorized")return;CM.err=errMsg(e)||"잠시 후 다시 시도해 주세요.";if(onPage())route();});
     return;
   }
   refresh(false);
   if(!mgr())return vWorker();
-  ({orders:vOrders,products:vProducts,inq:vInq,pnl:vPnl,set:vSet}[sub]||vDash)();
+  ({orders:vOrders,ship:vShip,products:vProducts,po:vPO,claims:vClaims,inq:vInq,pnl:vPnl,set:vSet}[sub]||vDash)();
 }
 function fillDash(){
   const el=$("#cm-dash-slot");
@@ -6306,19 +6846,19 @@ function fillDash(){
   if(!CM.ready){if(!CM.loading)ensure().then(fillDash).catch(()=>{});return;}
   refresh(false);
   const today=todayStr(),ym=today.slice(0,7);
-  const toShip=CM.orders.filter(o=>["new","packed"].includes(o.status)).length;
+  const toShip=toShipList().length;
   const inq=CM.inquiries.filter(i=>i.status==="open").length,inqLate=CM.inquiries.filter(i=>i.status==="open"&&i.due&&i.due<today).length;
-  const low=CM.products.filter(p=>p.active!==0&&p.stock<=p.safety).length;
+  const low=lowList().length,claims=claimOpen().length,poChg=CM.pos.filter(p=>p.status==="changed").length;
   const rev=CM.orders.filter(o=>o.order_date.startsWith(ym)&&live(o)).reduce((s,o)=>s+Number(o.amount||0),0);
-  if(!CM.orders.length&&!CM.products.length){el.innerHTML=`<div class="card" style="padding:14px 20px;display:flex;gap:12px;align-items:center;flex-wrap:wrap"><span style="font-size:13.5px;color:var(--sub);flex:1;min-width:220px"><b style="color:var(--ink)">커머스</b> — 상품을 등록하고 주문 엑셀을 올리면 발송·재고·채널 손익이 이어집니다.</span><button class="btn btn-sm" data-nav="commerce">시작하기 →</button></div>`;return;}
-  el.innerHTML=`<div class="card"><h2><span class="bars"></span>판매 현황 <span class="cnt">${+ym.slice(5)}월 매출 ${fmt(rev)}원</span><button class="btn btn-sm btn-ghost" data-nav="commerce" style="margin-left:auto">커머스 열기 →</button></h2>
-    <div class="sp-today"><span class="bchip ${toShip?"warn":""}" data-cm="go" data-to="orders"><b>${toShip}</b>발송할 주문</span><span class="bchip ${inqLate?"warn":inq?"rev":""}" data-cm="go" data-to="inq"><b>${inq}</b>답할 문의</span><span class="bchip ${low?"warn":""}" data-cm="go" data-to="products"><b>${low}</b>재고 부족</span></div></div>`;
+  if(!CM.orders.length&&!CM.products.length){el.innerHTML=`<div class="card" style="padding:14px 20px;display:flex;gap:12px;align-items:center;flex-wrap:wrap"><span style="font-size:13.5px;color:var(--sub);flex:1;min-width:220px"><b style="color:var(--ink)">마이셀러</b> — 상품을 등록하고 주문 엑셀을 올리면 송장·재고·발주·채널 손익이 이어집니다.</span><button class="btn btn-sm" data-nav="commerce">시작하기 →</button></div>`;return;}
+  el.innerHTML=`<div class="card"><h2><span class="bars"></span>판매 현황 <span class="cnt">${+ym.slice(5)}월 매출 ${fmt(rev)}원</span><button class="btn btn-sm btn-ghost" data-nav="commerce" style="margin-left:auto">마이셀러 열기 →</button></h2>
+    <div class="sp-today"><span class="bchip ${toShip?"warn":""}" data-cm="go" data-to="ship"><b>${toShip}</b>발송할 주문</span><span class="bchip ${inqLate?"warn":inq?"rev":""}" data-cm="go" data-to="inq"><b>${inq}</b>답할 문의</span><span class="bchip ${low?"warn":""}" data-cm="go" data-to="products"><b>${low}</b>재고 부족</span>${claims?`<span class="bchip warn" data-cm="go" data-to="claims"><b>${claims}</b>반품·교환</span>`:""}${poChg?`<span class="bchip warn" data-cm="go" data-to="po"><b>${poChg}</b>발주 변경 요청</span>`:""}</div></div>`;
 }
 function weekText(s0,s1){
   if(!usable()||!mgr()||!CM.ready||!modOn("commerce"))return"";
   const os=CM.orders.filter(o=>o.order_date>=s0&&o.order_date<=s1&&live(o));
   const rev=os.reduce((s,o)=>s+Number(o.amount||0),0);
-  return`\n## 판매 (커머스)\n- 주문 ${os.length}건 · 매출 ${fmtWon(rev)}\n- 발송 대기 ${CM.orders.filter(o=>["new","packed"].includes(o.status)).length}건 · 미답변 문의 ${CM.inquiries.filter(i=>i.status==="open").length}건 · 재고 부족 ${CM.products.filter(p=>p.active!==0&&p.stock<=p.safety).length}개\n`;
+  return`\n## 판매 (마이셀러)\n- 주문 ${os.length}건 · 매출 ${fmtWon(rev)}\n- 발송 대기 ${toShipList().length}건 · 미답변 문의 ${CM.inquiries.filter(i=>i.status==="open").length}건 · 재고 부족 ${lowList().length}개\n- 반품·교환 진행 ${claimOpen().length}건 · 진행 중인 발주 ${poOpen().length}건\n`;
 }
 return{view,fillDash,onVersion,reset,refresh,weekText};
 })();
