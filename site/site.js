@@ -28,7 +28,7 @@
 })();
 // 가격 계산기 — 숫자는 서버 상수와 같이 바꾼다
 (function(){
-  var P={"pro":12000,"proYear":9900,"svc":{"store":19000,"building":19000,"tax":9900,"seller":19000},"names":{"store":"마이스토어","building":"마이빌딩","tax":"마이택스","seller":"마이셀러"},"seat":4900,"disc":0.1,"all":49000,"allYear":39900};
+  var P={"pro":12000,"proYear":9900,"svc":{"store":19000,"building":19000,"tax":9900,"seller":19000},"names":{"store":"마이스토어","building":"마이빌딩","tax":"마이택스","people":"마이피플","seller":"마이셀러"},"seat":4900,"disc":0.1,"all":49000,"allYear":39900};
   var total=document.getElementById("c-total"); if(!total) return;
   var won=function(n){return n.toLocaleString("ko-KR")+"원";};
   function calc(){

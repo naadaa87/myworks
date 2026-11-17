@@ -12,11 +12,11 @@
    · 스페이스: 예약 → 청소 배정 → 체크리스트 → 확인 → 손익. HOSTDB(읽기)는 운영자 워크스페이스에서만, SPACEDB(1회 가져오기)는 운영자만.
    · 무료 요금제 한도(요청당 쿼리 50회)를 넘지 않도록 여러 건의 쓰기는 한 문장으로 묶어 처리합니다. */
 
-const SCHEMA = "10";
+const SCHEMA = "11";
 const PLANS = ["basic", "pro"];
-const MODULES = ["space", "outsourcing", "commerce"];
+const MODULES = ["space", "outsourcing", "commerce", "tax", "people"];
 const BASE_MODULES = ["outsourcing"];          // 거래 — 기본 기능이라 등급과 관계없이 늘 켜져 있습니다
-const EXT_MODULES = ["space", "commerce"];     // 확장판 — 마이스토어 · 마이셀러 (워크스페이스 관리자가 켜고 끕니다)
+const EXT_MODULES = ["space", "commerce", "tax", "people"];     // 확장판 — 마이스토어 · 마이셀러 · 마이택스 · 마이피플 (워크스페이스 관리자가 켜고 끕니다)
 const PLAN_LIMITS = { basic: { brands: 2, members: 2, tokens: 1 }, pro: { brands: 1000, members: 10, tokens: 20 }, beta: { brands: 1000, members: 30, tokens: 20 } };   // members = 관리자 외 구성원 수
 /* 무료 공개 기간 — 결제를 붙이기 전까지 모든 워크스페이스가 프로 기능과 확장판을 무료로 씁니다.
    유료로 바꿀 때 false로 바꾸면 워크스페이스마다 저장된 등급(베이직·프로·기한)이 다시 적용됩니다. 데이터는 그대로입니다. */
@@ -193,7 +193,7 @@ async function ensure(db) {
   try { const r = await db.prepare("SELECT v FROM mw_meta WHERE k='schema'").first(); v = r && r.v; } catch (e) { v = null; }
   if (v !== SCHEMA) {
     // 표 만들기는 묶음(exec)으로 — 무료 플랜의 요청당 쿼리 수 한도를 넘지 않도록
-    for (const group of [DDL, SP_DDL, OS_DDL, CM_DDL, ADM_DDL, INV_DDL]) await db.exec(group.join("\n"));
+    for (const group of [DDL, SP_DDL, OS_DDL, CM_DDL, TX_DDL, PP_DDL, ADM_DDL, INV_DDL]) await db.exec(group.join("\n"));
     const have = {};
     for (const t of [...new Set(ADD_COLS.map(x => x[0]))]) have[t] = new Set((((await db.prepare(`PRAGMA table_info(${t})`).all()).results) || []).map(c => c.name));
     for (const [t, col] of ADD_COLS) {
@@ -906,7 +906,7 @@ const PRIVATE = {
   async wipe(db, me) {
     if (me.role !== "admin") return fail("forbidden", 403);
     const now = ts(), tpl = defaultTemplate();
-    await db.exec(spWipeSql(me.ws).concat(OS_TABLES.concat(["cm_order", "cm_inquiry", "cm_cost"]).map(t => `DELETE FROM ${t} WHERE ws=${wsLit(me.ws)}`)).join("\n"));   // 스페이스·안건·주문 기록은 지우고, 운영 시간·공통 체크리스트·상품·채널·설정은 남깁니다
+    await db.exec(spWipeSql(me.ws).concat(OS_TABLES.concat(["cm_order", "cm_inquiry", "cm_cost", "tx_doc", "tx_kval", "pp_shift", "pp_att", "pp_job", "pp_pay"]).map(t => `DELETE FROM ${t} WHERE ws=${wsLit(me.ws)}`)).join("\n"));   // 스페이스·안건·주문 기록은 지우고, 운영 시간·공통 체크리스트·상품·채널·설정은 남깁니다
     await db.batch([
       db.prepare("UPDATE ent SET deleted=1, data=NULL, ua=?1 WHERE ws=?2 AND kind NOT IN ('member','meta') AND deleted=0").bind(now, me.ws),
       ...upserts(db, me.ws, [{ kind: "template", id: tpl.id, data: tpl }], ts(Date.now() + 1)),
@@ -980,7 +980,7 @@ const PRIVATE = {
       return json({ ok: true });
     }
     if (act === "delete") {
-      await db.exec(SP_TABLES.concat(OS_TABLES, CM_TABLES, ["ws_set", "api_tokens", "links", "mod_set", "invites"]).map(t => `DELETE FROM ${t} WHERE ws=${wsLit(w.id)}`).join("\n"));
+      await db.exec(SP_TABLES.concat(OS_TABLES, CM_TABLES, TX_TABLES, PP_TABLES, ["ws_set", "api_tokens", "links", "mod_set", "invites"]).map(t => `DELETE FROM ${t} WHERE ws=${wsLit(w.id)}`).join("\n"));
       await db.batch([
         db.prepare("DELETE FROM ent WHERE ws=?1").bind(w.id),
         db.prepare("DELETE FROM sess WHERE ws=?1").bind(w.id),
@@ -2075,7 +2075,7 @@ function spRestoreStmts(db, ws, sp) {
   }
   return { dels, stmts };
 }
-const modTables = () => OS_TABLES.concat(CM_TABLES);
+const modTables = () => OS_TABLES.concat(CM_TABLES, TX_TABLES, PP_TABLES);
 async function modBackupRaw(db, ws) {
   const MOD_TABLES = modTables();
   const rs = await db.batch(MOD_TABLES.map(t => db.prepare(spSel(t, "ws=?1")).bind(ws)).concat([db.prepare("SELECT json_object('mod',mod,'k',k,'v',CASE WHEN json_valid(v) THEN json(v) ELSE json('null') END) AS j FROM mod_set WHERE ws=?1").bind(ws)]));
@@ -3021,6 +3021,639 @@ PRIVATE["proposal/decide"] = async function (db, me, b) {
 };
 
 /* ───────── 확인 링크 (공개) ───────── */
+/* ═══════════ 마이택스 — 사업자별 손익·신고 자료·증빙·KPI·세금 달력·지원사업 ═══════════
+   수입·지출 기록 자체는 기본 기능의 '돈'(동기화 데이터)에 있고, 여기에는 사업자·증빙(세금계산서·현금영수증·카드)·KPI·지원사업만 둡니다.
+   세금 계산은 참고용 추정이며 화면에서 그렇게 안내합니다. 신고 자체는 홈택스나 세무사를 통해 합니다. */
+const TX_DDL = [
+  "CREATE TABLE IF NOT EXISTS tx_biz(ws TEXT NOT NULL, id TEXT NOT NULL, name TEXT NOT NULL, kind TEXT NOT NULL DEFAULT 'indiv', vat TEXT NOT NULL DEFAULT 'general', biz_no TEXT, industry TEXT, open_date TEXT, region TEXT, young INTEGER NOT NULL DEFAULT 0, links TEXT, incl_vat INTEGER NOT NULL DEFAULT 1, card_credit INTEGER NOT NULL DEFAULT 0, sort INTEGER NOT NULL DEFAULT 0, active INTEGER NOT NULL DEFAULT 1, memo TEXT, created_at TEXT, updated_at TEXT, PRIMARY KEY(ws,id))",
+  "CREATE TABLE IF NOT EXISTS tx_doc(ws TEXT NOT NULL, id TEXT NOT NULL, biz_id TEXT, dir TEXT NOT NULL, kind TEXT NOT NULL, date TEXT NOT NULL, partner TEXT, partner_no TEXT, supply INTEGER NOT NULL DEFAULT 0, vat INTEGER NOT NULL DEFAULT 0, total INTEGER NOT NULL DEFAULT 0, item TEXT, approve_no TEXT, status TEXT NOT NULL DEFAULT 'done', fin_id TEXT, ref TEXT, source TEXT, memo TEXT, created_at TEXT, updated_at TEXT, PRIMARY KEY(ws,id))",
+  "CREATE INDEX IF NOT EXISTS idx_tx_doc_date ON tx_doc(ws,date)",
+  "CREATE INDEX IF NOT EXISTS idx_tx_doc_appr ON tx_doc(ws,approve_no)",
+  "CREATE TABLE IF NOT EXISTS tx_kpi(ws TEXT NOT NULL, id TEXT NOT NULL, name TEXT NOT NULL, metric TEXT NOT NULL, ref TEXT, period TEXT NOT NULL DEFAULT 'month', target REAL, dir TEXT NOT NULL DEFAULT 'up', unit TEXT, biz_id TEXT, sort INTEGER NOT NULL DEFAULT 0, active INTEGER NOT NULL DEFAULT 1, created_at TEXT, PRIMARY KEY(ws,id))",
+  "CREATE TABLE IF NOT EXISTS tx_kval(ws TEXT NOT NULL, kpi_id TEXT NOT NULL, period TEXT NOT NULL, value REAL, target REAL, memo TEXT, PRIMARY KEY(ws,kpi_id,period))",
+  "CREATE TABLE IF NOT EXISTS tx_grant(ws TEXT NOT NULL, id TEXT NOT NULL, title TEXT NOT NULL, org TEXT, url TEXT, deadline TEXT, status TEXT NOT NULL DEFAULT 'watch', amount INTEGER, memo TEXT, ext_id TEXT, created_at TEXT, updated_at TEXT, PRIMARY KEY(ws,id))"
+];
+const TX_TABLES = ["tx_biz", "tx_doc", "tx_kpi", "tx_kval", "tx_grant"];
+Object.assign(SPC, {
+  tx_biz: ["id", "name", "kind", "vat", "biz_no", "industry", "open_date", "region", "young", "links", "incl_vat", "card_credit", "sort", "active", "memo", "created_at", "updated_at"],
+  tx_doc: ["id", "biz_id", "dir", "kind", "date", "partner", "partner_no", "supply", "vat", "total", "item", "approve_no", "status", "fin_id", "ref", "source", "memo", "created_at", "updated_at"],
+  tx_kpi: ["id", "name", "metric", "ref", "period", "target", "dir", "unit", "biz_id", "sort", "active", "created_at"],
+  tx_kval: ["kpi_id", "period", "value", "target", "memo"],
+  tx_grant: ["id", "title", "org", "url", "deadline", "status", "amount", "memo", "ext_id", "created_at", "updated_at"]
+});
+Object.assign(SPJ, { tx_biz: { links: "{}" } });
+const TX_DOC_KIND = ["세금계산서", "계산서", "현금영수증", "카드"];
+const TX_DOC_ST = ["plan", "done", "cancel"];   // 발행 예정 · 발행·수취 완료 · 취소
+const TX_GRANT_ST = ["watch", "prep", "applied", "won", "lost"];
+const TX_KPI_METRIC = ["rev", "profit", "margin", "gpm", "exp", "group", "cat", "manual"];
+const numOrNull = v => v === "" || v === null || v === undefined || !Number.isFinite(Number(v)) ? null : Number(v);
+const bizNo = s => String(s || "").replace(/[^0-9]/g, "").slice(0, 13);
+function txBizIn(b) {
+  const o = {};
+  if ("name" in b) o.name = clip(b.name, 60);
+  if ("kind" in b) o.kind = b.kind === "corp" ? "corp" : "indiv";
+  if ("vat" in b) o.vat = ["general", "simple", "exempt"].includes(b.vat) ? b.vat : "general";
+  if ("biz_no" in b) o.biz_no = bizNo(b.biz_no);
+  if ("industry" in b) o.industry = clip(b.industry, 30);
+  if ("open_date" in b) o.open_date = dOk(b.open_date) || null;
+  if ("region" in b) o.region = b.region === "metro" ? "metro" : "other";   // 수도권과밀억제권역 안 / 밖
+  if ("young" in b) o.young = b.young ? 1 : 0;
+  if ("incl_vat" in b) o.incl_vat = b.incl_vat ? 1 : 0;
+  if ("card_credit" in b) o.card_credit = b.card_credit ? 1 : 0;
+  if ("active" in b) o.active = b.active === false || b.active === 0 ? 0 : 1;
+  if ("memo" in b) o.memo = clip(b.memo, 500);
+  if ("links" in b) {
+    const l = b.links && typeof b.links === "object" ? b.links : {};
+    const arr = (a, n) => (Array.isArray(a) ? a : []).map(x => clip(x, 60)).filter(Boolean).slice(0, n);
+    o.links = JSON.stringify({ brands: arr(l.brands, 40), stores: arr(l.stores, 200), mods: arr(l.mods, 5).filter(x => ["space", "commerce", "outsourcing", "people"].includes(x)), main: !!l.main });
+  }
+  return o;
+}
+function txDocIn(r) {
+  const o = {};
+  if ("biz_id" in r) o.biz_id = clip(r.biz_id, 60) || null;
+  if ("dir" in r) o.dir = r.dir === "buy" ? "buy" : "sale";
+  if ("kind" in r) o.kind = TX_DOC_KIND.includes(r.kind) ? r.kind : "세금계산서";
+  if ("date" in r) { o.date = dOk(r.date); if (!o.date) delete o.date; }
+  if ("partner" in r) o.partner = clip(r.partner, 80);
+  if ("partner_no" in r) o.partner_no = bizNo(r.partner_no);
+  const money = v => Math.max(-10000000000, Math.min(10000000000, intOr(String(v ?? "").replace(/[^\d.-]/g, ""), 0)));
+  if ("supply" in r) o.supply = money(r.supply);
+  if ("vat" in r) o.vat = money(r.vat);
+  if ("total" in r) o.total = money(r.total);
+  if ("item" in r) o.item = clip(r.item, 120);
+  if ("approve_no" in r) o.approve_no = clip(String(r.approve_no ?? "").replace(/\s/g, ""), 40) || null;
+  if ("status" in r && TX_DOC_ST.includes(r.status)) o.status = r.status;
+  if ("fin_id" in r) o.fin_id = clip(r.fin_id, 60) || null;
+  if ("ref" in r) o.ref = clip(r.ref, 60) || null;
+  if ("memo" in r) o.memo = clip(r.memo, 300);
+  if (o.supply !== undefined && o.vat !== undefined && (o.total === undefined || !o.total)) o.total = o.supply + o.vat;
+  return o;
+}
+function txNorm(s) {   // 손익 구조·현금·공제 정보·달력 체크 — 크기만 제한하고 그대로 둡니다
+  s = s && typeof s === "object" ? s : {};
+  const st = s.struct && typeof s.struct === "object" ? s.struct : {};
+  const groups = (Array.isArray(st.groups) ? st.groups : []).slice(0, 30).map(g => ({ id: clip(g && g.id, 30), name: clip(g && g.name, 30), type: ["rev", "cogs", "fee", "opex", "oin", "oout"].includes(g && g.type) ? g.type : "opex" })).filter(g => g.id && g.name);
+  const map = {}; if (st.map && typeof st.map === "object") for (const [k, v] of Object.entries(st.map).slice(0, 200)) map[clip(k, 40)] = clip(v, 30);
+  const cash = s.cash && typeof s.cash === "object" ? s.cash : {};
+  const fixed = (Array.isArray(cash.fixed) ? cash.fixed : []).slice(0, 40).map(f => ({ name: clip(f && f.name, 40), amount: Math.max(0, intOr(f && f.amount, 0)), day: clampInt(f && f.day, 1, 31, 25), dir: f && f.dir === "in" ? "in" : "out" })).filter(f => f.name && f.amount);
+  const me = s.me && typeof s.me === "object" ? s.me : {};
+  const done = (Array.isArray(s.done) ? s.done : []).map(x => clip(x, 40)).filter(Boolean).slice(-400);
+  const nodeduct = (Array.isArray(s.nodeduct) ? s.nodeduct : []).map(x => clip(x, 40)).filter(Boolean).slice(0, 40);
+  return {
+    struct: { groups, map },
+    cash: { open: intOr(cash.open, 0), asof: dOk(cash.asof) || "", fixed },
+    me: { deps: clampInt(me.deps, 1, 20, 1), yellow: Math.max(0, intOr(me.yellow, 0)), pension: Math.max(0, intOr(me.pension, 0)), prepaid: Math.max(0, intOr(me.prepaid, 0)), extra: Math.max(0, intOr(me.extra, 0)), book: me.book === "double" ? "double" : me.book === "simple" ? "simple" : "", bizcard: !!me.bizcard, bizacct: !!me.bizacct, cut: clampInt(me.cut, 0, 100, 0), age: clampInt(me.age, 0, 120, 0), half: !!me.half },
+    nodeduct, done, set: !!s.set
+  };
+}
+async function txSettings(db, ws) { const m = await modSettings(db, ws, "tx"); return txNorm(m.settings); }
+const TAX = {
+  async data(db, me, b, req, url, env) {
+    if (!isMgr(me)) return fail("forbidden", 403);
+    const today = kstToday(), from = dOk(url.searchParams.get("from")) || addDaysS(today, -800);
+    const rs = await db.batch([
+      db.prepare("SELECT v FROM mod_set WHERE ws=?1 AND mod='tx' AND k='settings'").bind(me.ws),
+      db.prepare(spSel("tx_biz", "ws=?1", "ORDER BY sort, created_at")).bind(me.ws),
+      db.prepare(spSel("tx_doc", "ws=?1 AND date>=?2", "ORDER BY date DESC LIMIT 20000")).bind(me.ws, from),
+      db.prepare(spSel("tx_kpi", "ws=?1", "ORDER BY sort, created_at")).bind(me.ws),
+      db.prepare(spSel("tx_kval", "ws=?1")).bind(me.ws),
+      db.prepare(spSel("tx_grant", "ws=?1", "ORDER BY COALESCE(deadline,'9999'), created_at")).bind(me.ws),
+      // 받을 돈 — 거래의 미입금 청구서
+      db.prepare("SELECT json_object('id',v.id,'no',v.no,'net',v.net,'amount',v.amount,'tax',v.tax,'tax_mode',v.tax_mode,'due',v.due_date,'title',j.title,'client',j.client_name,'client_id',j.client_id,'created_at',v.created_at) AS j FROM os_invoice v JOIN os_job j ON j.ws=v.ws AND j.id=v.job_id WHERE v.ws=?1 AND v.status='issued' ORDER BY v.due_date LIMIT 500").bind(me.ws),
+      // 세금계산서를 발행해야 하는 청구서 — 부가세 별도 청구 중 아직 증빙 대장에 없는 것
+      db.prepare("SELECT json_object('id',v.id,'no',v.no,'amount',v.amount,'tax',v.tax,'net',v.net,'status',v.status,'created_at',v.created_at,'paid_at',v.paid_at,'title',j.title,'client',j.client_name,'client_id',j.client_id) AS j FROM os_invoice v JOIN os_job j ON j.ws=v.ws AND j.id=v.job_id WHERE v.ws=?1 AND v.tax_mode='vat' AND v.status<>'void' AND v.created_at>=?2 AND NOT EXISTS (SELECT 1 FROM tx_doc d WHERE d.ws=v.ws AND d.ref=v.id) ORDER BY v.created_at DESC LIMIT 200").bind(me.ws, addDaysS(today, -200)),
+      // 급여에서 나가는 돈 — 마이피플 급여 기록 월별 합계 (원천세·4대보험 납부 예상에 씁니다)
+      db.prepare("SELECT substr(period,1,7) AS ym, SUM(gross) AS gross, SUM(net) AS net, SUM(employer) AS employer, SUM(COALESCE((SELECT SUM(json_extract(value,'$.amount')) FROM json_each(deds) WHERE json_extract(value,'$.k') IN ('it','lt','bt','bl','dt','dl')),0)) AS wh, SUM(COALESCE((SELECT SUM(json_extract(value,'$.amount')) FROM json_each(deds) WHERE json_extract(value,'$.k') IN ('np','hi','lc','ei')),0)) AS ins, COUNT(*) AS n FROM pp_pay WHERE ws=?1 AND status<>'draft' AND period>=?2 GROUP BY substr(period,1,7)").bind(me.ws, addDaysS(today, -400).slice(0, 7)),
+      db.prepare("SELECT COUNT(*) AS n FROM pp_staff WHERE ws=?1 AND status<>'end'").bind(me.ws)
+    ]);
+    const s0 = rs[0] && rs[0].results && rs[0].results[0];
+    const pay = ((rs[8] && rs[8].results) || []).map(r => ({ ym: r.ym, gross: Number(r.gross) || 0, net: Number(r.net) || 0, employer: Number(r.employer) || 0, wh: Number(r.wh) || 0, ins: Number(r.ins) || 0, n: Number(r.n) || 0 }));
+    const staffN = Number(((rs[9] && rs[9].results) || [])[0] && rs[9].results[0].n) || 0;
+    return rawJson({ ok: true, v: me.spv, today, from, settings: txNorm(s0 ? parse(s0.v) : null), pay, staffN, keys: { nts: !!(env && env.NTS_API_KEY), bizinfo: !!(env && env.BIZINFO_API_KEY) } }, ',"biz":' + rawArr(rs[1]) + ',"docs":' + rawArr(rs[2]) + ',"kpis":' + rawArr(rs[3]) + ',"kvals":' + rawArr(rs[4]) + ',"grants":' + rawArr(rs[5]) + ',"recv":' + rawArr(rs[6]) + ',"invNeed":' + rawArr(rs[7]));
+  },
+  async settings(db, me, b) {
+    if (!isMgr(me)) return fail("forbidden", 403);
+    const cur = await txSettings(db, me.ws);
+    const s = txNorm(Object.assign({}, cur, b && b.set && typeof b.set === "object" ? b.set : {}));
+    if (JSON.stringify(s).length > 60000) return fail("too-large", 413);
+    const { v } = await spRun(db, me, [db.prepare("INSERT INTO mod_set(ws,mod,k,v) VALUES(?1,'tx','settings',?2) ON CONFLICT(ws,mod,k) DO UPDATE SET v=excluded.v").bind(me.ws, JSON.stringify(s))]);
+    return json({ ok: true, v, settings: s });
+  },
+  async "biz/save"(db, me, b) {
+    if (!isMgr(me)) return fail("forbidden", 403);
+    const id = clip(b.id, 60), o = txBizIn(b || {}), now = iso();
+    if (!id) {
+      if (!o.name) return fail("bad-request");
+      const n = await db.prepare("SELECT COUNT(*) AS n FROM tx_biz WHERE ws=?1").bind(me.ws).first();
+      if (Number(n && n.n) >= 30) return fail("limit", 409);
+      const row = Object.assign({ id: bulkId("bz"), kind: "indiv", vat: "general", biz_no: "", industry: "", open_date: null, region: "other", young: 0, links: '{"brands":[],"stores":[],"mods":[],"main":false}', incl_vat: 1, card_credit: 0, sort: Number(n && n.n) + 1, active: 1, memo: "", created_at: now, updated_at: now }, o);
+      const { v } = await spRun(db, me, spBulk(db, "tx_biz", me.ws, [row]));
+      return json({ ok: true, v, biz: await spOne(db, "tx_biz", me.ws, row.id) });
+    }
+    if (!await spOne(db, "tx_biz", me.ws, id)) return fail("not-found", 404);
+    if ("name" in o && !o.name) return fail("bad-request");
+    o.updated_at = now;
+    const { v } = await spRun(db, me, [db.prepare(`UPDATE tx_biz SET ${setCols(o, 3)} WHERE ws=?1 AND id=?2`).bind(me.ws, id, ...Object.values(o))]);
+    return json({ ok: true, v, biz: await spOne(db, "tx_biz", me.ws, id) });
+  },
+  async "biz/del"(db, me, b) {
+    if (!isMgr(me)) return fail("forbidden", 403);
+    const id = clip(b.id, 60);
+    const { v } = await spRun(db, me, [db.prepare("DELETE FROM tx_biz WHERE ws=?1 AND id=?2").bind(me.ws, id), db.prepare("UPDATE tx_doc SET biz_id=NULL WHERE ws=?1 AND biz_id=?2").bind(me.ws, id), db.prepare("UPDATE tx_kpi SET biz_id=NULL WHERE ws=?1 AND biz_id=?2").bind(me.ws, id)]);
+    return json({ ok: true, v });
+  },
+  async "doc/save"(db, me, b) {
+    if (!isMgr(me)) return fail("forbidden", 403);
+    const id = clip(b.id, 60), o = txDocIn(b || {}), now = iso();
+    if (!id) {
+      if (!o.date) return fail("bad-date");
+      const row = Object.assign({ id: bulkId("dc"), biz_id: null, dir: "sale", kind: "세금계산서", partner: "", partner_no: "", supply: 0, vat: 0, total: 0, item: "", approve_no: null, status: "done", fin_id: null, ref: null, source: "direct", memo: "", created_at: now, updated_at: now }, o);
+      if (!row.total) row.total = row.supply + row.vat;
+      if (row.ref && await db.prepare("SELECT 1 AS x FROM tx_doc WHERE ws=?1 AND ref=?2").bind(me.ws, row.ref).first()) return fail("dup", 409);
+      const { v } = await spRun(db, me, spBulk(db, "tx_doc", me.ws, [row]));
+      return json({ ok: true, v, doc: await spOne(db, "tx_doc", me.ws, row.id) });
+    }
+    if (!await spOne(db, "tx_doc", me.ws, id)) return fail("not-found", 404);
+    o.updated_at = now;
+    const { v } = await spRun(db, me, [db.prepare(`UPDATE tx_doc SET ${setCols(o, 3)} WHERE ws=?1 AND id=?2`).bind(me.ws, id, ...Object.values(o))]);
+    return json({ ok: true, v, doc: await spOne(db, "tx_doc", me.ws, id) });
+  },
+  async "doc/del"(db, me, b) {
+    if (!isMgr(me)) return fail("forbidden", 403);
+    const ids = (Array.isArray(b.ids) ? b.ids : [b.id]).map(x => clip(x, 60)).filter(Boolean).slice(0, 5000);
+    if (!ids.length) return fail("bad-request");
+    const { v } = await spRun(db, me, [db.prepare("DELETE FROM tx_doc WHERE ws=?1 AND id IN (SELECT value FROM json_each(?2))").bind(me.ws, JSON.stringify(ids))]);
+    return json({ ok: true, v, deleted: ids.length });
+  },
+  // 홈택스에서 내려받은 목록(세금계산서·현금영수증·카드) — 승인번호가 같으면 건너뜁니다
+  async "doc/import"(db, me, b) {
+    if (!isMgr(me)) return fail("forbidden", 403);
+    const rows = (Array.isArray(b.rows) ? b.rows : []).slice(0, 5000).map(r => txDocIn(r || {})).filter(r => r.date && (r.total || r.supply));
+    if (!rows.length) return fail("empty");
+    const dates = rows.map(r => r.date).sort(), now = iso();
+    const ex = (await db.prepare("SELECT approve_no, dir, date, partner_no, total FROM tx_doc WHERE ws=?1 AND date>=?2 AND date<=?3").bind(me.ws, dates[0], dates[dates.length - 1]).all()).results || [];
+    const seenA = new Set(ex.map(x => x.approve_no).filter(Boolean)), seenK = new Set(ex.map(x => [x.dir, x.date, x.partner_no || "", x.total].join("|")));
+    const add = [];
+    let skipped = 0;
+    for (const r of rows) {
+      const k = [r.dir || "sale", r.date, r.partner_no || "", r.total || (r.supply || 0) + (r.vat || 0)].join("|");
+      if ((r.approve_no && seenA.has(r.approve_no)) || (!r.approve_no && seenK.has(k))) { skipped++; continue; }
+      if (r.approve_no) seenA.add(r.approve_no); seenK.add(k);
+      add.push(Object.assign({ id: bulkId("dc"), biz_id: clip(b.biz_id, 60) || null, dir: "sale", kind: "세금계산서", partner: "", partner_no: "", supply: 0, vat: 0, total: 0, item: "", approve_no: null, status: "done", fin_id: null, ref: null, source: "hometax", memo: "", created_at: now, updated_at: now }, r, { total: r.total || (r.supply || 0) + (r.vat || 0) }));
+    }
+    const { v } = add.length ? await spRun(db, me, spBulk(db, "tx_doc", me.ws, add)) : { v: null };
+    return json({ ok: true, v, added: add.length, skipped });
+  },
+  async "doc/link"(db, me, b) {   // 증빙 ↔ 돈 기록 연결 (여러 건을 한 번에)
+    if (!isMgr(me)) return fail("forbidden", 403);
+    const pairs = (Array.isArray(b.pairs) ? b.pairs : []).slice(0, 5000).map(p => ({ id: clip(p && p.id, 60), fin: clip(p && p.fin_id, 60) || null })).filter(p => p.id);
+    if (!pairs.length) return fail("bad-request");
+    const { v } = await spRun(db, me, [db.prepare("UPDATE tx_doc SET fin_id=(SELECT json_extract(value,'$.fin') FROM json_each(?2) WHERE json_extract(value,'$.id')=tx_doc.id), updated_at=?3 WHERE ws=?1 AND id IN (SELECT json_extract(value,'$.id') FROM json_each(?2))").bind(me.ws, JSON.stringify(pairs), iso())]);
+    return json({ ok: true, v, linked: pairs.length });
+  },
+  async "kpi/save"(db, me, b) {
+    if (!isMgr(me)) return fail("forbidden", 403);
+    const id = clip(b.id, 60), o = {};
+    if ("name" in b) o.name = clip(b.name, 40);
+    if ("metric" in b) o.metric = TX_KPI_METRIC.includes(b.metric) ? b.metric : "rev";
+    if ("ref" in b) o.ref = clip(b.ref, 40) || null;
+    if ("period" in b) o.period = ["month", "quarter", "year"].includes(b.period) ? b.period : "month";
+    if ("target" in b) o.target = numOrNull(b.target);
+    if ("dir" in b) o.dir = b.dir === "down" ? "down" : "up";
+    if ("unit" in b) o.unit = clip(b.unit, 10);
+    if ("biz_id" in b) o.biz_id = clip(b.biz_id, 60) || null;
+    if ("active" in b) o.active = b.active === false || b.active === 0 ? 0 : 1;
+    if (!id) {
+      if (!o.name) return fail("bad-request");
+      const n = await db.prepare("SELECT COUNT(*) AS n FROM tx_kpi WHERE ws=?1").bind(me.ws).first();
+      if (Number(n && n.n) >= 40) return fail("limit", 409);
+      const row = Object.assign({ id: bulkId("kp"), metric: "rev", ref: null, period: "month", target: null, dir: "up", unit: "", biz_id: null, sort: Number(n && n.n) + 1, active: 1, created_at: iso() }, o);
+      const { v } = await spRun(db, me, spBulk(db, "tx_kpi", me.ws, [row]));
+      return json({ ok: true, v, kpi: await spOne(db, "tx_kpi", me.ws, row.id) });
+    }
+    if (!await spOne(db, "tx_kpi", me.ws, id)) return fail("not-found", 404);
+    if (!Object.keys(o).length) return fail("bad-request");
+    const { v } = await spRun(db, me, [db.prepare(`UPDATE tx_kpi SET ${setCols(o, 3)} WHERE ws=?1 AND id=?2`).bind(me.ws, id, ...Object.values(o))]);
+    return json({ ok: true, v, kpi: await spOne(db, "tx_kpi", me.ws, id) });
+  },
+  async "kpi/del"(db, me, b) {
+    if (!isMgr(me)) return fail("forbidden", 403);
+    const id = clip(b.id, 60);
+    const { v } = await spRun(db, me, [db.prepare("DELETE FROM tx_kpi WHERE ws=?1 AND id=?2").bind(me.ws, id), db.prepare("DELETE FROM tx_kval WHERE ws=?1 AND kpi_id=?2").bind(me.ws, id)]);
+    return json({ ok: true, v });
+  },
+  async "kval/save"(db, me, b) {   // 기간별 실적(직접 입력 KPI)과 기간별 목표
+    if (!isMgr(me)) return fail("forbidden", 403);
+    const kid = clip(b.kpi_id, 60), per = String(b.period || "");
+    if (!/^\d{4}(-\d{2}|-Q[1-4])?$/.test(per)) return fail("bad-request");
+    if (!await spOne(db, "tx_kpi", me.ws, kid)) return fail("not-found", 404);
+    const row = { kpi_id: kid, period: per, value: numOrNull(b.value), target: numOrNull(b.target), memo: clip(b.memo, 200) };
+    const stmts = row.value === null && row.target === null && !row.memo ? [db.prepare("DELETE FROM tx_kval WHERE ws=?1 AND kpi_id=?2 AND period=?3").bind(me.ws, kid, per)] : spBulk(db, "tx_kval", me.ws, [row], "ON CONFLICT(ws,kpi_id,period) DO UPDATE SET value=excluded.value, target=excluded.target, memo=excluded.memo");
+    const { v } = await spRun(db, me, stmts);
+    return json({ ok: true, v, kval: row });
+  },
+  async "grant/save"(db, me, b) {
+    if (!isMgr(me)) return fail("forbidden", 403);
+    const id = clip(b.id, 60), o = {}, now = iso();
+    if ("title" in b) o.title = clip(b.title, 200);
+    if ("org" in b) o.org = clip(b.org, 80);
+    if ("url" in b) { const u = clip(b.url, 400); o.url = /^https?:\/\//i.test(u) ? u : ""; }
+    if ("deadline" in b) o.deadline = dOk(b.deadline) || null;
+    if ("status" in b) o.status = TX_GRANT_ST.includes(b.status) ? b.status : "watch";
+    if ("amount" in b) o.amount = numOrNull(b.amount) === null ? null : Math.max(0, intOr(b.amount, 0));
+    if ("memo" in b) o.memo = clip(b.memo, 1000);
+    if ("ext_id" in b) o.ext_id = clip(b.ext_id, 60) || null;
+    if (!id) {
+      if (!o.title) return fail("bad-request");
+      if (o.ext_id && await db.prepare("SELECT 1 AS x FROM tx_grant WHERE ws=?1 AND ext_id=?2").bind(me.ws, o.ext_id).first()) return fail("dup", 409);
+      const row = Object.assign({ id: bulkId("gr"), org: "", url: "", deadline: null, status: "watch", amount: null, memo: "", ext_id: null, created_at: now, updated_at: now }, o);
+      const { v } = await spRun(db, me, spBulk(db, "tx_grant", me.ws, [row]));
+      return json({ ok: true, v, grant: await spOne(db, "tx_grant", me.ws, row.id) });
+    }
+    if (!await spOne(db, "tx_grant", me.ws, id)) return fail("not-found", 404);
+    o.updated_at = now;
+    const { v } = await spRun(db, me, [db.prepare(`UPDATE tx_grant SET ${setCols(o, 3)} WHERE ws=?1 AND id=?2`).bind(me.ws, id, ...Object.values(o))]);
+    return json({ ok: true, v, grant: await spOne(db, "tx_grant", me.ws, id) });
+  },
+  async "grant/del"(db, me, b) {
+    if (!isMgr(me)) return fail("forbidden", 403);
+    const { v } = await spRun(db, me, [db.prepare("DELETE FROM tx_grant WHERE ws=?1 AND id=?2").bind(me.ws, clip(b.id, 60))]);
+    return json({ ok: true, v });
+  },
+  // 거래처 사업자 상태 — 국세청 사업자등록 상태조회(공공데이터포털). Cloudflare에 NTS_API_KEY가 있어야 합니다
+  async bizcheck(db, me, b, req, url, env) {
+    if (!isMgr(me)) return fail("forbidden", 403);
+    const nos = [...new Set((Array.isArray(b.nos) ? b.nos : []).map(bizNo).filter(x => x.length === 10))].slice(0, 100);
+    if (!nos.length) return fail("bad-request");
+    const key = env && env.NTS_API_KEY;
+    if (!key) return fail("no-key", 400, { hint: "Cloudflare Pages → Settings → Variables and Secrets에 NTS_API_KEY를 넣어 주세요." });
+    let r;
+    try {
+      r = await fetch("https://api.odcloud.kr/api/nts-businessman/v1/status?serviceKey=" + encodeURIComponent(key), { method: "POST", headers: { "content-type": "application/json", accept: "application/json" }, body: JSON.stringify({ b_no: nos }) });
+    } catch (e) { return fail("upstream", 502); }
+    const j = await r.json().catch(() => null);
+    if (!r.ok || !j || !Array.isArray(j.data)) return fail("upstream", 502, { status: r.status });
+    return json({ ok: true, items: j.data.map(x => ({ no: String(x.b_no || ""), status: String(x.b_stt || ""), code: String(x.b_stt_cd || ""), taxType: String(x.tax_type || ""), endDate: String(x.end_dt || "") })) });
+  },
+  // 지원사업 공고 — 기업마당 지원사업정보 API. Cloudflare에 BIZINFO_API_KEY가 있어야 합니다
+  async feed(db, me, b, req, url, env) {
+    if (!isMgr(me)) return fail("forbidden", 403);
+    const key = env && env.BIZINFO_API_KEY;
+    if (!key) return fail("no-key", 400);
+    const tags = (Array.isArray(b.tags) ? b.tags : []).map(x => clip(x, 20)).filter(Boolean).slice(0, 5).join(",");
+    const q = new URLSearchParams({ crtfcKey: key, dataType: "json", searchCnt: String(clampInt(b.n, 10, 100, 60)) });
+    if (tags) q.set("hashtags", tags);
+    let r;
+    try { r = await fetch("https://www.bizinfo.go.kr/uss/rss/bizinfoApi.do?" + q.toString(), { headers: { accept: "application/json" } }); } catch (e) { return fail("upstream", 502); }
+    const j = await r.json().catch(() => null);
+    const arr = j && (Array.isArray(j.jsonArray) ? j.jsonArray : Array.isArray(j.items) ? j.items : Array.isArray(j) ? j : Array.isArray(j.data) ? j.data : null);
+    if (!r.ok || !arr) return fail("upstream", 502, { status: r.status });
+    const abs = u => { u = String(u || ""); return /^https?:\/\//.test(u) ? u : u ? "https://www.bizinfo.go.kr" + (u.startsWith("/") ? "" : "/") + u : ""; };
+    const items = arr.slice(0, 100).map(x => ({
+      id: clip(x.pblancId || x.seq || x.id || x.pblancUrl || x.title, 60),
+      title: clip(x.pblancNm || x.title, 200), org: clip(x.jrsdInsttNm || x.author || x.excInsttNm, 80), exec: clip(x.excInsttNm, 80),
+      period: clip(x.reqstBeginEndDe || x.reqstDt || "", 60), field: clip(x.pldirSportRealmLclasCodeNm || x.lcategory || "", 40),
+      target: clip(x.trgetNm || "", 120), summary: clip(String(x.bsnsSumryCn || x.description || "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " "), 300),
+      tags: clip(x.hashtags || x.hashTags || "", 200), url: abs(x.pblancUrl || x.link), at: clip(x.creatPnttm || x.pubDate || "", 30)
+    })).filter(x => x.title);
+    return json({ ok: true, items });
+  }
+};
+
+/* ═══════════ 마이피플 — 함께 일하는 사람(파트너)과 고용한 사람(근무·급여) ═══════════
+   · 관리자는 전부, 직원(관리자 아닌 내부 팀원)은 근무표·출퇴근까지, 급여와 임금 정보는 워크스페이스 관리자만 봅니다.
+   · 근무자는 자기 근무표·출퇴근·명세서만 받고, 다른 사람의 근무·임금은 받지 않습니다. */
+const PP_DDL = [
+  "CREATE TABLE IF NOT EXISTS pp_staff(ws TEXT NOT NULL, id TEXT NOT NULL, member_id TEXT, contact_id TEXT, name TEXT NOT NULL, phone TEXT, kind TEXT NOT NULL DEFAULT 'part', pay_type TEXT NOT NULL DEFAULT 'hour', rate INTEGER NOT NULL DEFAULT 0, ins TEXT NOT NULL DEFAULT 'none', tax_m INTEGER NOT NULL DEFAULT 0, meal INTEGER NOT NULL DEFAULT 0, week_hours REAL, days TEXT, store_id TEXT, start_date TEXT, end_date TEXT, status TEXT NOT NULL DEFAULT 'active', docs TEXT, contract TEXT, bank TEXT, birth TEXT, memo TEXT, created_at TEXT, updated_at TEXT, PRIMARY KEY(ws,id))",
+  "CREATE INDEX IF NOT EXISTS idx_pp_staff_mem ON pp_staff(ws,member_id)",
+  "CREATE TABLE IF NOT EXISTS pp_shift(ws TEXT NOT NULL, id TEXT NOT NULL, staff_id TEXT NOT NULL, date TEXT NOT NULL, t_start TEXT NOT NULL, t_end TEXT NOT NULL, brk INTEGER NOT NULL DEFAULT 0, store_id TEXT, note TEXT, PRIMARY KEY(ws,id))",
+  "CREATE INDEX IF NOT EXISTS idx_pp_shift_d ON pp_shift(ws,date)",
+  "CREATE TABLE IF NOT EXISTS pp_att(ws TEXT NOT NULL, id TEXT NOT NULL, staff_id TEXT NOT NULL, date TEXT NOT NULL, in_at TEXT, out_at TEXT, brk INTEGER NOT NULL DEFAULT 0, src TEXT, lat REAL, lng REAL, dist INTEGER, note TEXT, edited_by TEXT, created_at TEXT, updated_at TEXT, PRIMARY KEY(ws,id))",
+  "CREATE INDEX IF NOT EXISTS idx_pp_att_d ON pp_att(ws,date)",
+  "CREATE INDEX IF NOT EXISTS idx_pp_att_s ON pp_att(ws,staff_id,date)",
+  "CREATE TABLE IF NOT EXISTS pp_job(ws TEXT NOT NULL, id TEXT NOT NULL, staff_id TEXT NOT NULL, date TEXT NOT NULL, qty INTEGER NOT NULL DEFAULT 1, rate INTEGER, note TEXT, created_at TEXT, PRIMARY KEY(ws,id))",
+  "CREATE INDEX IF NOT EXISTS idx_pp_job_d ON pp_job(ws,date)",
+  "CREATE TABLE IF NOT EXISTS pp_pay(ws TEXT NOT NULL, id TEXT NOT NULL, staff_id TEXT NOT NULL, period TEXT NOT NULL, pfrom TEXT, pto TEXT, items TEXT NOT NULL DEFAULT '[]', deds TEXT NOT NULL DEFAULT '[]', gross INTEGER NOT NULL DEFAULT 0, ded INTEGER NOT NULL DEFAULT 0, net INTEGER NOT NULL DEFAULT 0, employer INTEGER NOT NULL DEFAULT 0, pay_date TEXT, status TEXT NOT NULL DEFAULT 'draft', paid_at TEXT, fin_id TEXT, memo TEXT, created_at TEXT, updated_at TEXT, PRIMARY KEY(ws,id))",
+  "CREATE UNIQUE INDEX IF NOT EXISTS idx_pp_pay_sp ON pp_pay(ws,staff_id,period)",
+  "CREATE TABLE IF NOT EXISTS pp_card(ws TEXT NOT NULL, contact_id TEXT NOT NULL, img TEXT, at TEXT, PRIMARY KEY(ws,contact_id))"
+];
+const PP_TABLES = ["pp_staff", "pp_shift", "pp_att", "pp_job", "pp_pay", "pp_card"];
+Object.assign(SPC, {
+  pp_staff: ["id", "member_id", "contact_id", "name", "phone", "kind", "pay_type", "rate", "ins", "tax_m", "meal", "week_hours", "days", "store_id", "start_date", "end_date", "status", "docs", "contract", "bank", "birth", "memo", "created_at", "updated_at"],
+  pp_shift: ["id", "staff_id", "date", "t_start", "t_end", "brk", "store_id", "note"],
+  pp_att: ["id", "staff_id", "date", "in_at", "out_at", "brk", "src", "lat", "lng", "dist", "note", "edited_by", "created_at", "updated_at"],
+  pp_job: ["id", "staff_id", "date", "qty", "rate", "note", "created_at"],
+  pp_pay: ["id", "staff_id", "period", "pfrom", "pto", "items", "deds", "gross", "ded", "net", "employer", "pay_date", "status", "paid_at", "fin_id", "memo", "created_at", "updated_at"],
+  pp_card: ["contact_id", "img", "at"]
+});
+Object.assign(SPJ, { pp_staff: { days: "[]", docs: "{}", contract: "{}" }, pp_pay: { items: "[]", deds: "[]" } });
+const PP_KIND = ["part", "full", "job", "day", "free"];          // 아르바이트 · 직원 · 건당 · 일용 · 프리랜서(3.3%)
+const PP_PAYT = ["hour", "day", "week", "month", "job"];
+const PP_INS = ["four", "biz33", "daily", "none"];               // 4대보험 · 3.3% · 일용 · 없음
+const PP_PAY_ST = ["draft", "confirmed", "paid"];
+const PP_SELF = new Set(["me", "clock"]);                        // 현장 근무자도 쓰는 것 — 내 근무표·출퇴근·명세서
+const ppAdmin = me => me.role === "admin";
+const PP_PAY_COLS = ["rate", "tax_m", "meal", "bank", "birth"];  // 관리자만 받는 임금 정보
+function ppStaffIn(b, admin) {
+  const o = {};
+  if ("member_id" in b) o.member_id = clip(b.member_id, 60) || null;
+  if ("contact_id" in b) o.contact_id = clip(b.contact_id, 60) || null;
+  if ("name" in b) o.name = clip(b.name, 40);
+  if ("phone" in b) o.phone = clip(b.phone, 40);
+  if ("kind" in b) o.kind = PP_KIND.includes(b.kind) ? b.kind : "part";
+  if ("pay_type" in b) o.pay_type = PP_PAYT.includes(b.pay_type) ? b.pay_type : "hour";
+  if ("ins" in b) o.ins = PP_INS.includes(b.ins) ? b.ins : "none";
+  if ("week_hours" in b) o.week_hours = numOrNull(b.week_hours) === null ? null : Math.max(0, Math.min(80, Number(b.week_hours)));
+  if ("days" in b) o.days = JSON.stringify((Array.isArray(b.days) ? b.days : []).map(Number).filter(d => d >= 0 && d <= 6).slice(0, 7));
+  if ("store_id" in b) o.store_id = clip(b.store_id, 60) || null;
+  if ("start_date" in b) o.start_date = dOk(b.start_date) || null;
+  if ("end_date" in b) o.end_date = dOk(b.end_date) || null;
+  if ("status" in b) o.status = ["active", "leave", "end"].includes(b.status) ? b.status : "active";
+  if ("memo" in b) o.memo = clip(b.memo, 1000);
+  if ("docs" in b) { const d = b.docs && typeof b.docs === "object" ? b.docs : {}; o.docs = JSON.stringify({ contract: dOk(d.contract) || "", health: dOk(d.health) || "", bank: !!d.bank, idchk: !!d.idchk, ins: dOk(d.ins) || "" }); }
+  if ("contract" in b) { const c = b.contract && typeof b.contract === "object" ? b.contract : {}; o.contract = JSON.stringify({ place: clip(c.place, 100), job: clip(c.job, 100), holiday: clip(c.holiday, 60), payday: clip(c.payday, 40), method: clip(c.method, 40), extra: clip(c.extra, 500) }); }
+  if (admin) {
+    if ("rate" in b) o.rate = Math.max(0, Math.min(100000000, intOr(b.rate, 0)));
+    if ("tax_m" in b) o.tax_m = Math.max(0, Math.min(10000000, intOr(b.tax_m, 0)));
+    if ("meal" in b) o.meal = Math.max(0, Math.min(1000000, intOr(b.meal, 0)));
+    if ("bank" in b) o.bank = clip(b.bank, 100);
+    if ("birth" in b) o.birth = dOk(b.birth) || null;
+  }
+  return o;
+}
+const ppStrip = (s, admin) => { if (!s || admin) return s; const o = Object.assign({}, s); for (const k of PP_PAY_COLS) delete o[k]; return o; };
+function ppNorm(s) {
+  s = s && typeof s === "object" ? s : {};
+  const r = s.rates && typeof s.rates === "object" ? s.rates : {};
+  const num = (v, d, lo, hi) => { const n = Number(v); return Number.isFinite(n) && v !== "" && v !== null ? Math.min(hi, Math.max(lo, n)) : d; };
+  const locs = {}; if (s.locs && typeof s.locs === "object") for (const [k, v] of Object.entries(s.locs).slice(0, 200)) if (v && Number.isFinite(Number(v.lat)) && Number.isFinite(Number(v.lng))) locs[clip(k, 60)] = { lat: Number(v.lat), lng: Number(v.lng), radius: clampInt(v.radius, 30, 2000, 150) };
+  return {
+    five: !!s.five,                                   // 상시 5인 이상 — 연장·야간 가산수당 적용
+    payday: clampInt(s.payday, 1, 31, 10),
+    rates: { np: num(r.np, 4.75, 0, 20), hi: num(r.hi, 3.595, 0, 20), lc: num(r.lc, 13.14, 0, 50), ei: num(r.ei, 0.9, 0, 5), eiEr: num(r.eiEr, 1.15, 0, 5), ia: num(r.ia, 0, 0, 20), npMin: num(r.npMin, 410000, 0, 10000000), npMax: num(r.npMax, 6590000, 0, 50000000) },
+    locs, gps: s.gps !== false
+  };
+}
+async function ppSettings(db, ws) { const m = await modSettings(db, ws, "pp"); return ppNorm(m.settings); }
+function distM(a, b) { const R = 6371000, t = x => x * Math.PI / 180, dLa = t(b.lat - a.lat), dLo = t(b.lng - a.lng); const h = Math.sin(dLa / 2) ** 2 + Math.cos(t(a.lat)) * Math.cos(t(b.lat)) * Math.sin(dLo / 2) ** 2; return Math.round(2 * R * Math.asin(Math.sqrt(h))); }
+const kstDateOf = isoS => new Date(Date.parse(isoS) + 9 * 3600e3).toISOString().slice(0, 10);
+const PEOP = {
+  async data(db, me, b, req, url) {
+    if (!isMgr(me)) return fail("forbidden", 403);
+    const admin = ppAdmin(me), today = kstToday();
+    let from = dOk(url.searchParams.get("from")) || addDaysS(today, -35), to = dOk(url.searchParams.get("to")) || addDaysS(today, 14);
+    if (to < from) [from, to] = [to, from];
+    if (to > addDaysS(from, 120)) to = addDaysS(from, 120);
+    const q = [
+      db.prepare("SELECT v FROM mod_set WHERE ws=?1 AND mod='pp' AND k='settings'").bind(me.ws),
+      db.prepare(spSel("pp_staff", "ws=?1", "ORDER BY status, name")).bind(me.ws),
+      db.prepare(spSel("pp_shift", "ws=?1 AND date>=?2 AND date<=?3", "ORDER BY date, t_start")).bind(me.ws, addDaysS(from, -7), addDaysS(to, 7)),
+      db.prepare(spSel("pp_att", "ws=?1 AND ((date>=?2 AND date<=?3) OR (out_at IS NULL AND date>=?4))", "ORDER BY date, in_at")).bind(me.ws, addDaysS(from, -7), to, addDaysS(today, -2)),
+      db.prepare(spSel("pp_job", "ws=?1 AND date>=?2 AND date<=?3", "ORDER BY date")).bind(me.ws, addDaysS(from, -7), to)
+    ];
+    if (admin) q.push(
+      db.prepare(spSel("pp_pay", "ws=?1 AND period>=?2", "ORDER BY period DESC")).bind(me.ws, addDaysS(today, -400).slice(0, 7)),
+      // 마이스토어 청소 — 건당 근무자의 건수 (제출·확인 완료)
+      db.prepare("SELECT COALESCE(submitted_by, assignee) AS mid, clean_date AS d, COUNT(*) AS n FROM sp_cln WHERE ws=?1 AND status IN ('done','confirmed') AND clean_date>=?2 AND clean_date<=?3 GROUP BY mid, clean_date").bind(me.ws, addDaysS(from, -7), to),
+      db.prepare("SELECT target, MAX(used_at) AS at, MAX(result) AS result, MAX(note) AS note FROM links WHERE ws=?1 AND kind='payslip' AND used_at IS NOT NULL GROUP BY target").bind(me.ws)
+    );
+    const rs = await db.batch(q);
+    const s0 = rs[0] && rs[0].results && rs[0].results[0];
+    const staff = rowsOf(rs[1]).map(s => ppStrip(s, admin));
+    const out = { ok: true, v: me.spv, today, from, to, admin, settings: ppNorm(s0 ? parse(s0.v) : null), staff, shifts: rowsOf(rs[2]), att: rowsOf(rs[3]), jobs: rowsOf(rs[4]) };
+    if (admin) {
+      out.pays = rowsOf(rs[5]);
+      out.cleans = ((rs[6] && rs[6].results) || []).map(r => ({ mid: r.mid, date: r.d, n: Number(r.n) || 0 }));
+      out.acks = ((rs[7] && rs[7].results) || []).map(r => ({ id: r.target, at: r.at, result: r.result, note: r.note || "" }));
+    }
+    return json(out);
+  },
+  async me(db, me) {   // 나의 근무 — 근무자·직원·관리자 누구나 자기 것만
+    const today = kstToday(), mon = addDaysS(today, -((new Date(today + "T00:00:00Z").getUTCDay() + 6) % 7));
+    const st = rowsOf(await db.prepare(spSel("pp_staff", "ws=?1 AND member_id=?2 AND status<>'end'")).bind(me.ws, me.id).all());
+    if (!st.length) return json({ ok: true, today, staff: [], shifts: [], att: [], pays: [], settings: { gps: true } });
+    const ids = JSON.stringify(st.map(s => s.id));
+    const [sh, at, py, set] = await db.batch([
+      db.prepare(spSel("pp_shift", "ws=?1 AND staff_id IN (SELECT value FROM json_each(?2)) AND date>=?3 AND date<=?4", "ORDER BY date, t_start")).bind(me.ws, ids, addDaysS(mon, -7), addDaysS(mon, 13)),
+      db.prepare(spSel("pp_att", "ws=?1 AND staff_id IN (SELECT value FROM json_each(?2)) AND date>=?3", "ORDER BY date DESC, in_at DESC")).bind(me.ws, ids, addDaysS(today, -40)),
+      db.prepare(spSel("pp_pay", "ws=?1 AND staff_id IN (SELECT value FROM json_each(?2)) AND status<>'draft'", "ORDER BY period DESC LIMIT 24")).bind(me.ws, ids),
+      db.prepare("SELECT v FROM mod_set WHERE ws=?1 AND mod='pp' AND k='settings'").bind(me.ws)
+    ]);
+    const s1 = set && set.results && set.results[0], ps = ppNorm(s1 ? parse(s1.v) : null);
+    const pays = rowsOf(py).map(p => ({ id: p.id, staff_id: p.staff_id, period: p.period, pfrom: p.pfrom, pto: p.pto, items: p.items, deds: p.deds, gross: p.gross, ded: p.ded, net: p.net, pay_date: p.pay_date, status: p.status, paid_at: p.paid_at }));
+    return json({ ok: true, today, staff: st.map(s => ({ id: s.id, name: s.name, kind: s.kind, pay_type: s.pay_type, rate: s.rate, ins: s.ins, store_id: s.store_id, week_hours: s.week_hours, start_date: s.start_date })), shifts: rowsOf(sh), att: rowsOf(at), pays, settings: { gps: ps.gps, locs: Object.keys(ps.locs) } });
+  },
+  async clock(db, me, b) {   // 출근·퇴근 — 위치는 브라우저가 알려 준 경우에만 남깁니다
+    const act = b.act === "out" ? "out" : "in";
+    const st = rowsOf(await db.prepare(spSel("pp_staff", "ws=?1 AND member_id=?2 AND status='active'")).bind(me.ws, me.id).all());
+    const s = st.find(x => x.id === b.staff_id) || st[0];
+    if (!s) return fail("no-staff", 404);
+    const now = iso(), today = kstToday();
+    const lat = Number(b.lat), lng = Number(b.lng), hasLoc = Number.isFinite(lat) && Number.isFinite(lng) && Math.abs(lat) <= 90 && Math.abs(lng) <= 180;
+    let dist = null;
+    if (hasLoc && s.store_id) { const ps = await ppSettings(db, me.ws), L = ps.locs[s.store_id]; if (L) dist = distM({ lat, lng }, L); }
+    const open = await db.prepare(spSel("pp_att", "ws=?1 AND staff_id=?2 AND out_at IS NULL AND in_at>=?3", "ORDER BY in_at DESC LIMIT 1")).bind(me.ws, s.id, new Date(Date.now() - 30 * 3600e3).toISOString()).first();
+    const cur = open ? parse(open.j) : null;
+    if (act === "in") {
+      if (cur) return fail("already-in", 409, { att: cur });
+      const row = { id: bulkId("at"), staff_id: s.id, date: today, in_at: now, out_at: null, brk: 0, src: "self", lat: hasLoc ? Math.round(lat * 1e5) / 1e5 : null, lng: hasLoc ? Math.round(lng * 1e5) / 1e5 : null, dist, note: "", edited_by: null, created_at: now, updated_at: now };
+      const { v } = await spRun(db, me, spBulk(db, "pp_att", me.ws, [row]));
+      return json({ ok: true, v, att: row });
+    }
+    if (!cur) return fail("not-in", 409);
+    const brk = clampInt(b.brk, 0, 600, cur.brk || 0);
+    const note = dist !== null && cur.dist !== null && cur.dist !== undefined ? cur.note : cur.note;
+    const { v } = await spRun(db, me, [db.prepare("UPDATE pp_att SET out_at=?3, brk=?4, updated_at=?3, note=?5, dist=COALESCE(dist,?6) WHERE ws=?1 AND id=?2").bind(me.ws, cur.id, now, brk, note || "", dist)]);
+    return json({ ok: true, v, att: await spOne(db, "pp_att", me.ws, cur.id) });
+  },
+  async settings(db, me, b) {
+    if (!isMgr(me)) return fail("forbidden", 403);
+    if (b && b.set && typeof b.set === "object") {
+      if (!ppAdmin(me)) return fail("forbidden", 403);
+      const s = ppNorm(Object.assign({}, await ppSettings(db, me.ws), b.set));
+      const { v } = await spRun(db, me, [db.prepare("INSERT INTO mod_set(ws,mod,k,v) VALUES(?1,'pp','settings',?2) ON CONFLICT(ws,mod,k) DO UPDATE SET v=excluded.v").bind(me.ws, JSON.stringify(s))]);
+      return json({ ok: true, v, settings: s });
+    }
+    return json({ ok: true, settings: await ppSettings(db, me.ws) });
+  },
+  async "loc/save"(db, me, b) {   // 매장 출근 위치 — 관리자가 매장에서 한 번 눌러 둡니다
+    if (!isMgr(me)) return fail("forbidden", 403);
+    const sid = clip(b.store_id, 60);
+    if (!sid || !await storeOk(db, me, sid)) return fail("not-found", 404);
+    const s = await ppSettings(db, me.ws);
+    if (b.clear) delete s.locs[sid];
+    else { const lat = Number(b.lat), lng = Number(b.lng); if (!Number.isFinite(lat) || !Number.isFinite(lng)) return fail("bad-request"); s.locs[sid] = { lat: Math.round(lat * 1e5) / 1e5, lng: Math.round(lng * 1e5) / 1e5, radius: clampInt(b.radius, 30, 2000, 150) }; }
+    const { v } = await spRun(db, me, [db.prepare("INSERT INTO mod_set(ws,mod,k,v) VALUES(?1,'pp','settings',?2) ON CONFLICT(ws,mod,k) DO UPDATE SET v=excluded.v").bind(me.ws, JSON.stringify(s))]);
+    return json({ ok: true, v, settings: s });
+  },
+  async "staff/save"(db, me, b) {
+    if (!isMgr(me)) return fail("forbidden", 403);
+    const admin = ppAdmin(me), id = clip(b.id, 60), o = ppStaffIn(b || {}, admin), now = iso();
+    if (o.member_id) {
+      const m = await entData(db, me.ws, "member", o.member_id);
+      if (!m) return fail("not-found", 404);
+    }
+    if (!id) {
+      if (!o.name) return fail("bad-request");
+      const n = await db.prepare("SELECT COUNT(*) AS n FROM pp_staff WHERE ws=?1").bind(me.ws).first();
+      if (Number(n && n.n) >= 500) return fail("limit", 409);
+      const row = Object.assign({ id: bulkId("sf"), member_id: null, contact_id: null, phone: "", kind: "part", pay_type: "hour", rate: 0, ins: "none", tax_m: 0, meal: 0, week_hours: null, days: "[]", store_id: null, start_date: kstToday(), end_date: null, status: "active", docs: "{}", contract: "{}", bank: "", birth: null, memo: "", created_at: now, updated_at: now }, o);
+      const { v } = await spRun(db, me, spBulk(db, "pp_staff", me.ws, [row]));
+      return json({ ok: true, v, staff: ppStrip(await spOne(db, "pp_staff", me.ws, row.id), admin) });
+    }
+    if (!await spOne(db, "pp_staff", me.ws, id)) return fail("not-found", 404);
+    if ("name" in o && !o.name) return fail("bad-request");
+    o.updated_at = now;
+    const { v } = await spRun(db, me, [db.prepare(`UPDATE pp_staff SET ${setCols(o, 3)} WHERE ws=?1 AND id=?2`).bind(me.ws, id, ...Object.values(o))]);
+    return json({ ok: true, v, staff: ppStrip(await spOne(db, "pp_staff", me.ws, id), admin) });
+  },
+  async "staff/del"(db, me, b) {
+    if (!ppAdmin(me)) return fail("forbidden", 403);
+    const id = clip(b.id, 60);
+    const used = await db.prepare("SELECT (SELECT COUNT(*) FROM pp_att WHERE ws=?1 AND staff_id=?2) + (SELECT COUNT(*) FROM pp_pay WHERE ws=?1 AND staff_id=?2) AS n").bind(me.ws, id).first();
+    if (Number(used && used.n)) return fail("in-use", 409);
+    const { v } = await spRun(db, me, [db.prepare("DELETE FROM pp_staff WHERE ws=?1 AND id=?2").bind(me.ws, id), db.prepare("DELETE FROM pp_shift WHERE ws=?1 AND staff_id=?2").bind(me.ws, id), db.prepare("DELETE FROM pp_job WHERE ws=?1 AND staff_id=?2").bind(me.ws, id)]);
+    return json({ ok: true, v });
+  },
+  async "shift/save"(db, me, b) {   // 근무표 — 여러 칸을 한 번에 저장
+    if (!isMgr(me)) return fail("forbidden", 403);
+    const rows = (Array.isArray(b.rows) ? b.rows : [b]).slice(0, 500).map(r => ({ id: clip(r && r.id, 60) || bulkId("sh"), staff_id: clip(r && r.staff_id, 60), date: dOk(r && r.date), t_start: tOk(r && r.t_start), t_end: tOk(r && r.t_end), brk: clampInt(r && r.brk, 0, 600, 0), store_id: clip(r && r.store_id, 60) || null, note: clip(r && r.note, 200) })).filter(r => r.staff_id && r.date && r.t_start && r.t_end);
+    if (!rows.length) return fail("bad-request");
+    const { v } = await spRun(db, me, spBulk(db, "pp_shift", me.ws, rows, "ON CONFLICT(ws,id) DO UPDATE SET staff_id=excluded.staff_id, date=excluded.date, t_start=excluded.t_start, t_end=excluded.t_end, brk=excluded.brk, store_id=excluded.store_id, note=excluded.note"));
+    return json({ ok: true, v, shifts: rows });
+  },
+  async "shift/del"(db, me, b) {
+    if (!isMgr(me)) return fail("forbidden", 403);
+    const ids = (Array.isArray(b.ids) ? b.ids : [b.id]).map(x => clip(x, 60)).filter(Boolean).slice(0, 1000);
+    const { v } = await spRun(db, me, [db.prepare("DELETE FROM pp_shift WHERE ws=?1 AND id IN (SELECT value FROM json_each(?2))").bind(me.ws, JSON.stringify(ids))]);
+    return json({ ok: true, v });
+  },
+  async "shift/copy"(db, me, b) {   // 지난주 근무표를 이번 주로 — 같은 사람·날짜·시작 시각이 이미 있으면 건너뜁니다
+    if (!isMgr(me)) return fail("forbidden", 403);
+    const from = dOk(b.from), to = dOk(b.to);
+    if (!from || !to) return fail("bad-request");
+    const src = rowsOf(await db.prepare(spSel("pp_shift", "ws=?1 AND date>=?2 AND date<=?3")).bind(me.ws, from, addDaysS(from, 6)).all());
+    const ex = rowsOf(await db.prepare(spSel("pp_shift", "ws=?1 AND date>=?2 AND date<=?3")).bind(me.ws, to, addDaysS(to, 6)).all());
+    const have = new Set(ex.map(x => [x.staff_id, x.date, x.t_start].join("|")));
+    const off = Math.round((Date.parse(to) - Date.parse(from)) / 864e5);
+    const add = src.map(x => Object.assign({}, x, { id: bulkId("sh"), date: addDaysS(x.date, off) })).filter(x => !have.has([x.staff_id, x.date, x.t_start].join("|")));
+    const { v } = add.length ? await spRun(db, me, spBulk(db, "pp_shift", me.ws, add)) : { v: null };
+    return json({ ok: true, v, added: add.length, shifts: add });
+  },
+  async "att/save"(db, me, b) {   // 관리자가 넣거나 고치는 출퇴근
+    if (!isMgr(me)) return fail("forbidden", 403);
+    const id = clip(b.id, 60), now = iso();
+    const isoOk = s => { const t = Date.parse(String(s || "")); return Number.isFinite(t) ? new Date(t).toISOString() : null; };
+    const o = {};
+    if ("staff_id" in b) o.staff_id = clip(b.staff_id, 60);
+    if ("in_at" in b) o.in_at = isoOk(b.in_at);
+    if ("out_at" in b) o.out_at = isoOk(b.out_at);
+    if ("brk" in b) o.brk = clampInt(b.brk, 0, 600, 0);
+    if ("note" in b) o.note = clip(b.note, 300);
+    if (o.in_at) o.date = kstDateOf(o.in_at);
+    if (o.in_at && o.out_at && o.out_at <= o.in_at) return fail("bad-time");
+    o.edited_by = me.name || me.id; o.updated_at = now;
+    if (!id) {
+      if (!o.staff_id || !o.in_at) return fail("bad-request");
+      if (!await spOne(db, "pp_staff", me.ws, o.staff_id)) return fail("not-found", 404);
+      const row = Object.assign({ id: bulkId("at"), out_at: null, brk: 0, src: "mgr", lat: null, lng: null, dist: null, note: "", created_at: now }, o);
+      const { v } = await spRun(db, me, spBulk(db, "pp_att", me.ws, [row]));
+      return json({ ok: true, v, att: await spOne(db, "pp_att", me.ws, row.id) });
+    }
+    const ex = await spOne(db, "pp_att", me.ws, id);
+    if (!ex) return fail("not-found", 404);
+    if (o.out_at && !o.in_at && o.out_at <= ex.in_at) return fail("bad-time");
+    const { v } = await spRun(db, me, [db.prepare(`UPDATE pp_att SET ${setCols(o, 3)} WHERE ws=?1 AND id=?2`).bind(me.ws, id, ...Object.values(o))]);
+    return json({ ok: true, v, att: await spOne(db, "pp_att", me.ws, id) });
+  },
+  async "att/del"(db, me, b) {
+    if (!isMgr(me)) return fail("forbidden", 403);
+    const { v } = await spRun(db, me, [db.prepare("DELETE FROM pp_att WHERE ws=?1 AND id=?2").bind(me.ws, clip(b.id, 60))]);
+    return json({ ok: true, v });
+  },
+  async "job/save"(db, me, b) {   // 건당 근무 기록 (마이스토어 청소 외의 일)
+    if (!isMgr(me)) return fail("forbidden", 403);
+    const row = { id: clip(b.id, 60) || bulkId("jb"), staff_id: clip(b.staff_id, 60), date: dOk(b.date), qty: clampInt(b.qty, 1, 10000, 1), rate: ppAdmin(me) ? numOrNull(b.rate) : null, note: clip(b.note, 200), created_at: iso() };
+    if (!row.staff_id || !row.date) return fail("bad-request");
+    if (!await spOne(db, "pp_staff", me.ws, row.staff_id)) return fail("not-found", 404);
+    const { v } = await spRun(db, me, spBulk(db, "pp_job", me.ws, [row], "ON CONFLICT(ws,id) DO UPDATE SET staff_id=excluded.staff_id, date=excluded.date, qty=excluded.qty, rate=COALESCE(excluded.rate, pp_job.rate), note=excluded.note"));
+    return json({ ok: true, v, job: await spOne(db, "pp_job", me.ws, row.id) });
+  },
+  async "job/del"(db, me, b) {
+    if (!isMgr(me)) return fail("forbidden", 403);
+    const { v } = await spRun(db, me, [db.prepare("DELETE FROM pp_job WHERE ws=?1 AND id=?2").bind(me.ws, clip(b.id, 60))]);
+    return json({ ok: true, v });
+  },
+  async "pay/save"(db, me, b) {   // 급여 계산 결과 저장 — 계산은 화면에서, 서버는 숫자를 검산해 보관합니다
+    if (!ppAdmin(me)) return fail("forbidden", 403);
+    const sid = clip(b.staff_id, 60), per = String(b.period || "");
+    if (!/^\d{4}-\d{2}(-W\d)?$/.test(per)) return fail("bad-request");
+    if (!await spOne(db, "pp_staff", me.ws, sid)) return fail("not-found", 404);
+    const line = (x, keys) => ({ k: clip(x && x.k, 10), label: clip(x && x.label, 40), basis: clip(x && x.basis, 120), amount: Math.max(-100000000, Math.min(1000000000, intOr(x && x.amount, 0))) });
+    const items = (Array.isArray(b.items) ? b.items : []).slice(0, 30).map(line).filter(x => x.label);
+    const deds = (Array.isArray(b.deds) ? b.deds : []).slice(0, 30).map(line).filter(x => x.label);
+    const gross = items.reduce((s, x) => s + x.amount, 0), ded = deds.reduce((s, x) => s + x.amount, 0);
+    const ex = await db.prepare(spSel("pp_pay", "ws=?1 AND staff_id=?2 AND period=?3")).bind(me.ws, sid, per).first();
+    const cur = ex ? parse(ex.j) : null;
+    if (cur && cur.status === "paid") return fail("locked", 409);
+    const now = iso();
+    const row = { id: cur ? cur.id : bulkId("py"), staff_id: sid, period: per, pfrom: dOk(b.pfrom) || null, pto: dOk(b.pto) || null, items, deds, gross, ded, net: gross - ded, employer: Math.max(0, intOr(b.employer, 0)), pay_date: dOk(b.pay_date) || null, status: cur ? cur.status : "draft", paid_at: cur ? cur.paid_at : null, fin_id: cur ? cur.fin_id : null, memo: clip(b.memo, 500), created_at: cur ? cur.created_at : now, updated_at: now };
+    const { v } = await spRun(db, me, spBulk(db, "pp_pay", me.ws, [row], "ON CONFLICT(ws,id) DO UPDATE SET pfrom=excluded.pfrom, pto=excluded.pto, items=excluded.items, deds=excluded.deds, gross=excluded.gross, ded=excluded.ded, net=excluded.net, employer=excluded.employer, pay_date=excluded.pay_date, memo=excluded.memo, updated_at=excluded.updated_at"));
+    return json({ ok: true, v, pay: await spOne(db, "pp_pay", me.ws, row.id) });
+  },
+  async "pay/status"(db, me, b) {
+    if (!ppAdmin(me)) return fail("forbidden", 403);
+    const id = clip(b.id, 60), st = String(b.status || "");
+    if (!PP_PAY_ST.includes(st)) return fail("bad-request");
+    const ex = await spOne(db, "pp_pay", me.ws, id);
+    if (!ex) return fail("not-found", 404);
+    if (ex.status === "paid" && st !== "paid" && !b.force) return fail("locked", 409);
+    const paidAt = st === "paid" ? (dOk(b.paid_at) || kstToday()) : null;
+    const fin = "fin_id" in b ? (clip(b.fin_id, 60) || null) : ex.fin_id;
+    const { v } = await spRun(db, me, [db.prepare("UPDATE pp_pay SET status=?3, paid_at=?4, fin_id=?5, updated_at=?6 WHERE ws=?1 AND id=?2").bind(me.ws, id, st, paidAt, fin, iso())]);
+    return json({ ok: true, v, pay: await spOne(db, "pp_pay", me.ws, id) });
+  },
+  async "pay/del"(db, me, b) {
+    if (!ppAdmin(me)) return fail("forbidden", 403);
+    const id = clip(b.id, 60), ex = await spOne(db, "pp_pay", me.ws, id);
+    if (!ex) return fail("not-found", 404);
+    if (ex.status === "paid") return fail("locked", 409);
+    const { v } = await spRun(db, me, [db.prepare("DELETE FROM pp_pay WHERE ws=?1 AND id=?2").bind(me.ws, id), db.prepare("UPDATE links SET expires_at=?3 WHERE ws=?1 AND kind='payslip' AND target=?2").bind(me.ws, id, iso())]);
+    return json({ ok: true, v });
+  },
+  async "card/get"(db, me, b) {   // 명함 사진 — 연락처 동기화가 무거워지지 않게 따로 둡니다
+    if (!isMgr(me)) return fail("forbidden", 403);
+    const r = await db.prepare("SELECT img, at FROM pp_card WHERE ws=?1 AND contact_id=?2").bind(me.ws, clip(b.contact_id, 60)).first();
+    return json({ ok: true, img: r ? r.img : "", at: r ? r.at : "" });
+  },
+  async "card/save"(db, me, b) {
+    if (!isMgr(me)) return fail("forbidden", 403);
+    const cid = clip(b.contact_id, 60), img = String(b.img || "");
+    if (!cid) return fail("bad-request");
+    if (!/^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/.test(img) || img.length > 400000) return fail("bad-image", 400);
+    if (!await entData(db, me.ws, "contact", cid)) return fail("not-found", 404);
+    await db.prepare("INSERT INTO pp_card(ws,contact_id,img,at) VALUES(?1,?2,?3,?4) ON CONFLICT(ws,contact_id) DO UPDATE SET img=excluded.img, at=excluded.at").bind(me.ws, cid, img, iso()).run();
+    return json({ ok: true });
+  },
+  async "card/del"(db, me, b) {
+    if (!isMgr(me)) return fail("forbidden", 403);
+    await db.prepare("DELETE FROM pp_card WHERE ws=?1 AND contact_id=?2").bind(me.ws, clip(b.contact_id, 60)).run();
+    return json({ ok: true });
+  },
+  async partner(db, me, b) {   // 파트너 카드 — 이 연락처와의 거래 이력, 근무 기록 여부
+    if (!isMgr(me)) return fail("forbidden", 403);
+    const cid = clip(b.id, 60);
+    const [jobs, card, st] = await db.batch([
+      db.prepare("SELECT json_object('id',id,'title',title,'status',status,'amount',amount,'created_at',created_at,'closed_at',closed_at) AS j FROM os_job WHERE ws=?1 AND client_id=?2 ORDER BY created_at DESC LIMIT 50").bind(me.ws, cid),
+      db.prepare("SELECT img, at FROM pp_card WHERE ws=?1 AND contact_id=?2").bind(me.ws, cid),
+      db.prepare("SELECT id, name, kind, status, start_date FROM pp_staff WHERE ws=?1 AND contact_id=?2").bind(me.ws, cid)
+    ]);
+    const c = ((card && card.results) || [])[0];
+    return json({ ok: true, jobs: rowsOf(jobs), img: c ? c.img : "", staff: (st && st.results) || [] });
+  }
+};
+
 const LINK_KINDS = {
   quote: {   // 견적 승인·수정 요청
     exists: async (db, me, id) => !!(await db.prepare("SELECT 1 AS x FROM os_quote WHERE ws=?1 AND id=?2").bind(me.ws, id).first()),
@@ -3089,6 +3722,21 @@ const LINK_KINDS = {
       const st = action === "approve" ? "confirmed" : "changed", now = iso();
       await db.batch([db.prepare("UPDATE cm_po SET status=?3, reply_note=?4, replied_by=?5, replied_at=?6, updated_at=?6 WHERE ws=?1 AND id=?2").bind(l.ws, p.id, st, clip(note, 500), clip(by, 40), now), db.prepare("UPDATE workspaces SET sp_ver=sp_ver+1 WHERE id=?1").bind(l.ws)]);
       return { ok: true, status: st === "confirmed" ? "approved" : "changed" };
+    }
+  },
+  payslip: {   // 임금명세서 — 근무자가 계정 없이 받아 보고 '받았습니다' 또는 '문의합니다'
+    exists: async (db, me, id) => me.role === "admin" && !!(await db.prepare("SELECT 1 AS x FROM pp_pay WHERE ws=?1 AND id=?2 AND status<>'draft'").bind(me.ws, id).first()),
+    view: async (db, l) => {
+      const p = await spOneT(db, "pp_pay", l.ws, l.target); if (!p || p.status === "draft") return null;
+      const [w, s] = await db.batch([db.prepare("SELECT name FROM workspaces WHERE id=?1").bind(l.ws), db.prepare("SELECT name, birth FROM pp_staff WHERE ws=?1 AND id=?2").bind(l.ws, p.staff_id)]);
+      const one = r => ((r && r.results) || [])[0] || {};
+      const st = one(s);
+      return { kind: "payslip", title: `${p.period.replace(/^(\d{4})-(\d{2})(-W(\d))?$/, (m, y, mo, w2, wk) => `${y}년 ${+mo}월${wk ? ` ${wk}주` : ""}`)} 임금명세서`, client: st.name || "", company: "", sender: { workspace: one(w).name || "" }, pay: { period: p.period, pfrom: p.pfrom || "", pto: p.pto || "", pay_date: p.pay_date || p.paid_at || "", items: p.items || [], deds: p.deds || [], gross: p.gross, ded: p.ded, net: p.net, birth: st.birth || "", paid: p.status === "paid" }, status: l.used_at ? (l.result === "changed" ? "changed" : "approved") : "pending" };
+    },
+    act: async (db, l, action) => {
+      const p = await spOneT(db, "pp_pay", l.ws, l.target); if (!p || p.status === "draft") return { error: "not-found" };
+      await db.prepare("UPDATE workspaces SET sp_ver=sp_ver+1 WHERE id=?1").bind(l.ws).run();
+      return { ok: true, status: action === "approve" ? "approved" : "changed" };
     }
   },
   project: {   // 진행 상황 공유 — 계정 없이 보는 읽기 전용 페이지 (금액·메모·의견은 보내지 않습니다)
@@ -3426,7 +4074,7 @@ const codeOut = c => ({ code: c.code, label: c.label || "", plan: planOk(c.plan)
 const payOut = p => ({ id: p.id, ws: p.ws || "", wsName: p.ws_name || "", paidAt: p.paid_at, amount: Number(p.amount) || 0, method: p.method || "", item: p.item || "", from: p.period_from || "", to: p.period_to || "", invoice: !!Number(p.invoice), memo: p.memo || "", createdAt: p.created_at });
 const fbOut = f => ({ id: f.id, ws: f.ws, wsName: f.ws_name || "", loginId: f.login_id || "", name: f.name || "", role: f.role || "", kind: f.kind, body: f.body, page: f.page || "", ua: f.ua || "", contact: f.contact || "", status: f.status, reply: f.reply || "", replyAt: f.reply_at || "", memo: f.memo || "", createdAt: f.created_at, updatedAt: f.updated_at || "" });
 // 전체 백업에 넣는 표 — 로그인 세션(sess)과 오류 기록은 빼고, AI 토큰은 해시를 지웁니다
-const EXPORT_TABLES = () => ["mw_meta", "workspaces", "accounts", "ent", "ws_set", "api_tokens", "links", "invites", "mod_set", ...SP_TABLES, ...OS_TABLES, ...CM_TABLES, "adm_pay", "adm_code", "fb", "adm_log"];
+const EXPORT_TABLES = () => ["mw_meta", "workspaces", "accounts", "ent", "ws_set", "api_tokens", "links", "invites", "mod_set", ...SP_TABLES, ...OS_TABLES, ...CM_TABLES, ...TX_TABLES, ...PP_TABLES, "adm_pay", "adm_code", "fb", "adm_log"];
 const EXPORT_PAGE = 800;
 /* ───────── 본사 운영팀 — 역할별 권한 ─────────
    총괄(운영자 계정)이 운영자 워크스페이스의 구성원에게 역할을 줍니다. 모든 역할은 워크스페이스의 업무 내용은 보지 못합니다. */
@@ -3887,7 +4535,7 @@ export async function onRequest(context) {
       const r = await AIFN[fn](db, me, p);
       return json(r, r && r.error ? ({ "not-found": 404, forbidden: 403, "module-off": 403 }[r.error] || 400) : 200);
     }
-    const MODS = { "sp/": ["space", SPACE], "os/": ["outsourcing", OUTS], "cm/": ["commerce", COMM] };
+    const MODS = { "sp/": ["space", SPACE], "os/": ["outsourcing", OUTS], "cm/": ["commerce", COMM], "tx/": ["tax", TAX], "pp/": ["people", PEOP] };
     const mk = Object.keys(MODS).find(k => path.startsWith(k));
     if (mk) {   // 업종 모듈 — 프로 워크스페이스에서 켠 모듈만, 협력사 역할은 쓰지 않습니다
       const [mod, H] = MODS[mk], fn = path.slice(3);
@@ -3897,7 +4545,7 @@ export async function onRequest(context) {
       if (me.err) return fail(me.err, 403);
       if (me.role === "partner") return fail("forbidden", 403);
       if (!hasMod(me, mod)) return fail("module-off", 403, { module: mod });
-      if (isField(me) && !(mod === "space" || (mod === "commerce" && me.role === "worker"))) return fail("forbidden", 403);   // 현장 근무자는 스페이스·커머스 발송, 시설 담당은 스페이스만
+      if (isField(me) && !(mod === "space" || (mod === "commerce" && me.role === "worker") || (mod === "people" && PP_SELF.has(fn)))) return fail("forbidden", 403);   // 현장 근무자는 마이스토어·마이셀러 발송·내 근무, 시설 담당은 마이스토어·내 근무만
       return await H[fn](db, me, body, request, url, env);
     }
     if (!Object.prototype.hasOwnProperty.call(PRIVATE, path)) return fail("not-found", 404);
