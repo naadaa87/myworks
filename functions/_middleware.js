@@ -6,17 +6,17 @@
    · 처음 설정한 계정이 운영자가 되어 새 워크스페이스 가입을 승인합니다.
      운영자도 각 워크스페이스의 업무 내용은 볼 수 없고, 가입·이용 상태와 등급만 관리합니다.
    · 등급: 베이직(나 혼자 + 구성원 2명, 브랜드 2개, 읽기 토큰 1개) / 프로(구성원 10명 포함, 업종 모듈, 쓰기 토큰).
-     업종 모듈: space(마이스토어) · outsourcing(거래) · commerce(마이셀러) · tax(마이택스) · people(마이피플) · marketing(마이마케팅) — 프로 워크스페이스에서 켜고 끕니다.
+     업종 모듈: space(마이스토어) · outsourcing(거래) · commerce(마이셀러) · tax(마이택스) · people(마이피플) · marketing(마이마케팅) · creator(마이크리에이터) — 프로 워크스페이스에서 켜고 끕니다.
    · AI 접속: 개인 API 토큰(Bearer)으로 외부 AI가 /api/ai/* 를 읽고, 쓰기 토큰은 "제안"을 올립니다. /mcp 는 같은 기능의 MCP 서버입니다.
    · 확인 링크: 계정 없는 고객·거래처가 /#/link/<token> 에서 견적 승인·납품 확인만 합니다.
    · 스페이스: 예약 → 청소 배정 → 체크리스트 → 확인 → 손익. HOSTDB(읽기)는 운영자 워크스페이스에서만, SPACEDB(1회 가져오기)는 운영자만.
    · 무료 요금제 한도(요청당 쿼리 50회)를 넘지 않도록 여러 건의 쓰기는 한 문장으로 묶어 처리합니다. */
 
-const SCHEMA = "12";
+const SCHEMA = "13";
 const PLANS = ["basic", "pro"];
-const MODULES = ["space", "outsourcing", "commerce", "tax", "people", "marketing"];
+const MODULES = ["space", "outsourcing", "commerce", "tax", "people", "marketing", "creator"];
 const BASE_MODULES = ["outsourcing"];          // 거래 — 기본 기능이라 등급과 관계없이 늘 켜져 있습니다
-const EXT_MODULES = ["space", "commerce", "tax", "people", "marketing"];     // 확장판 — 마이스토어 · 마이셀러 · 마이택스 · 마이피플 · 마이마케팅 (워크스페이스 관리자가 켜고 끕니다)
+const EXT_MODULES = ["space", "commerce", "tax", "people", "marketing", "creator"];     // 확장판 — 마이스토어 · 마이셀러 · 마이택스 · 마이피플 · 마이마케팅 · 마이크리에이터 (워크스페이스 관리자가 켜고 끕니다)
 const PLAN_LIMITS = { basic: { brands: 2, members: 2, tokens: 1 }, pro: { brands: 1000, members: 10, tokens: 20 }, beta: { brands: 1000, members: 30, tokens: 20 } };   // members = 관리자 외 구성원 수
 /* 무료 공개 기간 — 결제를 붙이기 전까지 모든 워크스페이스가 프로 기능과 확장판을 무료로 씁니다.
    유료로 바꿀 때 false로 바꾸면 워크스페이스마다 저장된 등급(베이직·프로·기한)이 다시 적용됩니다. 데이터는 그대로입니다. */
@@ -193,7 +193,7 @@ async function ensure(db) {
   try { const r = await db.prepare("SELECT v FROM mw_meta WHERE k='schema'").first(); v = r && r.v; } catch (e) { v = null; }
   if (v !== SCHEMA) {
     // 표 만들기는 묶음(exec)으로 — 무료 플랜의 요청당 쿼리 수 한도를 넘지 않도록
-    for (const group of [DDL, SP_DDL, OS_DDL, CM_DDL, TX_DDL, PP_DDL, MK_DDL, ADM_DDL, INV_DDL]) await db.exec(group.join("\n"));
+    for (const group of [DDL, SP_DDL, OS_DDL, CM_DDL, TX_DDL, PP_DDL, MK_DDL, CR_DDL, ADM_DDL, INV_DDL]) await db.exec(group.join("\n"));
     const have = {};
     for (const t of [...new Set(ADD_COLS.map(x => x[0]))]) have[t] = new Set((((await db.prepare(`PRAGMA table_info(${t})`).all()).results) || []).map(c => c.name));
     for (const [t, col] of ADD_COLS) {
@@ -809,7 +809,7 @@ const PRIVATE = {
     if (!LINK_KINDS[kind]) return fail("bad-request");
     const target = clip(b.target, 60);
     if (!target || !await LINK_KINDS[kind].exists(db, me, target)) return fail("not-found", 404);
-    const days = clampInt(b.days, 1, 180, 30), token = rand(16), now = Date.now();
+    const days = clampInt(b.days, 1, kind === "cr-kit" ? 365 : 180, 30), token = rand(16), now = Date.now();   // 미디어킷은 오래 걸어 두는 주소라 1년까지
     await db.batch([
       db.prepare("UPDATE links SET expires_at=?3 WHERE ws=?1 AND kind=?2 AND target=?4 AND used_at IS NULL").bind(me.ws, kind, new Date(now - 1000).toISOString(), target),   // 같은 대상의 이전 링크는 닫습니다
       db.prepare("INSERT INTO links(token,ws,kind,target,created_by,created_at,expires_at,opts) VALUES(?1,?2,?3,?4,?5,?6,?7,?8)").bind(token, me.ws, kind, target, me.id, iso(), new Date(now + days * 864e5).toISOString(), kind === "project" ? JSON.stringify({ tasks: b.tasks !== false }) : null)
@@ -980,7 +980,7 @@ const PRIVATE = {
       return json({ ok: true });
     }
     if (act === "delete") {
-      await db.exec(SP_TABLES.concat(OS_TABLES, CM_TABLES, TX_TABLES, PP_TABLES, MK_TABLES, ["ws_set", "api_tokens", "links", "mod_set", "invites"]).map(t => `DELETE FROM ${t} WHERE ws=${wsLit(w.id)}`).join("\n"));
+      await db.exec(SP_TABLES.concat(OS_TABLES, CM_TABLES, TX_TABLES, PP_TABLES, MK_TABLES, CR_TABLES, ["ws_set", "api_tokens", "links", "mod_set", "invites"]).map(t => `DELETE FROM ${t} WHERE ws=${wsLit(w.id)}`).join("\n"));
       await db.batch([
         db.prepare("DELETE FROM ent WHERE ws=?1").bind(w.id),
         db.prepare("DELETE FROM sess WHERE ws=?1").bind(w.id),
@@ -2075,11 +2075,16 @@ function spRestoreStmts(db, ws, sp) {
   }
   return { dels, stmts };
 }
-const modTables = () => OS_TABLES.concat(CM_TABLES, TX_TABLES, PP_TABLES, MK_TABLES);
+const modTables = () => OS_TABLES.concat(CM_TABLES, TX_TABLES, PP_TABLES, MK_TABLES, CR_TABLES);
+// 표를 둘씩 묶어 한 문장(UNION ALL)으로 읽습니다 — 확장판이 늘어도 요청당 쿼리 수 한도(무료 플랜 50)를 넘지 않게
 async function modBackupRaw(db, ws) {
-  const MOD_TABLES = modTables();
-  const rs = await db.batch(MOD_TABLES.map(t => db.prepare(spSel(t, "ws=?1")).bind(ws)).concat([db.prepare("SELECT json_object('mod',mod,'k',k,'v',CASE WHEN json_valid(v) THEN json(v) ELSE json('null') END) AS j FROM mod_set WHERE ws=?1 AND NOT (mod='mk' AND k='conn')").bind(ws)]));
-  return '{"v":1,' + MOD_TABLES.map((t, i) => JSON.stringify(t) + ":" + rawArr(rs[i])).join(",") + ',"mod_set":' + rawArr(rs[MOD_TABLES.length]) + "}";
+  const MOD_TABLES = modTables(), pairs = [];
+  for (let i = 0; i < MOD_TABLES.length; i += 2) pairs.push(MOD_TABLES.slice(i, i + 2));
+  const tagged = t => spSel(t, "ws=?1").replace("SELECT ", `SELECT '${t}' AS t, `);
+  const rs = await db.batch(pairs.map(p => db.prepare(p.map(tagged).join(" UNION ALL ")).bind(ws)).concat([db.prepare("SELECT json_object('mod',mod,'k',k,'v',CASE WHEN json_valid(v) THEN json(v) ELSE json('null') END) AS j FROM mod_set WHERE ws=?1 AND NOT (mod='mk' AND k='conn') AND NOT (mod='cr' AND k='quota')").bind(ws)]));
+  const by = {}; for (const t of MOD_TABLES) by[t] = [];
+  pairs.forEach((p, i) => { for (const r of (rs[i] && rs[i].results) || []) if (by[r.t]) by[r.t].push(r.j); });
+  return '{"v":1,' + MOD_TABLES.map(t => JSON.stringify(t) + ":[" + by[t].join(",") + "]").join(",") + ',"mod_set":' + rawArr(rs[pairs.length]) + "}";
 }
 function modRestoreStmts(db, ws, m) {
   if (!m || typeof m !== "object" || m.v !== 1) return { dels: [], stmts: [] };
@@ -2753,7 +2758,7 @@ function cmNorm(s) {
    · 쓰기 토큰은 바로 고치지 않고 "제안"(ent kind=prop)을 올리며, 관리자·직원이 홈에서 승인하면 반영됩니다.
    · 확인 링크(/#/link/<token>)는 계정 없는 상대방이 견적 승인·납품 확인·청구 확인만 할 수 있는 공개 페이지입니다. */
 const TASK_ST = ["대기", "진행중", "검토", "완료"];
-const AI_KINDS = ["create-task", "update-status", "add-note", "create-contact", "create-job", "mk-action", "mk-post"];
+const AI_KINDS = ["create-task", "update-status", "add-note", "create-contact", "create-job", "mk-action", "mk-post", "cr-idea", "cr-deal"];
 async function sha256(s) { return hex(new Uint8Array(await crypto.subtle.digest("SHA-256", enc.encode(s)))); }
 async function wsSettings(db, ws) {
   const rs = (await db.prepare("SELECT k, v FROM ws_set WHERE ws=?1 AND k IN ('ai_auto','ai_note')").bind(ws).all()).results || [];
@@ -2908,6 +2913,7 @@ const AIFN = {
   async outsourcing(db, me) { if (!aiMod(me, "outsourcing")) return { error: "module-off" }; return await osAiSummary(db, me); },
   async commerce(db, me) { if (!aiMod(me, "commerce")) return { error: "module-off" }; return await cmAiSummary(db, me); },
   async marketing(db, me) { if (!aiMod(me, "marketing")) return { error: "module-off" }; return await mkAiSummary(db, me); },
+  async creator(db, me) { if (!aiMod(me, "creator")) return { error: "module-off" }; return await crAiSummary(db, me); },
   async propose(db, me, p) {
     if (me.ai.scope !== "write") return { error: "forbidden", hint: "읽기 토큰입니다. 쓰기 토큰으로 제안할 수 있습니다." };
     if (me.role !== "admin" && me.role !== "staff") return { error: "forbidden" };
@@ -2916,6 +2922,7 @@ const AIFN = {
     const payload = p.payload && typeof p.payload === "object" ? p.payload : {};
     if (kind === "create-job" && !hasMod(me, "outsourcing")) return { error: "module-off" };
     if (kind.startsWith("mk-") && !hasMod(me, "marketing")) return { error: "module-off" };
+    if (kind.startsWith("cr-") && !hasMod(me, "creator")) return { error: "module-off" };
     const chk = propCheck(kind, payload);
     if (chk.error) return chk;
     const set = await wsSettings(db, me.ws);
@@ -2958,6 +2965,12 @@ function propCheck(kind, p) {
   } else if (kind === "mk-post") {   // 마이마케팅 콘텐츠 초안
     out.title = clip(p.title, 120); if (!out.title) return { error: "bad-request", hint: "title이 필요합니다." };
     out.body = clip(p.body, 6000); out.channel = clip(p.channel, 60); out.date = dOk(p.date); out.format = clip(p.format, 20); out.tags = clip(p.tags, 300);
+  } else if (kind === "cr-idea") {   // 마이크리에이터 콘텐츠 아이디어
+    out.title = clip(p.title, 120); if (!out.title) return { error: "bad-request", hint: "title이 필요합니다." };
+    out.channel = clip(p.channel, 60); out.format = clip(p.format, 20); out.date = dOk(p.date); out.memo = clip(p.memo, 3000);
+  } else if (kind === "cr-deal") {   // 마이크리에이터 협찬 건
+    out.brand = clip(p.brand, 60); if (!out.brand) return { error: "bad-request", hint: "brand가 필요합니다." };
+    out.title = clip(p.title, 100); out.type = clip(p.type, 20); out.channel = clip(p.channel, 60); out.amount = Math.max(0, intOr(p.amount, 0)); out.due = dOk(p.due); out.memo = clip(p.memo, 2000);
   }
   return { payload: out };
 }
@@ -3013,6 +3026,10 @@ async function propApply(db, me, prop) {   // 제안을 실제 데이터로 — 
   if (prop.kind === "mk-action" || prop.kind === "mk-post") {
     if (!hasMod(me, "marketing")) return { error: "module-off" };
     return await mkPropItems(db, me, prop);
+  }
+  if (prop.kind === "cr-idea" || prop.kind === "cr-deal") {
+    if (!hasMod(me, "creator")) return { error: "module-off" };
+    return await crPropItems(db, me, prop);
   }
   return { error: "bad-request" };
 }
@@ -3077,7 +3094,7 @@ function txBizIn(b) {
   if ("links" in b) {
     const l = b.links && typeof b.links === "object" ? b.links : {};
     const arr = (a, n) => (Array.isArray(a) ? a : []).map(x => clip(x, 60)).filter(Boolean).slice(0, n);
-    o.links = JSON.stringify({ brands: arr(l.brands, 40), stores: arr(l.stores, 200), mods: arr(l.mods, 5).filter(x => ["space", "commerce", "outsourcing", "people", "marketing"].includes(x)), main: !!l.main });
+    o.links = JSON.stringify({ brands: arr(l.brands, 40), stores: arr(l.stores, 200), mods: arr(l.mods, 6).filter(x => ["space", "commerce", "outsourcing", "people", "marketing", "creator"].includes(x)), main: !!l.main });
   }
   return o;
 }
@@ -4351,6 +4368,458 @@ const MKT = {
   }
 };
 
+/* ═══════════ 마이크리에이터 — 채널, 협찬·광고, 콘텐츠 제작, 수익, 단가표, 미디어킷 ═══════════
+   · 협찬·광고 한 건(cr_deal)이 문의 → 협의 → 계약 → 제작 → 검수 → 게시 → 정산 → 완료로 흐릅니다.
+   · 입금을 확인하면 수익 기록(cr_inc)이 한 줄 생기고, 화면에서 그 줄을 돈 메뉴로 보냅니다.
+   · 공개 링크는 세 가지입니다. 미디어킷(cr-kit · 협찬 문의 접수), 협찬 조건 확인서(cr-deal · 브랜드가 확인·수정 요청), 결과 보고서(cr-report · 보기 전용).
+     미디어킷에는 금액이 나가지 않습니다(단가표는 켰을 때만). 메모(memo)는 어느 링크에도 넣지 않습니다.
+   · 세금 계산은 참고용입니다. 원천징수율은 설정에서 바꿀 수 있게 두었습니다. */
+const CR_DDL = [
+  "CREATE TABLE IF NOT EXISTS cr_chan(ws TEXT NOT NULL, id TEXT NOT NULL, name TEXT NOT NULL, platform TEXT NOT NULL DEFAULT 'etc', handle TEXT, url TEXT, topic TEXT, active INTEGER NOT NULL DEFAULT 1, sort INTEGER NOT NULL DEFAULT 0, memo TEXT, created_at TEXT, updated_at TEXT, PRIMARY KEY(ws,id))",
+  "CREATE TABLE IF NOT EXISTS cr_snap(ws TEXT NOT NULL, id TEXT NOT NULL, chan_id TEXT NOT NULL, ym TEXT NOT NULL, subs INTEGER NOT NULL DEFAULT 0, views INTEGER NOT NULL DEFAULT 0, posts INTEGER NOT NULL DEFAULT 0, memo TEXT, updated_at TEXT, PRIMARY KEY(ws,id))",
+  "CREATE UNIQUE INDEX IF NOT EXISTS idx_cr_snap_key ON cr_snap(ws,chan_id,ym)",
+  "CREATE TABLE IF NOT EXISTS cr_deal(ws TEXT NOT NULL, id TEXT NOT NULL, brand TEXT NOT NULL, title TEXT, type TEXT NOT NULL DEFAULT 'paid', stage TEXT NOT NULL DEFAULT 'nego', chan_id TEXT NOT NULL DEFAULT '', amount INTEGER NOT NULL DEFAULT 0, tax_mode TEXT NOT NULL DEFAULT 'none', draft_due TEXT, post_due TEXT, pay_due TEXT, reply TEXT NOT NULL DEFAULT '', seen INTEGER NOT NULL DEFAULT 1, paid_at TEXT, inc_id TEXT, d TEXT, result TEXT, terms TEXT, created_at TEXT, updated_at TEXT, PRIMARY KEY(ws,id))",
+  "CREATE INDEX IF NOT EXISTS idx_cr_deal_stage ON cr_deal(ws,stage)",
+  "CREATE TABLE IF NOT EXISTS cr_cont(ws TEXT NOT NULL, id TEXT NOT NULL, chan_id TEXT NOT NULL DEFAULT '', deal_id TEXT NOT NULL DEFAULT '', title TEXT NOT NULL, format TEXT NOT NULL DEFAULT 'etc', stage TEXT NOT NULL DEFAULT 'idea', shoot_date TEXT, post_date TEXT, url TEXT, view INTEGER NOT NULL DEFAULT 0, likes INTEGER NOT NULL DEFAULT 0, cmts INTEGER NOT NULL DEFAULT 0, d TEXT, created_at TEXT, updated_at TEXT, PRIMARY KEY(ws,id))",
+  "CREATE INDEX IF NOT EXISTS idx_cr_cont_date ON cr_cont(ws,post_date)",
+  "CREATE TABLE IF NOT EXISTS cr_inc(ws TEXT NOT NULL, id TEXT NOT NULL, date TEXT NOT NULL, ym TEXT NOT NULL, src TEXT NOT NULL DEFAULT 'etc', chan_id TEXT NOT NULL DEFAULT '', deal_id TEXT NOT NULL DEFAULT '', title TEXT, gross INTEGER NOT NULL DEFAULT 0, vat INTEGER NOT NULL DEFAULT 0, wht INTEGER NOT NULL DEFAULT 0, net INTEGER NOT NULL DEFAULT 0, cur TEXT NOT NULL DEFAULT 'KRW', fx_amount REAL, fx_rate REAL, memo TEXT, created_at TEXT, updated_at TEXT, PRIMARY KEY(ws,id))",
+  "CREATE INDEX IF NOT EXISTS idx_cr_inc_ym ON cr_inc(ws,ym)",
+  "CREATE TABLE IF NOT EXISTS cr_rate(ws TEXT NOT NULL, id TEXT NOT NULL, name TEXT NOT NULL, chan_id TEXT NOT NULL DEFAULT '', format TEXT NOT NULL DEFAULT 'etc', price INTEGER NOT NULL DEFAULT 0, note TEXT, active INTEGER NOT NULL DEFAULT 1, sort INTEGER NOT NULL DEFAULT 0, created_at TEXT, updated_at TEXT, PRIMARY KEY(ws,id))"
+];
+const CR_TABLES = ["cr_chan", "cr_snap", "cr_deal", "cr_cont", "cr_inc", "cr_rate"];
+Object.assign(SPC, {
+  cr_chan: ["id", "name", "platform", "handle", "url", "topic", "active", "sort", "memo", "created_at", "updated_at"],
+  cr_snap: ["id", "chan_id", "ym", "subs", "views", "posts", "memo", "updated_at"],
+  cr_deal: ["id", "brand", "title", "type", "stage", "chan_id", "amount", "tax_mode", "draft_due", "post_due", "pay_due", "reply", "seen", "paid_at", "inc_id", "d", "result", "terms", "created_at", "updated_at"],
+  cr_cont: ["id", "chan_id", "deal_id", "title", "format", "stage", "shoot_date", "post_date", "url", "view", "likes", "cmts", "d", "created_at", "updated_at"],
+  cr_inc: ["id", "date", "ym", "src", "chan_id", "deal_id", "title", "gross", "vat", "wht", "net", "cur", "fx_amount", "fx_rate", "memo", "created_at", "updated_at"],
+  cr_rate: ["id", "name", "chan_id", "format", "price", "note", "active", "sort", "created_at", "updated_at"]
+});
+Object.assign(SPJ, { cr_deal: { d: "{}", result: "{}", terms: "null" }, cr_cont: { d: "{}" } });   // 자주 찾지 않는 칸은 d(JSON) 하나에 모읍니다 — 한 줄을 읽는 SQL이 길어지지 않게
+const CR_PLAT = ["youtube", "instagram", "tiktok", "naver_blog", "naver_clip", "chzzk", "soop", "threads", "x", "facebook", "newsletter", "brunch", "podcast", "webtoon", "etc"];
+const CR_TYPE = ["paid", "gift", "affil", "group", "appear", "license", "etc"];   // 유료 광고 · 제품 협찬 · 제휴(수수료) · 공동구매 · 출연·행사·강연 · 2차 활용(라이선스) · 기타
+const CR_STAGE = ["inquiry", "nego", "contract", "making", "review", "posted", "settle", "done", "lost"];   // 문의 · 협의 · 계약 · 제작 · 검수 · 게시 · 정산 대기 · 완료 · 무산
+const CR_TAX = ["vat", "wht", "none"];   // 세금계산서(부가세 10% 별도) · 원천징수 · 세금 계산 없음
+const CR_FMT = ["long", "short", "live", "post", "story", "blog", "news", "audio", "etc"];   // 긴 영상 · 숏폼 · 라이브 · 피드 게시물 · 스토리 · 블로그 글 · 뉴스레터 · 오디오 · 기타
+const CR_CSTAGE = ["idea", "plan", "shoot", "edit", "review", "sched", "posted", "drop"];   // 아이디어 · 기획 · 촬영 · 편집 · 검수 · 예약 · 게시 · 보류
+const CR_SRC = ["ads", "sponsor", "affil", "fan", "sales", "lecture", "license", "etc"];   // 플랫폼 광고수익 · 협찬·광고 · 제휴 수수료 · 후원·멤버십 · 상품 판매 · 강의·출연 · 저작권·2차 활용 · 기타
+const CR_CUR = ["KRW", "USD", "JPY", "EUR", "etc"];
+const CR_LIMIT = { chans: 30, deals: 3000, conts: 5000, incs: 6000, rates: 60, snaps: 2400 };
+const CR_TERM_KEYS = ["title", "type", "chan_id", "amount", "tax_mode", "draft_due", "post_due", "pay_due"], CR_TERM_D = ["gift_value", "items", "keep_until", "usage", "usage_until", "excl", "excl_until", "revisions", "guide", "cond"];   // 조건 확인서에 나가는 칸
+const crNum = v => numOrNull(typeof v === "string" ? v.replace(/[,\s]/g, "") : v);   // "1,385.5"처럼 쉼표가 든 숫자도 받습니다
+const crPct = (v, d) => { const n = Number(v); return Number.isFinite(n) && v !== "" && v !== null ? Math.max(0, Math.min(300, Math.round(n))) : d; };
+function crNorm(s) {   // 설정 — 사업 형태·원천징수율, 견적 옵션, 미디어킷
+  s = s && typeof s === "object" ? s : {};
+  const obj = k => (s[k] && typeof s[k] === "object" ? s[k] : {});
+  const b = obj("biz"), o = obj("opts"), k = obj("kit"), a = k.aud && typeof k.aud === "object" ? k.aud : {};
+  const wht = Number(b.wht);
+  const pct = v => { const n = Number(v); return Number.isFinite(n) && v !== "" && v !== null ? Math.max(0, Math.min(100, Math.round(n))) : null; };
+  return {
+    set: !!s.set,
+    biz: { type: ["none", "exempt", "taxable"].includes(b.type) ? b.type : "none", wht: Number.isFinite(wht) && b.wht !== "" && b.wht !== null ? Math.max(0, Math.min(30, Math.round(wht * 10) / 10)) : 3.3, name: clip(b.name, 40), person: clip(b.person, 30), email: clip(b.email, 80), phone: clip(b.phone, 30) },
+    opts: { usage: crPct(o.usage, 30), excl: crPct(o.excl, 20), rush: crPct(o.rush, 30) },
+    cpv: mkDec(s.cpv),
+    kit: {
+      on: !!k.on, name: clip(k.name, 40), tagline: clip(k.tagline, 80), bio: clip(k.bio, 1200),
+      topics: (Array.isArray(k.topics) ? k.topics : String(k.topics || "").split(/[,\n]/)).map(x => clip(x, 20)).filter(Boolean).slice(0, 10),
+      email: clip(k.email, 80),
+      aud: { f: pct(a.f), m: pct(a.m), ages: clip(a.ages, 80), regions: clip(a.regions, 80), note: clip(a.note, 200) },
+      picks: (Array.isArray(k.picks) ? k.picks : []).map(x => clip(x, 60)).filter(Boolean).slice(0, 8),
+      cases: k.cases !== false, rates: !!k.rates, inquiry: k.inquiry !== false
+    },
+    checks: (Array.isArray(s.checks) ? s.checks : []).map(x => clip(x, 40)).filter(Boolean).slice(-200)
+  };
+}
+async function crSettings(db, ws) { const m = await modSettings(db, ws, "cr"); return crNorm(m.settings); }
+function crTax(gross, mode, rate) {   // 공급가 기준 — vat: 10% 더해 받음 · wht: 원천징수율만큼 떼고 받음
+  gross = Math.max(0, intOr(gross, 0));
+  const vat = mode === "vat" ? Math.round(gross * 0.1) : 0, wht = mode === "wht" ? Math.round(gross * (Number(rate) || 0) / 100) : 0;
+  return { vat, wht, net: gross + vat - wht };
+}
+function crChanIn(b) {
+  const o = {};
+  if ("name" in b) o.name = clip(b.name, 40);
+  if ("platform" in b) o.platform = CR_PLAT.includes(b.platform) ? b.platform : "etc";
+  if ("handle" in b) o.handle = clip(b.handle, 80);
+  if ("url" in b) o.url = mkUrl(b.url);
+  if ("topic" in b) o.topic = clip(b.topic, 60);
+  if ("active" in b) o.active = b.active === false || b.active === 0 ? 0 : 1;
+  if ("memo" in b) o.memo = clip(b.memo, 500);
+  return o;
+}
+const crUrls = v => (Array.isArray(v) ? v : String(v || "").split(/\s+/)).map(mkUrl).filter(Boolean).slice(0, 6);
+function crResultIn(r) {   // 협찬 결과 — 게시 주소와 성과 숫자
+  r = r && typeof r === "object" ? r : {};
+  return { urls: crUrls(r.urls), posted_at: dOk(r.posted_at), view: mkInt(r.view, 1e12), likes: mkInt(r.likes, 1e11), cmts: mkInt(r.cmts, 1e11), shares: mkInt(r.shares, 1e11), saves: mkInt(r.saves, 1e11), clk: mkInt(r.clk, 1e11), note: clip(r.note, 1000), at: dOk(r.at) };
+}
+function crDiscIn(d) {   // 광고 표기 — 어떻게 표시했는지와 점검 항목
+  d = d && typeof d === "object" ? d : {};
+  return { how: clip(d.how, 120), ok: (Array.isArray(d.ok) ? d.ok : []).map(x => clip(x, 30)).filter(Boolean).slice(0, 20) };
+}
+/* 협찬 건 — 위 칸(col)과 d(JSON)에 나눠 담습니다. d는 고친 칸만 덮어씁니다 */
+function crDealIn(b) {
+  const o = {}, d = {};
+  if ("brand" in b) o.brand = clip(b.brand, 60);
+  if ("title" in b) o.title = clip(b.title, 100);
+  if ("type" in b) o.type = CR_TYPE.includes(b.type) ? b.type : "paid";
+  if ("stage" in b) o.stage = CR_STAGE.includes(b.stage) ? b.stage : "nego";
+  if ("chan_id" in b) o.chan_id = clip(b.chan_id, 60);
+  if ("amount" in b) o.amount = mkInt(b.amount, 1e11);
+  if ("tax_mode" in b) o.tax_mode = CR_TAX.includes(b.tax_mode) ? b.tax_mode : "none";
+  for (const k of ["draft_due", "post_due", "pay_due"]) if (k in b) o[k] = dOk(b[k]) || null;
+  if ("result" in b) o.result = JSON.stringify(crResultIn(b.result));
+  if ("agency" in b) d.agency = clip(b.agency, 60);
+  if ("person" in b) d.person = clip(b.person, 40);
+  if ("contact" in b) d.contact = clip(b.contact, 120);
+  if ("contact_id" in b) d.contact_id = clip(b.contact_id, 60);
+  if ("gift_value" in b) d.gift_value = mkInt(b.gift_value, 1e10);
+  if ("items" in b) d.items = clip(b.items, 400);
+  for (const k of ["keep_until", "usage_until", "excl_until"]) if (k in b) d[k] = dOk(b[k]);
+  if ("usage" in b) d.usage = clip(b.usage, 200);
+  if ("excl" in b) d.excl = clip(b.excl, 200);
+  if ("revisions" in b) d.revisions = crNum(b.revisions) === null ? null : clampInt(b.revisions, 0, 20, 0);
+  if ("guide" in b) d.guide = clip(b.guide, 2000);
+  if ("cond" in b) d.cond = clip(b.cond, 1500);
+  if ("disc" in b) d.disc = crDiscIn(b.disc);
+  if ("lost_reason" in b) d.lost_reason = clip(b.lost_reason, 200);
+  if ("show_case" in b) d.show_case = !!b.show_case;
+  if ("memo" in b) d.memo = clip(b.memo, 2000);
+  return { o, d };
+}
+const CR_DEAL_D0 = () => ({ agency: "", person: "", contact: "", contact_id: "", gift_value: 0, items: "", keep_until: "", usage: "", usage_until: "", excl: "", excl_until: "", revisions: null, guide: "", cond: "", disc: { how: "", ok: [] }, lost_reason: "", show_case: false, memo: "", reply_note: "", reply_at: "", src: "manual", inq: null, paid_amount: 0, by: "" });
+const crDealRow = (o, d, now) => Object.assign({ id: bulkId("cd"), brand: "", title: "", type: "paid", stage: "nego", chan_id: "", amount: 0, tax_mode: "none", draft_due: null, post_due: null, pay_due: null, reply: "", seen: 1, paid_at: null, inc_id: null, result: "{}", terms: null, created_at: now, updated_at: now }, o, { d: Object.assign(CR_DEAL_D0(), d) });
+const crD = x => (x && x.d && typeof x.d === "object" ? x.d : {});
+function crContIn(b) {
+  const o = {}, d = {};
+  if ("title" in b) o.title = clip(b.title, 120);
+  if ("chan_id" in b) o.chan_id = clip(b.chan_id, 60);
+  if ("deal_id" in b) o.deal_id = clip(b.deal_id, 60);
+  if ("format" in b) o.format = CR_FMT.includes(b.format) ? b.format : "etc";
+  if ("stage" in b) o.stage = CR_CSTAGE.includes(b.stage) ? b.stage : "idea";
+  if ("shoot_date" in b) o.shoot_date = dOk(b.shoot_date) || null;
+  if ("post_date" in b) o.post_date = dOk(b.post_date) || null;
+  if ("url" in b) o.url = mkUrl(b.url);
+  for (const k of ["view", "likes", "cmts"]) if (k in b) o[k] = mkInt(b[k], 1e12);
+  if ("post_time" in b) d.post_time = tOk(b.post_time);
+  if ("checks" in b) d.checks = (Array.isArray(b.checks) ? b.checks : []).map(x => clip(x, 30)).filter(Boolean).slice(0, 30);
+  if ("editor" in b) d.editor = clip(b.editor, 40);
+  if ("editor_id" in b) d.editor_id = clip(b.editor_id, 60);
+  if ("cost" in b) d.cost = mkInt(b.cost, 1e10);
+  for (const k of ["shares", "saves"]) if (k in b) d[k] = mkInt(b[k], 1e12);
+  if ("stat_at" in b) d.stat_at = dOk(b.stat_at);
+  if ("memo" in b) d.memo = clip(b.memo, 4000);
+  return { o, d };
+}
+const CR_CONT_D0 = () => ({ post_time: "", checks: [], editor: "", editor_id: "", cost: 0, shares: 0, saves: 0, stat_at: "", memo: "", by: "" });
+const crContRow = (o, d, now) => Object.assign({ id: bulkId("cc"), chan_id: "", deal_id: "", title: "", format: "etc", stage: "idea", shoot_date: null, post_date: null, url: "", view: 0, likes: 0, cmts: 0, created_at: now, updated_at: now }, o, { d: Object.assign(CR_CONT_D0(), d) });
+function crIncIn(b) {
+  const o = {};
+  if ("date" in b) o.date = dOk(b.date);
+  if ("ym" in b) o.ym = ymOk(b.ym);
+  if ("src" in b) o.src = CR_SRC.includes(b.src) ? b.src : "etc";
+  if ("chan_id" in b) o.chan_id = clip(b.chan_id, 60);
+  if ("title" in b) o.title = clip(b.title, 100);
+  for (const k of ["gross", "vat", "wht"]) if (k in b) o[k] = mkInt(b[k], 1e11);
+  if ("cur" in b) o.cur = CR_CUR.includes(b.cur) ? b.cur : "KRW";
+  if ("fx_amount" in b) o.fx_amount = crNum(b.fx_amount) === null ? null : mkDec(b.fx_amount);
+  if ("fx_rate" in b) o.fx_rate = crNum(b.fx_rate) === null ? null : mkDec(b.fx_rate);
+  if ("memo" in b) o.memo = clip(b.memo, 500);
+  return o;
+}
+function crRateIn(b) {
+  const o = {};
+  if ("name" in b) o.name = clip(b.name, 60);
+  if ("chan_id" in b) o.chan_id = clip(b.chan_id, 60);
+  if ("format" in b) o.format = CR_FMT.includes(b.format) ? b.format : "etc";
+  if ("price" in b) o.price = mkInt(b.price, 1e10);
+  if ("note" in b) o.note = clip(b.note, 200);
+  if ("active" in b) o.active = b.active === false || b.active === 0 ? 0 : 1;
+  return o;
+}
+const crHas = async (db, ws, t, id) => !!(id && await db.prepare(`SELECT 1 AS x FROM ${t} WHERE ws=?1 AND id=?2`).bind(ws, id).first());
+const crCount = async (db, ws, t) => Number(((await db.prepare(`SELECT COUNT(*) AS n FROM ${t} WHERE ws=?1`).bind(ws).first()) || {}).n) || 0;
+const crIncSrc = type => type === "affil" || type === "group" ? "affil" : type === "license" ? "license" : type === "appear" ? "lecture" : "sponsor";
+const crModOn = async (db, ws) => { const w = await db.prepare("SELECT modules FROM workspaces WHERE id=?1").bind(ws).first(); return !!w && (parse(w.modules) || []).includes("creator"); };
+const crDealName = d => d.brand + (d.title ? " — " + d.title : "");
+async function crAiSummary(db, me) {
+  const today = kstToday(), ym = today.slice(0, 7), pm = addDaysS(ym + "-01", -1).slice(0, 7), soon = addDaysS(today, 14);
+  const rs = await db.batch([
+    db.prepare("SELECT v FROM mod_set WHERE ws=?1 AND mod='cr' AND k='settings'").bind(me.ws),
+    db.prepare("SELECT c.id, c.name, c.platform, c.active, (SELECT json_object('ym',s.ym,'subs',s.subs,'views',s.views,'posts',s.posts) FROM cr_snap s WHERE s.ws=c.ws AND s.chan_id=c.id ORDER BY s.ym DESC LIMIT 1) AS snap FROM cr_chan c WHERE c.ws=?1 ORDER BY c.sort, c.created_at").bind(me.ws),
+    db.prepare("SELECT id, brand, title, type, stage, chan_id, amount, tax_mode, draft_due, post_due, pay_due, reply, seen, paid_at, d FROM cr_deal WHERE ws=?1 AND stage NOT IN ('done','lost') ORDER BY created_at DESC LIMIT 100").bind(me.ws),
+    db.prepare("SELECT id, chan_id, deal_id, title, format, stage, shoot_date, post_date FROM cr_cont WHERE ws=?1 AND stage NOT IN ('posted','drop') AND (post_date IS NULL OR post_date<=?2 OR shoot_date<=?2) ORDER BY COALESCE(shoot_date,post_date,'9999') LIMIT 60").bind(me.ws, soon),
+    db.prepare("SELECT ym, src, SUM(gross) AS gross, SUM(net) AS net, COUNT(*) AS n FROM cr_inc WHERE ws=?1 AND ym>=?2 GROUP BY ym, src").bind(me.ws, pm),
+    db.prepare("SELECT title, chan_id, format, post_date, view, likes, cmts FROM cr_cont WHERE ws=?1 AND stage='posted' AND post_date>=?2 ORDER BY post_date DESC LIMIT 20").bind(me.ws, addDaysS(today, -30)),
+    db.prepare("SELECT brand, d FROM cr_deal WHERE ws=?1 AND stage NOT IN ('inquiry','nego','lost') AND d LIKE '%\"excl_until\":\"2%' ORDER BY created_at DESC LIMIT 200").bind(me.ws)
+  ]);
+  const R = i => (rs[i] && rs[i].results) || [], s0 = R(0)[0], set = crNorm(s0 ? parse(s0.v) : null), chN = new Map(R(1).map(c => [c.id, c.name]));
+  const inc = m => { const rows = R(4).filter(x => x.ym === m), by = {}; let gross = 0, net = 0; for (const x of rows) { by[x.src] = Number(x.gross) || 0; gross += Number(x.gross) || 0; net += Number(x.net) || 0; } return { month: m, gross, received: net, bySource: by }; };
+  const deals = R(2).map(x => Object.assign(x, { d: parse(x.d) || {} })), late = d => d && d < today;
+  return {
+    today, business: { type: set.biz.type, withholdingPct: set.biz.wht },
+    channels: R(1).map(c => { const s = parse(c.snap) || {}; return { id: c.id, name: c.name, platform: c.platform, active: !!c.active, subscribers: s.subs ?? null, monthlyViews: s.views ?? null, asOf: s.ym || "" }; }),
+    openDeals: deals.map(d => ({ id: d.id, brand: d.brand, title: d.title || "", type: d.type, stage: d.stage, channel: chN.get(d.chan_id) || "", amount: d.amount, taxMode: d.tax_mode, deliverables: d.d.items || "", draftDue: d.draft_due || "", postDue: d.post_due || "", payDue: d.pay_due || "", brandReply: d.reply || "", fromMediaKit: d.d.src === "kit", unread: !Number(d.seen), paid: !!d.paid_at })),
+    attention: {
+      newInquiries: deals.filter(d => d.stage === "inquiry" && !Number(d.seen)).length,
+      draftOverdue: deals.filter(d => ["contract", "making"].includes(d.stage) && late(d.draft_due)).length,
+      postOverdue: deals.filter(d => ["contract", "making", "review"].includes(d.stage) && late(d.post_due)).length,
+      paymentOverdue: deals.filter(d => ["posted", "settle"].includes(d.stage) && !d.paid_at && late(d.pay_due)).length,
+      changeRequested: deals.filter(d => d.reply === "changed").length
+    },
+    exclusivity: R(6).map(x => ({ brand: x.brand, d: parse(x.d) || {} })).filter(x => x.d.excl && x.d.excl_until >= today).map(x => ({ brand: x.brand, scope: x.d.excl, until: x.d.excl_until })),
+    upcomingContent: R(3).map(c => ({ id: c.id, title: c.title, channel: chN.get(c.chan_id) || "", format: c.format, stage: c.stage, shootDate: c.shoot_date || "", postDate: c.post_date || "", sponsored: !!c.deal_id })),
+    recentPosts: R(5).map(c => ({ title: c.title, channel: chN.get(c.chan_id) || "", format: c.format, postDate: c.post_date || "", views: c.view, likes: c.likes, comments: c.cmts })),
+    income: { thisMonth: inc(ym), lastMonth: inc(pm) },
+    hint: "금액은 원입니다. gross는 세금 전(공급가), received는 실제 입금액입니다. 쓰기 토큰은 propose의 cr-idea(콘텐츠 아이디어)·cr-deal(협찬 건)로 제안할 수 있습니다."
+  };
+}
+async function crPropItems(db, me, prop) {   // AI 제안 → 콘텐츠 아이디어 · 협찬 건
+  const p = prop.payload, now = iso(), bump = db.prepare("UPDATE workspaces SET sp_ver=sp_ver+1 WHERE id=?1").bind(me.ws);
+  const ch = p.channel ? await db.prepare("SELECT id, name FROM cr_chan WHERE ws=?1 AND (id=?2 OR name=?2 OR name LIKE ?3) ORDER BY (id=?2) DESC, (name=?2) DESC, LENGTH(name) LIMIT 1").bind(me.ws, p.channel, "%" + p.channel + "%").first() : null;
+  if (prop.kind === "cr-idea") {
+    const row = crContRow({ chan_id: ch ? ch.id : "", title: p.title, format: CR_FMT.includes(p.format) ? p.format : "etc", stage: "idea", post_date: p.date || null }, { memo: p.memo || "", by: me.id }, now);
+    return { items: [actRow(me, `AI 제안으로 콘텐츠 아이디어 "${row.title}"을(를) 더했습니다.`)], stmts: spBulk(db, "cr_cont", me.ws, [row]).concat([bump]), applied: { contentId: row.id, title: row.title, channel: ch ? ch.name : "" } };
+  }
+  const row = crDealRow({ brand: p.brand, title: p.title, type: CR_TYPE.includes(p.type) ? p.type : "paid", stage: "nego", chan_id: ch ? ch.id : "", amount: p.amount, post_due: p.due || null }, { memo: p.memo || "", src: "ai", by: me.id }, now);
+  return { items: [actRow(me, `AI 제안으로 협찬 건 "${crDealName(row)}"을(를) 더했습니다.`)], stmts: spBulk(db, "cr_deal", me.ws, [row]).concat([bump]), applied: { dealId: row.id, brand: row.brand, title: row.title } };
+}
+const CREA = {
+  async data(db, me) {
+    if (!isMgr(me)) return fail("forbidden", 403);
+    const now = iso();
+    const rs = await db.batch([
+      db.prepare("SELECT v FROM mod_set WHERE ws=?1 AND mod='cr' AND k='settings'").bind(me.ws),
+      db.prepare(spSel("cr_chan", "ws=?1", "ORDER BY sort, created_at")).bind(me.ws),
+      db.prepare(spSel("cr_snap", "ws=?1", "ORDER BY ym LIMIT 2400")).bind(me.ws),
+      db.prepare(spSel("cr_deal", "ws=?1", "ORDER BY created_at DESC LIMIT 3000")).bind(me.ws),
+      db.prepare(spSel("cr_cont", "ws=?1", "ORDER BY COALESCE(post_date,'9999') DESC, created_at DESC LIMIT 5000")).bind(me.ws),
+      db.prepare(spSel("cr_inc", "ws=?1", "ORDER BY date DESC, created_at DESC LIMIT 6000")).bind(me.ws),
+      db.prepare(spSel("cr_rate", "ws=?1", "ORDER BY sort, created_at")).bind(me.ws),
+      db.prepare("SELECT token, created_at, expires_at, views, last_view FROM links WHERE ws=?1 AND kind='cr-kit' AND target='kit' AND expires_at>?2 ORDER BY created_at DESC LIMIT 1").bind(me.ws, now)
+    ]);
+    const s0 = ((rs[0] && rs[0].results) || [])[0], k = ((rs[7] && rs[7].results) || [])[0];
+    return rawJson({ ok: true, v: me.spv, today: kstToday(), settings: crNorm(s0 ? parse(s0.v) : null), kitLink: k ? { token: k.token, createdAt: k.created_at, expiresAt: k.expires_at, views: Number(k.views) || 0, lastView: k.last_view || "" } : null },
+      ',"chans":' + rawArr(rs[1]) + ',"snaps":' + rawArr(rs[2]) + ',"deals":' + rawArr(rs[3]) + ',"conts":' + rawArr(rs[4]) + ',"incs":' + rawArr(rs[5]) + ',"rates":' + rawArr(rs[6]));
+  },
+  async settings(db, me, b) {
+    if (!isMgr(me)) return fail("forbidden", 403);
+    const cur = await crSettings(db, me.ws), p = b && b.set && typeof b.set === "object" ? b.set : {};
+    const merged = Object.assign({}, cur, p);
+    for (const k of ["biz", "opts", "kit"]) if (p[k] && typeof p[k] === "object") merged[k] = Object.assign({}, cur[k], p[k]);
+    if (p.kit && p.kit.aud && typeof p.kit.aud === "object") merged.kit.aud = Object.assign({}, cur.kit.aud, p.kit.aud);
+    const s = crNorm(merged);
+    if (JSON.stringify(s).length > 20000) return fail("too-large", 413);
+    const { v } = await spRun(db, me, [db.prepare("INSERT INTO mod_set(ws,mod,k,v) VALUES(?1,'cr','settings',?2) ON CONFLICT(ws,mod,k) DO UPDATE SET v=excluded.v").bind(me.ws, JSON.stringify(s))]);
+    return json({ ok: true, v, settings: s });
+  },
+  async "chan/save"(db, me, b) {
+    if (!isMgr(me)) return fail("forbidden", 403);
+    const id = clip(b.id, 60), o = crChanIn(b || {}), now = iso();
+    if (!id) {
+      if (!o.name) return fail("bad-request");
+      const n = await crCount(db, me.ws, "cr_chan");
+      if (n >= CR_LIMIT.chans) return fail("limit", 409);
+      const row = Object.assign({ id: bulkId("ch"), name: "", platform: "etc", handle: "", url: "", topic: "", active: 1, sort: n + 1, memo: "", created_at: now, updated_at: now }, o);
+      const { v } = await spRun(db, me, spBulk(db, "cr_chan", me.ws, [row]));
+      return json({ ok: true, v, chan: await spOne(db, "cr_chan", me.ws, row.id) });
+    }
+    if (!await crHas(db, me.ws, "cr_chan", id)) return fail("not-found", 404);
+    if ("name" in o && !o.name) return fail("bad-request");
+    o.updated_at = now;
+    const { v } = await spRun(db, me, [db.prepare(`UPDATE cr_chan SET ${setCols(o, 3)} WHERE ws=?1 AND id=?2`).bind(me.ws, id, ...Object.values(o))]);
+    return json({ ok: true, v, chan: await spOne(db, "cr_chan", me.ws, id) });
+  },
+  async "chan/del"(db, me, b) {   // 협찬·콘텐츠·수익이 붙어 있으면 지우지 않습니다 (대신 '쓰지 않음'으로). 월별 숫자는 함께 지웁니다
+    if (!isMgr(me)) return fail("forbidden", 403);
+    const id = clip(b.id, 60);
+    if (!id) return fail("bad-request");
+    const u = await db.prepare("SELECT (SELECT COUNT(*) FROM cr_deal WHERE ws=?1 AND chan_id=?2) + (SELECT COUNT(*) FROM cr_cont WHERE ws=?1 AND chan_id=?2) + (SELECT COUNT(*) FROM cr_inc WHERE ws=?1 AND chan_id=?2) AS n").bind(me.ws, id).first();
+    if (Number(u && u.n) > 0) return fail("in-use", 409, { n: Number(u.n) });
+    const { v } = await spRun(db, me, [db.prepare("DELETE FROM cr_chan WHERE ws=?1 AND id=?2").bind(me.ws, id), db.prepare("DELETE FROM cr_snap WHERE ws=?1 AND chan_id=?2").bind(me.ws, id), db.prepare("UPDATE cr_rate SET chan_id='' WHERE ws=?1 AND chan_id=?2").bind(me.ws, id)]);
+    return json({ ok: true, v });
+  },
+  // 채널의 월별 숫자 — 같은 채널·같은 달은 한 줄만 둡니다 (다시 적으면 고칩니다)
+  async "snap/save"(db, me, b) {
+    if (!isMgr(me)) return fail("forbidden", 403);
+    const chan = clip(b.chan_id, 60), ym = ymOk(b.ym);
+    if (!ym) return fail("bad-date");
+    if (!await crHas(db, me.ws, "cr_chan", chan)) return fail("bad-channel");
+    if (await crCount(db, me.ws, "cr_snap") >= CR_LIMIT.snaps) return fail("limit", 409);
+    const row = { id: bulkId("cs"), chan_id: chan, ym, subs: mkInt(b.subs, 1e10), views: mkInt(b.views, 1e12), posts: mkInt(b.posts, 1e5), memo: clip(b.memo, 200), updated_at: iso() };
+    const { v } = await spRun(db, me, spBulk(db, "cr_snap", me.ws, [row], "ON CONFLICT(ws,chan_id,ym) DO UPDATE SET subs=excluded.subs, views=excluded.views, posts=excluded.posts, memo=excluded.memo, updated_at=excluded.updated_at"));
+    const r = await db.prepare(spSel("cr_snap", "ws=?1 AND chan_id=?2 AND ym=?3")).bind(me.ws, chan, ym).first();
+    return json({ ok: true, v, snap: r ? parse(r.j) : null });
+  },
+  async "snap/del"(db, me, b) {
+    if (!isMgr(me)) return fail("forbidden", 403);
+    const { v } = await spRun(db, me, [db.prepare("DELETE FROM cr_snap WHERE ws=?1 AND id=?2").bind(me.ws, clip(b.id, 60))]);
+    return json({ ok: true, v });
+  },
+  async "deal/save"(db, me, b) {
+    if (!isMgr(me)) return fail("forbidden", 403);
+    const id = clip(b.id, 60), { o, d } = crDealIn(b || {}), now = iso();
+    if (o.chan_id && !await crHas(db, me.ws, "cr_chan", o.chan_id)) return fail("bad-channel");
+    if (!id) {
+      if (!o.brand) return fail("bad-request");
+      if (await crCount(db, me.ws, "cr_deal") >= CR_LIMIT.deals) return fail("limit", 409);
+      const row = crDealRow(o, Object.assign(d, { by: me.id }), now);
+      const { v } = await spRun(db, me, spBulk(db, "cr_deal", me.ws, [row]));
+      return json({ ok: true, v, deal: await spOne(db, "cr_deal", me.ws, row.id) });
+    }
+    const cur = await spOne(db, "cr_deal", me.ws, id);
+    if (!cur) return fail("not-found", 404);
+    if ("brand" in o && !o.brand) return fail("bad-request");
+    const cd = Object.assign(CR_DEAL_D0(), crD(cur));
+    // 브랜드가 수정을 요청한 뒤 조건을 고치면 다시 '확인 대기'로 돌립니다. 다시 확인받기(reply:"")로도 돌릴 수 있습니다
+    const touched = CR_TERM_KEYS.some(k => k in o && String(o[k] ?? "") !== String(cur[k] ?? "")) || CR_TERM_D.some(k => k in d && String(d[k] ?? "") !== String(cd[k] ?? ""));
+    if ((cur.reply === "changed" && touched) || (b.reply === "" && cur.reply)) { o.reply = ""; d.reply_note = ""; d.reply_at = ""; }
+    o.d = JSON.stringify(Object.assign(cd, d));
+    o.seen = 1; o.updated_at = now;
+    const { v } = await spRun(db, me, [db.prepare(`UPDATE cr_deal SET ${setCols(o, 3)} WHERE ws=?1 AND id=?2`).bind(me.ws, id, ...Object.values(o))]);
+    return json({ ok: true, v, deal: await spOne(db, "cr_deal", me.ws, id) });
+  },
+  async "deal/seen"(db, me, b) {   // 미디어킷으로 들어온 문의나 브랜드의 답을 열어 봤다는 표시
+    if (!isMgr(me)) return fail("forbidden", 403);
+    const { v } = await spRun(db, me, [db.prepare("UPDATE cr_deal SET seen=1 WHERE ws=?1 AND id=?2 AND seen=0").bind(me.ws, clip(b.id, 60))]);
+    return json({ ok: true, v });
+  },
+  // 입금 확인 — 수익 기록 한 줄을 만들고(이미 있으면 고치고), 게시가 끝난 건은 '완료'로 넘깁니다
+  async "deal/paid"(db, me, b) {
+    if (!isMgr(me)) return fail("forbidden", 403);
+    const id = clip(b.id, 60), d = await spOne(db, "cr_deal", me.ws, id);
+    if (!d) return fail("not-found", 404);
+    const date = dOk(b.date) || kstToday(), set = await crSettings(db, me.ws), now = iso();
+    const gross = crNum(b.amount) !== null ? mkInt(b.amount, 1e11) : d.amount;
+    if (!gross) return fail("no-amount");
+    const t = crTax(gross, d.tax_mode, set.biz.wht), has = await crHas(db, me.ws, "cr_inc", d.inc_id);
+    if (!has && await crCount(db, me.ws, "cr_inc") >= CR_LIMIT.incs) return fail("limit", 409);
+    const inc = { id: has ? d.inc_id : bulkId("ci"), date, ym: date.slice(0, 7), src: crIncSrc(d.type), chan_id: d.chan_id || "", deal_id: d.id, title: clip(crDealName(d), 100), gross, vat: t.vat, wht: t.wht, net: t.net, cur: "KRW", fx_amount: null, fx_rate: null, memo: "", created_at: now, updated_at: now };
+    const stmts = has
+      ? [db.prepare("UPDATE cr_inc SET date=?3, ym=?4, gross=?5, vat=?6, wht=?7, net=?8, updated_at=?9 WHERE ws=?1 AND id=?2").bind(me.ws, inc.id, date, inc.ym, gross, t.vat, t.wht, t.net, now)]
+      : spBulk(db, "cr_inc", me.ws, [inc]);
+    stmts.push(db.prepare("UPDATE cr_deal SET paid_at=?3, inc_id=?4, d=?5, stage=CASE WHEN stage IN ('posted','settle') THEN 'done' ELSE stage END, seen=1, updated_at=?6 WHERE ws=?1 AND id=?2").bind(me.ws, id, date, inc.id, JSON.stringify(Object.assign(CR_DEAL_D0(), crD(d), { paid_amount: t.net })), now));
+    const { v } = await spRun(db, me, stmts);
+    return json({ ok: true, v, deal: await spOne(db, "cr_deal", me.ws, id), inc: await spOne(db, "cr_inc", me.ws, inc.id) });
+  },
+  async "deal/unpaid"(db, me, b) {   // 입금 확인 취소 — 수익 기록도 함께 지웁니다
+    if (!isMgr(me)) return fail("forbidden", 403);
+    const id = clip(b.id, 60), d = await spOne(db, "cr_deal", me.ws, id);
+    if (!d) return fail("not-found", 404);
+    const { v } = await spRun(db, me, [
+      db.prepare("DELETE FROM cr_inc WHERE ws=?1 AND id=?2").bind(me.ws, d.inc_id || ""),
+      db.prepare("UPDATE cr_deal SET paid_at=NULL, inc_id=NULL, d=?3, stage=CASE WHEN stage='done' THEN 'settle' ELSE stage END, updated_at=?4 WHERE ws=?1 AND id=?2").bind(me.ws, id, JSON.stringify(Object.assign(CR_DEAL_D0(), crD(d), { paid_amount: 0 })), iso())
+    ]);
+    return json({ ok: true, v, deal: await spOne(db, "cr_deal", me.ws, id), incId: d.inc_id || "" });
+  },
+  async "deal/del"(db, me, b) {   // 협찬 건을 지웁니다. 콘텐츠와 수익 기록은 남기고 연결만 떼며, 보낸 확인서·보고서 링크는 닫습니다
+    if (!isMgr(me)) return fail("forbidden", 403);
+    const id = clip(b.id, 60);
+    if (!id) return fail("bad-request");
+    const { v } = await spRun(db, me, [
+      db.prepare("DELETE FROM cr_deal WHERE ws=?1 AND id=?2").bind(me.ws, id),
+      db.prepare("UPDATE cr_cont SET deal_id='' WHERE ws=?1 AND deal_id=?2").bind(me.ws, id),
+      db.prepare("UPDATE cr_inc SET deal_id='' WHERE ws=?1 AND deal_id=?2").bind(me.ws, id),
+      db.prepare("UPDATE links SET expires_at=?3 WHERE ws=?1 AND kind IN ('cr-deal','cr-report') AND target=?2 AND expires_at>?3").bind(me.ws, id, new Date(Date.now() - 1000).toISOString())
+    ]);
+    return json({ ok: true, v });
+  },
+  async "cont/save"(db, me, b) {
+    if (!isMgr(me)) return fail("forbidden", 403);
+    const id = clip(b.id, 60), { o, d } = crContIn(b || {}), now = iso();
+    if (o.chan_id && !await crHas(db, me.ws, "cr_chan", o.chan_id)) return fail("bad-channel");
+    if (o.deal_id && !await crHas(db, me.ws, "cr_deal", o.deal_id)) return fail("bad-deal");
+    if (!id) {
+      if (!o.title) return fail("bad-request");
+      if (await crCount(db, me.ws, "cr_cont") >= CR_LIMIT.conts) return fail("limit", 409);
+      if (o.stage === "posted" && !o.post_date) o.post_date = kstToday();
+      const row = crContRow(o, Object.assign(d, { by: me.id }), now);
+      const { v } = await spRun(db, me, spBulk(db, "cr_cont", me.ws, [row]));
+      return json({ ok: true, v, cont: await spOne(db, "cr_cont", me.ws, row.id) });
+    }
+    const cur = await spOne(db, "cr_cont", me.ws, id);
+    if (!cur) return fail("not-found", 404);
+    if ("title" in o && !o.title) return fail("bad-request");
+    if (o.stage === "posted" && !("post_date" in o ? o.post_date : cur.post_date)) o.post_date = kstToday();   // 게시로 옮기면 날짜가 비어 있을 때 오늘로 적습니다
+    o.d = JSON.stringify(Object.assign(CR_CONT_D0(), crD(cur), d));
+    o.updated_at = now;
+    const { v } = await spRun(db, me, [db.prepare(`UPDATE cr_cont SET ${setCols(o, 3)} WHERE ws=?1 AND id=?2`).bind(me.ws, id, ...Object.values(o))]);
+    return json({ ok: true, v, cont: await spOne(db, "cr_cont", me.ws, id) });
+  },
+  async "cont/bulk"(db, me, b) {   // 아이디어 여러 개 한 번에
+    if (!isMgr(me)) return fail("forbidden", 403);
+    const now = iso(), have = await crCount(db, me.ws, "cr_cont");
+    const chans = new Set(((await db.prepare("SELECT id FROM cr_chan WHERE ws=?1").bind(me.ws).all()).results || []).map(r => r.id));
+    const rows = (Array.isArray(b.rows) ? b.rows : []).slice(0, 100).map(r => crContIn(r && typeof r === "object" ? r : {})).filter(x => x.o.title).map(({ o, d }) => { if (o.chan_id && !chans.has(o.chan_id)) o.chan_id = ""; o.deal_id = ""; return crContRow(o, Object.assign(d, { by: me.id }), now); });
+    if (!rows.length) return fail("empty");
+    if (have + rows.length > CR_LIMIT.conts) return fail("limit", 409);
+    const { v } = await spRun(db, me, spBulk(db, "cr_cont", me.ws, rows));
+    return json({ ok: true, v, made: rows.length });
+  },
+  async "cont/del"(db, me, b) {
+    if (!isMgr(me)) return fail("forbidden", 403);
+    const { v } = await spRun(db, me, [db.prepare("DELETE FROM cr_cont WHERE ws=?1 AND id=?2").bind(me.ws, clip(b.id, 60))]);
+    return json({ ok: true, v });
+  },
+  // 수익 한 줄 — 외화는 금액과 환율을 함께 적으면 원화로 바꿔 둡니다. 받은 돈(net) = 세금 전 금액 + 부가세 − 원천징수
+  async "inc/save"(db, me, b) {
+    if (!isMgr(me)) return fail("forbidden", 403);
+    const id = clip(b.id, 60), o = crIncIn(b || {}), now = iso();
+    if (o.chan_id && !await crHas(db, me.ws, "cr_chan", o.chan_id)) return fail("bad-channel");
+    const cur = id ? await spOne(db, "cr_inc", me.ws, id) : null;
+    if (id && !cur) return fail("not-found", 404);
+    const m = Object.assign({ date: "", ym: "", src: "etc", chan_id: "", deal_id: "", title: "", gross: 0, vat: 0, wht: 0, net: 0, cur: "KRW", fx_amount: null, fx_rate: null, memo: "" }, cur || {}, o);
+    if (!m.date) return fail("bad-date");
+    if (!o.ym) m.ym = cur && !("date" in o) ? cur.ym : m.date.slice(0, 7);
+    if (m.cur === "KRW") { m.fx_amount = null; m.fx_rate = null; }
+    else if (m.fx_amount && m.fx_rate && !o.gross) m.gross = Math.round(m.fx_amount * m.fx_rate);
+    if (!m.gross) return fail("no-amount");
+    m.net = Math.max(0, m.gross + m.vat - m.wht);
+    if (!cur) {
+      if (await crCount(db, me.ws, "cr_inc") >= CR_LIMIT.incs) return fail("limit", 409);
+      const row = Object.assign(m, { id: bulkId("ci"), created_at: now, updated_at: now });
+      const { v } = await spRun(db, me, spBulk(db, "cr_inc", me.ws, [row]));
+      return json({ ok: true, v, inc: await spOne(db, "cr_inc", me.ws, row.id) });
+    }
+    const u = { date: m.date, ym: m.ym, src: m.src, chan_id: m.chan_id, title: m.title, gross: m.gross, vat: m.vat, wht: m.wht, net: m.net, cur: m.cur, fx_amount: m.fx_amount, fx_rate: m.fx_rate, memo: m.memo, updated_at: now };
+    const stmts = [db.prepare(`UPDATE cr_inc SET ${setCols(u, 3)} WHERE ws=?1 AND id=?2`).bind(me.ws, id, ...Object.values(u))];
+    if (cur.deal_id) stmts.push(db.prepare("UPDATE cr_deal SET paid_at=?3, d=json_set(CASE WHEN json_valid(d) THEN d ELSE '{}' END,'$.paid_amount',?4) WHERE ws=?1 AND id=?2 AND inc_id=?5").bind(me.ws, cur.deal_id, m.date, m.net, id));   // 협찬 입금으로 생긴 줄을 고치면 협찬 건의 입금 기록도 맞춥니다
+    const { v } = await spRun(db, me, stmts);
+    return json({ ok: true, v, inc: await spOne(db, "cr_inc", me.ws, id) });
+  },
+  async "inc/del"(db, me, b) {
+    if (!isMgr(me)) return fail("forbidden", 403);
+    const id = clip(b.id, 60);
+    const { v } = await spRun(db, me, [
+      db.prepare("UPDATE cr_deal SET paid_at=NULL, inc_id=NULL, d=json_set(CASE WHEN json_valid(d) THEN d ELSE '{}' END,'$.paid_amount',0), stage=CASE WHEN stage='done' THEN 'settle' ELSE stage END WHERE ws=?1 AND inc_id=?2").bind(me.ws, id),
+      db.prepare("DELETE FROM cr_inc WHERE ws=?1 AND id=?2").bind(me.ws, id)
+    ]);
+    return json({ ok: true, v });
+  },
+  async "rate/save"(db, me, b) {
+    if (!isMgr(me)) return fail("forbidden", 403);
+    const id = clip(b.id, 60), o = crRateIn(b || {}), now = iso();
+    if (o.chan_id && !await crHas(db, me.ws, "cr_chan", o.chan_id)) return fail("bad-channel");
+    if (!id) {
+      if (!o.name) return fail("bad-request");
+      const n = await crCount(db, me.ws, "cr_rate");
+      if (n >= CR_LIMIT.rates) return fail("limit", 409);
+      const row = Object.assign({ id: bulkId("cr"), name: "", chan_id: "", format: "etc", price: 0, note: "", active: 1, sort: n + 1, created_at: now, updated_at: now }, o);
+      const { v } = await spRun(db, me, spBulk(db, "cr_rate", me.ws, [row]));
+      return json({ ok: true, v, rate: await spOne(db, "cr_rate", me.ws, row.id) });
+    }
+    if (!await crHas(db, me.ws, "cr_rate", id)) return fail("not-found", 404);
+    if ("name" in o && !o.name) return fail("bad-request");
+    o.updated_at = now;
+    const { v } = await spRun(db, me, [db.prepare(`UPDATE cr_rate SET ${setCols(o, 3)} WHERE ws=?1 AND id=?2`).bind(me.ws, id, ...Object.values(o))]);
+    return json({ ok: true, v, rate: await spOne(db, "cr_rate", me.ws, id) });
+  },
+  async "rate/del"(db, me, b) {
+    if (!isMgr(me)) return fail("forbidden", 403);
+    const { v } = await spRun(db, me, [db.prepare("DELETE FROM cr_rate WHERE ws=?1 AND id=?2").bind(me.ws, clip(b.id, 60))]);
+    return json({ ok: true, v });
+  }
+};
+
 const LINK_KINDS = {
   quote: {   // 견적 승인·수정 요청
     exists: async (db, me, id) => !!(await db.prepare("SELECT 1 AS x FROM os_quote WHERE ws=?1 AND id=?2").bind(me.ws, id).first()),
@@ -4495,6 +4964,106 @@ PUBLIC["link/act"] = async function (db, b) {
   if (r.error) return fail(r.error, r.error === "bad-state" ? 409 : 404);
   await db.prepare("UPDATE links SET used_at=?2, result=?3, note=?4 WHERE token=?1").bind(l.token, iso(), r.status, clip(b.note, 500)).run();
   return json({ ok: true, status: r.status });
+};
+
+/* ───────── 마이크리에이터 공개 링크 — 미디어킷 · 협찬 조건 확인서 · 결과 보고서 ─────────
+   · 미디어킷(cr-kit)은 워크스페이스에 하나입니다. 채널 숫자·대표 콘텐츠·협업 사례를 보여 주고 협찬 문의를 받습니다.
+   · 조건 확인서(cr-deal)는 브랜드 담당자가 가입 없이 조건을 확인하거나 수정을 요청합니다. 확인하면 그때의 조건을 그대로 남겨 둡니다.
+   · 결과 보고서(cr-report)는 보기 전용입니다. */
+const crSender = async (db, ws, set) => { const w = await db.prepare("SELECT name FROM workspaces WHERE id=?1").bind(ws).first(); return { workspace: set.biz.name || (w && w.name) || "", name: set.biz.person, email: set.biz.email, phone: set.biz.phone }; };   // 활동명(없으면 워크스페이스 이름)과 담당자 이름
+const crTermsOf = (d, chName, set) => { const t = crTax(d.amount, d.tax_mode, set.biz.wht), x = crD(d); return { type: d.type, channel: chName || "", items: x.items || "", amount: d.amount, tax_mode: d.tax_mode, vat: t.vat, wht: t.wht, wht_pct: set.biz.wht, total: d.amount + t.vat, net: t.net, gift_value: x.gift_value || 0, draft_due: d.draft_due || "", post_due: d.post_due || "", pay_due: d.pay_due || "", keep_until: x.keep_until || "", usage: x.usage || "", usage_until: x.usage_until || "", excl: x.excl || "", excl_until: x.excl_until || "", revisions: x.revisions ?? null, guide: x.guide || "", cond: x.cond || "", disclosure: (x.disc && x.disc.how) || "" }; };
+Object.assign(LINK_KINDS, {
+  "cr-kit": {
+    exists: async (db, me, id) => isMgr(me) && id === "kit" && hasMod(me, "creator"),
+    view: async (db, l) => {
+      if (!await crModOn(db, l.ws)) return null;
+      const set = await crSettings(db, l.ws), k = set.kit;
+      if (!k.on) return null;
+      const rs = await db.batch([
+        db.prepare("SELECT id, name, platform, handle, url, topic FROM cr_chan WHERE ws=?1 AND active=1 ORDER BY sort, created_at LIMIT 12").bind(l.ws),
+        db.prepare("SELECT chan_id, ym, subs, views, posts FROM cr_snap WHERE ws=?1 ORDER BY ym DESC LIMIT 400").bind(l.ws),
+        db.prepare("SELECT id, chan_id, title, format, url, view, likes, cmts, post_date FROM cr_cont WHERE ws=?1 AND stage='posted' ORDER BY post_date DESC LIMIT 400").bind(l.ws),
+        db.prepare("SELECT brand, title, type, result, d FROM cr_deal WHERE ws=?1 AND stage IN ('posted','settle','done') ORDER BY updated_at DESC LIMIT 300").bind(l.ws),
+        db.prepare("SELECT name, chan_id, format, price, note FROM cr_rate WHERE ws=?1 AND active=1 ORDER BY sort, created_at LIMIT 30").bind(l.ws)
+      ]);
+      const R = i => (rs[i] && rs[i].results) || [], chN = new Map(R(0).map(c => [c.id, c.name])), posted = R(2), since = addDaysS(kstToday(), -90);
+      let asOf = "";
+      const channels = R(0).map(c => {   // 숫자를 하나도 적지 않은 채널은 빼고 보여 줍니다
+        const sn = R(1).filter(s => s.chan_id === c.id), last = sn[0] || null, m3 = sn.slice(0, 3).filter(s => Number(s.views) > 0);
+        const rec = posted.filter(p => p.chan_id === c.id && Number(p.view) > 0 && (p.post_date || "") >= since).slice(0, 10);
+        if (last && last.ym > asOf) asOf = last.ym;
+        return { name: c.name, platform: c.platform, handle: c.handle || "", url: c.url || "", topic: c.topic || "", subs: last ? Number(last.subs) || 0 : null, monthViews: m3.length ? Math.round(m3.reduce((s, x) => s + Number(x.views), 0) / m3.length) : null, avgView: rec.length ? Math.round(rec.reduce((s, x) => s + Number(x.view), 0) / rec.length) : null, avgN: rec.length };
+      }).filter(c => c.subs != null || c.avgView != null);
+      const picks = k.picks.map(id => posted.find(p => p.id === id)).filter(p => p && p.url).map(p => ({ title: p.title, url: p.url, format: p.format, channel: chN.get(p.chan_id) || "", view: Number(p.view) || 0, date: p.post_date || "" }));
+      const cases = k.cases ? R(3).filter(d => (parse(d.d) || {}).show_case).slice(0, 12).map(d => { const r = parse(d.result) || {}; return { brand: d.brand, title: d.title || "", type: d.type, url: (Array.isArray(r.urls) && r.urls[0]) || "" }; }) : [];   // '사례로 보여 주기'를 켠 건만
+      const rates = k.rates ? R(4).map(r => ({ name: r.name, channel: chN.get(r.chan_id) || "", format: r.format, price: Number(r.price) || 0, note: r.note || "" })) : [];
+      const sender = await crSender(db, l.ws, set);
+      return { kind: "cr-kit", title: k.name || sender.workspace, tagline: k.tagline, bio: k.bio, topics: k.topics, email: k.email, aud: k.aud, channels, picks, cases, rates, inquiry: !!k.inquiry, asOf, sender: { workspace: sender.workspace, name: sender.name } };
+    },
+    act: async () => ({ error: "bad-state" })
+  },
+  "cr-deal": {
+    exists: async (db, me, id) => isMgr(me) && hasMod(me, "creator") && !!(await db.prepare("SELECT 1 AS x FROM cr_deal WHERE ws=?1 AND id=?2 AND stage<>'lost'").bind(me.ws, id).first()),
+    view: async (db, l) => {
+      const d = await spOneT(db, "cr_deal", l.ws, l.target); if (!d) return null;
+      const set = await crSettings(db, l.ws), ch = d.chan_id ? await db.prepare("SELECT name FROM cr_chan WHERE ws=?1 AND id=?2").bind(l.ws, d.chan_id).first() : null;
+      const agreed = d.reply === "approved" && d.terms && typeof d.terms === "object" ? d.terms : null;   // 확인을 마친 뒤에는 그때 확인한 조건을 보여 줍니다
+      return { kind: "cr-deal", title: d.title || "협찬 조건", client: d.brand, company: crD(d).agency || "", sender: await crSender(db, l.ws, set), deal: agreed || crTermsOf(d, ch && ch.name, set), agreedAt: agreed ? agreed.at || "" : "", agreedBy: agreed ? agreed.by || "" : "", status: d.stage === "lost" ? "cancel" : d.reply === "approved" ? "approved" : d.reply === "changed" ? "changed" : "pending", reply_note: crD(d).reply_note || "" };
+    },
+    act: async (db, l, action, note, by) => {
+      const d = await spOneT(db, "cr_deal", l.ws, l.target); if (!d) return { error: "not-found" };
+      if (d.stage === "lost" || d.reply === "approved") return { error: "bad-state" };
+      const now = iso(), who = clip(by, 40), set = await crSettings(db, l.ws);
+      const ch = d.chan_id ? await db.prepare("SELECT name FROM cr_chan WHERE ws=?1 AND id=?2").bind(l.ws, d.chan_id).first() : null;
+      const ok = action === "approve";
+      const nd = JSON.stringify(Object.assign(CR_DEAL_D0(), crD(d), { reply_note: clip(note, 500), reply_at: now }));
+      const stmts = [ok
+        ? db.prepare("UPDATE cr_deal SET reply='approved', d=?3, terms=?5, stage=CASE WHEN stage IN ('inquiry','nego') THEN 'contract' ELSE stage END, seen=0, updated_at=?4 WHERE ws=?1 AND id=?2").bind(l.ws, d.id, nd, now, JSON.stringify(Object.assign(crTermsOf(d, ch && ch.name, set), { at: now, by: who })))
+        : db.prepare("UPDATE cr_deal SET reply='changed', d=?3, stage=CASE WHEN stage='inquiry' THEN 'nego' ELSE stage END, seen=0, updated_at=?4 WHERE ws=?1 AND id=?2").bind(l.ws, d.id, nd, now)];
+      stmts.push(...upserts(db, l.ws, [{ kind: "act", id: uid("a"), own: l.created_by, data: { id: uid("a"), ts: now.slice(5, 16).replace("T", " ").replace("-", "/"), who: who || d.brand || "브랜드", by: "", createdAt: now, text: `협찬 "${crDealName(d)}" 조건을 ${ok ? "확인했습니다" : "수정 요청했습니다"}.${note ? " — " + clip(note, 120) : ""}` } }], ts()));
+      stmts.push(db.prepare("UPDATE workspaces SET sp_ver=sp_ver+1 WHERE id=?1").bind(l.ws));
+      await db.batch(stmts);
+      return { ok: true, status: ok ? "approved" : "changed" };
+    }
+  },
+  "cr-report": {
+    exists: async (db, me, id) => isMgr(me) && hasMod(me, "creator") && !!(await db.prepare("SELECT 1 AS x FROM cr_deal WHERE ws=?1 AND id=?2 AND stage IN ('posted','settle','done')").bind(me.ws, id).first()),
+    view: async (db, l) => {
+      const d = await spOneT(db, "cr_deal", l.ws, l.target); if (!d) return null;
+      const set = await crSettings(db, l.ws), r = d.result && typeof d.result === "object" ? d.result : {};
+      const rs = await db.batch([
+        db.prepare("SELECT name FROM cr_chan WHERE ws=?1 AND id=?2").bind(l.ws, d.chan_id || ""),
+        db.prepare("SELECT c.title, c.format, c.url, c.post_date, c.view, c.likes, c.cmts, c.d, h.name AS chan FROM cr_cont c LEFT JOIN cr_chan h ON h.ws=c.ws AND h.id=c.chan_id WHERE c.ws=?1 AND c.deal_id=?2 AND c.stage='posted' ORDER BY c.post_date LIMIT 20").bind(l.ws, d.id)
+      ]);
+      const ch = ((rs[0] && rs[0].results) || [])[0], conts = ((rs[1] && rs[1].results) || []).map(c => { const x = parse(c.d) || {}; return { title: c.title, format: c.format, channel: c.chan || "", url: c.url || "", date: c.post_date || "", view: Number(c.view) || 0, likes: Number(c.likes) || 0, cmts: Number(c.cmts) || 0, shares: Number(x.shares) || 0, saves: Number(x.saves) || 0, at: x.stat_at || "" }; });
+      return { kind: "cr-report", title: d.title || "협찬 결과", client: d.brand, company: crD(d).agency || "", sender: await crSender(db, l.ws, set), report: { channel: (ch && ch.name) || "", items: crD(d).items || "", urls: Array.isArray(r.urls) ? r.urls : [], posted_at: r.posted_at || "", view: Number(r.view) || 0, likes: Number(r.likes) || 0, cmts: Number(r.cmts) || 0, shares: Number(r.shares) || 0, saves: Number(r.saves) || 0, clk: Number(r.clk) || 0, note: r.note || "", at: r.at || "", contents: conts, disclosure: (crD(d).disc && crD(d).disc.how) || "" } };
+    },
+    act: async () => ({ error: "bad-state" })
+  }
+});
+// 미디어킷의 협찬 문의 — 가입 없이 적어 보내면 협찬의 '문의' 칸에 들어갑니다. 워크스페이스마다 하루 40건까지 받습니다
+PUBLIC["link/inquiry"] = async function (db, b) {
+  const l = await linkRow(db, b.t);
+  if (!l || l.kind !== "cr-kit") return fail("not-found", 404);
+  if (l.expires_at < iso()) return fail("expired", 410);
+  if (clip(b.hp, 10)) return json({ ok: true });   // 사람 눈에 보이지 않는 칸이 채워져 있으면 조용히 버립니다
+  const set = await crSettings(db, l.ws);
+  if (!set.kit.on || !set.kit.inquiry || !await crModOn(db, l.ws)) return fail("closed", 403);
+  const name = clip(b.name, 40), company = clip(b.company, 60), email = clip(b.email, 80), phone = clip(b.phone, 30), message = clip(b.message, 2000), budget = clip(b.budget, 60);
+  if (!(name || company) || !message) return fail("bad-request");
+  if (!email && !phone) return fail("need-contact");
+  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) return fail("bad-email");
+  const today = kstToday(), q0 = await db.prepare("SELECT v FROM mod_set WHERE ws=?1 AND mod='cr' AND k='quota'").bind(l.ws).first(), Q = (q0 && parse(q0.v)) || {}, used = Q.d === today ? Number(Q.inq) || 0 : 0;
+  if (used >= 40 || await crCount(db, l.ws, "cr_deal") >= CR_LIMIT.deals) return fail("busy", 429);
+  const now = iso(), type = CR_TYPE.includes(b.type) ? b.type : "paid";
+  const row = crDealRow({ brand: company || name, title: clip(message.split("\n")[0], 60), type, stage: "inquiry", seen: 0 }, { person: company ? name : "", contact: [email, phone].filter(Boolean).join(" · "), src: "kit", by: l.created_by || "", inq: { name, company, email, phone, budget, type, message, at: now } }, now);
+  await db.batch([
+    ...spBulk(db, "cr_deal", l.ws, [row]),
+    db.prepare("INSERT INTO mod_set(ws,mod,k,v) VALUES(?1,'cr','quota',?2) ON CONFLICT(ws,mod,k) DO UPDATE SET v=excluded.v").bind(l.ws, JSON.stringify({ d: today, inq: used + 1 })),
+    ...upserts(db, l.ws, [{ kind: "act", id: uid("a"), own: l.created_by, data: { id: uid("a"), ts: now.slice(5, 16).replace("T", " ").replace("-", "/"), who: name || company, by: "", createdAt: now, text: `미디어킷으로 협찬 문의가 들어왔습니다 — ${company || name}` } }], ts()),
+    db.prepare("UPDATE workspaces SET sp_ver=sp_ver+1 WHERE id=?1").bind(l.ws)
+  ]);
+  return json({ ok: true });
 };
 
 
@@ -4675,10 +5244,11 @@ const MCP_TOOLS = [
   { name: "myworks_outsourcing", description: "거래: 진행 안건, 견적 회신 대기, 미수금, 이번 주 납기", input: {} },
   { name: "myworks_commerce", description: "마이셀러: 발송할 주문, 답할 문의, 재고 부족, 발주·입고, 이달 매출", input: {} },
   { name: "myworks_marketing", description: "마이마케팅: 최근 30일·7일 광고비·노출·클릭·전환·매출과 채널·캠페인별 성과, 목표(CPA·ROAS), 남은 실행안, 예정된 콘텐츠", input: {} },
-  { name: "myworks_propose", description: "변경 제안 올리기(쓰기 토큰). kind: create-task(title, project|store, detail, due, priority, assignee) · update-status(task, status|due) · add-note(text, project|store|task) · create-contact(name, company, phone, email, kind) · create-job(title, client, detail, due, amount) · mk-action(title, detail, campaign, kind, from, to — 마케팅 실행안) · mk-post(title, body, channel, date, format, tags — 콘텐츠 초안). 관리자가 승인하면 반영됩니다", input: { kind: "string", payload: "object", reason: "string" }, required: ["kind", "payload"] }
+  { name: "myworks_creator", description: "마이크리에이터: 채널별 구독자·월 조회수, 진행 중인 협찬(단계·금액·마감·입금 예정), 챙길 것(새 문의·마감 지남·입금 지연·수정 요청), 독점 조건, 예정 콘텐츠, 최근 게시물 성과, 이달·지난달 수익", input: {} },
+  { name: "myworks_propose", description: "변경 제안 올리기(쓰기 토큰). kind: create-task(title, project|store, detail, due, priority, assignee) · update-status(task, status|due) · add-note(text, project|store|task) · create-contact(name, company, phone, email, kind) · create-job(title, client, detail, due, amount) · mk-action(title, detail, campaign, kind, from, to — 마케팅 실행안) · mk-post(title, body, channel, date, format, tags — 콘텐츠 초안) · cr-idea(title, channel, format, date, memo — 크리에이터 콘텐츠 아이디어) · cr-deal(brand, title, type, channel, amount, due, memo — 협찬 건). 관리자가 승인하면 반영됩니다", input: { kind: "string", payload: "object", reason: "string" }, required: ["kind", "payload"] }
 ];
 const mcpSchema = t => ({ type: "object", properties: Object.fromEntries(Object.entries(t.input).map(([k, v]) => [k, v === "object" ? { type: "object" } : { type: "string" }])), required: t.required || [] });
-const mcpFn = { myworks_me: "me", myworks_today: "today", myworks_projects: "projects", myworks_project: "project", myworks_stores: "stores", myworks_tasks: "tasks", myworks_search: "search", myworks_contacts: "contacts", myworks_space: "space", myworks_outsourcing: "outsourcing", myworks_commerce: "commerce", myworks_marketing: "marketing", myworks_propose: "propose" };
+const mcpFn = { myworks_me: "me", myworks_today: "today", myworks_projects: "projects", myworks_project: "project", myworks_stores: "stores", myworks_tasks: "tasks", myworks_search: "search", myworks_contacts: "contacts", myworks_space: "space", myworks_outsourcing: "outsourcing", myworks_commerce: "commerce", myworks_marketing: "marketing", myworks_creator: "creator", myworks_propose: "propose" };
 const rpc = (id, result, error) => json(error ? { jsonrpc: "2.0", id, error } : { jsonrpc: "2.0", id, result });
 async function mcp(db, request) {
   if (request.method === "GET") return fail("method-not-allowed", 405, { hint: "POST JSON-RPC only (Streamable HTTP, no SSE)" });
@@ -4772,7 +5342,7 @@ const codeOut = c => ({ code: c.code, label: c.label || "", plan: planOk(c.plan)
 const payOut = p => ({ id: p.id, ws: p.ws || "", wsName: p.ws_name || "", paidAt: p.paid_at, amount: Number(p.amount) || 0, method: p.method || "", item: p.item || "", from: p.period_from || "", to: p.period_to || "", invoice: !!Number(p.invoice), memo: p.memo || "", createdAt: p.created_at });
 const fbOut = f => ({ id: f.id, ws: f.ws, wsName: f.ws_name || "", loginId: f.login_id || "", name: f.name || "", role: f.role || "", kind: f.kind, body: f.body, page: f.page || "", ua: f.ua || "", contact: f.contact || "", status: f.status, reply: f.reply || "", replyAt: f.reply_at || "", memo: f.memo || "", createdAt: f.created_at, updatedAt: f.updated_at || "" });
 // 전체 백업에 넣는 표 — 로그인 세션(sess)과 오류 기록은 빼고, AI 토큰은 해시를 지웁니다
-const EXPORT_TABLES = () => ["mw_meta", "workspaces", "accounts", "ent", "ws_set", "api_tokens", "links", "invites", "mod_set", ...SP_TABLES, ...OS_TABLES, ...CM_TABLES, ...TX_TABLES, ...PP_TABLES, ...MK_TABLES, "adm_pay", "adm_code", "fb", "adm_log"];
+const EXPORT_TABLES = () => ["mw_meta", "workspaces", "accounts", "ent", "ws_set", "api_tokens", "links", "invites", "mod_set", ...SP_TABLES, ...OS_TABLES, ...CM_TABLES, ...TX_TABLES, ...PP_TABLES, ...MK_TABLES, ...CR_TABLES, "adm_pay", "adm_code", "fb", "adm_log"];
 const EXPORT_PAGE = 800;
 /* ───────── 본사 운영팀 — 역할별 권한 ─────────
    총괄(운영자 계정)이 운영자 워크스페이스의 구성원에게 역할을 줍니다. 모든 역할은 워크스페이스의 업무 내용은 보지 못합니다. */
@@ -5233,7 +5803,7 @@ export async function onRequest(context) {
       const r = await AIFN[fn](db, me, p);
       return json(r, r && r.error ? ({ "not-found": 404, forbidden: 403, "module-off": 403 }[r.error] || 400) : 200);
     }
-    const MODS = { "sp/": ["space", SPACE], "os/": ["outsourcing", OUTS], "cm/": ["commerce", COMM], "tx/": ["tax", TAX], "pp/": ["people", PEOP], "mk/": ["marketing", MKT] };
+    const MODS = { "sp/": ["space", SPACE], "os/": ["outsourcing", OUTS], "cm/": ["commerce", COMM], "tx/": ["tax", TAX], "pp/": ["people", PEOP], "mk/": ["marketing", MKT], "cr/": ["creator", CREA] };
     const mk = Object.keys(MODS).find(k => path.startsWith(k));
     if (mk) {   // 업종 모듈 — 프로 워크스페이스에서 켠 모듈만, 협력사 역할은 쓰지 않습니다
       const [mod, H] = MODS[mk], fn = path.slice(3);

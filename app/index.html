@@ -1405,6 +1405,93 @@ a.linkbtn{display:inline-block;margin-top:6px}
   .mk-mix>div{grid-template-columns:minmax(0,1fr) 60px 92px}
   .m-box:has(.mk-wide){padding:22px 16px 20px}
 }
+/* ═══ 마이크리에이터 ═══ */
+.cr-board{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(186px,1fr);gap:10px;overflow-x:auto;padding-bottom:8px;align-items:start}
+.cr-col{background:var(--paper);border:1px solid var(--line);border-radius:var(--r);padding:10px;min-width:0}
+.cr-col>h3{font-size:13px;font-weight:700;color:var(--sub);display:flex;align-items:center;gap:6px;margin:0 2px 8px}
+.cr-col>h3 em{font-style:normal;font-family:var(--mono);font-weight:500;color:var(--faint)}
+.cr-col>h3 span{margin-left:auto;font-family:var(--mono);font-size:11.5px;font-weight:500;color:var(--faint);white-space:nowrap}
+.cr-card{display:flex;flex-direction:column;gap:5px;background:var(--card);border:1px solid var(--line);border-radius:9px;padding:10px 11px;margin-bottom:7px;cursor:pointer;min-width:0;text-align:left;width:100%}
+.cr-card:last-child{margin-bottom:0}
+.cr-card:hover{border-color:var(--accent)}
+.cr-card b{font-size:13.5px;line-height:1.4;overflow-wrap:anywhere}
+.cr-card small{font-size:12px;color:var(--sub);overflow-wrap:anywhere;line-height:1.45}
+.cr-card .row{display:flex;gap:5px;flex-wrap:wrap;align-items:center}
+.cr-card .amt{font-family:var(--mono);font-size:12.5px;font-weight:600}
+.cr-card.new{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-soft)}
+.cr-colempty{font-size:12px;color:var(--faint);text-align:center;padding:10px 0}
+.cr-steps{display:flex;gap:4px;flex-wrap:wrap;margin:0 0 14px}
+.cr-steps button{border:1px solid var(--line);background:var(--card);border-radius:999px;padding:4px 11px;font-size:12.5px;font-weight:600;color:var(--sub)}
+.cr-steps button.past{background:var(--wait-soft);color:var(--ink)}
+.cr-steps button.on{background:var(--ink);border-color:var(--ink);color:#fff}
+.cr-kv{display:grid;grid-template-columns:104px minmax(0,1fr);gap:7px 12px;font-size:13.5px;line-height:1.6;margin:0}
+.cr-kv dt{color:var(--sub)}
+.cr-kv dd{margin:0;overflow-wrap:anywhere;white-space:pre-wrap}
+.cr-kv dd b.num{font-family:var(--mono);font-weight:600}
+.cr-acts{display:flex;gap:6px;flex-wrap:wrap;margin:14px 0 4px}
+.cr-stack{display:flex;align-items:flex-end;gap:6px;height:170px;padding-top:8px;overflow-x:auto}
+.cr-stack>div{flex:1;min-width:22px;display:flex;flex-direction:column;align-items:center;gap:5px;height:100%}
+.cr-stack span{flex:1;width:100%;max-width:38px;display:flex;flex-direction:column-reverse;border-bottom:1px solid var(--line)}
+.cr-stack i{display:block;width:100%}
+.cr-stack i:last-child{border-radius:3px 3px 0 0}
+.cr-stack em{font-size:10.5px;color:var(--faint);font-style:normal;white-space:nowrap}
+.cr-stack .on em{color:var(--ink);font-weight:700}
+.cr-chans{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
+.cr-chan{border:1px solid var(--line);border-radius:var(--r);background:var(--card);padding:16px 18px;min-width:0}
+.cr-chan.off{opacity:.6}
+.cr-chan h3{font-size:15px;font-weight:700;display:flex;align-items:center;gap:8px;flex-wrap:wrap;overflow-wrap:anywhere}
+.cr-chan .big{font-family:var(--mono);font-size:24px;font-weight:600;letter-spacing:-.02em;margin-top:8px;line-height:1.25}
+.cr-chan .big em{font-style:normal;font-size:13px;color:var(--faint);font-weight:500;margin-left:3px}
+.cr-spark{width:100%;height:46px;display:block;margin:8px 0 2px}
+.cr-sum{border:1px solid var(--line);border-radius:var(--r);background:var(--paper);padding:14px 16px;margin-top:12px}
+.cr-sum .v{font-family:var(--mono);font-size:26px;font-weight:600;letter-spacing:-.02em;line-height:1.3}
+.cr-sum table{width:100%;font-size:13px;margin-top:6px;border-collapse:collapse}
+.cr-sum td{padding:3px 0;color:var(--sub)}
+.cr-sum td:last-child{text-align:right;font-family:var(--mono);color:var(--ink)}
+.cr-guide{border:1px solid var(--line);border-radius:var(--r);background:var(--card);margin-bottom:10px}
+.cr-guide summary{padding:13px 16px;font-weight:700;font-size:14.5px;cursor:pointer;list-style:none;display:flex;align-items:center;gap:8px}
+.cr-guide summary::-webkit-details-marker{display:none}
+.cr-guide summary::after{content:"＋";margin-left:auto;color:var(--faint);font-weight:500}
+.cr-guide[open] summary::after{content:"－"}
+.cr-guide .in{padding:0 16px 14px;font-size:13.5px;line-height:1.75;color:var(--ink)}
+.cr-guide .in h4{font-size:13px;color:var(--sub);margin:12px 0 4px}
+.cr-guide .in ul{margin:0 0 0 18px}
+.cr-guide .in li{margin-bottom:3px}
+.cr-pickrow{display:flex;align-items:center;gap:10px;padding:8px 2px;border-bottom:1px solid var(--line-soft);font-size:13.5px;margin:0;cursor:pointer}
+.m-box label.cr-pickrow,.mkx label.cr-pickrow{display:flex;color:var(--ink);font-weight:500;margin:0}
+.cr-pickrow input{width:16px;height:16px;accent-color:var(--accent);padding:0;flex:none}
+.cr-pickrow span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cr-pickrow em{font-style:normal;font-family:var(--mono);font-size:12px;color:var(--faint);flex:none}
+.mkx .mk-pick label{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:999px;padding:5px 12px;font-size:13px;margin:0;cursor:pointer;background:var(--card);color:var(--ink);font-weight:500}
+.cr-inq{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:12px 14px;font-size:13.5px;line-height:1.7;margin-bottom:12px;white-space:pre-wrap;overflow-wrap:anywhere}
+.cr-inq b{display:block;font-size:12.5px;color:var(--sub);margin-bottom:2px}
+/* 공개 페이지 — 미디어킷 · 조건 확인서 · 결과 보고서 */
+.cr-kit-top h1{font-size:25px;font-weight:800;letter-spacing:-.02em;line-height:1.3;margin:6px 0 4px}
+.cr-kit-top p{font-size:15px;color:var(--sub);line-height:1.6}
+.cr-kit-bio{font-size:14.5px;line-height:1.8;white-space:pre-wrap;overflow-wrap:anywhere;margin:14px 0 4px}
+.cr-kit-ch{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px}
+.cr-kit-ch>div{border:1px solid var(--line);border-radius:10px;padding:14px 16px;background:var(--paper);min-width:0}
+.cr-kit-ch h4{font-size:14.5px;font-weight:700;overflow-wrap:anywhere}
+.cr-kit-ch h4 a{color:inherit}
+.cr-kit-ch dl{display:grid;grid-template-columns:1fr auto;gap:3px 10px;font-size:13px;margin-top:8px}
+.cr-kit-ch dt{color:var(--sub)}
+.cr-kit-ch dd{margin:0;font-family:var(--mono);font-weight:600;text-align:right}
+.cr-kit-list a,.cr-kit-list>div{display:flex;gap:10px;align-items:baseline;padding:10px 2px;border-bottom:1px solid var(--line-soft);text-decoration:none;color:var(--ink);font-size:14px}
+.cr-kit-list b{flex:1;min-width:0;font-weight:600;overflow-wrap:anywhere}
+.cr-kit-list span{font-size:12.5px;color:var(--sub);flex:none;white-space:nowrap}
+.cr-num4{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px;margin:10px 0 14px}
+.cr-num4>div{border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--paper)}
+.cr-num4 b{display:block;font-family:var(--mono);font-size:19px;font-weight:600;letter-spacing:-.02em}
+.cr-num4 span{font-size:12px;color:var(--sub)}
+.cr-hp{position:absolute;left:-9999px;width:1px;height:1px;opacity:0}
+.gate-box.lk-wrap:has(.cr-kit-top){max-width:720px}
+.m-box:has(.cr-wide){width:min(780px,calc(100% - 32px));margin-top:5vh}
+@media (max-width:820px){
+  .cr-board{grid-auto-columns:minmax(200px,78%)}
+  .cr-kv{grid-template-columns:88px minmax(0,1fr)}
+  .m-box:has(.cr-wide){padding:22px 16px 20px}
+  .cr-chans{grid-template-columns:1fr}
+}
 </style>
 </head>
 <body>
@@ -1601,9 +1688,9 @@ const ID_RE=/^[a-z0-9][a-z0-9._-]{3,19}$/;
 const KINDS=[["member","members"],["project","projects"],["store","stores"],["task","tasks"],["comment","comments"],["fin","finance"],["routine","routines"],["template","templates"],["plan","plans"],["act","activity"],["contact","contacts"],["prop","proposals"]];
 /* 등급·모듈 — 서버가 state/sync 로 알려 줍니다. 구버전 서버라면 예전처럼 프로 + 스페이스로 봅니다 */
 const TIER0=()=>({plan:"pro",modules:["space"],limits:{brands:1000,members:1000,tokens:0},planUntil:"",legacy:true});
-const MOD_LABEL={space:"마이스토어",outsourcing:"거래",commerce:"마이셀러",tax:"마이택스",people:"마이피플",marketing:"마이마케팅"};
-const MOD_DESC={space:"매장·공간 운영 — 예약·영업, 일 마감, 근무·점검, 시설, 지점별 손익",outsourcing:"고객·안건, 견적 승인, 납품 확인, 청구·입금·미수금",commerce:"온라인 판매 — 주문·발송, 재고·수발주, 문의, 정산·손익",tax:"매출·비용·이익 구조, 현금흐름, KPI, 부가세·종소세 신고 자료, 증빙, 세금 달력, 절세·지원사업",people:"파트너·레퍼런스·명함, 근무표·출퇴근, 급여 계산과 임금명세서",marketing:"광고·홍보 채널과 캠페인, 광고비·클릭·전환 성과, 콘텐츠 달력, 키워드, 남은 실행안"};
-const EXT_ROUTES=["space","commerce","tax","people","marketing"];   // 확장판 (켜고 끄는 것). 거래(outsourcing)는 기본 기능입니다
+const MOD_LABEL={space:"마이스토어",outsourcing:"거래",commerce:"마이셀러",tax:"마이택스",people:"마이피플",marketing:"마이마케팅",creator:"마이크리에이터"};
+const MOD_DESC={space:"매장·공간 운영 — 예약·영업, 일 마감, 근무·점검, 시설, 지점별 손익",outsourcing:"고객·안건, 견적 승인, 납품 확인, 청구·입금·미수금",commerce:"온라인 판매 — 주문·발송, 재고·수발주, 문의, 정산·손익",tax:"매출·비용·이익 구조, 현금흐름, KPI, 부가세·종소세 신고 자료, 증빙, 세금 달력, 절세·지원사업",people:"파트너·레퍼런스·명함, 근무표·출퇴근, 급여 계산과 임금명세서",marketing:"광고·홍보 채널과 캠페인, 광고비·클릭·전환 성과, 콘텐츠 달력, 키워드, 남은 실행안",creator:"채널 구독자·조회수, 협찬 건(조건·마감·입금), 콘텐츠 제작 일정, 수익, 단가표"};
+const EXT_ROUTES=["space","commerce","tax","people","marketing","creator"];   // 확장판 (켜고 끄는 것). 거래(outsourcing)는 기본 기능입니다
 const tier=()=>MODE==="cloud"?(CLOUD.tier||TIER0()):{plan:"local",modules:[],limits:{brands:1000,members:1000,tokens:0},planUntil:""};
 const modOn=m=>MODE==="cloud"&&tier().modules.includes(m);
 const isPro=()=>MODE!=="cloud"||tier().plan==="pro";
@@ -1694,7 +1781,7 @@ async function pollSync(force){
     SYNC_AT=res.now;OFFLINE=false;
     const prevRole=ME.role;
     const a=applyRemote(res.rows||[]);
-    if(res.spv!=null){SPACE.onVersion(res.spv);OUTS.onVersion(res.spv);COMM.onVersion(res.spv);TX.onVersion(res.spv);MP.onVersion(res.spv);MK.onVersion(res.spv);}
+    if(res.spv!=null){SPACE.onVersion(res.spv);OUTS.onVersion(res.spv);COMM.onVersion(res.spv);TX.onVersion(res.spv);MP.onVersion(res.spv);MK.onVersion(res.spv);CR.onVersion(res.spv);}
     let n=a.changed;
     if(res.badges&&JSON.stringify(res.badges)!==JSON.stringify(CLOUD.badges)){CLOUD.badges=res.badges;renderNav();ADM.onBadges();n++;}
     if(res.tier&&setTier(res.tier)){renderNav();n++;}
@@ -1722,7 +1809,7 @@ function applyState(st){
   hydrate(st);
   CLOUD.owner=!!st.owner;CLOUD.op=st.op||(st.owner?"owner":"");CLOUD.perms=Array.isArray(st.perms)?st.perms:[];CLOUD.ws=st.ws||null;CLOUD.badges=st.badges||{};
   setTier(st.tier);
-  if(st.spv!=null){SPACE.onVersion(st.spv);OUTS.onVersion(st.spv);COMM.onVersion(st.spv);TX.onVersion(st.spv);MP.onVersion(st.spv);MK.onVersion(st.spv);}
+  if(st.spv!=null){SPACE.onVersion(st.spv);OUTS.onVersion(st.spv);COMM.onVersion(st.spv);TX.onVersion(st.spv);MP.onVersion(st.spv);MK.onVersion(st.spv);CR.onVersion(st.spv);}
   ME=DB.members.find(x=>x.id===st.me)||null;
   buildSnap();PENDING={};SYNC_AT=st.now;
   persistPending();persistMeta();
@@ -1766,7 +1853,7 @@ async function cloudRefresh(){
 function cloudSignOut(reason){
   stopPoll();clearTimeout(pushTimer);TOKEN="";ME=null;PENDING={};
   [TKEY,CKEY,CMETA,CPEND].forEach(k=>{try{localStorage.removeItem(k);}catch(e){}});
-  CLOUD={owner:false,op:"",perms:[],ws:null,badges:{},tier:null};ADMIN=null;REQS=null;ADMIN_AT=0;REQS_AT=0;TOKENS=null;SPACE.reset();OUTS.reset();COMM.reset();TX.reset();MP.reset();MK.reset();ADM.reset();PPL.reset();
+  CLOUD={owner:false,op:"",perms:[],ws:null,badges:{},tier:null};ADMIN=null;REQS=null;ADMIN_AT=0;REQS_AT=0;TOKENS=null;SPACE.reset();OUTS.reset();COMM.reset();TX.reset();MP.reset();MK.reset();CR.reset();ADM.reset();PPL.reset();
   if($("#modal-root").classList.contains("show"))closeModal();
   location.hash="";showGate("login");
   if(reason==="expired")toast("로그인이 만료되었습니다. 다시 로그인하세요.");
@@ -2005,7 +2092,7 @@ async function doLogout(){if(MODE==="cloud"){try{await flushPush();}catch(e){}ap
 
 /* ═══════════ 앱 셸·라우터 ═══════════ */
 const NAV=[["dashboard","홈","⌂"],["plan","플랜","▥"],["projects","프로젝트","▤"],["stores","매장","▣"],["board","업무보드","☰","보드"],["members","사람","◉"],["data","연동·데이터","⇅","연동"]];
-const MOD_ROUTES=["space","outsourcing","commerce","tax","people","marketing"];
+const MOD_ROUTES=["space","outsourcing","commerce","tax","people","marketing","creator"];
 function enterApp(){
   showGate("app");
   runRoutines();
@@ -2029,6 +2116,7 @@ function navList(){
   if(mgr)ins.push(["money","돈","₩"]);
   if(MODE==="cloud"&&mgr&&modOn("tax"))ins.push(["tax","마이택스","§","택스"]);
   if(MODE==="cloud"&&mgr&&modOn("marketing"))ins.push(["marketing","마이마케팅","◈","마케팅"]);
+  if(MODE==="cloud"&&mgr&&modOn("creator"))ins.push(["creator","마이크리에이터","✦","크리에이터"]);
   if(MODE==="cloud"&&mgr&&modOn("people")){const i=L.findIndex(n=>n[0]==="members");if(i>-1)L[i]=["members","마이피플","◉","피플"];}
   if(MODE==="cloud"&&ME&&ME.role!=="partner"){
     if(modOn("space"))ins.push(["space","마이스토어","▦","스토어"]);
@@ -2079,6 +2167,13 @@ function route(){
     MK.view(arg);
     return;
   }
+  if(page==="creator"){
+    if(!canFinance()){location.hash="#/"+(isField()?navList()[0][0]:"dashboard");return;}
+    setNav("creator");
+    const sw=$("#side-ws");if(sw)sw.textContent=DB.meta.workspace;
+    CR.view(arg);
+    return;
+  }
   if(page==="people"){
     if(ME.role==="partner"){location.hash="#/dashboard";return;}
     setNav(canFinance()?"members":"people/me");
@@ -2104,7 +2199,7 @@ function route(){
   const sw=$("#side-ws");if(sw)sw.textContent=DB.meta.workspace;
   v.innerHTML=VIEWS[pg]();
   if(pg==="data"){wireDropzone();if(MODE==="cloud"&&canFinance()){if(modOn("space"))SPACE.prefetch(weekRange(1)[0],weekRange(0)[1]);loadTokens();loadWsSet();}}
-  if(pg==="dashboard"){if(modOn("space"))SPACE.fillDash();if(modOn("outsourcing"))OUTS.fillDash();if(modOn("commerce"))COMM.fillDash();if(modOn("tax"))TX.fillDash();if(modOn("people"))MP.fillDash();if(modOn("marketing"))MK.fillDash();}
+  if(pg==="dashboard"){if(modOn("space"))SPACE.fillDash();if(modOn("outsourcing"))OUTS.fillDash();if(modOn("commerce"))COMM.fillDash();if(modOn("tax"))TX.fillDash();if(modOn("people"))MP.fillDash();if(modOn("marketing"))MK.fillDash();if(modOn("creator"))CR.fillDash();}
   if(pg==="admin")ADM.view(arg);
   if(pg==="members"&&MODE==="cloud"&&isAdmin())loadReqs();
   if(pg==="members"&&MODE==="cloud"&&canFinance()&&F.peopleTab!=="contacts"){PPL.loadInvites(true).then(()=>{const c=$("#iv-card");if(c)c.outerHTML=PPL.invitesCard();});PPL.fillRef();}
@@ -2179,7 +2274,7 @@ function setReview(t,review,note,by){
   else if(review==="redo")t.status="진행중";
   t.updatedAt=new Date().toISOString();
 }
-const PROP_KIND={"create-task":"업무 추가","update-status":"상태 변경","add-note":"메모 추가","create-contact":"연락처 추가","create-job":"안건 추가","mk-action":"마케팅 실행안","mk-post":"콘텐츠 초안"};
+const PROP_KIND={"create-task":"업무 추가","update-status":"상태 변경","add-note":"메모 추가","create-contact":"연락처 추가","create-job":"안건 추가","mk-action":"마케팅 실행안","mk-post":"콘텐츠 초안","cr-idea":"콘텐츠 아이디어","cr-deal":"협찬 건"};
 function propText(p){
   const d=p.payload||{};
   switch(p.kind){
@@ -2190,6 +2285,8 @@ function propText(p){
     case"create-job":return`"${esc(d.title)}"${d.client?` · ${esc(d.client)}`:""}${d.amount?` · ${fmtWon(d.amount)}`:""}`;
     case"mk-action":return`"${esc(d.title)}"${d.campaign?` · ${esc(d.campaign)}`:""}${d.from||d.to?` · ${esc(d.from||"")}${d.from&&d.to?" → ":""}${esc(d.to||"")}`:""}`;
     case"mk-post":return`"${esc(d.title)}"${d.channel?` · ${esc(d.channel)}`:""}${d.date?` · ${fmtD(d.date)}`:""}`;
+    case"cr-idea":return`"${esc(d.title)}"${d.channel?` · ${esc(d.channel)}`:""}${d.date?` · ${fmtD(d.date)}`:""}`;
+    case"cr-deal":return`${esc(d.brand)}${d.title?` — ${esc(d.title)}`:""}${d.amount?` · ${fmtWon(d.amount)}`:""}${d.due?` · 게시 ${fmtD(d.due)}`:""}`;
   }
   return esc(JSON.stringify(d)).slice(0,120);
 }
@@ -2222,6 +2319,7 @@ async function decideProp(id,approve){
     toast(approve?"반영했습니다.":"제안을 거절했습니다.");
     if(approve&&p.kind==="create-job")OUTS.refresh(true);
     if(approve&&String(p.kind).startsWith("mk-"))MK.refresh(true);
+    if(approve&&String(p.kind).startsWith("cr-"))CR.refresh(true);
   }catch(e){
     btns.forEach(b=>b.disabled=false);
     if(e.code==="unauthorized")return;
@@ -2340,6 +2438,7 @@ function vDashboard(){
   ${modOn("tax")&&canFinance()?`<div id="tx-dash-slot" style="margin-bottom:14px"></div>`:""}
   ${modOn("people")&&canFinance()?`<div id="pp-dash-slot" style="margin-bottom:14px"></div>`:""}
   ${modOn("marketing")&&canFinance()?`<div id="mk-dash-slot" style="margin-bottom:14px"></div>`:""}
+  ${modOn("creator")&&canFinance()?`<div id="cr-dash-slot" style="margin-bottom:14px"></div>`:""}
   <div class="two-col">
     <div>
       <div class="card">
@@ -2604,6 +2703,7 @@ function finWhere(f){
   if(f.source==="space"||/^스페이스 집계|^마이스토어/.test(f.memo||"")){const x=f.storeId?storeById(f.storeId):null;return["마이스토어",x?x.name:""];}
   if(f.source==="commerce"||/^커머스 |^마이셀러 /.test(f.memo||""))return["마이셀러",""];
   if(f.source==="marketing")return["마이마케팅",""];
+  if(f.source==="creator")return["마이크리에이터",""];
   if(f.source==="outsourcing"||/^외주 입금|^거래 입금/.test(f.memo||""))return["거래",""];
   return["직접 기록",""];
 }
@@ -2662,6 +2762,7 @@ const EXT_CAT=[
   {id:"tax",name:"마이택스",color:"#6B4ED6",ico:"§",who:"개인·법인 사업자 · 3.3% 프리랜서 · 여러 사업자를 가진 분",one:"매출·비용·이익과 세금 준비를 한 화면에서 챙깁니다",pts:["손익 구조를 내 사업에 맞게 — 매출원가·수수료·인건비 항목을 직접 정합니다","매출 흐름·현금흐름 그래프, 기간별 KPI 목표와 달성률","부가세·종소세 신고 자료 — 사업자별로 나누고, 사업과 무관한 돈은 사유를 남겨 뺍니다","홈택스 엑셀을 올리면 세금계산서·현금영수증·카드 자료와 자동 대조","세금 달력(휴대폰 일정으로 내보내기), 절세 체크리스트, 지원사업 찾기"]},
   {id:"people",name:"마이피플",color:"#C2410C",ico:"◉",who:"파트너와 일하는 프리랜서 · 아르바이트·직원·건당 근무자를 쓰는 사업자",one:"함께 일하는 사람과 근무·급여를 한곳에서 관리합니다",pts:["파트너 평가·레퍼런스 체크·협업 이력, 명함 사진과 글자 붙여넣기","근무표·출퇴근(휴대폰으로, 매장 위치 확인)","시급·일급·주급·월급·건당 급여 자동 계산 — 주휴수당, 4대보험·3.3%·일용직 공제","임금명세서 링크, 근로계약서 인쇄, 지급하면 인건비가 돈 메뉴로"]},
   {id:"marketing",name:"마이마케팅",color:"#D6336C",ico:"◈",who:"광고·홍보를 직접 챙기는 1인 사업자 · 자영업자 · 온라인 판매자",one:"광고비가 어디로 가고 무엇이 돌아오는지 한 화면에서 봅니다",pts:["검색광고·타겟광고·콘텐츠·영상·체험단·메시지를 채널이 달라도 같은 눈금으로","보고서 파일을 올리면 열을 알아서 맞추고, 네이버 검색광고·메타 광고는 연결해 두면 가져옵니다","최적화 모드 — 무엇을 고칠지 짚고 채널별 설정 점검표로 안내","부스터 모드 — 목표에 맞춰 예산·입찰·소재를 얼마나 바꿀지 숫자로, 바꾼 뒤 효과까지","콘텐츠 달력, 키워드 조합기, 기획 마법사와 클로드 연동"]},
+  {id:"creator",name:"마이크리에이터",color:"#65A30D",ico:"✦",who:"유튜버 · 인스타그래머 · 블로거 · 스트리머 · 부업으로 콘텐츠를 만드는 분",one:"협찬 문의부터 입금까지, 만드는 일과 버는 돈을 한곳에서 챙깁니다",pts:["협찬 건마다 조건·마감·입금을 한 줄로 — 문의 → 계약 → 제작 → 게시 → 정산","브랜드에게 보내는 조건 확인서와 결과 보고서 링크 (가입 없이 확인)","미디어킷 주소 하나로 채널 숫자를 보여 주고 협찬 문의를 받습니다","콘텐츠 제작 보드와 달력, 올리기 전 점검, 광고 표기 점검","수익을 출처별로 — 해외 플랫폼 수익은 환율까지, 3.3%·부가세 계산","내 기록으로 내는 조회당 단가와 견적 계산, 클로드 연동"]},
   {id:"edu",name:"마이에듀",color:"#B45309",ico:"✎",who:"학원 · 교습소 · 공방 · 강사",one:"수강생과 수업, 수강료를 한 장부로",pts:["반·시간표·출결, 수강료 청구·수납"],soon:"준비 예정"},
   {id:"building",name:"마이빌딩",color:"#2B4FD6",ico:"▥",who:"소규모 건물주 · 임대인",one:"임대차와 건물 관리를 혼자서 챙깁니다",pts:["호실·계약·수납·공실·법정 점검"],soon:"준비 예정"}
 ];
@@ -2688,6 +2789,7 @@ function vExt(){
       <div><b>스마트스토어·쿠팡 판매</b><span>마이셀러를 켜고 채널별 주문 엑셀을 올립니다.</span></div>
       <div><b>매장 + 온라인 판매</b><span>둘 다 켜면 손익이 각각 돈 메뉴로 모입니다.</span></div>
       <div><b>광고를 하고 있거나 시작하려는 분</b><span>마이마케팅을 켜고 기획 마법사로 시작하거나, 광고 관리자에서 받은 보고서 파일을 올립니다.</span></div>
+      <div><b>유튜브·인스타그램·블로그를 하는 분</b><span>마이크리에이터를 켜고 채널과 협찬 건을 적습니다. 미디어킷 주소를 프로필에 걸어 두면 문의가 바로 들어옵니다.</span></div>
     </div>
   </div>`;
 }
@@ -3490,7 +3592,7 @@ function weekRange(off){
 }
 function reportCopy(off){
   let text=buildWeekReport(off);
-  if(MODE==="cloud"&&canFinance()){const r=weekRange(off);if(modOn("space"))text+=SPACE.weekText(...r);if(modOn("outsourcing"))text+=OUTS.weekText(...r);if(modOn("commerce"))text+=COMM.weekText(...r);if(modOn("tax"))text+=TX.weekText(...r);if(modOn("people"))text+=MP.weekText(...r);if(modOn("marketing"))text+=MK.weekText(...r);}
+  if(MODE==="cloud"&&canFinance()){const r=weekRange(off);if(modOn("space"))text+=SPACE.weekText(...r);if(modOn("outsourcing"))text+=OUTS.weekText(...r);if(modOn("commerce"))text+=COMM.weekText(...r);if(modOn("tax"))text+=TX.weekText(...r);if(modOn("people"))text+=MP.weekText(...r);if(modOn("marketing"))text+=MK.weekText(...r);if(modOn("creator"))text+=CR.weekText(...r);}
   copyText(text,"주간 리포트를 복사했습니다. 클로드에 붙여넣어 회고를 요청해 보세요.");
 }
 function copyText(text,okMsg){
@@ -3646,7 +3748,7 @@ async function planSave(id){
 }
 
 /* ═══════════ AI 접속 (토큰·MCP·자동 반영) ═══════════ */
-const AI_KIND_LABEL={"create-task":"업무 추가","update-status":"업무 상태·마감 변경","add-note":"메모·의견 추가","create-contact":"연락처 추가","create-job":"외주 안건 추가","mk-action":"마케팅 실행안 추가","mk-post":"콘텐츠 초안 추가"};
+const AI_KIND_LABEL={"create-task":"업무 추가","update-status":"업무 상태·마감 변경","add-note":"메모·의견 추가","create-contact":"연락처 추가","create-job":"외주 안건 추가","mk-action":"마케팅 실행안 추가","mk-post":"콘텐츠 초안 추가","cr-idea":"콘텐츠 아이디어 추가","cr-deal":"협찬 건 추가"};
 function loadTokens(force){
   if(!canFinance())return;
   if(!force&&TOKENS)return renderTokens();
@@ -3752,9 +3854,10 @@ function renderShare(){   // 진행 상황 공유 (보기 전용)
 function renderLink(){
   const box=$("#lk-box"),L=LINK,v=L.view||{};
   if(v.kind==="project")return renderShare();
+  if(v.kind==="cr-kit"||v.kind==="cr-report")return CR.linkPage();
   $("#lk-label").textContent="확인 요청";
   $("#lk-foot").innerHTML=`이 페이지는 보낸 분이 마이웍스에서 만든 확인 링크입니다. 로그인 없이 내용 확인과 승인·수정 요청만 할 수 있습니다. <a href="./" style="margin-left:6px">마이웍스 열기</a>`;
-  const kindT={quote:"견적서",delivery:"납품 확인",invoice:"청구서",po:"발주서",payslip:"임금명세서"}[v.kind]||"확인";
+  const kindT={quote:"견적서",delivery:"납품 확인",invoice:"청구서",po:"발주서",payslip:"임금명세서","cr-deal":"협찬 조건 확인서"}[v.kind]||"확인";
   const done=L.usedAt&&L.result;
   const sender=v.sender||{};
   const head=`<div class="lk-head"><span class="pill p-line">${kindT}</span><h1>${esc(v.title||kindT)}</h1><div class="hint">${esc(sender.company||sender.workspace||"")}${sender.name?` · ${esc(sender.name)}`:""}${v.client?` → ${esc(v.client)}${v.company?` (${esc(v.company)})`:""}`:""}</div></div>`;
@@ -3785,11 +3888,13 @@ function renderLink(){
       <tfoot><tr class="sum"><td colspan="3" class="r">합계</td><td class="r num">${fmtWon(po.total)}</td></tr></tfoot></table></div>
       <div class="lk-meta">${po.no?`<span>발주번호 <b class="mono">${esc(po.no)}</b></span>`:""}${po.ordered_at?`<span>보낸 날 <b>${fmtD((d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"))(new Date(po.ordered_at)))}</b></span>`:""}${po.expected?`<span>입고 희망일 <b>${fmtD(po.expected)}</b></span>`:""}</div>
       ${po.memo?`<div class="sp-box info" style="white-space:pre-wrap">${esc(po.memo)}</div>`:""}`;
+  }else if(v.kind==="cr-deal"){
+    body=CR.sheetHtml(v);
   }
   let foot="";
   const status=v.kind==="quote"?(v.quote||{}).status:v.status;   // quote: sent·changed·approved·draft·void / delivery·invoice: pending·changed·approved
   const note=v.kind==="quote"?(v.quote||{}).reply_note:v.reply_note;
-  const okT=v.kind==="invoice"?"내용을 확인했습니다":v.kind==="quote"?"견적을 승인합니다":v.kind==="po"?"발주 내용을 확인했습니다":v.kind==="payslip"?"명세서를 받았습니다":"결과물을 확인했습니다";
+  const okT=v.kind==="invoice"?"내용을 확인했습니다":v.kind==="quote"?"견적을 승인합니다":v.kind==="po"?"발주 내용을 확인했습니다":v.kind==="payslip"?"명세서를 받았습니다":v.kind==="cr-deal"?"조건을 확인했습니다":"결과물을 확인했습니다";
   const PS=v.kind==="payslip";
   const form=(allowChange)=>`<div class="lk-act">
       <label>이름</label><input id="lk-by" maxlength="40" placeholder="확인하시는 분 성함 (선택)">
@@ -3800,8 +3905,10 @@ function renderLink(){
     </div>`;
   if(PS&&status==="approved")foot=`<div class="sp-box ok"><b>명세서를 받으셨습니다</b>${L.usedAt?fmtWhen(L.usedAt)+" 확인":""}</div>`;
   else if(PS&&status==="changed")foot=`<div class="sp-box warn"><b>문의를 남기셨습니다</b>${L.usedAt?fmtWhen(L.usedAt)+" 접수":""}${note?` — ${esc(note)}`:""}</div><div class="hint">보낸 분이 확인하고 연락드립니다. 고친 명세서는 새 링크로 받습니다.</div>`;
-  else if(status==="approved"||(v.kind==="invoice"&&L.result==="approved"))foot=`<div class="sp-box ok"><b>${v.kind==="invoice"||v.kind==="po"?"확인하셨습니다":"승인하셨습니다"}</b>${L.usedAt?fmtWhen(L.usedAt)+" 처리":""}${note?` — ${esc(note)}`:""}</div>`;
+  else if(status==="approved"||(v.kind==="invoice"&&L.result==="approved"))foot=`<div class="sp-box ok"><b>${v.kind==="invoice"||v.kind==="po"||v.kind==="cr-deal"?"확인하셨습니다":"승인하셨습니다"}</b>${L.usedAt?fmtWhen(L.usedAt)+" 처리":""}${note?` — ${esc(note)}`:""}</div>`;
   else if(L.expired)foot=`<div class="sp-box warn"><b>기한이 지난 링크입니다</b>보낸 분에게 새 링크를 요청해 주세요.</div>`;
+  else if(v.kind==="cr-deal"&&status==="cancel")foot=`<div class="sp-box warn"><b>진행하지 않기로 한 건입니다</b>따로 처리하실 일은 없습니다.</div>`;
+  else if(v.kind==="cr-deal"&&status==="changed")foot=`<div class="sp-box warn"><b>수정을 요청하셨습니다</b>${L.usedAt?fmtWhen(L.usedAt)+" 처리":""}${note?` — ${esc(note)}`:""}</div><div class="hint" style="margin-bottom:6px">보낸 분이 조건을 고치면 이 링크에서 바로 다시 확인할 수 있습니다. 지금 조건 그대로 진행해도 괜찮으면 아래 버튼을 눌러 주세요.</div>`+form(false);
   else if(v.kind==="quote"&&!["sent","changed"].includes(status))foot=`<div class="sp-box info">아직 보내지 않은 견적입니다. 보낸 분이 발송하면 여기서 승인할 수 있습니다.</div>`;
   else if(v.kind==="po"&&status==="cancel")foot=`<div class="sp-box warn"><b>취소된 발주입니다</b>보낸 분이 이 발주를 취소했습니다. 따로 처리하실 일은 없습니다.</div>`;
   else if(v.kind==="po"&&status==="draft")foot=`<div class="sp-box info">보낸 분이 발주서를 고치는 중입니다. 다시 보내면 여기서 확인할 수 있습니다.</div>`;
@@ -7233,7 +7340,7 @@ function bizOf(f){
   if(f.storeId){const b=act.find(b=>(L(b).stores||[]).includes(f.storeId));if(b)return b.id;}
   const brand=f.projectId?((projectById(f.projectId)||{}).brand||""):f.storeId?((storeById(f.storeId)||{}).brand||""):"";
   if(brand){const b=act.find(b=>(L(b).brands||[]).includes(brand));if(b)return b.id;}
-  const mod={space:"space",commerce:"commerce",outsourcing:"outsourcing",people:"people",marketing:"marketing"}[f.source]||(/^마이스토어|^스페이스/.test(f.memo||"")?"space":/^마이셀러|^커머스/.test(f.memo||"")?"commerce":/^거래 입금|^외주 입금/.test(f.memo||"")?"outsourcing":"");
+  const mod={space:"space",commerce:"commerce",outsourcing:"outsourcing",people:"people",marketing:"marketing",creator:"creator"}[f.source]||(/^마이스토어|^스페이스/.test(f.memo||"")?"space":/^마이셀러|^커머스/.test(f.memo||"")?"commerce":/^거래 입금|^외주 입금/.test(f.memo||"")?"outsourcing":"");
   if(mod){const b=act.find(b=>(L(b).mods||[]).includes(mod));if(b)return b.id;}
   return(act.find(b=>L(b).main)||act[0]).id;
 }
@@ -8041,7 +8148,7 @@ const fixRow=(f,i)=>`<div class="tx-fx" data-fx="${i}"><input data-fxf="name" va
 function bizModal(b){
   const isNew=!b;b=b||{name:"",kind:"indiv",vat:"general",biz_no:"",industry:"",open_date:"",region:"other",young:0,incl_vat:1,card_credit:0,active:1,memo:"",links:{brands:[],stores:[],mods:[],main:!S.biz.length}};
   const l=b.links||{},stores=DB.stores||[],brands=DB.brands||[];
-  const MODS=[["space","마이스토어"],["commerce","마이셀러"],["outsourcing","거래"],["people","마이피플 급여"],["marketing","마이마케팅 광고비"]];
+  const MODS=[["space","마이스토어"],["commerce","마이셀러"],["outsourcing","거래"],["people","마이피플 급여"],["marketing","마이마케팅 광고비"],["creator","마이크리에이터 수익"]];
   openModal(`<h2><span class="bars"></span>${isNew?"사업자 등록":"사업자 수정"}</h2>
   <div class="m-grid2">
     <div><label>이름</label><input id="bz-name" value="${esc(b.name)}" maxlength="60" placeholder="예: 하루상회 (개인)"></div>
@@ -10221,6 +10328,899 @@ function view(arg){
   autoQueue();
 }
 return{view,fillDash,onVersion,reset,refresh,weekText,_t:{S,U,agg,R,win,roasOf,diagnose,issues,boostPlan,effect,buildPlan,detectCols,parseSheet,toDate,tgt,eff,beCpa,beRoas,reindex}};
+})();
+
+/* ═══════════ 마이크리에이터 — 채널, 협찬·광고, 콘텐츠 제작, 수익, 단가·견적, 미디어킷 ═══════════
+   협찬 한 건이 문의 → 협의 → 계약 → 제작 → 검수 → 게시 → 정산 → 완료로 흐릅니다. 기록은 서버(cr_)에 두고, 챙길 것·단가·수익 구조는 이 화면에서 기록을 보고 셉니다.
+   브랜드에게는 링크 세 가지를 보냅니다 — 미디어킷(문의 받기), 조건 확인서(확인·수정 요청), 결과 보고서(보기 전용).
+   세금 계산과 광고 표기 안내는 모두 참고용이고 화면에서도 그렇게 적습니다. 시세 같은 지어낸 숫자는 쓰지 않고 내 기록으로만 단가를 냅니다. */
+const CR=(()=>{
+const S={ready:false,loading:null,err:"",at:0,stale:false,v:-1,today:"",settings:null,chans:[],snaps:[],deals:[],conts:[],incs:[],rates:[],kitLink:null};
+const U0=()=>({dview:"board",dst:"open",dq:"",cview:"board",cch:"",cym:"",iym:"",calc:{mode:"rate",rate:"",views:"",cpv:"",usage:false,excl:false,rush:false},sent:false});
+const U=U0();
+/* 채널 — [이름, 보는 사람을 부르는 말, 광고 표기 묶음] */
+const PLAT={youtube:["유튜브","구독자","video"],instagram:["인스타그램","팔로워","photo"],tiktok:["틱톡","팔로워","video"],naver_blog:["네이버 블로그","이웃","text"],naver_clip:["네이버 클립","구독자","video"],chzzk:["치지직","팔로워","live"],soop:["SOOP(숲)","애청자","live"],threads:["스레드","팔로워","photo"],x:["X(트위터)","팔로워","photo"],facebook:["페이스북","팔로워","photo"],newsletter:["뉴스레터","구독자","text"],brunch:["브런치","구독자","text"],podcast:["팟캐스트","구독자","video"],webtoon:["웹툰·연재","구독자","text"],etc:["기타","구독자","photo"]};
+const TYPE={paid:["유료 광고","돈을 받고 만드는 콘텐츠 (브랜디드·PPL)"],gift:["제품 협찬","돈 없이 제품·서비스만 받음"],affil:["제휴 수수료","내 링크로 팔린 만큼 받음"],group:["공동구매","팔린 만큼 수수료를 받음"],appear:["출연·행사·강연","촬영 출연, 행사 참석, 강연"],license:["2차 활용","이미 만든 콘텐츠를 브랜드가 쓰는 대가"],etc:["기타",""]};
+const STG={inquiry:["문의","p-gray"],nego:["협의","p-amber"],contract:["계약","p-blue"],making:["제작","p-blue"],review:["검수","p-amber"],posted:["게시","p-green"],settle:["정산 대기","p-red"],done:["완료","p-line"],lost:["무산","p-line"]};
+const FLOW=["inquiry","nego","contract","making","review","posted","settle","done"];
+const TAXM={vat:"세금계산서 (부가세 10% 별도)",wht:"원천징수 (떼고 받음)",none:"세금 계산 없음"};
+const FMT={long:"긴 영상",short:"숏폼",live:"라이브",post:"피드 게시물",story:"스토리",blog:"블로그 글",news:"뉴스레터",audio:"오디오",etc:"기타"};
+const CST={idea:["아이디어","p-gray"],plan:["기획","p-gray"],shoot:["촬영","p-amber"],edit:["편집","p-amber"],review:["검수","p-blue"],sched:["예약","p-blue"],posted:["게시","p-green"],drop:["보류","p-line"]};
+const CFLOW=["idea","plan","shoot","edit","review","sched"];
+const SRC={ads:["플랫폼 광고수익","#FF4712"],sponsor:["협찬·광고","#1C1B19"],affil:["제휴 수수료","#2456C8"],fan:["후원·멤버십","#1E7F4D"],sales:["상품 판매","#B7791F"],lecture:["강의·출연","#8A857C"],license:["저작권·2차 활용","#7C5CBF"],etc:["기타","#CFCAC0"]};
+const CUR={KRW:"원화",USD:"달러 (USD)",JPY:"엔 (JPY)",EUR:"유로 (EUR)",etc:"그 밖의 외화"};
+const BIZ={none:["사업자 없음","브랜드가 3.3%를 떼고 줍니다 (프리랜서)","wht"],exempt:["면세사업자","직원·스튜디오 없이 혼자 — 브랜드가 3.3%를 떼고 줍니다","wht"],taxable:["과세사업자","세금계산서를 끊고 부가세 10%를 따로 받습니다","vat"]};
+/* 올리기 전 점검 — [열쇠, 할 일] */
+const CHK=[["thumb","썸네일"],["title","제목"],["desc","설명·본문"],["tags","태그·해시태그"],["sub","자막"],["end","최종 화면·고정 댓글"],["link","링크·쿠폰 코드"],["right","음원·글꼴·이미지 사용 허락"],["ad","광고 표기 (협찬일 때)"]];
+/* 광고 표기 — 공정거래위원회 「추천·보증 등에 관한 표시·광고 심사지침」을 간추린 것. 묶음마다 [이름, 어디에 표시하는지] */
+const DISC={video:["영상 (유튜브·틱톡·클립)",["제목에 [광고]를 넣거나, 영상 처음과 끝, 그리고 제품을 소개하는 부분에 ‘유료 광고 포함’ 자막을 넣습니다.","설명란이나 고정 댓글에만 적는 것으로는 부족합니다.","플랫폼의 ‘유료 프로모션 포함’ 표시만으로는 부족할 수 있어 자막을 함께 넣는 편이 안전합니다."]],photo:["사진·짧은 글 (인스타그램·스레드)",["첫 번째 사진 안에 표시하거나, 본문 첫 줄 또는 첫 번째 해시태그로 적습니다.","‘더보기’를 눌러야 보이는 자리, 해시태그 여러 개 사이에 섞은 표시는 인정되지 않습니다."]],text:["글 (블로그·카페·뉴스레터)",["제목이나 본문 첫 부분에 표시합니다. 글 끝에만 적는 것은 인정되지 않습니다. (2024년 12월부터)"]],live:["라이브 방송",["5분마다 자막이나 말로 광고임을 알립니다.","채팅창 공지만으로는 부족합니다."]]};
+const DISC_OK=[["word","‘광고’·‘협찬’처럼 뜻이 분명한 우리말로 적었다"],["place","정해진 자리에 표시했다"],["seen","본문과 구분되고 잘 보이는 크기·색이다"],["agreed","브랜드와 표기 방식을 맞췄다"]];
+const DISC_HOW={video:"제목에 [광고], 영상 처음·끝과 제품 소개 부분에 ‘유료 광고 포함’ 자막",photo:"첫 사진 또는 본문 첫 줄에 ‘광고’ 표시",text:"제목 또는 본문 첫 부분에 ‘광고’·‘협찬’ 표시",live:"5분마다 자막이나 말로 ‘유료 광고 포함’ 고지"};
+const TABS=[["","요약"],["deal","협찬"],["cont","콘텐츠"],["inc","수익"],["chan","채널"],["rate","단가·견적"],["kit","미디어킷"],["set","설정·안내"]];
+const ERR={forbidden:"권한이 없습니다.","not-found":"대상을 찾을 수 없습니다.","bad-request":"입력 내용을 확인해 주세요.","bad-date":"날짜를 확인해 주세요.","bad-channel":"채널을 다시 골라 주세요.","bad-deal":"연결한 협찬 건을 찾을 수 없습니다.","no-amount":"금액을 적어 주세요.",limit:"더 만들 수 없습니다. 쓰지 않는 항목을 정리해 주세요.",empty:"넣을 내용이 없습니다.","in-use":"협찬·콘텐츠·수익 기록이 붙어 있어 지울 수 없습니다. ‘쓰지 않음’으로 바꿔 두세요.","module-off":"마이크리에이터가 꺼져 있습니다.","too-large":"내용이 너무 깁니다. 조금 줄여 주세요."};
+const errMsg=e=>e&&e.code==="unauthorized"?"":(e&&ERR[e.code])||"처리하지 못했습니다. 잠시 후 다시 시도하세요.";
+const failToast=e=>{const m=errMsg(e);if(m)toast(m);};
+const fmt=n=>Math.round(Number(n)||0).toLocaleString("ko-KR");
+const won=n=>fmt(n)+"원";
+const man=n=>{n=Math.round(Number(n)||0);const a=Math.abs(n);return(n<0?"−":"")+(a>=1e8?(Math.round(a/1e6)/100).toLocaleString("ko-KR")+"억":a>=1e4?(Math.round(a/1e3)/10).toLocaleString("ko-KR")+"만":a.toLocaleString("ko-KR"))+"원";};
+const cnt=n=>{n=Math.round(Number(n)||0);return n>=1e8?(Math.round(n/1e6)/100).toLocaleString("ko-KR")+"억":n>=1e4?(Math.round(n/1e3)/10).toLocaleString("ko-KR")+"만":n.toLocaleString("ko-KR");};   // 구독자·조회수 — 1.2만, 3.4억
+const pad2=n=>String(n).padStart(2,"0");
+const T=()=>todayStr();
+const ymOf=d=>(d||T()).slice(0,7);
+const dgap=(a,b)=>Math.round((new Date(b+"T00:00:00")-new Date(a+"T00:00:00"))/864e5);
+const dTxt=n=>n===0?"오늘":n>0?`${n}일 남음`:`${-n}일 지남`;
+const mgr=()=>!!ME&&(ME.role==="admin"||ME.role==="staff");
+const onPage=()=>/^#\/creator(\/|$)/.test(location.hash);
+const SET0={set:false,biz:{type:"none",wht:3.3,name:"",person:"",email:"",phone:""},opts:{usage:30,excl:20,rush:30},cpv:0,kit:{on:false,name:"",tagline:"",bio:"",topics:[],email:"",aud:{f:null,m:null,ages:"",regions:"",note:""},picks:[],cases:true,rates:false,inquiry:true},checks:[]};
+const st=()=>S.settings||SET0;
+const D=x=>(x&&x.d&&typeof x.d==="object"?x.d:{});   // 자주 찾지 않는 칸은 d 안에 있습니다
+const lkUrl=t=>location.origin.replace(/\/$/,"")+"/link/"+t;
+const num=s=>String(s??"").replace(/[^\d.]/g,"");
+function dlCsv(name,H,rows){const csv="﻿"+[H].concat(rows).map(r=>r.map(c=>`"${String(c??"").replace(/"/g,'""')}"`).join(",")).join("\n");const b=new Blob([csv],{type:"text/csv;charset=utf-8"});const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},400);}
+
+/* ── 서버 ── */
+async function load(){
+  if(S.loading){try{await S.loading;}catch(e){}return;}
+  const p=api("cr/data").then(d=>{Object.assign(S,{ready:true,err:"",at:Date.now(),stale:false,v:d.v,today:d.today,settings:d.settings,chans:d.chans||[],snaps:d.snaps||[],deals:d.deals||[],conts:d.conts||[],incs:d.incs||[],rates:d.rates||[],kitLink:d.kitLink||null});});
+  S.loading=p;try{await p;}finally{if(S.loading===p)S.loading=null;}
+}
+async function call(path,body){const r=await api("cr/"+path,body||{});if(r&&r.v!=null){if(r.v===S.v+1)S.v=r.v;else S.stale=true;}return r;}
+const upd=(arr,row)=>{if(!row)return;const i=arr.findIndex(x=>x.id===row.id);if(i>-1)arr[i]=row;else arr.unshift(row);};
+function refresh(force){if(!S.ready||S.loading||MODE!=="cloud")return;if(!force&&!S.stale&&Date.now()-S.at<90000)return;load().then(()=>{if(onPage()&&uiSafe())route();else fillDash();}).catch(()=>{});}
+function onVersion(v){if(v==null||!S.ready||v===S.v)return;S.stale=true;if(onPage()||$("#cr-dash-slot"))refresh(true);}
+function reset(){Object.assign(S,{ready:false,loading:null,err:"",at:0,stale:false,v:-1,settings:null,chans:[],snaps:[],deals:[],conts:[],incs:[],rates:[],kitLink:null});Object.assign(U,U0());}
+async function saveSet(patch,msg){try{const r=await call("settings",{set:patch});S.settings=r.settings;if(msg)toast(msg);return true;}catch(e){failToast(e);return false;}}
+async function reload(msg){try{await load();if(onPage())route();if(msg)toast(msg);}catch(e){failToast(e);}}
+
+/* ── 찾기 · 셈 ── */
+const chanById=id=>S.chans.find(c=>c.id===id)||null;
+const dealById=id=>S.deals.find(d=>d.id===id)||null;
+const contById=id=>S.conts.find(c=>c.id===id)||null;
+const chanName=id=>{const c=chanById(id);return c?c.name:"";};
+const platOf=id=>{const c=chanById(id);return PLAT[c?c.platform:"etc"]||PLAT.etc;};
+const chansAct=()=>S.chans.filter(c=>c.active!==0);
+const dealName=d=>d.brand+(d.title?" — "+d.title:"");
+const chanOpts=(sel,all)=>(all!==undefined?`<option value="">${all}</option>`:"")+S.chans.filter(c=>c.active!==0||c.id===sel).map(c=>`<option value="${esc(c.id)}" ${c.id===sel?"selected":""}>${esc(c.name)}</option>`).join("");
+/* 공급가 기준 세금 — vat: 10% 더해 받음 · wht: 원천징수율만큼 떼고 받음 (서버 crTax와 같은 셈) */
+function taxOf(amount,mode){const g=Math.max(0,Math.round(Number(amount)||0)),vat=mode==="vat"?Math.round(g*0.1):0,wht=mode==="wht"?Math.round(g*(Number(st().biz.wht)||0)/100):0;return{vat,wht,total:g+vat,net:g+vat-wht};}
+const taxLine=(amount,mode)=>{const t=taxOf(amount,mode);return mode==="vat"?`부가세 ${won(t.vat)} 더해 ${won(t.net)} 입금`:mode==="wht"?`${st().biz.wht}% ${won(t.wht)} 떼고 ${won(t.net)} 입금`:`${won(t.net)} 입금`;};
+const defTax=()=>BIZ[st().biz.type][2];
+const snapsOf=id=>S.snaps.filter(s=>s.chan_id===id).sort((a,b)=>a.ym.localeCompare(b.ym));
+const lastSnap=id=>{const a=snapsOf(id);return a[a.length-1]||null;};
+/* 최근 90일에 올린 것 가운데 조회수를 적은 콘텐츠(많아도 10개)의 평균 — 미디어킷과 같은 셈 */
+function avgView(chanId){const since=addDaysStr(T(),-90),rows=S.conts.filter(c=>c.stage==="posted"&&c.view>0&&(!chanId||c.chan_id===chanId)&&(c.post_date||"")>=since).sort((a,b)=>(b.post_date||"").localeCompare(a.post_date||"")).slice(0,10);return rows.length?{v:Math.round(rows.reduce((s,c)=>s+c.view,0)/rows.length),n:rows.length}:null;}
+const incOf=(ym,f)=>S.incs.filter(i=>i.ym===ym&&(!f||f(i)));
+const sum=(rows,k)=>rows.reduce((s,r)=>s+(Number(r[k])||0),0);
+const openDeals=()=>S.deals.filter(d=>d.stage!=="done"&&d.stage!=="lost");
+const unpaid=()=>S.deals.filter(d=>["posted","settle"].includes(d.stage)&&!d.paid_at&&d.amount>0);
+const discDone=d=>DISC_OK.every(([k])=>((D(d).disc||{}).ok||[]).includes(k));
+const needsDisc=d=>d.type!=="appear"&&d.type!=="license";
+const postedOn=d=>(d.result&&d.result.posted_at)||S.conts.filter(c=>c.deal_id===d.id&&c.stage==="posted"&&c.post_date).map(c=>c.post_date).sort()[0]||"";
+/* 지금 걸려 있는 독점 조건 — 계약한 뒤부터 기한까지 */
+const exclNow=exceptId=>S.deals.filter(d=>d.id!==exceptId&&!["inquiry","nego","lost"].includes(d.stage)&&D(d).excl&&D(d).excl_until&&D(d).excl_until>=T());
+/* 내 실제 단가 — 지난 12개월에 돈을 받은 협찬 가운데 결과 조회수를 적은 건. 조회 1회당 얼마를 받았는지 */
+function myRates(){
+  const since=addDaysStr(T(),-365),rows=[];
+  for(const d of S.deals){if(!["paid","license"].includes(d.type)||d.amount<=0||!["posted","settle","done"].includes(d.stage))continue;const v=(d.result&&d.result.view)||sum(S.conts.filter(c=>c.deal_id===d.id&&c.stage==="posted"),"view");const on=postedOn(d)||d.updated_at.slice(0,10);if(!v||on<since)continue;rows.push({d,view:v,cpv:d.amount/v,on});}
+  rows.sort((a,b)=>b.on.localeCompare(a.on));
+  const s=rows.map(r=>r.cpv).sort((a,b)=>a-b),med=s.length?(s.length%2?s[(s.length-1)/2]:(s[s.length/2-1]+s[s.length/2])/2):null;
+  return{rows,med,avg:rows.length?sum(rows.map(r=>({a:r.d.amount})),"a")/sum(rows,"view"):null};
+}
+/* ── 챙길 것 — 급한 순서. sev 3: 지금, 2: 곧, 1: 알아 두기 ── */
+function alerts(){
+  const t=T(),out=[];
+  for(const d of S.deals){
+    if(d.stage==="lost"||d.stage==="done")continue;
+    const x=D(d),nm=dealName(d),a=(sev,title,sub)=>out.push({sev,title,sub:sub||"",deal:d.id});
+    if(d.stage==="inquiry"&&!d.seen)a(3,`새 협찬 문의 — ${d.brand}`,x.src==="kit"?"미디어킷으로 들어왔습니다":"");
+    if(d.reply==="changed")a(3,`${nm} — 브랜드가 조건 수정을 요청했습니다`,x.reply_note);
+    else if(d.reply==="approved"&&!d.seen)a(2,`${nm} — 브랜드가 조건을 확인했습니다`,"계약 단계로 넘어갔습니다");
+    if(["contract","making"].includes(d.stage)&&d.draft_due){const n=dgap(t,d.draft_due);if(n<=3)a(n<0?3:2,`${nm} — 초안 제출 ${dTxt(n)}`,fmtD(d.draft_due));}
+    if(["contract","making","review"].includes(d.stage)&&d.post_due){const n=dgap(t,d.post_due);if(n<=3)a(n<0?3:2,`${nm} — 게시 마감 ${dTxt(n)}`,fmtD(d.post_due));}
+    if(["posted","settle"].includes(d.stage)&&!d.paid_at&&d.amount>0&&d.pay_due&&d.pay_due<t)a(3,`${nm} — 입금 예정일이 ${dgap(d.pay_due,t)}일 지났습니다`,taxLine(d.amount,d.tax_mode));
+    if(["review","posted"].includes(d.stage)&&needsDisc(d)&&!discDone(d))a(2,`${nm} — 광고 표기를 아직 점검하지 않았습니다`,"돈이나 제품을 받았으면 표시해야 합니다");
+    if(["posted","settle"].includes(d.stage)&&!(d.result&&d.result.view)){const on=postedOn(d);if(on&&dgap(on,t)>=7)a(1,`${nm} — 성과를 적고 결과 보고서를 보내 보세요`,`게시한 지 ${dgap(on,t)}일`);}
+    if(x.usage_until){const n=dgap(t,x.usage_until);if(n>=0&&n<=14)a(1,`${nm} — 2차 활용 기간이 ${dTxt(n)}`,"브랜드가 더 쓰려면 다시 협의합니다");}
+    if(x.keep_until&&x.keep_until<t&&dgap(x.keep_until,t)<=14)a(1,`${nm} — 게시 유지 기간이 끝났습니다`,"이제 내리거나 고쳐도 됩니다");
+  }
+  for(const c of S.conts){
+    if(["idea","drop","posted"].includes(c.stage)||!c.post_date)continue;
+    const n=dgap(t,c.post_date);
+    if(n<0)out.push({sev:2,title:`${c.title} — 게시 예정일이 ${-n}일 지났습니다`,sub:CST[c.stage][0]+" 단계",cont:c.id});
+    else if(n<=2&&["plan","shoot","edit"].includes(c.stage))out.push({sev:2,title:`${c.title} — 게시 ${n?"D-"+n:"오늘"}인데 아직 ${CST[c.stage][0]} 단계입니다`,sub:fmtD(c.post_date),cont:c.id});
+  }
+  const pm=monShift(ymOf(),-1);
+  if(+t.slice(8)>=3)for(const c of chansAct())if(!S.snaps.some(s=>s.chan_id===c.id&&s.ym>=pm))out.push({sev:1,title:`${c.name} — 지난달 숫자를 아직 적지 않았습니다`,sub:"구독자와 조회수를 달마다 적어 두면 미디어킷에 그대로 나갑니다",chan:c.id});
+  return out.sort((a,b)=>b.sev-a.sev);
+}
+const hotN=()=>S.deals.filter(d=>(d.stage==="inquiry"&&!d.seen)||(d.reply==="changed"&&d.stage!=="lost")).length;
+
+/* ── 화면 틀 ── */
+function shell(sub,inner,head){
+  const h=head||{},n=hotN();
+  $("#view").innerHTML=`
+  <div class="page-head"><div><h1><span class="bars"></span>${esc(h.title||"마이크리에이터")}</h1><div class="desc">${h.desc||"협찬 문의부터 입금까지, 만드는 일과 버는 돈을 한곳에서 챙깁니다."}</div></div>${h.actions?`<div style="display:flex;gap:6px;flex-wrap:wrap">${h.actions}</div>`:""}</div>
+  <nav class="sp-tabs">${TABS.map(([k,l])=>`<button class="${sub===k?"on":""}" data-cr="go" data-to="${k}">${l}${k==="deal"&&n?`<b class="nbadge">${n}</b>`:""}</button>`).join("")}</nav>
+  <div class="mkx">${inner}</div>`;
+  const tb=$("#view .sp-tabs"),on=tb&&tb.querySelector("button.on");if(on&&tb.scrollWidth>tb.clientWidth)tb.scrollLeft=Math.max(0,on.offsetLeft-(tb.clientWidth-on.offsetWidth)/2);
+}
+const empty=(t,s)=>`<div class="sp-empty"><b>${t}</b>${s||""}</div>`;
+const dlt=(a,b)=>{if(!b)return"";const d=Math.round((a-b)/b*100);return d?` <span class="${d>0?"mk-up":"mk-dn"}" style="font-size:12px;font-weight:700">${d>0?"▲":"▼"}${Math.abs(d)}%</span>`:"";};
+const duePill=(ds,label)=>{if(!ds)return"";const n=dgap(T(),ds);return`<span class="tx-dd ${n<0?"late":n<=3?"soon":""}">${label} ${n===0?"오늘":n>0?"D-"+n:"D+"+(-n)}</span>`;};
+/* 12개월 수익 막대 — 출처별로 쌓습니다 */
+function incBars(endYm,n){
+  const ms=[];for(let i=n-1;i>=0;i--)ms.push(monShift(endYm,-i));
+  const data=ms.map(m=>{const by={};for(const i of incOf(m))by[i.src]=(by[i.src]||0)+i.gross;return{m,by,tot:Object.values(by).reduce((s,v)=>s+v,0)};}),max=Math.max(1,...data.map(x=>x.tot));
+  const used=Object.keys(SRC).filter(k=>data.some(x=>x.by[k]));
+  return`<div class="cr-stack">${data.map(x=>`<div class="${x.m===endYm?"on":""}" title="${monLabel(x.m)} ${won(x.tot)}"><span>${used.map(k=>x.by[k]?`<i style="height:${Math.max(1,x.by[k]/max*100)}%;background:${SRC[k][1]}"></i>`:"").join("")}</span><em>${+x.m.slice(5)}월</em></div>`).join("")}</div>
+  ${used.length?`<div class="mk-leg">${used.map(k=>`<span><i style="background:${SRC[k][1]}"></i>${SRC[k][0]}</span>`).join("")}</div>`:`<div class="hint" style="margin-top:6px">수익을 적으면 달마다 어디서 벌었는지 쌓여 보입니다.</div>`}`;
+}
+
+/* ── 요약 ── */
+function setupCard(){
+  const s=[["채널을 적습니다","유튜브·인스타그램·블로그처럼 활동하는 곳을 적고, 구독자와 월 조회수를 달마다 적어 둡니다.","chan-new","채널 추가"],["협찬 건과 콘텐츠를 적습니다","들어온 제안을 건마다 적으면 마감과 입금을 알아서 챙겨 줍니다. 만드는 콘텐츠는 아이디어부터 게시까지 한 줄로 봅니다.","deal-new","협찬 건 적기"],["미디어킷을 엽니다","채널 숫자와 대표 콘텐츠가 담긴 소개 페이지 주소가 생깁니다. 브랜드가 그 페이지에서 바로 문의를 남깁니다.","go:kit","미디어킷 만들기"]];
+  return`<div class="card"><h2><span class="bars"></span>처음이신가요?</h2><div class="flow">${s.map(([t,d,a,l],i)=>`<div class="f-step"><div class="f-no mono">${i+1}</div><b>${t}</b><p>${d}</p><div style="margin-top:8px">${a.startsWith("go:")?`<button class="btn btn-sm" data-cr="go" data-to="${a.slice(3)}">${l}</button>`:`<button class="btn btn-sm" data-cr="${a}">${l}</button>`}</div></div>`).join("")}</div>
+  <div class="hint" style="margin-top:12px">먼저 <a data-cr="go" data-to="set" style="cursor:pointer;text-decoration:underline">설정·안내</a>에서 사업 형태를 고르면 3.3%를 떼는지, 부가세를 따로 받는지에 맞춰 받을 돈을 계산합니다.</div></div>`;
+}
+function weekItems(days){
+  const t=T(),to=addDaysStr(t,days),out=[];
+  for(const d of openDeals()){const nm=dealName(d);if(["contract","making"].includes(d.stage)&&d.draft_due>=t&&d.draft_due<=to)out.push({date:d.draft_due,k:"초안",title:nm,deal:d.id});if(["contract","making","review"].includes(d.stage)&&d.post_due>=t&&d.post_due<=to)out.push({date:d.post_due,k:"게시 마감",title:nm,deal:d.id});if(["posted","settle"].includes(d.stage)&&!d.paid_at&&d.pay_due>=t&&d.pay_due<=to)out.push({date:d.pay_due,k:"입금 예정",title:nm,deal:d.id});}
+  for(const c of S.conts){if(["posted","drop"].includes(c.stage))continue;if(c.shoot_date>=t&&c.shoot_date<=to&&["idea","plan","shoot"].includes(c.stage))out.push({date:c.shoot_date,k:"촬영",title:c.title,cont:c.id});if(c.post_date>=t&&c.post_date<=to)out.push({date:c.post_date,k:"게시",title:c.title,cont:c.id});}
+  return out.sort((a,b)=>a.date.localeCompare(b.date));
+}
+function vDash(){
+  if(!S.chans.length&&!S.deals.length&&!S.conts.length&&!S.incs.length){shell("",setupCard());return;}
+  const ym=ymOf(),pm=monShift(ym,-1),m=incOf(ym),p=incOf(pm),al=alerts(),open=openDeals(),up=unpaid(),wk=weekItems(7);
+  const act=chansAct(),subs=act.reduce((s,c)=>s+((lastSnap(c.id)||{}).subs||0),0),subsP=act.reduce((s,c)=>{const a=snapsOf(c.id);return s+((a[a.length-2]||{}).subs||0);},0);
+  const posted=S.conts.filter(c=>c.stage==="posted"&&(c.post_date||"").startsWith(ym)).length,making=S.conts.filter(c=>!["idea","posted","drop"].includes(c.stage)).length;
+  const pipe=open.filter(d=>!["inquiry","nego"].includes(d.stage)),gross=sum(m,"gross");
+  shell("",`
+  <div class="sp-kpis">
+    <div class="stat"><div class="s-num">${man(gross)}</div><div class="s-lb">${+ym.slice(5)}월 수익 (세금 전)${dlt(gross,sum(p,"gross"))}</div><div class="s-sub">입금 ${man(sum(m,"net"))}${sum(m,"wht")?` · 미리 뗀 세금 ${man(sum(m,"wht"))}`:""}</div></div>
+    <div class="stat ${up.some(d=>d.pay_due&&d.pay_due<T())?"warn":""}"><div class="s-num">${man(sum(up.map(d=>({a:taxOf(d.amount,d.tax_mode).net})),"a"))}</div><div class="s-lb">받을 돈</div><div class="s-sub">${up.length?`게시를 마친 ${up.length}건${up.some(d=>d.pay_due&&d.pay_due<T())?" · 예정일 지난 건 있음":""}`:"게시를 마치고 못 받은 돈이 없습니다"}</div></div>
+    <div class="stat"><div class="s-num">${open.length}<em>건</em></div><div class="s-lb">진행 중인 협찬</div><div class="s-sub">${pipe.length?`계약한 금액 ${man(sum(pipe,"amount"))}`:"계약까지 간 건이 아직 없습니다"}</div></div>
+    <div class="stat"><div class="s-num">${cnt(subs)}<em>명</em></div><div class="s-lb">구독자·팔로워${dlt(subs,subsP)}</div><div class="s-sub">이달 올린 것 ${posted}개 · 만드는 중 ${making}개</div></div>
+  </div>
+  <div class="sp-grid2">
+    <div>
+      <div class="card"><h2><span class="bars"></span>챙길 것 <span class="cnt">${al.length}가지</span></h2>
+        ${al.length?al.slice(0,9).map(a=>`<div class="pj-line" data-cr="${a.deal?"deal-open":a.cont?"cont-open":"go"}" data-id="${a.deal||a.cont||""}" data-to="chan"><span class="pj-nm" style="white-space:normal">${esc(a.title)}${a.sub?`<div class="hint" style="font-weight:400">${esc(a.sub)}</div>`:""}</span><span class="pill nodot ${a.sev>=3?"p-red":a.sev===2?"p-amber":"p-gray"}">${a.sev>=3?"지금":a.sev===2?"곧":"알아 두기"}</span></div>`).join("")+(al.length>9?`<div class="hint" style="margin-top:8px">그 밖에 ${al.length-9}가지가 더 있습니다.</div>`:""):`<div class="empty" style="padding:16px">지금은 따로 챙길 것이 없습니다.</div>`}
+      </div>
+      <div class="card"><h2><span class="bars"></span>협찬 흐름 <button class="btn btn-sm btn-ghost" data-cr="go" data-to="deal" style="margin-left:auto">전체 보기 →</button></h2>
+        <div class="sp-today">${FLOW.slice(0,7).map(k=>{const n=S.deals.filter(d=>d.stage===k).length;return`<span class="bchip ${k==="settle"&&n?"warn":""}" data-cr="go" data-to="deal"><b>${n}</b>${STG[k][0]}</span>`;}).join("")}</div>
+        ${exclNow().length?`<div class="hint" style="margin-top:10px">지금 걸려 있는 독점 조건: ${exclNow().map(d=>`<b>${esc(d.brand)}</b> ${esc(D(d).excl)} (${fmtD(D(d).excl_until)}까지)`).join(" · ")}</div>`:""}
+      </div>
+    </div>
+    <div>
+      <div class="card"><h2><span class="bars"></span>이레 안 일정 <span class="cnt">${wk.length}개</span></h2>
+        ${wk.length?wk.map(w=>`<div class="pj-line" data-cr="${w.deal?"deal-open":"cont-open"}" data-id="${w.deal||w.cont}"><span class="mono hint" style="min-width:56px;flex:none;white-space:nowrap">${fmtD(w.date)}</span><span class="pj-nm">${esc(w.title)}</span><span class="pill nodot ${w.k==="입금 예정"?"p-green":w.k==="촬영"?"p-amber":"p-blue"}">${w.k}</span></div>`).join(""):`<div class="empty" style="padding:16px">이레 안에 잡힌 촬영·게시·마감이 없습니다.</div>`}
+      </div>
+      <div class="card"><h2><span class="bars"></span>최근 6개월 수익 <button class="btn btn-sm btn-ghost" data-cr="go" data-to="inc" style="margin-left:auto">자세히 →</button></h2>${incBars(ym,6)}</div>
+    </div>
+  </div>`,{actions:`<button class="btn" data-cr="cont-new">＋ 콘텐츠</button><button class="btn btn-pri" data-cr="deal-new">＋ 협찬 건</button>`});
+}
+
+/* ── 협찬 ── */
+function dealBadges(d){
+  const x=D(d),b=[];
+  if(d.stage==="inquiry"&&!d.seen)b.push(`<span class="pill nodot p-red">새 문의</span>`);
+  if(d.reply==="changed")b.push(`<span class="pill nodot p-red">수정 요청</span>`);
+  else if(d.reply==="approved")b.push(`<span class="pill nodot p-green">조건 확인됨</span>`);
+  if(d.paid_at)b.push(`<span class="pill nodot p-green">입금</span>`);
+  if(x.src==="kit")b.push(`<span class="tag">미디어킷</span>`);
+  else if(x.src==="ai")b.push(`<span class="tag">AI 제안</span>`);
+  return b.join("");
+}
+function dealDue(d){
+  if(["contract","making"].includes(d.stage)&&d.draft_due)return duePill(d.draft_due,"초안");
+  if(["contract","making","review"].includes(d.stage)&&d.post_due)return duePill(d.post_due,"게시");
+  if(["posted","settle"].includes(d.stage)&&!d.paid_at&&d.pay_due)return duePill(d.pay_due,"입금");
+  return"";
+}
+function dealCard(d){
+  const ch=chanName(d.chan_id);
+  return`<button class="cr-card ${(d.stage==="inquiry"&&!d.seen)||d.reply==="changed"?"new":""}" data-cr="deal-open" data-id="${d.id}">
+    <b>${esc(d.brand)}</b>${d.title?`<small>${esc(d.title)}</small>`:""}
+    <span class="row"><span class="tag">${TYPE[d.type][0]}</span>${ch?`<span class="tag">${esc(ch)}</span>`:""}</span>
+    <span class="row">${d.amount?`<span class="amt">${won(d.amount)}</span>`:D(d).gift_value?`<span class="amt">제품 ${won(D(d).gift_value)}</span>`:""}${dealDue(d)}</span>
+    ${dealBadges(d)?`<span class="row">${dealBadges(d)}</span>`:""}
+  </button>`;
+}
+function vDeals(){
+  const q=norm(U.dq),hit=d=>!q||norm(d.brand+(d.title||"")+(D(d).agency||"")+(D(d).person||"")).includes(q);
+  const list=S.deals.filter(d=>hit(d)&&(U.dst==="all"||(U.dst==="open"?!["done","lost"].includes(d.stage):d.stage===U.dst)));
+  const cols=FLOW.slice(0,7),ex=exclNow();
+  let body;
+  if(!S.deals.length)body=empty("협찬 건이 없습니다","들어온 제안을 건마다 적어 두면 초안·게시 마감과 입금 예정일을 알아서 챙겨 줍니다. 미디어킷을 열어 두면 브랜드가 남긴 문의가 여기 ‘문의’ 칸에 바로 들어옵니다.<div style=\"margin-top:12px\"><button class=\"btn btn-sm btn-pri\" data-cr=\"deal-new\">＋ 협찬 건</button> <button class=\"btn btn-sm\" data-cr=\"go\" data-to=\"kit\">미디어킷 만들기</button></div>");
+  else if(U.dview==="board"&&U.dst==="open")body=`<div class="cr-board">${cols.map(k=>{const L=list.filter(d=>d.stage===k).sort((a,b)=>(a.post_due||a.draft_due||"9999").localeCompare(b.post_due||b.draft_due||"9999")||b.created_at.localeCompare(a.created_at)),tot=sum(L,"amount");return`<div class="cr-col"><h3>${STG[k][0]} <em>${L.length}</em>${tot?`<span>${man(tot)}</span>`:""}</h3>${L.length?L.map(dealCard).join(""):`<div class="cr-colempty">—</div>`}</div>`;}).join("")}</div>`;
+  else body=list.length?`<div class="card" style="padding:6px 14px"><div class="tblwrap"><table class="tbl" style="min-width:680px"><thead><tr><th>브랜드 · 건</th><th>단계</th><th>종류</th><th>채널</th><th class="r">금액</th><th>게시</th><th>입금</th></tr></thead><tbody>${list.sort((a,b)=>FLOW.concat("lost").indexOf(a.stage)-FLOW.concat("lost").indexOf(b.stage)||b.created_at.localeCompare(a.created_at)).map(d=>`<tr data-cr="deal-open" data-id="${d.id}" style="cursor:pointer"><td><b>${esc(d.brand)}</b>${d.title?`<div class="hint">${esc(d.title)}</div>`:""}</td><td><span class="pill ${STG[d.stage][1]}">${STG[d.stage][0]}</span></td><td>${TYPE[d.type][0]}</td><td>${esc(chanName(d.chan_id))}</td><td class="r num">${d.amount?fmt(d.amount):"—"}</td><td class="nw">${d.post_due?fmtD(d.post_due):"—"}</td><td class="nw">${d.paid_at?`<span class="pill nodot p-green">${fmtD(d.paid_at)}</span>`:d.pay_due?fmtD(d.pay_due)+" 예정":"—"}</td></tr>`).join("")}</tbody></table></div></div>`:empty("조건에 맞는 건이 없습니다");
+  shell("deal",`
+  <div class="sp-bar"><div class="seg"><button class="${U.dview==="board"&&U.dst==="open"?"on":""}" data-cr="dview" data-v="board">보드</button><button class="${U.dview==="list"||U.dst!=="open"?"on":""}" data-cr="dview" data-v="list">목록</button></div>
+    <select data-crc="dst" aria-label="단계"><option value="open" ${U.dst==="open"?"selected":""}>진행 중</option><option value="all" ${U.dst==="all"?"selected":""}>모두</option>${Object.entries(STG).map(([k,[l]])=>`<option value="${k}" ${U.dst===k?"selected":""}>${l}</option>`).join("")}</select>
+    <input data-cri="dq" value="${esc(U.dq)}" placeholder="브랜드·건 이름 검색" style="flex:1 1 160px;min-width:0" aria-label="검색"></div>
+  ${ex.length?`<div class="sp-box info">지금 걸려 있는 독점 조건 — ${ex.map(d=>`<b style="display:inline">${esc(d.brand)}</b> ${esc(D(d).excl)} (${fmtD(D(d).excl_until)}까지)`).join(" · ")}. 겹치는 제안은 받기 전에 확인하세요.</div>`:""}
+  ${body}
+  ${S.deals.length?`<div class="hint" style="margin-top:12px">카드를 누르면 조건·일정·입금을 보고, 브랜드에게 보낼 조건 확인서와 결과 보고서 링크를 만듭니다. 칸 옆 금액은 세금 전(공급가) 합계입니다.</div>`:""}`,
+  {actions:`<button class="btn btn-pri" data-cr="deal-new">＋ 협찬 건</button>`});
+}
+function dealModal(d,pre){
+  const isNew=!d;d=d||Object.assign({brand:"",title:"",type:"paid",stage:"nego",chan_id:(chansAct()[0]||{}).id||"",amount:0,tax_mode:defTax(),draft_due:"",post_due:"",pay_due:"",d:{}},pre||{});
+  const x=D(d),ex=exclNow(d.id),cts=(DB.contacts||[]).filter(c=>c.name);
+  openModal(`<div class="cr-wide"><h2><span class="bars"></span>${isNew?"협찬 건 적기":"협찬 건 고치기"}</h2>
+  ${ex.length?`<div class="sp-box warn"><b>독점 조건이 걸려 있습니다</b>${ex.map(e=>`${esc(e.brand)} — ${esc(D(e).excl)} (${fmtD(D(e).excl_until)}까지)`).join("<br>")}</div>`:""}
+  <div class="mk-form">
+    <div><label for="cr-d-brand">브랜드</label><input id="cr-d-brand" value="${esc(d.brand)}" maxlength="60" placeholder="예: 모노가구" list="cr-d-brands"><datalist id="cr-d-brands">${[...new Set(S.deals.map(v=>v.brand).concat(cts.map(c=>c.company||c.name)))].filter(Boolean).slice(0,80).map(n=>`<option value="${esc(n)}">`).join("")}</datalist></div>
+    <div><label for="cr-d-title">건 이름</label><input id="cr-d-title" value="${esc(d.title||"")}" maxlength="100" placeholder="예: 원목 선반 리뷰"></div>
+    <div><label for="cr-d-type">종류</label><select id="cr-d-type">${Object.entries(TYPE).map(([k,[l,h]])=>`<option value="${k}" ${d.type===k?"selected":""} title="${esc(h)}">${l}</option>`).join("")}</select></div>
+    <div><label for="cr-d-chan">채널</label><select id="cr-d-chan">${chanOpts(d.chan_id,"정하지 않음")}</select></div>
+    <div><label for="cr-d-stage">단계</label><select id="cr-d-stage">${Object.entries(STG).map(([k,[l]])=>`<option value="${k}" ${d.stage===k?"selected":""}>${l}</option>`).join("")}</select></div>
+    <div><label for="cr-d-agency">대행사 <span class="hint">(있을 때)</span></label><input id="cr-d-agency" value="${esc(x.agency||"")}" maxlength="60"></div>
+    <div><label for="cr-d-person">담당자</label><input id="cr-d-person" value="${esc(x.person||"")}" maxlength="40"></div>
+    <div><label for="cr-d-contact">연락처</label><input id="cr-d-contact" value="${esc(x.contact||"")}" maxlength="120" placeholder="이메일이나 전화"></div>
+  </div>
+  <div class="mk-sub">돈</div>
+  <div class="mk-form">
+    <div><label for="cr-d-amount">금액 <span class="hint">(세금 전, 원)</span></label><input id="cr-d-amount" inputmode="numeric" value="${d.amount?fmt(d.amount):""}" data-cri="dtax" placeholder="0"></div>
+    <div><label for="cr-d-tax">세금 처리</label><select id="cr-d-tax" data-crc="dtax">${Object.entries(TAXM).map(([k,l])=>`<option value="${k}" ${d.tax_mode===k?"selected":""}>${k==="wht"?`원천징수 (${st().biz.wht}% 떼고 받음)`:l}</option>`).join("")}</select></div>
+    <div><label for="cr-d-gift">받는 제품 값 <span class="hint">(시가, 원)</span></label><input id="cr-d-gift" inputmode="numeric" value="${x.gift_value?fmt(x.gift_value):""}" placeholder="제품 협찬일 때"></div>
+    <div><label for="cr-d-pay">입금 예정일</label><input id="cr-d-pay" type="date" value="${esc(d.pay_due||"")}"></div>
+  </div>
+  <div class="hint" id="cr-d-taxout" style="margin-top:6px"></div>
+  <div class="mk-sub">만들 것과 일정</div>
+  <label for="cr-d-items">만들 것</label><input id="cr-d-items" value="${esc(x.items||"")}" maxlength="400" placeholder="예: 긴 영상 1편 + 쇼츠 1편 + 인스타그램 스토리 2개">
+  <div class="mk-form">
+    <div><label for="cr-d-draft">초안 보내는 날</label><input id="cr-d-draft" type="date" value="${esc(d.draft_due||"")}"></div>
+    <div><label for="cr-d-post">게시일</label><input id="cr-d-post" type="date" value="${esc(d.post_due||"")}"></div>
+    <div><label for="cr-d-rev">수정 횟수</label><input id="cr-d-rev" type="number" min="0" max="20" value="${x.revisions??""}" placeholder="예: 2"></div>
+    <div><label for="cr-d-keep">게시 유지 기한</label><input id="cr-d-keep" type="date" value="${esc(x.keep_until||"")}"></div>
+  </div>
+  <div class="mk-sub">브랜드가 갖는 권리</div>
+  <div class="mk-form">
+    <div><label for="cr-d-usage">2차 활용 범위</label><input id="cr-d-usage" value="${esc(x.usage||"")}" maxlength="200" placeholder="예: 브랜드 인스타그램 재게시, 상세페이지"></div>
+    <div><label for="cr-d-usageu">2차 활용 기한</label><input id="cr-d-usageu" type="date" value="${esc(x.usage_until||"")}"></div>
+    <div><label for="cr-d-excl">독점 범위</label><input id="cr-d-excl" value="${esc(x.excl||"")}" maxlength="200" placeholder="예: 같은 종류의 가구 브랜드"></div>
+    <div><label for="cr-d-exclu">독점 기한</label><input id="cr-d-exclu" type="date" value="${esc(x.excl_until||"")}"></div>
+  </div>
+  <label for="cr-d-guide">브랜드 요구 사항 <span class="hint">(꼭 넣을 말, 해시태그, 링크)</span></label><textarea id="cr-d-guide" maxlength="2000" style="min-height:64px">${esc(x.guide||"")}</textarea>
+  <label for="cr-d-cond">그 밖의 조건 <span class="hint">(조건 확인서에 함께 나갑니다)</span></label><textarea id="cr-d-cond" maxlength="1500" style="min-height:54px" placeholder="예: 촬영용 제품은 반납하지 않습니다. 성과 보장은 하지 않습니다.">${esc(x.cond||"")}</textarea>
+  <label for="cr-d-memo">메모 <span class="hint">(나만 봅니다)</span></label><textarea id="cr-d-memo" maxlength="2000" style="min-height:54px">${esc(x.memo||"")}</textarea>
+  <div class="m-foot">${isNew?"":`<button class="btn btn-ghost left" data-cr="deal-del" data-id="${d.id}">삭제</button>`}<button class="btn btn-ghost" data-g="modal-close">취소</button><button class="btn btn-pri" data-cr="deal-save" data-id="${isNew?"":d.id}">저장</button></div></div>`);
+  dealTaxOut();
+}
+function dealTaxOut(){const o=$("#cr-d-taxout");if(!o)return;const a=Number(num($("#cr-d-amount").value))||0,m=$("#cr-d-tax").value;o.innerHTML=a?`<b style="color:var(--ink)">${taxLine(a,m)}</b> · 사업 형태는 설정·안내에서 바꿉니다. 참고용 계산입니다.`:"금액을 적으면 실제로 받을 돈을 계산합니다.";}
+function dealRead(){
+  const v=s=>$(s).value.trim();
+  return{brand:v("#cr-d-brand"),title:v("#cr-d-title"),type:v("#cr-d-type"),chan_id:v("#cr-d-chan"),stage:v("#cr-d-stage"),agency:v("#cr-d-agency"),person:v("#cr-d-person"),contact:v("#cr-d-contact"),amount:num(v("#cr-d-amount")),tax_mode:v("#cr-d-tax"),gift_value:num(v("#cr-d-gift")),pay_due:v("#cr-d-pay"),items:v("#cr-d-items"),draft_due:v("#cr-d-draft"),post_due:v("#cr-d-post"),revisions:v("#cr-d-rev"),keep_until:v("#cr-d-keep"),usage:v("#cr-d-usage"),usage_until:v("#cr-d-usageu"),excl:v("#cr-d-excl"),excl_until:v("#cr-d-exclu"),guide:v("#cr-d-guide"),cond:v("#cr-d-cond"),memo:v("#cr-d-memo")};
+}
+async function dealSave(id){
+  const b=dealRead();
+  if(!b.brand)return toast("브랜드를 적어 주세요.");
+  if(id)b.id=id;
+  try{const r=await call("deal/save",b);upd(S.deals,r.deal);closeModal();if(onPage())route();toast("저장했습니다.");dealView(r.deal.id);}catch(e){failToast(e);}
+}
+const kv=(k,v)=>v?`<dt>${k}</dt><dd>${v}</dd>`:"";
+/* 조건 요약 — 화면과 조건 확인서(공개 페이지)가 같이 씁니다. t: {type, channel, items, amount, tax_mode, vat, wht, wht_pct, total, net, …} */
+function termsHtml(t){
+  const money=t.amount?`<b class="num">${won(t.amount)}</b>${t.tax_mode==="vat"?` + 부가세 ${won(t.vat)} = <b class="num">${won(t.total)}</b>`:t.tax_mode==="wht"?` − 원천징수 ${t.wht_pct}% ${won(t.wht)} = <b class="num">${won(t.net)}</b> 입금`:""}`:"";
+  return`<dl class="cr-kv">${kv("종류",TYPE[t.type]?TYPE[t.type][0]:"")}${kv("채널",esc(t.channel))}${kv("만들 것",esc(t.items))}${kv("금액",money)}${kv("제공 제품",t.gift_value?`시가 ${won(t.gift_value)}`:"")}${kv("초안",t.draft_due?fmtD(t.draft_due):"")}${kv("게시일",t.post_due?fmtD(t.post_due):"")}${kv("입금 예정",t.pay_due?fmtD(t.pay_due):"")}${kv("수정",t.revisions!=null&&t.revisions!==""?`${t.revisions}번까지`:"")}${kv("게시 유지",t.keep_until?fmtD(t.keep_until)+"까지":"")}${kv("2차 활용",t.usage?esc(t.usage)+(t.usage_until?` (${fmtD(t.usage_until)}까지)`:""):"")}${kv("독점",t.excl?esc(t.excl)+(t.excl_until?` (${fmtD(t.excl_until)}까지)`:""):"")}${kv("요구 사항",esc(t.guide))}${kv("광고 표기",esc(t.disclosure))}${kv("그 밖의 조건",esc(t.cond))}</dl>`;
+}
+const termsOf=d=>{const x=D(d),t=taxOf(d.amount,d.tax_mode);return{type:d.type,channel:chanName(d.chan_id),items:x.items,amount:d.amount,tax_mode:d.tax_mode,vat:t.vat,wht:t.wht,wht_pct:st().biz.wht,total:t.total,net:t.net,gift_value:x.gift_value,draft_due:d.draft_due,post_due:d.post_due,pay_due:d.pay_due,keep_until:x.keep_until,usage:x.usage,usage_until:x.usage_until,excl:x.excl,excl_until:x.excl_until,revisions:x.revisions,guide:x.guide,cond:x.cond,disclosure:(x.disc||{}).how};};
+function dealView(id){
+  const d=dealById(id);if(!d)return;
+  const x=D(d),idx=FLOW.indexOf(d.stage),conts=S.conts.filter(c=>c.deal_id===d.id),r=d.result||{},q=x.inq,grp=platOf(d.chan_id)[2],disc=x.disc||{how:"",ok:[]};
+  if(!d.seen){d.seen=1;call("deal/seen",{id}).catch(()=>{});if(onPage())route();}   // 열어 보면 ‘새 문의’ 표시를 풉니다
+  const changedAfter=d.reply==="approved"&&d.terms&&(d.terms.amount!==d.amount||(d.terms.post_due||"")!==(d.post_due||"")||(d.terms.items||"")!==(x.items||""));
+  openModal(`<div class="cr-wide"><h2><span class="bars"></span>${esc(d.brand)} ${d.title?`<span style="font-weight:600;color:var(--sub)">· ${esc(d.title)}</span>`:""}</h2>
+  ${d.stage==="lost"?`<div class="sp-box warn"><b>무산된 건입니다</b>${esc(x.lost_reason||"사유를 적지 않았습니다")} <button class="btn btn-sm" data-cr="deal-stage" data-id="${d.id}" data-v="nego" style="margin-left:8px">다시 진행</button></div>`
+    :`<div class="cr-steps" role="group" aria-label="단계">${FLOW.map((k,i)=>`<button class="${i===idx?"on":i<idx?"past":""}" data-cr="deal-stage" data-id="${d.id}" data-v="${k}">${STG[k][0]}</button>`).join("")}</div>`}
+  ${q?`<div class="cr-inq"><b>미디어킷으로 들어온 문의 · ${fmtWhen(q.at)}</b>${esc(q.message)}\n\n${esc([q.company,q.name].filter(Boolean).join(" · "))}${q.email?` · <a href="mailto:${esc(q.email)}">${esc(q.email)}</a>`:""}${q.phone?` · ${esc(q.phone)}`:""}${q.budget?`\n예산: ${esc(q.budget)}`:""}</div>`:""}
+  ${d.reply==="changed"?`<div class="sp-box warn"><b>브랜드가 조건 수정을 요청했습니다</b>${esc(x.reply_note||"")}<div class="hint" style="margin-top:4px">조건을 고쳐 저장하면 같은 링크에서 브랜드가 다시 확인합니다.</div></div>`:""}
+  ${d.reply==="approved"?`<div class="sp-box ok"><b>브랜드가 조건을 확인했습니다</b>${d.terms&&d.terms.by?esc(d.terms.by)+" · ":""}${d.terms&&d.terms.at?fmtWhen(d.terms.at):""}${x.reply_note?` — ${esc(x.reply_note)}`:""}${changedAfter?`<div style="margin-top:4px">확인받은 뒤에 금액·게시일·만들 것이 바뀌었습니다. <a data-cr="deal-reask" data-id="${d.id}" style="cursor:pointer;text-decoration:underline">다시 확인받기</a></div>`:""}</div>`:""}
+  ${(x.agency||x.person||x.contact)?`<div class="hint" style="margin-bottom:10px">${[x.agency&&"대행사 "+esc(x.agency),x.person&&esc(x.person),x.contact&&esc(x.contact)].filter(Boolean).join(" · ")}</div>`:""}
+  ${termsHtml(termsOf(d))}
+  ${x.memo?`<div class="sp-box memo" style="margin-top:12px;white-space:pre-wrap">${esc(x.memo)}</div>`:""}
+  <div class="cr-acts">
+    ${d.stage!=="lost"?`<button class="btn btn-sm ${d.reply?"":"btn-pri"}" data-cr="deal-sheet" data-id="${d.id}">조건 확인서 보내기</button>`:""}
+    ${d.amount>0&&d.stage!=="lost"?(d.paid_at?`<button class="btn btn-sm" data-cr="deal-unpaid" data-id="${d.id}">입금 확인 취소</button>`:`<button class="btn btn-sm ${["posted","settle"].includes(d.stage)?"btn-pri":""}" data-cr="deal-pay" data-id="${d.id}">입금 확인</button>`):""}
+    ${d.stage!=="lost"?`<button class="btn btn-sm" data-cr="cont-new" data-deal="${d.id}">콘텐츠 만들기</button>`:""}
+    <button class="btn btn-sm" data-cr="deal-edit" data-id="${d.id}">조건 고치기</button>
+    ${!["done","lost"].includes(d.stage)?`<button class="btn btn-sm btn-ghost" data-cr="deal-lost" data-id="${d.id}">무산 처리</button>`:""}
+  </div>
+  ${d.paid_at?`<div class="hint">${fmtD(d.paid_at)} 입금 ${won(x.paid_amount||0)} · 수익 탭에 기록됐습니다.</div>`:""}
+  ${conts.length?`<div class="mk-sub">이 건으로 만드는 콘텐츠</div>${conts.map(c=>`<div class="pj-line" data-cr="cont-open" data-id="${c.id}"><span class="pj-nm">${esc(c.title)}</span><span class="hint">${FMT[c.format]}</span>${c.view?`<span class="mono hint">조회 ${cnt(c.view)}</span>`:""}<span class="pill ${CST[c.stage][1]}">${CST[c.stage][0]}</span></div>`).join("")}`:""}
+  ${needsDisc(d)&&d.stage!=="lost"&&idx>=2?`<div class="mk-sub">광고 표기 <span class="hint">${DISC[grp][0]}</span>${discDone(d)?`<span class="pill nodot p-green">점검 끝</span>`:""}</div>
+    <div class="hint" style="margin-bottom:6px">${DISC[grp][1].join(" ")}</div>
+    <label for="cr-v-how" class="mk-lb" style="display:block;font-size:13px;font-weight:600;color:var(--sub);margin:8px 0 5px">이렇게 표시합니다 <span class="hint">(조건 확인서에 나갑니다)</span></label><input id="cr-v-how" value="${esc(disc.how||"")}" maxlength="120" placeholder="${esc(DISC_HOW[grp])}">
+    ${DISC_OK.map(([k,l])=>`<label class="cr-pickrow"><input type="checkbox" class="cr-v-ok" value="${k}" ${(disc.ok||[]).includes(k)?"checked":""}><span style="white-space:normal">${l}</span></label>`).join("")}
+    <div style="margin-top:8px"><button class="btn btn-sm" data-cr="deal-disc" data-id="${d.id}">표기 점검 저장</button> <button class="btn btn-sm btn-ghost" data-cr="deal-how" data-v="${esc(DISC_HOW[grp])}">기본 문구 넣기</button></div>`:""}
+  ${idx>=5&&d.stage!=="lost"?`<div class="mk-sub">결과 <span class="hint">브랜드에게 보낼 숫자</span></div>
+    <label for="cr-v-urls" class="mk-lb" style="display:block;font-size:13px;font-weight:600;color:var(--sub);margin:8px 0 5px">게시 주소 <span class="hint">(여러 개면 줄을 바꿔서)</span></label><textarea id="cr-v-urls" style="min-height:48px" placeholder="https://">${esc((r.urls||[]).join("\n")||conts.filter(c=>c.url).map(c=>c.url).join("\n"))}</textarea>
+    <div class="mk-form">${[["view","조회"],["likes","좋아요"],["cmts","댓글"],["shares","공유"],["saves","저장"],["clk","링크 클릭"]].map(([k,l])=>`<div><label for="cr-v-${k}">${l}</label><input id="cr-v-${k}" inputmode="numeric" value="${r[k]?fmt(r[k]):(["view","likes","cmts"].includes(k)&&sum(conts,k)?fmt(sum(conts,k)):"")}"></div>`).join("")}
+      <div><label for="cr-v-posted">게시한 날</label><input id="cr-v-posted" type="date" value="${esc(r.posted_at||postedOn(d))}"></div><div><label for="cr-v-at">숫자를 센 날</label><input id="cr-v-at" type="date" value="${esc(r.at||T())}"></div></div>
+    <label for="cr-v-note" class="mk-lb" style="display:block;font-size:13px;font-weight:600;color:var(--sub);margin:8px 0 5px">한마디 <span class="hint">(보고서에 나갑니다)</span></label><textarea id="cr-v-note" maxlength="1000" style="min-height:48px" placeholder="예: 댓글에 구매처 문의가 많았습니다.">${esc(r.note||"")}</textarea>
+    <label class="cr-pickrow" style="border:0"><input type="checkbox" id="cr-v-case" ${x.show_case?"checked":""}><span style="white-space:normal">미디어킷의 ‘함께한 브랜드’에 이 건을 보여 줍니다 (브랜드 이름·건 이름·게시 주소만)</span></label>
+    <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap"><button class="btn btn-sm" data-cr="deal-result" data-id="${d.id}">결과 저장</button><button class="btn btn-sm btn-pri" data-cr="deal-report" data-id="${d.id}">결과 보고서 링크</button></div>`:""}
+  <div class="m-foot"><button class="btn btn-ghost" data-g="modal-close">닫기</button></div></div>`);
+}
+async function dealPatch(id,patch,msg,stay){
+  try{const r=await call("deal/save",Object.assign({id},patch));upd(S.deals,r.deal);if(onPage())route();if(msg)toast(msg);if(stay!==false)dealView(id);return r.deal;}catch(e){failToast(e);return null;}
+}
+function payModal(id){
+  const d=dealById(id);if(!d)return;
+  openModal(`<h2><span class="bars"></span>입금 확인</h2>
+  <div class="hint" style="margin:-8px 0 10px">${esc(dealName(d))}</div>
+  <div class="m-grid2"><div><label for="cr-p-date">입금된 날</label><input id="cr-p-date" type="date" value="${T()}"></div><div><label for="cr-p-amount">금액 <span class="hint">(세금 전)</span></label><input id="cr-p-amount" inputmode="numeric" value="${fmt(d.amount)}" data-cri="ptax"></div></div>
+  <div class="cr-sum"><div class="hint">실제로 들어왔어야 하는 돈</div><div class="v" id="cr-p-net">${won(taxOf(d.amount,d.tax_mode).net)}</div><div class="hint" id="cr-p-line" data-mode="${d.tax_mode}">${taxLine(d.amount,d.tax_mode)}</div></div>
+  <div class="hint" style="margin-top:10px">확인하면 수익 탭에 한 줄이 생기고, 게시를 마친 건은 ‘완료’로 넘어갑니다. 통장에 찍힌 금액과 다르면 수익 탭에서 고칠 수 있습니다.</div>
+  <div class="m-foot"><button class="btn btn-ghost" data-cr="deal-open" data-id="${id}">취소</button><button class="btn btn-pri" data-cr="deal-paid" data-id="${id}">입금 확인</button></div>`);
+}
+function lostModal(id){
+  const d=dealById(id);if(!d)return;
+  openModal(`<h2><span class="bars"></span>무산 처리</h2><div class="hint" style="margin:-8px 0 10px">${esc(dealName(d))}</div>
+  <label for="cr-l-why">사유</label><input id="cr-l-why" maxlength="200" list="cr-l-whys" placeholder="예: 금액이 맞지 않음"><datalist id="cr-l-whys">${["금액이 맞지 않음","일정이 맞지 않음","채널 성격과 맞지 않음","독점 조건과 겹침","브랜드가 진행을 멈춤","답이 없음"].map(w=>`<option value="${w}">`).join("")}</datalist>
+  <div class="hint" style="margin-top:8px">기록은 남습니다. 사유를 적어 두면 어떤 제안이 왜 깨졌는지 나중에 볼 수 있습니다.</div>
+  <div class="m-foot"><button class="btn btn-ghost" data-cr="deal-open" data-id="${id}">취소</button><button class="btn btn-pri" data-cr="deal-lost-go" data-id="${id}">무산 처리</button></div>`);
+}
+async function linkModal(kind,id){
+  const d=dealById(id);if(!d)return;
+  const isSheet=kind==="cr-deal";
+  let r;try{r=await api("link/create",{kind,target:id,days:isSheet?30:90});}catch(e){if(e.code!=="unauthorized")toast(e.status===404?(isSheet?"무산된 건에는 확인서를 보낼 수 없습니다.":"게시한 뒤에 보고서를 보낼 수 있습니다. 단계를 ‘게시’로 옮겨 주세요."):"링크를 만들지 못했습니다.");return;}
+  const url=lkUrl(r.token),who=st().biz.name||st().kit.name||DB.meta.workspace;
+  const body=isSheet?`안녕하세요, ${who}입니다.\n"${dealName(d)}" 진행 조건을 정리했습니다. 아래 링크에서 확인해 주시고, 고칠 부분이 있으면 그 자리에서 적어 주세요.\n${url}`:`안녕하세요, ${who}입니다.\n"${dealName(d)}" 결과를 정리했습니다.\n${url}`;
+  openModal(`<h2><span class="bars"></span>${isSheet?"조건 확인서":"결과 보고서"}</h2>
+  <div class="hint" style="margin-bottom:10px">${isSheet?"브랜드 담당자가 가입 없이 이 링크에서 조건을 보고 ‘확인했습니다’ 또는 ‘수정을 요청합니다’를 누릅니다. 확인하면 그때의 조건이 그대로 남고 단계가 ‘계약’으로 넘어갑니다. 30일 동안 쓸 수 있습니다.":"게시 주소와 조회·좋아요·댓글 같은 숫자가 담긴 보기 전용 페이지입니다. 금액과 메모는 나가지 않습니다. 90일 동안 열립니다."} 링크를 다시 만들면 이전 링크는 닫힙니다.</div>
+  <div class="linkbox mono">${esc(url)}</div>
+  <label for="cr-lk-msg">함께 보낼 말</label><textarea id="cr-lk-msg" style="min-height:96px">${esc(body)}</textarea>
+  <div class="m-foot"><a class="btn btn-ghost left" href="${esc(url)}" target="_blank" rel="noopener">보는 화면 열기 ↗</a><button class="btn btn-ghost" data-cr="deal-open" data-id="${id}">돌아가기</button><button class="btn btn-pri" data-cr="copy-msg">글과 링크 복사</button></div>`);
+}
+
+/* ── 콘텐츠 ── */
+function contCard(c){
+  const x=D(c),dl=c.deal_id?dealById(c.deal_id):null,n=(x.checks||[]).length,ch=chanName(c.chan_id);
+  return`<button class="cr-card" data-cr="cont-open" data-id="${c.id}">
+    <b>${esc(c.title)}</b>
+    <span class="row">${ch?`<span class="tag">${esc(ch)}</span>`:""}<span class="tag">${FMT[c.format]}</span>${dl?`<span class="pill nodot p-amber">협찬 · ${esc(dl.brand)}</span>`:""}</span>
+    <span class="row">${c.stage==="shoot"||c.stage==="plan"?duePill(c.shoot_date,"촬영"):""}${duePill(c.post_date,"게시")}${n?`<small>점검 ${n}/${CHK.length}</small>`:""}${x.editor?`<small>${esc(x.editor)}</small>`:""}</span>
+  </button>`;
+}
+function vConts(){
+  const list=S.conts.filter(c=>!U.cch||c.chan_id===U.cch),ym=U.cym||ymOf();
+  let body;
+  if(!S.conts.length)body=empty("콘텐츠가 없습니다","떠오른 주제를 아이디어로 적어 두고, 만들기 시작하면 기획 → 촬영 → 편집 → 검수 → 예약 → 게시로 옮깁니다. 게시한 뒤 조회수를 적어 두면 채널 평균과 내 단가가 저절로 계산됩니다.<div style=\"margin-top:12px\"><button class=\"btn btn-sm btn-pri\" data-cr=\"cont-new\">＋ 콘텐츠</button> <button class=\"btn btn-sm\" data-cr=\"idea-open\">아이디어 여러 개 적기</button></div>");
+  else if(U.cview==="cal"){
+    const y=+ym.slice(0,4),mo=+ym.slice(5),first=new Date(y,mo-1,1),start=(first.getDay()+6)%7,N=new Date(y,mo,0).getDate(),cells=[];
+    for(let i=0;i<start;i++)cells.push(`<div class="mk-day out blank"></div>`);
+    for(let dnum=1;dnum<=N;dnum++){const ds=ym+"-"+pad2(dnum),P=list.filter(c=>c.post_date===ds&&c.stage!=="drop"),Sh=list.filter(c=>c.shoot_date===ds&&!["posted","drop"].includes(c.stage));
+      if(!P.length&&!Sh.length&&ds!==T()){cells.push(`<div class="mk-day blank" data-cr="cont-new" data-date="${ds}"><span>${dnum}</span></div>`);continue;}
+      cells.push(`<div class="mk-day ${ds===T()?"today":""}" data-cr="cont-new" data-date="${ds}"><span>${dnum}${window.innerWidth<=820?` ${"월화수목금토일"[(start+dnum-1)%7]}`:""}</span>${Sh.map(c=>`<button class="mk-post s-draft" data-cr="cont-open" data-id="${c.id}" title="촬영 · ${esc(c.title)}">촬영 · ${esc(c.title)}</button>`).join("")}${P.map(c=>`<button class="mk-post ${c.stage==="posted"?"s-posted":c.stage==="sched"||c.stage==="review"?"s-ready":""}" data-cr="cont-open" data-id="${c.id}" title="${esc(c.title)}">${D(c).post_time?esc(D(c).post_time)+" ":""}${esc(c.title)}</button>`).join("")}</div>`);}
+    body=`<div class="sp-bar" style="margin-bottom:10px"><button class="btn btn-sm" data-cr="ym" data-k="cym" data-d="-1" aria-label="이전 달">‹</button><b>${monLabel(ym)}</b><button class="btn btn-sm" data-cr="ym" data-k="cym" data-d="1" aria-label="다음 달">›</button><span class="hint">초록은 게시한 것, 파랑은 예약·검수, 노랑은 촬영 날입니다. 날짜를 누르면 그날로 새 콘텐츠를 적습니다.</span></div>
+    <div class="mk-cal">${["월","화","수","목","금","토","일"].map(w=>`<div class="mk-dow">${w}</div>`).join("")}${cells.join("")}</div>`;
+  }else{
+    const posted=list.filter(c=>c.stage==="posted").sort((a,b)=>(b.post_date||"").localeCompare(a.post_date||"")),drop=list.filter(c=>c.stage==="drop");
+    body=`<div class="cr-board">${CFLOW.map(k=>{const L=list.filter(c=>c.stage===k).sort((a,b)=>(a.post_date||a.shoot_date||"9999").localeCompare(b.post_date||b.shoot_date||"9999"));return`<div class="cr-col"><h3>${CST[k][0]} <em>${L.length}</em></h3>${L.length?L.map(contCard).join(""):`<div class="cr-colempty">—</div>`}</div>`;}).join("")}</div>
+    <div class="card" style="margin-top:14px"><h2><span class="bars"></span>게시한 것 <span class="cnt">${posted.length}개</span></h2>
+      ${posted.length?`<div class="tblwrap"><table class="tbl" style="min-width:620px"><thead><tr><th>제목</th><th>채널</th><th>게시일</th><th class="r">조회</th><th class="r">좋아요</th><th class="r">댓글</th><th class="r">반응률</th></tr></thead><tbody>${posted.slice(0,40).map(c=>`<tr data-cr="cont-open" data-id="${c.id}" style="cursor:pointer"><td><b>${esc(c.title)}</b>${c.deal_id&&dealById(c.deal_id)?` <span class="pill nodot p-amber">협찬</span>`:""}</td><td>${esc(chanName(c.chan_id))}</td><td class="nw">${fmtD(c.post_date)}</td><td class="r num">${c.view?fmt(c.view):`<span class="hint">적기</span>`}</td><td class="r num">${c.likes?fmt(c.likes):"—"}</td><td class="r num">${c.cmts?fmt(c.cmts):"—"}</td><td class="r num">${c.view&&c.likes+c.cmts?(Math.round((c.likes+c.cmts)/c.view*1000)/10)+"%":"—"}</td></tr>`).join("")}</tbody></table></div><div class="hint" style="margin-top:8px">반응률은 (좋아요 + 댓글) ÷ 조회입니다.${posted.length>40?` 최근 40개만 보입니다.`:""}</div>`:`<div class="empty" style="padding:16px">아직 게시한 콘텐츠가 없습니다.</div>`}
+    </div>
+    ${drop.length?`<div class="hint" style="margin-top:10px">보류한 것 ${drop.length}개: ${drop.slice(0,8).map(c=>`<a data-cr="cont-open" data-id="${c.id}" style="cursor:pointer;text-decoration:underline">${esc(c.title)}</a>`).join(" · ")}</div>`:""}`;
+  }
+  shell("cont",`
+  <div class="sp-bar"><div class="seg"><button class="${U.cview==="board"?"on":""}" data-cr="cview" data-v="board">보드</button><button class="${U.cview==="cal"?"on":""}" data-cr="cview" data-v="cal">달력</button></div>
+    ${S.chans.length>1?`<select data-crc="cch" aria-label="채널">${chanOpts(U.cch,"모든 채널")}</select>`:""}</div>
+  ${body}`,{actions:`<button class="btn" data-cr="idea-open">아이디어 여러 개</button><button class="btn btn-pri" data-cr="cont-new">＋ 콘텐츠</button>`});
+}
+function contModal(c,pre){
+  const isNew=!c;c=c||Object.assign({title:"",chan_id:(chansAct()[0]||{}).id||"",deal_id:"",format:"long",stage:"idea",shoot_date:"",post_date:"",url:"",view:0,likes:0,cmts:0,d:{}},pre||{});
+  const x=D(c),deals=S.deals.filter(d=>(!["done","lost"].includes(d.stage))||d.id===c.deal_id),done=new Set(x.checks||[]),cts=(DB.contacts||[]).filter(v=>v.name);
+  if(isNew&&c.deal_id){const dl=dealById(c.deal_id);if(dl){if(dl.chan_id)c.chan_id=dl.chan_id;if(!c.post_date)c.post_date=dl.post_due||"";if(!c.title)c.title=dl.title||"";}}
+  openModal(`<div class="cr-wide"><h2><span class="bars"></span>${isNew?"콘텐츠 적기":"콘텐츠"}</h2>
+  <label for="cr-c-title">제목</label><input id="cr-c-title" value="${esc(c.title)}" maxlength="120" placeholder="예: 원목 선반 달아 보기">
+  <div class="mk-form">
+    <div><label for="cr-c-chan">채널</label><select id="cr-c-chan">${chanOpts(c.chan_id,"정하지 않음")}</select></div>
+    <div><label for="cr-c-fmt">형식</label><select id="cr-c-fmt">${Object.entries(FMT).map(([k,l])=>`<option value="${k}" ${c.format===k?"selected":""}>${l}</option>`).join("")}</select></div>
+    <div><label for="cr-c-stage">단계</label><select id="cr-c-stage">${Object.entries(CST).map(([k,[l]])=>`<option value="${k}" ${c.stage===k?"selected":""}>${l}</option>`).join("")}</select></div>
+    <div><label for="cr-c-deal">협찬 건</label><select id="cr-c-deal"><option value="">협찬 아님</option>${deals.map(d=>`<option value="${d.id}" ${d.id===c.deal_id?"selected":""}>${esc(dealName(d))}</option>`).join("")}</select></div>
+    <div><label for="cr-c-shoot">촬영하는 날</label><input id="cr-c-shoot" type="date" value="${esc(c.shoot_date||"")}"></div>
+    <div><label for="cr-c-post">게시하는 날</label><input id="cr-c-post" type="date" value="${esc(c.post_date||"")}"></div>
+    <div><label for="cr-c-time">게시 시각</label><input id="cr-c-time" type="time" value="${esc(x.post_time||"")}"></div>
+    <div><label for="cr-c-editor">편집·외주 맡은 사람</label><input id="cr-c-editor" value="${esc(x.editor||"")}" maxlength="40" list="cr-c-eds" placeholder="직접 하면 비워 둡니다"><datalist id="cr-c-eds">${[...new Set(S.conts.map(v=>D(v).editor).concat(cts.map(v=>v.name)))].filter(Boolean).slice(0,80).map(n=>`<option value="${esc(n)}">`).join("")}</datalist></div>
+    <div><label for="cr-c-cost">외주비 <span class="hint">(원)</span></label><input id="cr-c-cost" inputmode="numeric" value="${x.cost?fmt(x.cost):""}"></div>
+  </div>
+  <label for="cr-c-memo">기획 메모</label><textarea id="cr-c-memo" maxlength="4000" style="min-height:74px" placeholder="무엇을, 누구에게, 어떤 순서로 보여 줄지">${esc(x.memo||"")}</textarea>
+  <div class="mk-sub">올리기 전 점검 <span class="hint" id="cr-c-chkn">${done.size}/${CHK.length}</span></div>
+  <div class="mk-pick">${CHK.map(([k,l])=>`<label><input type="checkbox" class="cr-c-chk" value="${k}" ${done.has(k)?"checked":""}>${l}</label>`).join("")}</div>
+  <div class="mk-sub">게시한 뒤</div>
+  <label for="cr-c-url">게시 주소</label><input id="cr-c-url" value="${esc(c.url||"")}" maxlength="300" placeholder="https://">
+  <div class="mk-form">${[["view","조회",c.view],["likes","좋아요",c.likes],["cmts","댓글",c.cmts],["shares","공유",x.shares],["saves","저장",x.saves]].map(([k,l,v])=>`<div><label for="cr-c-${k}">${l}</label><input id="cr-c-${k}" inputmode="numeric" value="${v?fmt(v):""}"></div>`).join("")}<div><label for="cr-c-at">숫자를 센 날</label><input id="cr-c-at" type="date" value="${esc(x.stat_at||"")}"></div></div>
+  <div class="m-foot">${isNew?"":`<button class="btn btn-ghost left" data-cr="cont-del" data-id="${c.id}">삭제</button>`}<button class="btn btn-ghost" data-g="modal-close">취소</button><button class="btn btn-pri" data-cr="cont-save" data-id="${isNew?"":c.id}">저장</button></div></div>`);
+}
+async function contSave(id){
+  const v=s=>$(s).value.trim(),b={title:v("#cr-c-title"),chan_id:v("#cr-c-chan"),format:v("#cr-c-fmt"),stage:v("#cr-c-stage"),deal_id:v("#cr-c-deal"),shoot_date:v("#cr-c-shoot"),post_date:v("#cr-c-post"),post_time:v("#cr-c-time"),editor:v("#cr-c-editor"),cost:num(v("#cr-c-cost")),memo:v("#cr-c-memo"),checks:$$(".cr-c-chk:checked").map(x=>x.value),url:v("#cr-c-url"),view:num(v("#cr-c-view")),likes:num(v("#cr-c-likes")),cmts:num(v("#cr-c-cmts")),shares:num(v("#cr-c-shares")),saves:num(v("#cr-c-saves")),stat_at:v("#cr-c-at")};
+  if(!b.title)return toast("제목을 적어 주세요.");
+  if(b.url&&!/^https?:\/\//i.test(b.url))b.url="https://"+b.url;
+  if(b.url&&b.stage!=="posted"&&b.stage!=="drop"&&confirm("게시 주소를 적으셨습니다. 단계를 ‘게시’로 바꿀까요?"))b.stage="posted";
+  if(Number(b.view)&&!b.stat_at)b.stat_at=T();
+  if(id)b.id=id;
+  try{const r=await call("cont/save",b);upd(S.conts,r.cont);closeModal();if(onPage())route();toast("저장했습니다.");}catch(e){failToast(e);}
+}
+function ideaModal(){
+  openModal(`<h2><span class="bars"></span>아이디어 여러 개 적기</h2>
+  <div class="hint" style="margin:-8px 0 10px">한 줄에 하나씩 적으면 모두 ‘아이디어’ 칸에 들어갑니다.</div>
+  <label for="cr-i-chan">채널</label><select id="cr-i-chan">${chanOpts((chansAct()[0]||{}).id||"","정하지 않음")}</select>
+  <label for="cr-i-fmt">형식</label><select id="cr-i-fmt">${Object.entries(FMT).map(([k,l])=>`<option value="${k}">${l}</option>`).join("")}</select>
+  <label for="cr-i-text">주제</label><textarea id="cr-i-text" style="min-height:150px" placeholder="좁은 현관 정리하는 법&#10;전동 드릴 처음 살 때 볼 것&#10;겨울 결로 막는 법"></textarea>
+  <div class="m-foot"><button class="btn btn-ghost" data-g="modal-close">취소</button><button class="btn btn-pri" data-cr="idea-save">담기</button></div>`);
+}
+
+/* ── 수익 ── */
+const finKey=i=>"i:"+i.id;
+const finOf=key=>(DB.finance||[]).find(f=>f.source==="creator"&&f.crKey===key)||null;
+function finMemo(i){const dl=i.deal_id?dealById(i.deal_id):null;return`마이크리에이터 ${SRC[i.src][0]} · ${i.title||(dl?dealName(dl):"")||monLabel(i.ym)}${i.wht||i.vat?` (세금 전 ${fmt(i.gross)}${i.vat?` · 부가세 ${fmt(i.vat)}`:""}${i.wht?` · 원천징수 ${fmt(i.wht)}`:""})`:""}`.trim();}
+/* 그 달의 수익과 외주비를 돈 메뉴로 보냅니다 — 줄마다 한 번만 들어가고, 다시 누르면 달라진 금액만 고칩니다 */
+function finSend(ym){
+  const rows=incOf(ym),costs=S.conts.filter(c=>D(c).cost>0&&c.stage==="posted"&&(c.post_date||"").startsWith(ym));
+  if(!rows.length&&!costs.length)return toast("보낼 기록이 없습니다.");
+  if(!confirm(`${monLabel(ym)} 수익 ${rows.length}건${costs.length?`과 외주비 ${costs.length}건`:""}을 돈에 기록할까요?\n수익은 실제 입금액으로 들어가고, 이미 보낸 줄은 금액이 달라졌을 때만 고칩니다.`))return;
+  const now=new Date().toISOString(),incCat=(DB.finCats.income||[]).includes("매출")?"매출":((DB.finCats.income||[])[0]||"기타"),expCat=(DB.finCats.expense||[]).includes("외주비")?"외주비":((DB.finCats.expense||[])[0]||"기타");let add=0,fix=0;
+  for(const i of rows){const key=finKey(i),f=finOf(key),memo=finMemo(i);
+    if(f){if(f.amount!==i.net||f.date!==i.date||f.memo!==memo){f.amount=i.net;f.date=i.date;f.memo=memo;f.updatedAt=now;fix++;}}
+    else{const o={id:uid("f"),projectId:"",storeId:"",kind:"수입",amount:i.net,category:incCat,date:i.date,memo,memberId:ME.id,createdAt:now,source:"creator",crKey:key};if(i.wht)o.proof="원천징수";else if(i.vat)o.proof="세금계산서";DB.finance.push(o);add++;}}
+  for(const c of costs){const key="c:"+c.id,f=finOf(key),x=D(c),memo=`마이크리에이터 외주비 · ${c.title}${x.editor?` (${x.editor})`:""}`;
+    if(f){if(f.amount!==x.cost||f.memo!==memo){f.amount=x.cost;f.memo=memo;f.updatedAt=now;fix++;}}
+    else{DB.finance.push({id:uid("f"),projectId:"",storeId:"",kind:"지출",amount:x.cost,category:expCat,date:c.post_date,memo,memberId:ME.id,createdAt:now,source:"creator",crKey:key});add++;}}
+  if(add||fix){logAct(`${monLabel(ym)} 크리에이터 수익을 돈에 기록했습니다. (새로 ${add}건${fix?`, 고침 ${fix}건`:""})`);saveDB();}
+  route();toast(add||fix?`돈에 기록했습니다.${fix?` ${fix}건은 금액을 고쳤습니다.`:""}`:"이미 같은 내용으로 기록돼 있습니다.");
+}
+function finDrop(key){const i=(DB.finance||[]).findIndex(f=>f.source==="creator"&&f.crKey===key);if(i<0)return false;DB.finance.splice(i,1);saveDB();return true;}
+function vInc(){
+  const ym=U.iym||ymOf(),yr=ym.slice(0,4),rows=incOf(ym).sort((a,b)=>b.date.localeCompare(a.date)),p=incOf(monShift(ym,-1)),yrRows=S.incs.filter(i=>i.ym.startsWith(yr)),up=unpaid();
+  const gross=sum(rows,"gross"),bySrc=Object.keys(SRC).map(k=>[k,sum(rows.filter(i=>i.src===k),"gross")]).filter(x=>x[1]).sort((a,b)=>b[1]-a[1]);
+  const yg=sum(yrRows,"gross"),sp=sum(yrRows.filter(i=>i.src==="sponsor"),"gross");
+  const brands=new Map();for(const i of yrRows){if(!i.deal_id)continue;const dl=dealById(i.deal_id);if(!dl)continue;brands.set(dl.brand,(brands.get(dl.brand)||0)+i.gross);}
+  const top=[...brands.entries()].sort((a,b)=>b[1]-a[1])[0],sentN=rows.filter(i=>finOf(finKey(i))).length;
+  shell("inc",`
+  <div class="sp-bar"><button class="btn btn-sm" data-cr="ym" data-k="iym" data-d="-1" aria-label="이전 달">‹</button><b>${monLabel(ym)}</b><button class="btn btn-sm" data-cr="ym" data-k="iym" data-d="1" aria-label="다음 달">›</button></div>
+  <div class="sp-kpis">
+    <div class="stat"><div class="s-num">${man(gross)}</div><div class="s-lb">수익 (세금 전)${dlt(gross,sum(p,"gross"))}</div><div class="s-sub">${rows.length}건</div></div>
+    <div class="stat"><div class="s-num">${man(sum(rows,"net"))}</div><div class="s-lb">실제 입금</div><div class="s-sub">${sum(rows,"vat")?`부가세 ${man(sum(rows,"vat"))} 포함`:"통장에 들어온 돈"}</div></div>
+    <div class="stat"><div class="s-num">${man(sum(rows,"wht"))}</div><div class="s-lb">미리 뗀 세금 (원천징수)</div><div class="s-sub">${yr}년 누계 ${man(sum(yrRows,"wht"))} · 5월 종합소득세 때 정산</div></div>
+    <div class="stat ${yg&&sp/yg>=.7?"warn":""}"><div class="s-num">${yg?Math.round(sp/yg*100)+"%":"—"}</div><div class="s-lb">${yr}년 협찬 비중</div><div class="s-sub">${yg?`올해 수익 ${man(yg)}${top&&top[1]/yg>=.4?` · ${esc(top[0])} 한 곳이 ${Math.round(top[1]/yg*100)}%`:""}`:"수익을 적으면 보입니다"}</div></div>
+  </div>
+  <div class="sp-grid2">
+    <div class="card"><h2><span class="bars"></span>12개월 흐름 <span class="cnt">세금 전</span></h2>${incBars(ym,12)}</div>
+    <div class="card"><h2><span class="bars"></span>${+ym.slice(5)}월 어디서 벌었나</h2>
+      ${bySrc.length?bySrc.map(([k,v])=>`<div class="tx-kline"><span><i style="display:inline-block;width:10px;height:10px;border-radius:2px;background:${SRC[k][1]};margin-right:6px"></i>${SRC[k][0]}</span><b>${won(v)}</b><span class="tx-prog"><i style="width:${Math.round(v/gross*100)}%;background:${SRC[k][1]}"></i></span><em>${Math.round(v/gross*100)}%</em></div>`).join(""):`<div class="empty" style="padding:16px">이달 수익 기록이 없습니다.</div>`}
+      ${yg&&sp/yg>=.7?`<div class="hint" style="margin-top:10px">올해 수익의 ${Math.round(sp/yg*100)}%가 협찬입니다. 협찬은 달마다 들쭉날쭉하니, 플랫폼 광고수익이나 멤버십처럼 꾸준히 들어오는 돈의 비중도 함께 보세요.</div>`:""}
+    </div>
+  </div>
+  ${up.length?`<div class="card"><h2><span class="bars"></span>받을 돈 <span class="cnt">${up.length}건 · ${won(sum(up.map(d=>({a:taxOf(d.amount,d.tax_mode).net})),"a"))}</span></h2>${up.sort((a,b)=>(a.pay_due||"9999").localeCompare(b.pay_due||"9999")).map(d=>`<div class="pj-line" data-cr="deal-open" data-id="${d.id}"><span class="pj-nm">${esc(dealName(d))}</span><span class="mono hint">${won(taxOf(d.amount,d.tax_mode).net)}</span>${d.pay_due?duePill(d.pay_due,"입금"):`<span class="hint">예정일 없음</span>`}<button class="btn btn-sm" data-cr="deal-pay" data-id="${d.id}">입금 확인</button></div>`).join("")}</div>`:""}
+  <div class="card"><h2><span class="bars"></span>${monLabel(ym)} 기록 <span class="cnt">${rows.length}건</span><span style="margin-left:auto;display:flex;gap:6px;flex-wrap:wrap"><button class="btn btn-sm btn-ghost" data-cr="inc-csv">CSV</button><button class="btn btn-sm" data-cr="fin-send">돈에 기록${sentN<rows.length?` <b class="nbadge" style="margin-left:4px">${rows.length-sentN}</b>`:""}</button></span></h2>
+    ${rows.length?`<div class="tblwrap"><table class="tbl" style="min-width:720px"><thead><tr><th>입금일</th><th>어디서</th><th>내용</th><th class="r">세금 전</th><th class="r">부가세</th><th class="r">원천징수</th><th class="r">입금</th><th>돈</th></tr></thead><tbody>${rows.map(i=>`<tr data-cr="inc-edit" data-id="${i.id}" style="cursor:pointer"><td class="nw">${fmtD(i.date)}</td><td><i style="display:inline-block;width:8px;height:8px;border-radius:2px;background:${SRC[i.src][1]};margin-right:6px"></i>${SRC[i.src][0]}</td><td>${esc(i.title||"")}${i.cur!=="KRW"&&i.fx_amount?`<div class="hint">${i.cur} ${Number(i.fx_amount).toLocaleString("en-US")} × ${Number(i.fx_rate).toLocaleString("ko-KR")}</div>`:""}${chanName(i.chan_id)?`<div class="hint">${esc(chanName(i.chan_id))}</div>`:""}</td><td class="r num">${fmt(i.gross)}</td><td class="r num">${i.vat?fmt(i.vat):"—"}</td><td class="r num">${i.wht?fmt(i.wht):"—"}</td><td class="r num"><b>${fmt(i.net)}</b></td><td>${finOf(finKey(i))?`<span class="pill nodot p-green">기록됨</span>`:`<span class="hint">아직</span>`}</td></tr>`).join("")}</tbody></table></div>`:`<div class="empty" style="padding:18px">이달 수익 기록이 없습니다. 협찬은 ‘입금 확인’을 누르면 저절로 들어오고, 플랫폼 광고수익·후원·판매는 직접 적습니다.</div>`}
+    <div class="hint" style="margin-top:10px">‘돈에 기록’을 누르면 이달 수익이 돈 메뉴에 수입으로 들어가고, 마이택스가 켜져 있으면 손익과 신고 자료에도 잡힙니다. 게시한 콘텐츠의 외주비도 지출로 함께 보냅니다.</div>
+  </div>`,{actions:`<button class="btn btn-pri" data-cr="inc-new">＋ 수익 적기</button>`});
+}
+function incModal(i){
+  const isNew=!i,ym=U.iym||ymOf();i=i||{date:ym===ymOf()?T():ym+"-"+pad2(new Date(+ym.slice(0,4),+ym.slice(5),0).getDate()),ym,src:"ads",chan_id:(chansAct()[0]||{}).id||"",title:"",gross:0,vat:0,wht:0,cur:"KRW",fx_amount:null,fx_rate:null,memo:""};
+  const dl=i.deal_id?dealById(i.deal_id):null;
+  openModal(`<h2><span class="bars"></span>${isNew?"수익 적기":"수익 고치기"}</h2>
+  ${dl?`<div class="sp-box info">협찬 <b style="display:inline">${esc(dealName(dl))}</b>의 입금 기록입니다. 여기서 고치면 협찬 건의 입금액도 함께 바뀝니다.</div>`:""}
+  <div class="m-grid2"><div><label for="cr-n-src">어디서</label><select id="cr-n-src" ${dl?"disabled":""}>${Object.entries(SRC).map(([k,[l]])=>`<option value="${k}" ${i.src===k?"selected":""}>${l}</option>`).join("")}</select></div>
+    <div><label for="cr-n-chan">채널</label><select id="cr-n-chan">${chanOpts(i.chan_id,"정하지 않음")}</select></div></div>
+  <label for="cr-n-title">내용</label><input id="cr-n-title" value="${esc(i.title||"")}" maxlength="100" placeholder="예: 애드센스 10월분">
+  <div class="m-grid2"><div><label for="cr-n-date">입금일</label><input id="cr-n-date" type="date" value="${esc(i.date)}"></div><div><label for="cr-n-ym">어느 달 수익인지</label><input id="cr-n-ym" type="month" value="${esc(i.ym)}"></div></div>
+  <div class="m-grid2"><div><label for="cr-n-cur">통화</label><select id="cr-n-cur" data-crc="ncur">${Object.entries(CUR).map(([k,l])=>`<option value="${k}" ${i.cur===k?"selected":""}>${l}</option>`).join("")}</select></div><div></div></div>
+  <div class="m-grid2" id="cr-n-fx" style="${i.cur==="KRW"?"display:none":""}"><div><label for="cr-n-fxa">외화 금액</label><input id="cr-n-fxa" inputmode="decimal" value="${i.fx_amount??""}" data-cri="nfx" placeholder="예: 412.35"></div><div><label for="cr-n-fxr">환율 <span class="hint">(입금된 날 기준)</span></label><input id="cr-n-fxr" inputmode="decimal" value="${i.fx_rate??""}" data-cri="nfx" placeholder="예: 1385.5"></div></div>
+  <div class="m-grid3"><div><label for="cr-n-gross">세금 전 금액</label><input id="cr-n-gross" inputmode="numeric" value="${i.gross?fmt(i.gross):""}" data-cri="nnet"></div><div><label for="cr-n-vat">부가세</label><input id="cr-n-vat" inputmode="numeric" value="${i.vat?fmt(i.vat):""}" data-cri="nnet"></div><div><label for="cr-n-wht">원천징수</label><input id="cr-n-wht" inputmode="numeric" value="${i.wht?fmt(i.wht):""}" data-cri="nnet"></div></div>
+  <div class="hint" id="cr-n-net" style="margin-top:8px"></div>
+  <label for="cr-n-memo">메모</label><input id="cr-n-memo" value="${esc(i.memo||"")}" maxlength="500">
+  <div class="m-foot">${isNew?"":`<button class="btn btn-ghost left" data-cr="inc-del" data-id="${i.id}">삭제</button>`}<button class="btn btn-ghost" data-g="modal-close">취소</button><button class="btn btn-pri" data-cr="inc-save" data-id="${isNew?"":i.id}">저장</button></div>`);
+  incNet();
+}
+function incNet(){const o=$("#cr-n-net");if(!o)return;const g=Number(num($("#cr-n-gross").value))||0,v=Number(num($("#cr-n-vat").value))||0,w=Number(num($("#cr-n-wht").value))||0;o.innerHTML=g?`통장에 들어온 돈 <b style="color:var(--ink)">${won(Math.max(0,g+v-w))}</b> = 세금 전 ${fmt(g)}${v?` + 부가세 ${fmt(v)}`:""}${w?` − 원천징수 ${fmt(w)}`:""}`:"세금 전 금액을 적으면 실제 입금액을 계산합니다. 해외 플랫폼 수익은 외화 금액과 환율을 적으면 원화로 바꿉니다.";}
+async function incSave(id){
+  const v=s=>$(s).value.trim(),b={src:v("#cr-n-src"),chan_id:v("#cr-n-chan"),title:v("#cr-n-title"),date:v("#cr-n-date"),ym:v("#cr-n-ym"),cur:v("#cr-n-cur"),fx_amount:num(v("#cr-n-fxa")),fx_rate:num(v("#cr-n-fxr")),gross:num(v("#cr-n-gross")),vat:num(v("#cr-n-vat")),wht:num(v("#cr-n-wht")),memo:v("#cr-n-memo")};
+  if(!b.date)return toast("입금일을 골라 주세요.");
+  if(!Number(b.gross)&&!(b.cur!=="KRW"&&Number(b.fx_amount)&&Number(b.fx_rate)))return toast("금액을 적어 주세요.");
+  if(id)b.id=id;
+  try{const r=await call("inc/save",b);upd(S.incs,r.inc);if(r.inc.deal_id){const dl=dealById(r.inc.deal_id);if(dl){dl.paid_at=r.inc.date;if(dl.d)dl.d.paid_amount=r.inc.net;}}U.iym=r.inc.ym;closeModal();if(onPage())route();toast(finOf(finKey(r.inc))&&finOf(finKey(r.inc)).amount!==r.inc.net?"저장했습니다. ‘돈에 기록’을 다시 누르면 돈 메뉴의 금액도 고쳐집니다.":"저장했습니다.");}catch(e){failToast(e);}
+}
+
+/* ── 채널 ── */
+function spark(vals){   // 구독자 흐름 — 가장 낮은 값과 높은 값 사이에 맞춥니다
+  if(vals.length<2)return"";
+  const W=300,H=46,lo=Math.min(...vals),hi=Math.max(...vals),r=hi-lo||1,pts=vals.map((v,i)=>`${(i/(vals.length-1)*W).toFixed(1)},${(H-4-(v-lo)/r*(H-10)).toFixed(1)}`).join(" ");
+  return`<svg class="cr-spark" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-hidden="true"><polyline points="${pts}" fill="none" stroke="var(--accent)" stroke-width="2" vector-effect="non-scaling-stroke" stroke-linejoin="round"/></svg>`;
+}
+function chanCard(c){
+  const P=PLAT[c.platform]||PLAT.etc,sn=snapsOf(c.id),last=sn[sn.length-1],prev=sn[sn.length-2],av=avgView(c.id),ym=last?last.ym:"";
+  const ads=last?sum(S.incs.filter(i=>i.src==="ads"&&i.chan_id===c.id&&i.ym===last.ym),"gross"):0,rpm=last&&last.views&&ads?ads/last.views*1000:null;
+  return`<div class="cr-chan ${c.active===0?"off":""}">
+    <h3>${esc(c.name)} <span class="tag">${P[0]}</span>${c.active===0?`<span class="pill nodot p-gray">쓰지 않음</span>`:""}</h3>
+    ${c.handle||c.topic?`<div class="hint">${[c.handle&&esc(c.handle),c.topic&&esc(c.topic)].filter(Boolean).join(" · ")}</div>`:""}
+    ${last?`<div class="big">${fmt(last.subs)}<em>${P[1]}</em>${prev?dlt(last.subs,prev.subs):""}</div>${spark(sn.slice(-12).map(s=>s.subs))}
+      <dl class="cr-kv" style="margin-top:6px">${kv(`${+ym.slice(5)}월 조회`,last.views?fmt(last.views)+"회":"")}${kv("올린 수",last.posts?last.posts+"개":"")}${kv("평균 조회",av?`${fmt(av.v)}회 <span class="hint">최근 ${av.n}개</span>`:"")}${kv("조회 1,000회당",rpm!=null?`${won(rpm)} <span class="hint">광고수익 ÷ 조회</span>`:"")}</dl>`
+      :`<div class="hint" style="margin:12px 0">아직 적은 숫자가 없습니다. 구독자와 월 조회수를 달마다 적어 두면 흐름이 보이고 미디어킷에 그대로 나갑니다.</div>`}
+    <div class="cr-acts"><button class="btn btn-sm btn-pri" data-cr="snap-new" data-id="${c.id}">이달 숫자 적기</button>${sn.length?`<button class="btn btn-sm" data-cr="snap-list" data-id="${c.id}">지난 기록</button>`:""}<button class="btn btn-sm btn-ghost" data-cr="chan-edit" data-id="${c.id}">고치기</button>${c.url?`<a class="btn btn-sm btn-ghost" href="${esc(c.url)}" target="_blank" rel="noopener">열기 ↗</a>`:""}</div>
+  </div>`;
+}
+function vChans(){
+  shell("chan",S.chans.length?`<div class="cr-chans">${S.chans.slice().sort((a,b)=>(b.active!==0)-(a.active!==0)||a.sort-b.sort).map(chanCard).join("")}</div>
+  <div class="hint" style="margin-top:12px">숫자는 각 플랫폼의 통계 화면(유튜브 스튜디오, 인스타그램 인사이트 등)에서 보고 달마다 한 번 적습니다. ‘평균 조회’는 최근 90일에 올린 콘텐츠 가운데 조회수를 적은 것의 평균이고, ‘조회 1,000회당’은 그 달 플랫폼 광고수익을 그 달 조회수로 나눈 값입니다.</div>`
+  :empty("채널이 없습니다","유튜브·인스타그램·블로그처럼 활동하는 곳을 적습니다. 채널마다 구독자와 월 조회수를 적어 두면 성장 흐름을 보고, 협찬 단가를 정할 때 근거로 씁니다.<div style=\"margin-top:12px\"><button class=\"btn btn-sm btn-pri\" data-cr=\"chan-new\">＋ 채널</button></div>"),
+  {actions:`<button class="btn btn-pri" data-cr="chan-new">＋ 채널</button>`});
+}
+function chanModal(c){
+  const isNew=!c;c=c||{name:"",platform:"youtube",handle:"",url:"",topic:"",memo:"",active:1};
+  openModal(`<h2><span class="bars"></span>${isNew?"채널 추가":"채널 고치기"}</h2>
+  <div class="m-grid2"><div><label for="cr-h-plat">어디</label><select id="cr-h-plat">${Object.entries(PLAT).map(([k,[l]])=>`<option value="${k}" ${c.platform===k?"selected":""}>${l}</option>`).join("")}</select></div>
+    <div><label for="cr-h-name">채널 이름</label><input id="cr-h-name" value="${esc(c.name)}" maxlength="40" placeholder="예: 하루의 작업실"></div></div>
+  <div class="m-grid2"><div><label for="cr-h-handle">계정·핸들</label><input id="cr-h-handle" value="${esc(c.handle||"")}" maxlength="80" placeholder="@이름"></div><div><label for="cr-h-topic">다루는 주제</label><input id="cr-h-topic" value="${esc(c.topic||"")}" maxlength="60" placeholder="예: 셀프 인테리어"></div></div>
+  <label for="cr-h-url">주소</label><input id="cr-h-url" value="${esc(c.url||"")}" maxlength="300" placeholder="https://">
+  <label for="cr-h-memo">메모</label><input id="cr-h-memo" value="${esc(c.memo||"")}" maxlength="500">
+  ${isNew?"":`<label class="checkline"><input type="checkbox" id="cr-h-active" ${c.active!==0?"checked":""}>쓰는 중 <span class="hint">(끄면 미디어킷과 고르는 목록에서 빠집니다)</span></label>`}
+  <div class="m-foot">${isNew?"":`<button class="btn btn-ghost left" data-cr="chan-del" data-id="${c.id}">삭제</button>`}<button class="btn btn-ghost" data-g="modal-close">취소</button><button class="btn btn-pri" data-cr="chan-save" data-id="${isNew?"":c.id}">저장</button></div>`);
+}
+async function chanSave(id){
+  const v=s=>$(s).value.trim(),b={platform:v("#cr-h-plat"),name:v("#cr-h-name"),handle:v("#cr-h-handle"),topic:v("#cr-h-topic"),url:v("#cr-h-url"),memo:v("#cr-h-memo")};
+  if(!b.name)return toast("채널 이름을 적어 주세요.");
+  if(b.url&&!/^https?:\/\//i.test(b.url))b.url="https://"+b.url;
+  if(id){b.id=id;b.active=$("#cr-h-active").checked;}
+  try{const r=await call("chan/save",b);const i=S.chans.findIndex(x=>x.id===r.chan.id);if(i>-1)S.chans[i]=r.chan;else S.chans.push(r.chan);closeModal();if(onPage())route();toast("저장했습니다.");}catch(e){failToast(e);}
+}
+function snapModal(chanId,ym){
+  const c=chanById(chanId);if(!c)return;
+  ym=ym||ymOf();const cur=S.snaps.find(s=>s.chan_id===chanId&&s.ym===ym)||{},P=PLAT[c.platform]||PLAT.etc;
+  openModal(`<h2><span class="bars"></span>${esc(c.name)} 숫자 적기</h2>
+  <label for="cr-s-ym">어느 달</label><input id="cr-s-ym" type="month" value="${ym}" max="${ymOf()}" data-crc="snapym" data-id="${chanId}">
+  <div class="m-grid3"><div><label for="cr-s-subs">${P[1]} 수</label><input id="cr-s-subs" inputmode="numeric" value="${cur.subs?fmt(cur.subs):""}" placeholder="그달 말 기준"></div><div><label for="cr-s-views">그달 조회수</label><input id="cr-s-views" inputmode="numeric" value="${cur.views?fmt(cur.views):""}"></div><div><label for="cr-s-posts">올린 수</label><input id="cr-s-posts" inputmode="numeric" value="${cur.posts||""}"></div></div>
+  <label for="cr-s-memo">메모</label><input id="cr-s-memo" value="${esc(cur.memo||"")}" maxlength="200" placeholder="예: 쇼츠 하나가 크게 터짐">
+  <div class="hint" style="margin-top:8px">같은 달을 다시 적으면 고쳐집니다. 지난 달도 달을 바꿔 적을 수 있습니다.</div>
+  <div class="m-foot"><button class="btn btn-ghost" data-g="modal-close">취소</button><button class="btn btn-pri" data-cr="snap-save" data-id="${chanId}">저장</button></div>`);
+}
+function snapList(chanId){
+  const c=chanById(chanId);if(!c)return;
+  const sn=snapsOf(chanId).reverse(),P=PLAT[c.platform]||PLAT.etc;
+  openModal(`<h2><span class="bars"></span>${esc(c.name)} 지난 기록</h2>
+  <div class="tblwrap"><table class="tbl"><thead><tr><th>달</th><th class="r">${P[1]}</th><th class="r">조회</th><th class="r">올린 수</th><th></th></tr></thead><tbody>${sn.map((s,i)=>`<tr><td class="nw">${monLabel(s.ym)}${s.memo?`<div class="hint">${esc(s.memo)}</div>`:""}</td><td class="r num">${fmt(s.subs)}${sn[i+1]?dlt(s.subs,sn[i+1].subs):""}</td><td class="r num">${fmt(s.views)}</td><td class="r num">${s.posts||"—"}</td><td class="nw"><button class="btn btn-sm btn-ghost" data-cr="snap-new" data-id="${chanId}" data-ym="${s.ym}">고치기</button> <button class="btn btn-sm btn-ghost" data-cr="snap-del" data-id="${s.id}" data-chan="${chanId}">지우기</button></td></tr>`).join("")}</tbody></table></div>
+  <div class="m-foot"><button class="btn btn-ghost" data-g="modal-close">닫기</button><button class="btn btn-pri" data-cr="snap-new" data-id="${chanId}">이달 숫자 적기</button></div>`);
+}
+
+/* ── 단가 · 견적 ── */
+function quote(){
+  const C=U.calc,o=st().opts,mr=myRates();
+  let base=0,how="";
+  if(C.mode==="rate"){const r=S.rates.find(x=>x.id===C.rate);if(r){base=r.price;how=`단가표 ‘${r.name}’`;}}
+  else{const v=Number(num(C.views))||0,cpv=Number(num(C.cpv))||0;if(v&&cpv){base=Math.round(v*cpv/1000)*1000;how=`예상 조회 ${fmt(v)}회 × 조회당 ${cpv.toLocaleString("ko-KR")}원`;}}
+  const adds=[["usage","2차 활용",o.usage],["excl","독점",o.excl],["rush","급한 일정",o.rush]].filter(([k])=>C[k]).map(([k,l,p])=>({k,l,p,v:Math.round(base*p/100/1000)*1000}));
+  const total=base+adds.reduce((s,a)=>s+a.v,0);
+  return{base,how,adds,total,mr};
+}
+function quoteHtml(){
+  const Q=quote(),mode=defTax(),t=taxOf(Q.total,mode);
+  if(!Q.base)return`<div class="cr-sum"><div class="hint">${U.calc.mode==="rate"?(S.rates.length?"단가표에서 항목을 고르면 여기에 견적이 나옵니다.":"아래 단가표에 항목을 먼저 적어 주세요."):"예상 조회수와 조회당 단가를 적으면 여기에 견적이 나옵니다."}</div></div>`;
+  return`<div class="cr-sum"><div class="hint">제안할 금액 (세금 전)</div><div class="v">${won(Q.total)}</div>
+    <table><tr><td>${esc(Q.how)}</td><td>${fmt(Q.base)}</td></tr>${Q.adds.map(a=>`<tr><td>${a.l} +${a.p}%</td><td>${fmt(a.v)}</td></tr>`).join("")}<tr><td>${mode==="vat"?"부가세 10%":mode==="wht"?`원천징수 ${st().biz.wht}%`:"세금"}</td><td>${mode==="vat"?"+"+fmt(t.vat):mode==="wht"?"−"+fmt(t.wht):"—"}</td></tr><tr><td><b style="color:var(--ink)">통장에 들어오는 돈</b></td><td><b>${fmt(t.net)}</b></td></tr></table>
+    <div class="cr-acts"><button class="btn btn-sm" data-cr="quote-copy">견적 문구 복사</button><button class="btn btn-sm btn-pri" data-cr="quote-deal">이 금액으로 협찬 건 만들기</button></div></div>`;
+}
+function quoteText(){
+  const Q=quote(),mode=defTax(),t=taxOf(Q.total,mode),who=st().biz.name||st().kit.name||DB.meta.workspace;
+  return`안녕하세요, ${who}입니다.\n제안 주신 건의 견적을 보내 드립니다.\n\n· 제작비: ${won(Q.base)}${Q.adds.map(a=>`\n· ${a.l}: ${won(a.v)}`).join("")}\n· 합계: ${won(Q.total)} (${mode==="vat"?`부가세 별도, 부가세 포함 ${won(t.total)}`:mode==="wht"?`원천징수 ${st().biz.wht}% 전 금액`:"세금 전"})\n\n수정 횟수, 2차 활용 범위와 기간, 게시 일정은 조건 확인서로 따로 정리해 보내 드리겠습니다.`;
+}
+function vRates(){
+  const C=U.calc,mr=myRates(),o=st().opts;
+  if(C.mode==="views"&&!C.cpv&&(st().cpv||mr.med))C.cpv=String(st().cpv||Math.round(mr.med*10)/10);
+  if(C.mode==="rate"&&!C.rate&&S.rates.length)C.rate=(S.rates.find(r=>r.active!==0)||S.rates[0]).id;
+  shell("rate",`
+  <div class="sp-grid2">
+    <div>
+      <div class="card"><h2><span class="bars"></span>견적 계산</h2>
+        <div class="seg" style="margin-bottom:6px"><button class="${C.mode==="rate"?"on":""}" data-cr="calc-mode" data-v="rate">단가표에서</button><button class="${C.mode==="views"?"on":""}" data-cr="calc-mode" data-v="views">예상 조회수로</button></div>
+        ${C.mode==="rate"?`<label class="mk-lb" for="cr-q-rate">항목</label><select id="cr-q-rate" data-crc="calc" data-k="rate">${S.rates.filter(r=>r.active!==0||r.id===C.rate).map(r=>`<option value="${r.id}" ${r.id===C.rate?"selected":""}>${esc(r.name)} — ${won(r.price)}</option>`).join("")||`<option value="">단가표가 비어 있습니다</option>`}</select>`
+          :`<div class="mk-form"><div><label for="cr-q-views">예상 조회수</label><input id="cr-q-views" inputmode="numeric" value="${esc(C.views)}" data-cri="calc" data-k="views" placeholder="${avgView()?fmt(avgView().v):"예: 30,000"}"></div><div><label for="cr-q-cpv">조회 1회당 단가 <span class="hint">(원)</span></label><input id="cr-q-cpv" inputmode="decimal" value="${esc(C.cpv)}" data-cri="calc" data-k="cpv" placeholder="예: 25"></div></div>
+            <div class="hint" style="margin-top:6px">${avgView()?`최근 콘텐츠 평균 조회는 ${fmt(avgView().v)}회입니다. `:""}${mr.med!=null?`지난 협찬에서 실제로 받은 조회당 단가는 가운데 값 ${mr.med.toLocaleString("ko-KR",{maximumFractionDigits:1})}원입니다.`:"조회당 단가는 정해진 시세가 없습니다. 협찬을 몇 건 마치고 결과 조회수를 적으면 내 실제 단가가 오른쪽에 계산됩니다."}</div>`}
+        <label class="mk-lb">더하는 조건</label>
+        <div class="mk-pick">${[["usage","2차 활용",o.usage],["excl","독점",o.excl],["rush","급한 일정",o.rush]].map(([k,l,p])=>`<label><input type="checkbox" data-crc="calc-opt" value="${k}" ${C[k]?"checked":""}>${l} +${p}%</label>`).join("")}</div>
+        <div id="cr-q-out">${quoteHtml()}</div>
+        <div class="hint" style="margin-top:8px">더하는 비율은 설정·안내에서 바꿉니다. 금액은 천 원 단위로 맞추고, 세금은 사업 형태(${BIZ[st().biz.type][0]})에 따라 계산한 참고값입니다.</div>
+      </div>
+      <div class="card"><h2><span class="bars"></span>단가표 <span class="cnt">${S.rates.length}개</span><button class="btn btn-sm btn-pri" data-cr="rate-new" style="margin-left:auto">＋ 항목</button></h2>
+        ${S.rates.length?S.rates.map(r=>`<div class="pj-line" data-cr="rate-edit" data-id="${r.id}" style="${r.active===0?"opacity:.55":""}"><span class="pj-nm">${esc(r.name)}${r.note?`<div class="hint" style="font-weight:400;white-space:normal">${esc(r.note)}</div>`:""}</span>${chanName(r.chan_id)?`<span class="hint">${esc(chanName(r.chan_id))}</span>`:""}<span class="mono" style="font-size:13px;font-weight:600">${won(r.price)}</span></div>`).join(""):`<div class="empty" style="padding:16px">자주 받는 일의 기준 금액을 적어 둡니다. 예: 브랜디드 영상 1편, 쇼츠 1편, 인스타그램 피드 1개.</div>`}
+        <div class="hint" style="margin-top:8px">단가표는 미디어킷에서 ‘단가 보여 주기’를 켰을 때만 밖으로 나갑니다.</div>
+      </div>
+    </div>
+    <div>
+      <div class="card"><h2><span class="bars"></span>내 실제 단가 <span class="cnt">지난 12개월</span></h2>
+        ${mr.rows.length?`<div class="sp-kpis" style="grid-template-columns:1fr 1fr"><div class="stat"><div class="s-num">${mr.med.toLocaleString("ko-KR",{maximumFractionDigits:1})}<em>원</em></div><div class="s-lb">조회 1회당 (가운데 값)</div></div><div class="stat"><div class="s-num">${mr.avg.toLocaleString("ko-KR",{maximumFractionDigits:1})}<em>원</em></div><div class="s-lb">조회 1회당 (전체 평균)</div></div></div>
+          <div class="tblwrap"><table class="tbl" style="min-width:0;font-size:13px"><thead><tr><th>브랜드 · 건</th><th class="r">금액</th><th class="r">조회</th><th class="r">조회당</th></tr></thead><tbody>${mr.rows.slice(0,15).map(r=>`<tr data-cr="deal-open" data-id="${r.d.id}" style="cursor:pointer"><td><b>${esc(r.d.brand)}</b>${r.d.title?`<div class="hint">${esc(r.d.title)}</div>`:""}</td><td class="r num">${fmt(r.d.amount)}</td><td class="r num">${fmt(r.view)}</td><td class="r num">${r.cpv.toLocaleString("ko-KR",{maximumFractionDigits:1})}원</td></tr>`).join("")}</tbody></table></div>
+          <div class="hint" style="margin-top:8px">돈을 받은 협찬 가운데 결과 조회수를 적은 ${mr.rows.length}건으로 계산했습니다. 건수가 적을 때는 참고만 하세요.</div>`
+          :`<div class="empty" style="padding:18px">아직 계산할 기록이 없습니다.<br>협찬을 마치고 ‘결과’에 조회수를 적으면, 금액 ÷ 조회수로 내가 실제로 받은 단가가 여기에 쌓입니다.</div>`}
+      </div>
+      <div class="card"><h2><span class="bars"></span>협찬 제안은 얼마나 성사되나</h2>${(()=>{const all=S.deals.length,won_=S.deals.filter(d=>!["inquiry","nego","lost"].includes(d.stage)).length,lost=S.deals.filter(d=>d.stage==="lost"),why=new Map();for(const d of lost){const w=D(d).lost_reason||"사유 없음";why.set(w,(why.get(w)||0)+1);}return all?`<div class="sp-today"><span class="bchip"><b>${all}</b>들어온 제안</span><span class="bchip"><b>${won_}</b>계약까지</span><span class="bchip"><b>${lost.length}</b>무산</span><span class="bchip"><b>${all-won_-lost.length}</b>이야기 중</span></div>${why.size?`<div class="hint" style="margin-top:10px">무산된 이유: ${[...why.entries()].sort((a,b)=>b[1]-a[1]).slice(0,5).map(([w,n])=>`${esc(w)} ${n}건`).join(" · ")}</div>`:""}`:`<div class="empty" style="padding:16px">협찬 건을 적으면 보입니다.</div>`;})()}</div>
+    </div>
+  </div>`);
+}
+function rateModal(r){
+  const isNew=!r;r=r||{name:"",chan_id:"",format:"long",price:0,note:"",active:1};
+  openModal(`<h2><span class="bars"></span>${isNew?"단가표 항목":"단가표 고치기"}</h2>
+  <label for="cr-r-name">이름</label><input id="cr-r-name" value="${esc(r.name)}" maxlength="60" placeholder="예: 브랜디드 영상 1편">
+  <div class="m-grid2"><div><label for="cr-r-chan">채널</label><select id="cr-r-chan">${chanOpts(r.chan_id,"모든 채널")}</select></div><div><label for="cr-r-fmt">형식</label><select id="cr-r-fmt">${Object.entries(FMT).map(([k,l])=>`<option value="${k}" ${r.format===k?"selected":""}>${l}</option>`).join("")}</select></div></div>
+  <label for="cr-r-price">금액 <span class="hint">(세금 전, 원)</span></label><input id="cr-r-price" inputmode="numeric" value="${r.price?fmt(r.price):""}">
+  <label for="cr-r-note">포함하는 것</label><input id="cr-r-note" value="${esc(r.note||"")}" maxlength="200" placeholder="예: 기획·촬영·편집, 수정 2번, 30일 게시">
+  ${isNew?"":`<label class="checkline"><input type="checkbox" id="cr-r-active" ${r.active!==0?"checked":""}>쓰는 중</label>`}
+  <div class="m-foot">${isNew?"":`<button class="btn btn-ghost left" data-cr="rate-del" data-id="${r.id}">삭제</button>`}<button class="btn btn-ghost" data-g="modal-close">취소</button><button class="btn btn-pri" data-cr="rate-save" data-id="${isNew?"":r.id}">저장</button></div>`);
+}
+
+/* ── 미디어킷 ── */
+function vKit(){
+  const k=st().kit,L=S.kitLink,posted=S.conts.filter(c=>c.stage==="posted"&&c.url).sort((a,b)=>b.view-a.view||(b.post_date||"").localeCompare(a.post_date||"")).slice(0,40),cases=S.deals.filter(d=>D(d).show_case&&["posted","settle","done"].includes(d.stage)),url=L?lkUrl(L.token):"";
+  const noNum=chansAct().filter(c=>!lastSnap(c.id)).length;
+  shell("kit",`
+  <div class="sp-grid2">
+    <div>
+      <div class="card"><h2><span class="bars"></span>주소 ${k.on&&L?`<span class="pill p-green">공개 중</span>`:`<span class="pill p-gray">닫힘</span>`}</h2>
+        ${k.on&&L?`<div class="linkbox mono" style="margin-bottom:10px">${esc(url)}</div>
+          <div class="cr-acts" style="margin-top:0"><button class="btn btn-sm btn-pri" data-cr="copy" data-text="${esc(url)}" data-msg="미디어킷 주소를 복사했습니다. 프로필 링크나 메일 서명에 넣어 두세요.">주소 복사</button><a class="btn btn-sm" href="${esc(url)}" target="_blank" rel="noopener">보는 화면 열기 ↗</a><button class="btn btn-sm btn-ghost" data-cr="kit-link">새 주소로 바꾸기</button><button class="btn btn-sm btn-ghost" data-cr="kit-off">닫기</button></div>
+          <div class="hint" style="margin-top:10px">${L.views?`${fmt(L.views)}번 열렸습니다 · 마지막 ${fmtWhen(L.lastView)}`:"아직 열어 본 사람이 없습니다"} · ${fmtD(L.expiresAt.slice(0,10))}까지 열립니다. 인스타그램 프로필 링크, 유튜브 채널 정보, 메일 서명에 넣어 두면 브랜드가 여기서 숫자를 보고 바로 문의합니다.</div>`
+          :`<div class="hint" style="margin-bottom:12px">미디어킷은 브랜드에게 보여 주는 내 소개 페이지입니다. 채널 숫자, 대표 콘텐츠, 함께한 브랜드가 한 장에 담기고, 브랜드가 그 페이지에서 바로 협찬 문의를 남깁니다. 문의는 협찬 탭의 ‘문의’ 칸에 들어옵니다.</div>
+          <button class="btn btn-pri" data-cr="kit-on">미디어킷 열기</button>${noNum?`<div class="hint" style="margin-top:10px">숫자를 적지 않은 채널이 ${noNum}개 있습니다. <a data-cr="go" data-to="chan" style="cursor:pointer;text-decoration:underline">채널 탭</a>에서 먼저 적어 두면 좋습니다.</div>`:""}`}
+      </div>
+      <div class="card"><h2><span class="bars"></span>미디어킷에 나가는 것</h2>
+        <dl class="cr-kv">${kv("채널",chansAct().length?chansAct().map(c=>esc(c.name)+(lastSnap(c.id)?` <span class="hint">${cnt(lastSnap(c.id).subs)}</span>`:` <span class="hint">숫자가 없어 빠짐</span>`)).join(", "):`<span class="hint">채널 탭에서 추가</span>`)}${kv("숫자","채널마다 가장 최근에 적은 구독자·팔로워, 최근 석 달 평균 월 조회수, 최근 90일 콘텐츠 평균 조회")}${kv("대표 콘텐츠",k.picks.length?`${k.picks.filter(id=>posted.some(c=>c.id===id)||contById(id)).length}개 고름`:`<span class="hint">아래에서 고르기</span>`)}${kv("함께한 브랜드",k.cases?(cases.length?cases.map(d=>esc(d.brand)).join(", "):`<span class="hint">협찬 건의 ‘결과’에서 보여 줄 건을 고릅니다</span>`):"보여 주지 않음")}${kv("단가",k.rates?`${S.rates.filter(r=>r.active!==0).length}개 항목`:"보여 주지 않음")}</dl>
+        <div class="hint" style="margin-top:10px">협찬 금액, 다른 브랜드와의 조건, 메모는 나가지 않습니다.</div>
+      </div>
+    </div>
+    <div>
+      <div class="card"><h2><span class="bars"></span>소개 내용</h2>
+        <div class="m-grid2"><div><label class="mk-lb" for="cr-k-name">이름</label><input id="cr-k-name" value="${esc(k.name)}" maxlength="40" placeholder="${esc(DB.meta.workspace)}"></div><div><label class="mk-lb" for="cr-k-email">연락 이메일 <span class="hint">(보여 줄 때만)</span></label><input id="cr-k-email" value="${esc(k.email)}" maxlength="80"></div></div>
+        <label class="mk-lb" for="cr-k-tag">한 줄 소개</label><input id="cr-k-tag" value="${esc(k.tagline)}" maxlength="80" placeholder="예: 혼자 사는 집을 직접 고치는 사람">
+        <label class="mk-lb" for="cr-k-bio">소개</label><textarea id="cr-k-bio" maxlength="1200" style="min-height:90px" placeholder="어떤 사람들이 왜 보는 채널인지, 어떤 협업이 잘 맞는지">${esc(k.bio)}</textarea>
+        <label class="mk-lb" for="cr-k-topics">다루는 주제 <span class="hint">(쉼표로 나눠서, 10개까지)</span></label><input id="cr-k-topics" value="${esc(k.topics.join(", "))}" maxlength="240" placeholder="셀프 인테리어, 공구, 자취">
+        <div class="mk-sub">보는 사람 <span class="hint">플랫폼 통계 화면의 숫자를 옮겨 적습니다. 비워 두면 나가지 않습니다.</span></div>
+        <div class="mk-form"><div><label for="cr-k-f">여성 %</label><input id="cr-k-f" inputmode="numeric" value="${k.aud.f??""}"></div><div><label for="cr-k-m">남성 %</label><input id="cr-k-m" inputmode="numeric" value="${k.aud.m??""}"></div><div><label for="cr-k-ages">연령대</label><input id="cr-k-ages" value="${esc(k.aud.ages)}" maxlength="80" placeholder="예: 25–34세가 절반"></div><div><label for="cr-k-reg">지역</label><input id="cr-k-reg" value="${esc(k.aud.regions)}" maxlength="80" placeholder="예: 수도권 70%"></div></div>
+        <div class="mk-sub">보여 줄 것</div>
+        <label class="cr-pickrow"><input type="checkbox" id="cr-k-inq" ${k.inquiry?"checked":""}><span style="white-space:normal">협찬 문의 받기 <span class="hint">(끄면 숫자만 보여 줍니다)</span></span></label>
+        <label class="cr-pickrow"><input type="checkbox" id="cr-k-cases" ${k.cases?"checked":""}><span style="white-space:normal">함께한 브랜드 <span class="hint">(${cases.length}건 골라 둠)</span></span></label>
+        <label class="cr-pickrow"><input type="checkbox" id="cr-k-rates" ${k.rates?"checked":""}><span style="white-space:normal">단가표 <span class="hint">(금액을 미리 밝히고 싶을 때만)</span></span></label>
+        <div class="mk-sub">대표 콘텐츠 <span class="hint">8개까지 · 게시 주소가 있는 것만</span></div>
+        ${posted.length?`<div style="max-height:260px;overflow:auto">${posted.map(c=>`<label class="cr-pickrow"><input type="checkbox" class="cr-k-pick" value="${c.id}" ${k.picks.includes(c.id)?"checked":""}><span>${esc(c.title)}</span><em>${c.view?cnt(c.view):"—"}</em></label>`).join("")}</div>`:`<div class="hint">게시한 콘텐츠에 주소를 적어 두면 여기서 고를 수 있습니다.</div>`}
+        <div style="margin-top:14px"><button class="btn btn-pri" data-cr="kit-save">저장</button></div>
+      </div>
+    </div>
+  </div>`);
+}
+function kitRead(){
+  const v=s=>$(s).value.trim(),picks=$$(".cr-k-pick:checked").map(x=>x.value);
+  if(picks.length>8){toast("대표 콘텐츠는 8개까지 고릅니다.");return null;}
+  return{name:v("#cr-k-name"),email:v("#cr-k-email"),tagline:v("#cr-k-tag"),bio:v("#cr-k-bio"),topics:v("#cr-k-topics").split(/[,\n]/).map(s=>s.trim()).filter(Boolean),aud:{f:v("#cr-k-f"),m:v("#cr-k-m"),ages:v("#cr-k-ages"),regions:v("#cr-k-reg")},inquiry:$("#cr-k-inq").checked,cases:$("#cr-k-cases").checked,rates:$("#cr-k-rates").checked,picks};
+}
+async function kitLink(){try{const r=await api("link/create",{kind:"cr-kit",target:"kit",days:365});S.kitLink={token:r.token,createdAt:new Date().toISOString(),expiresAt:r.expiresAt,views:0,lastView:""};return true;}catch(e){if(e.code!=="unauthorized")toast("주소를 만들지 못했습니다.");return false;}}
+
+/* ── 설정 · 안내 ── */
+function vSet(){
+  const s=st(),b=s.biz,o=s.opts;
+  shell("set",`
+  <div class="sp-grid2">
+    <div>
+      <div class="card"><h2><span class="bars"></span>사업 형태</h2>
+        ${Object.entries(BIZ).map(([k,[l,h]])=>`<label class="cr-pickrow"><input type="radio" name="cr-biz" value="${k}" ${b.type===k?"checked":""}><span style="white-space:normal"><b>${l}</b> <span class="hint">${h}</span></span></label>`).join("")}
+        <div class="mk-form" style="margin-top:6px"><div><label for="cr-t-wht">원천징수율 <span class="hint">(%)</span></label><input id="cr-t-wht" inputmode="decimal" value="${b.wht}"></div><div><label for="cr-t-name">활동명·상호</label><input id="cr-t-name" value="${esc(b.name)}" maxlength="40" placeholder="${esc(DB.meta.workspace)}"></div><div><label for="cr-t-person">이름</label><input id="cr-t-person" value="${esc(b.person)}" maxlength="30"></div><div><label for="cr-t-email">이메일</label><input id="cr-t-email" value="${esc(b.email)}" maxlength="80"></div><div><label for="cr-t-phone">전화</label><input id="cr-t-phone" value="${esc(b.phone)}" maxlength="30"></div></div>
+        <div class="hint" style="margin-top:8px">사업 형태에 따라 새 협찬 건의 세금 처리 기본값이 정해집니다(건마다 바꿀 수 있습니다). 이름과 연락처는 조건 확인서와 결과 보고서의 보내는 사람으로 나갑니다. 원천징수율은 지금 3.3%이고, 법이 바뀌면 여기서 고칩니다.</div>
+        <div class="mk-sub">견적에 더하는 비율</div>
+        <div class="mk-form"><div><label for="cr-t-usage">2차 활용 <span class="hint">(%)</span></label><input id="cr-t-usage" inputmode="numeric" value="${o.usage}"></div><div><label for="cr-t-excl">독점 <span class="hint">(%)</span></label><input id="cr-t-excl" inputmode="numeric" value="${o.excl}"></div><div><label for="cr-t-rush">급한 일정 <span class="hint">(%)</span></label><input id="cr-t-rush" inputmode="numeric" value="${o.rush}"></div><div><label for="cr-t-cpv">조회 1회당 단가 <span class="hint">(원, 정해 둔 값이 있을 때)</span></label><input id="cr-t-cpv" inputmode="decimal" value="${s.cpv||""}"></div></div>
+        <div style="margin-top:14px"><button class="btn btn-pri" data-cr="set-save">저장</button></div>
+      </div>
+    </div>
+    <div>
+      <details class="cr-guide" open><summary>광고 표기 — 무엇을 어디에 적나</summary><div class="in">
+        <ul><li>돈, 제품, 할인, 판매 수수료 가운데 하나라도 받았으면 표시합니다. 제품만 받은 경우도 마찬가지입니다.</li><li>‘광고’, ‘유료 광고 포함’, ‘협찬’, ‘원고료 지원’처럼 뜻이 분명한 우리말로 적습니다.</li><li>‘체험단’, ‘서포터즈’, ‘선물’처럼 대가가 드러나지 않는 말, 우리말 게시물에 영어로만 쓴 ‘AD’·‘Sponsored’는 인정되지 않습니다.</li><li>배경과 비슷한 색이나 작은 글씨, 해시태그 여러 개 사이에 섞은 ‘#광고’도 인정되지 않습니다.</li><li>브랜드가 표시를 빼 달라고 해도 넣어야 합니다. 표시가 빠지면 표시광고법 위반이 될 수 있습니다.</li></ul>
+        ${Object.values(DISC).map(([n,L])=>`<h4>${n}</h4><ul>${L.map(x=>`<li>${x}</li>`).join("")}</ul>`).join("")}
+        <div class="hint" style="margin-top:8px">공정거래위원회 「추천·보증 등에 관한 표시·광고 심사지침」을 간추린 참고용 안내입니다. 헷갈리는 경우는 지침 원문과 공정거래위원회 안내서를 확인하세요.</div></div></details>
+      <details class="cr-guide"><summary>계약하기 전에 확인할 것</summary><div class="in">
+        <ul><li><b>금액과 세금</b> — 부가세가 포함인지 별도인지, 3.3%를 떼는지.</li><li><b>언제 받는지</b> — 게시 뒤 며칠 안에 입금하는지. 날짜가 없으면 ‘게시일로부터 30일 안’처럼 적어 달라고 합니다.</li><li><b>수정 횟수</b> — 몇 번까지 무료로 고치는지. 넘으면 어떻게 하는지.</li><li><b>2차 활용</b> — 브랜드가 내 콘텐츠를 광고·상세페이지·자기 채널에 쓰는지, 어디에 언제까지 쓰는지. 따로 값을 받을 수 있습니다.</li><li><b>독점</b> — 경쟁 브랜드와 일하지 못하는 기간과 범위. 넓고 길수록 값이 올라야 합니다.</li><li><b>게시 유지</b> — 언제까지 내리지 않기로 하는지.</li><li><b>저작권</b> — 만든 콘텐츠의 권리가 누구에게 있는지. 넘기는 조건이면 금액이 달라져야 합니다.</li><li><b>성과 보장</b> — 조회수·판매를 보장하는 조항이 있는지. 있다면 못 미쳤을 때 어떻게 되는지.</li><li><b>취소</b> — 촬영 뒤에 취소되면 얼마를 받는지.</li></ul>
+        <div class="hint" style="margin-top:8px">협찬 건에 이 내용을 적어 ‘조건 확인서’로 보내면, 브랜드가 확인한 조건이 날짜와 함께 남습니다. 계약서를 대신하지는 않으니 금액이 큰 건은 계약서도 함께 쓰세요.</div></div></details>
+      <details class="cr-guide"><summary>세금 — 알아 둘 것</summary><div class="in">
+        <ul><li>혼자 하고 직원이나 전용 스튜디오가 없으면 면세사업자(업종코드 940306), 직원이 있거나 스튜디오·장비를 갖추면 과세사업자(921505)로 등록하는 것이 보통입니다. 실제 활동에 맞게 고릅니다.</li><li>사업자가 없거나 면세사업자이면 브랜드가 3.3%를 떼고 줍니다. 뗀 세금은 다음 해 5월 종합소득세를 신고할 때 정산합니다. 수익 탭의 ‘미리 뗀 세금’이 그 합계입니다.</li><li>과세사업자가 구글 같은 해외 플랫폼에서 외화로 받는 광고수익은 부가세 영세율(0%)을 적용받을 수 있습니다. 원화로 받는 후원 수익은 다를 수 있습니다.</li><li>해외 수익은 입금된 날의 환율로 원화 금액을 적어 둡니다. 은행의 외화 입금 내역을 함께 보관하세요.</li><li>제품만 받은 협찬의 세금 처리는 경우에 따라 다르니 세무사와 확인하세요.</li></ul>
+        <div class="hint" style="margin-top:8px">참고용 안내입니다. 실제 신고는 세무사나 국세청 안내를 따르세요. 수익을 ‘돈에 기록’하면 마이택스에서 손익과 신고 자료로 이어 볼 수 있습니다.</div></div></details>
+    </div>
+  </div>`);
+}
+
+/* ── 공개 페이지 — 미디어킷 · 조건 확인서 · 결과 보고서 (로그인 없이 봅니다) ── */
+const sheetHtml=v=>`${termsHtml(v.deal||{})}${(v.sender||{}).email||(v.sender||{}).phone?`<div class="lk-meta" style="margin-bottom:0"><span>문의 ${v.sender.email?`<b><a href="mailto:${esc(v.sender.email)}">${esc(v.sender.email)}</a></b>`:""}${v.sender.phone?` <b>${esc(v.sender.phone)}</b>`:""}</span></div>`:""}${v.agreedAt?`<div class="hint" style="margin-top:10px">${v.agreedBy?esc(v.agreedBy)+"님이 ":""}${fmtWhen(v.agreedAt)}에 확인한 조건입니다.</div>`:""}<div class="hint" style="margin:12px 0 4px">돈이나 제품을 받고 만든 콘텐츠에는 ‘광고’·‘협찬’ 표시가 들어갑니다(공정거래위원회 추천·보증 심사지침).</div>`;
+function kitPage(box,L){
+  const v=L.view||{},s=v.sender||{},a=v.aud||{},ch=v.channels||[];
+  $("#lk-label").textContent="미디어킷";
+  $("#lk-foot").innerHTML=`${esc(v.title||s.workspace||"")}님이 마이웍스에서 만든 미디어킷입니다. 숫자는 본인이 각 플랫폼의 통계를 보고 적은 것입니다.`;
+  const aud=[a.f!=null&&`여성 ${a.f}%`,a.m!=null&&`남성 ${a.m}%`,a.ages&&esc(a.ages),a.regions&&esc(a.regions)].filter(Boolean);
+  const form=!v.inquiry?"":L.expired?`<div class="sp-box warn"><b>지금은 문의를 받지 않습니다</b>기한이 지난 주소입니다.</div>`:U.sent?`<div class="sp-box ok"><b>문의를 보냈습니다</b>확인하는 대로 적어 주신 연락처로 답을 드립니다.</div>`
+    :`<div class="lk-act" id="cr-inq"><h3 style="font-size:16px;font-weight:800;margin-bottom:4px">협업 문의</h3><div class="hint">적어 주신 회사·이름·연락처와 내용은 ${esc(v.title||"")}님에게 전달되어 이 문의에 답하는 데에만 쓰입니다.</div>
+      <div class="m-grid2"><div><label for="cr-iq-company">회사·브랜드</label><input id="cr-iq-company" maxlength="60" autocomplete="organization"></div><div><label for="cr-iq-name">담당자 이름</label><input id="cr-iq-name" maxlength="40" autocomplete="name"></div></div>
+      <div class="m-grid2"><div><label for="cr-iq-email">이메일</label><input id="cr-iq-email" type="email" maxlength="80" autocomplete="email"></div><div><label for="cr-iq-phone">전화 <span style="font-weight:500;color:var(--faint)">(선택)</span></label><input id="cr-iq-phone" type="tel" maxlength="30" autocomplete="tel"></div></div>
+      <div class="m-grid2"><div><label for="cr-iq-type">어떤 협업인가요</label><select id="cr-iq-type">${Object.entries(TYPE).map(([k,[l]])=>`<option value="${k}">${l}</option>`).join("")}</select></div><div><label for="cr-iq-budget">예산 <span style="font-weight:500;color:var(--faint)">(선택)</span></label><input id="cr-iq-budget" maxlength="60" placeholder="예: 100~200만 원"></div></div>
+      <label for="cr-iq-msg">내용</label><textarea id="cr-iq-msg" maxlength="2000" style="min-height:110px" placeholder="어떤 제품·서비스인지, 원하는 콘텐츠와 일정"></textarea>
+      <input class="cr-hp" id="cr-iq-hp" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <div class="m-foot" style="justify-content:flex-start"><button class="btn btn-pri" data-cr="inq-send">문의 보내기</button></div></div>`;
+  box.innerHTML=`<div class="cr-kit-top"><span class="pill p-line">미디어킷</span><h1>${esc(v.title||"")}</h1>${v.tagline?`<p>${esc(v.tagline)}</p>`:""}${(v.topics||[]).length?`<div class="mk-tags" style="margin-top:10px">${v.topics.map(t=>`<span class="tag">${esc(t)}</span>`).join("")}</div>`:""}</div>
+  ${v.bio?`<div class="cr-kit-bio">${esc(v.bio)}</div>`:""}
+  ${ch.length?`<div class="lk-sec"><h3>채널${v.asOf?` <span class="hint">${monLabel(v.asOf)} 기준</span>`:""}</h3><div class="cr-kit-ch">${ch.map(c=>{const P=PLAT[c.platform]||PLAT.etc;return`<div><h4>${c.url?`<a href="${esc(c.url)}" target="_blank" rel="noopener">${esc(c.name)} ↗</a>`:esc(c.name)}</h4><div class="hint">${P[0]}${c.handle?` · ${esc(c.handle)}`:""}${c.topic?` · ${esc(c.topic)}`:""}</div><dl>${c.subs!=null?`<dt>${P[1]}</dt><dd>${fmt(c.subs)}</dd>`:""}${c.monthViews!=null?`<dt>월 조회 (최근 석 달 평균)</dt><dd>${fmt(c.monthViews)}</dd>`:""}${c.avgView!=null?`<dt>콘텐츠 평균 조회 (최근 ${c.avgN}개)</dt><dd>${fmt(c.avgView)}</dd>`:""}</dl></div>`;}).join("")}</div></div>`:""}
+  ${aud.length||a.note?`<div class="lk-sec"><h3>보는 사람</h3><div class="mk-tags">${aud.map(x=>`<span class="tag">${x}</span>`).join("")}</div>${a.note?`<div class="hint" style="margin-top:6px">${esc(a.note)}</div>`:""}</div>`:""}
+  ${(v.picks||[]).length?`<div class="lk-sec"><h3>대표 콘텐츠</h3><div class="cr-kit-list">${v.picks.map(p=>`<a href="${esc(p.url)}" target="_blank" rel="noopener"><b>${esc(p.title)} ↗</b><span>${esc(p.channel||"")}${p.view?` · 조회 ${cnt(p.view)}`:""}</span></a>`).join("")}</div></div>`:""}
+  ${(v.cases||[]).length?`<div class="lk-sec"><h3>함께한 브랜드</h3><div class="cr-kit-list">${v.cases.map(c=>c.url?`<a href="${esc(c.url)}" target="_blank" rel="noopener"><b>${esc(c.brand)}${c.title?` — ${esc(c.title)}`:""} ↗</b><span>${TYPE[c.type]?TYPE[c.type][0]:""}</span></a>`:`<div><b>${esc(c.brand)}${c.title?` — ${esc(c.title)}`:""}</b><span>${TYPE[c.type]?TYPE[c.type][0]:""}</span></div>`).join("")}</div></div>`:""}
+  ${(v.rates||[]).length?`<div class="lk-sec"><h3>단가 <span class="hint">세금 전 · 조건에 따라 달라집니다</span></h3><div class="cr-kit-list">${v.rates.map(r=>`<div><b>${esc(r.name)}${r.note?`<div class="hint" style="font-weight:400">${esc(r.note)}</div>`:""}</b><span class="mono" style="color:var(--ink);font-weight:600">${won(r.price)}</span></div>`).join("")}</div></div>`:""}
+  ${v.email?`<div class="lk-meta"><span>연락 <b><a href="mailto:${esc(v.email)}">${esc(v.email)}</a></b></span></div>`:""}
+  ${form}${lkCta()}`;
+}
+function reportPage(box,L){
+  const v=L.view||{},s=v.sender||{},r=v.report||{},N=[["view","조회"],["likes","좋아요"],["cmts","댓글"],["shares","공유"],["saves","저장"],["clk","링크 클릭"]].filter(([k])=>r[k]>0);
+  $("#lk-label").textContent="결과 보고서";
+  $("#lk-foot").innerHTML=`${esc(s.workspace||"보낸 분")}님이 마이웍스에서 만든 결과 보고서입니다. 로그인 없이 보기만 할 수 있습니다.`;
+  box.innerHTML=`<div class="lk-head"><span class="pill p-line">결과 보고서</span><h1>${esc(v.title||"협찬 결과")}</h1><div class="hint">${esc(s.workspace||"")}${s.name?` · ${esc(s.name)}`:""}${v.client?` → ${esc(v.client)}${v.company?` (${esc(v.company)})`:""}`:""}</div></div>
+  ${N.length?`<div class="cr-num4">${N.map(([k,l])=>`<div><b>${fmt(r[k])}</b><span>${l}</span></div>`).join("")}</div>`:`<div class="sp-box info">아직 숫자를 적지 않았습니다.</div>`}
+  <div class="lk-meta">${r.channel?`<span>채널 <b>${esc(r.channel)}</b></span>`:""}${r.posted_at?`<span>게시한 날 <b>${fmtD(r.posted_at)}</b></span>`:""}${r.at?`<span>숫자를 센 날 <b>${fmtD(r.at)}</b></span>`:""}</div>
+  ${r.items?`<div class="hint" style="margin-bottom:10px">만든 것: ${esc(r.items)}</div>`:""}
+  ${(r.urls||[]).length?`<div class="lk-dl">${r.urls.map(u=>`<a class="lk-file" href="${esc(u)}" target="_blank" rel="noopener">${esc(u)} ↗</a>`).join("")}</div>`:""}
+  ${(r.contents||[]).length?`<div class="lk-sec"><h3>콘텐츠별</h3><div class="tblwrap"><table class="tbl lk-tbl"><thead><tr><th>콘텐츠</th><th class="r">조회</th><th class="r">좋아요</th><th class="r">댓글</th></tr></thead><tbody>${r.contents.map(c=>`<tr><td>${c.url?`<a href="${esc(c.url)}" target="_blank" rel="noopener">${esc(c.title)} ↗</a>`:esc(c.title)}<div class="hint">${esc(c.channel||"")}${c.date?` · ${fmtD(c.date)}`:""}</div></td><td class="r num">${fmt(c.view)}</td><td class="r num">${fmt(c.likes)}</td><td class="r num">${fmt(c.cmts)}</td></tr>`).join("")}</tbody></table></div></div>`:""}
+  ${r.note?`<div class="notes-view" style="margin:12px 0">${esc(r.note)}</div>`:""}
+  ${r.disclosure?`<div class="hint">광고 표기: ${esc(r.disclosure)}</div>`:""}
+  ${s.email||s.phone?`<div class="lk-meta" style="margin-top:14px"><span>문의 ${s.email?`<b><a href="mailto:${esc(s.email)}">${esc(s.email)}</a></b>`:""}${s.phone?` <b>${esc(s.phone)}</b>`:""}</span></div>`:""}
+  ${lkCta()}`;
+}
+function linkPage(){const box=$("#lk-box");if(!box||!LINK)return;((LINK.view||{}).kind==="cr-report"?reportPage:kitPage)(box,LINK);}
+async function inqSend(btn){
+  const v=s=>$(s).value.trim(),b={t:LINK.token,company:v("#cr-iq-company"),name:v("#cr-iq-name"),email:v("#cr-iq-email"),phone:v("#cr-iq-phone"),type:v("#cr-iq-type"),budget:v("#cr-iq-budget"),message:v("#cr-iq-msg"),hp:v("#cr-iq-hp")};
+  if(!b.company&&!b.name)return toast("회사나 담당자 이름을 적어 주세요.");
+  if(!b.email&&!b.phone)return toast("답을 받을 이메일이나 전화를 적어 주세요.");
+  if(!b.message)return toast("문의 내용을 적어 주세요.");
+  btn.disabled=true;
+  try{await api("link/inquiry",b);U.sent=true;linkPage();toast("문의를 보냈습니다.");}
+  catch(e){btn.disabled=false;toast(e.code==="bad-email"?"이메일 주소를 확인해 주세요.":e.code==="closed"?"지금은 문의를 받지 않습니다.":e.status===429?"오늘은 문의가 많아 더 받지 못했습니다. 이메일로 연락해 주세요.":e.status===410?"기한이 지난 주소입니다.":"보내지 못했습니다. 잠시 후 다시 시도해 주세요.");}
+}
+
+/* ── 마이웍스 다른 화면과의 연결 ── */
+function fillDash(){
+  const el=$("#cr-dash-slot");if(!el||MODE!=="cloud"||!mgr()||!modOn("creator"))return;
+  if(!S.ready){if(!S.loading)load().then(fillDash).catch(()=>{});return;}
+  refresh(false);
+  if(!S.chans.length&&!S.deals.length&&!S.conts.length&&!S.incs.length){el.innerHTML=`<div class="card" style="padding:14px 20px;display:flex;gap:12px;align-items:center;flex-wrap:wrap"><span style="font-size:13.5px;color:var(--sub);flex:1;min-width:220px"><b style="color:var(--ink)">마이크리에이터</b> — 협찬 문의부터 입금까지, 만드는 일과 버는 돈을 한곳에서 챙깁니다.</span><button class="btn btn-sm" data-nav="creator">시작하기 →</button></div>`;return;}
+  const al=alerts(),hot=al.filter(a=>a.sev>=3).length,ym=ymOf(),up=unpaid(),wk=weekItems(7).length,open=openDeals().length;
+  el.innerHTML=`<div class="card"><h2><span class="bars"></span>협찬·콘텐츠 <button class="btn btn-sm btn-ghost" data-nav="creator" style="margin-left:auto">마이크리에이터 열기 →</button></h2>
+    <div class="sp-today">${hot?`<span class="bchip warn" data-cr="go" data-to=""><b>${hot}</b>지금 챙길 것</span>`:""}<span class="bchip" data-cr="go" data-to="deal"><b>${open}</b>진행 중인 협찬</span>${up.length?`<span class="bchip ${up.some(d=>d.pay_due&&d.pay_due<T())?"warn":""}" data-cr="go" data-to="inc"><b>${man(sum(up.map(d=>({a:taxOf(d.amount,d.tax_mode).net})),"a"))}</b>받을 돈</span>`:""}<span class="bchip" data-cr="go" data-to="inc"><b>${man(sum(incOf(ym),"gross"))}</b>이달 수익</span>${wk?`<span class="bchip rev" data-cr="go" data-to="cont"><b>${wk}</b>이레 안 일정</span>`:""}</div></div>`;
+}
+function weekText(s0,s1){
+  if(MODE!=="cloud"||!mgr()||!S.ready||!modOn("creator")||(!S.deals.length&&!S.conts.length&&!S.incs.length))return"";
+  const posted=S.conts.filter(c=>c.stage==="posted"&&c.post_date>=s0&&c.post_date<=s1),inc=S.incs.filter(i=>i.date>=s0&&i.date<=s1),al=alerts().filter(a=>a.sev>=2).slice(0,5),open=openDeals();
+  return`\n## 협찬·콘텐츠 (마이크리에이터)\n- 이번 주 올린 콘텐츠 ${posted.length}개${posted.length?` (조회 합계 ${fmt(sum(posted,"view"))})`:""} · 입금 ${fmtWon(sum(inc,"net"))}\n- 진행 중인 협찬 ${open.length}건${open.slice(0,5).map(d=>`\n  - ${dealName(d)}: ${STG[d.stage][0]}${d.post_due?`, 게시 ${d.post_due}`:""}`).join("")}\n${al.map(a=>`- 챙길 것: ${a.title}`).join("\n")}${al.length?"\n":""}`;
+}
+
+/* ── 이벤트 ── */
+function resultRead(){const v=s=>$(s).value.trim();return{result:{urls:v("#cr-v-urls").split(/\s+/).filter(Boolean).map(u=>/^https?:\/\//i.test(u)?u:"https://"+u),posted_at:v("#cr-v-posted"),at:v("#cr-v-at"),view:num(v("#cr-v-view")),likes:num(v("#cr-v-likes")),cmts:num(v("#cr-v-cmts")),shares:num(v("#cr-v-shares")),saves:num(v("#cr-v-saves")),clk:num(v("#cr-v-clk")),note:v("#cr-v-note")},show_case:$("#cr-v-case").checked};}
+document.addEventListener("click",async e=>{
+  const b=e.target.closest("[data-cr]");if(!b)return;
+  const a=b.dataset.cr,id=b.dataset.id;
+  switch(a){
+    case"go":if($("#modal-root").classList.contains("show"))closeModal();go("#/creator"+(b.dataset.to?"/"+b.dataset.to:""));break;
+    case"dview":U.dview=b.dataset.v;if(U.dview==="board")U.dst="open";route();break;
+    case"cview":U.cview=b.dataset.v;route();break;
+    case"ym":{const k=b.dataset.k;U[k]=monShift(U[k]||ymOf(),Number(b.dataset.d));route();break;}
+    case"copy":copyText(b.dataset.text||"",b.dataset.msg||"복사했습니다.");break;
+    case"copy-msg":copyText($("#cr-lk-msg").value,"복사했습니다. 메일이나 메신저에 붙여 넣으세요.");break;
+    /* 채널 */
+    case"chan-new":chanModal(null);break;
+    case"chan-edit":{const c=chanById(id);if(c)chanModal(c);break;}
+    case"chan-save":chanSave(id);break;
+    case"chan-del":{if(!confirm("이 채널을 지울까요? 달마다 적은 숫자도 함께 지워집니다."))break;try{await call("chan/del",{id});S.chans=S.chans.filter(c=>c.id!==id);S.snaps=S.snaps.filter(s=>s.chan_id!==id);closeModal();route();toast("지웠습니다.");}catch(err){failToast(err);}break;}
+    case"snap-new":snapModal(id,b.dataset.ym);break;
+    case"snap-list":snapList(id);break;
+    case"snap-save":{const v=s=>$(s).value.trim(),ym=v("#cr-s-ym");if(!ym){toast("달을 골라 주세요.");break;}try{const r=await call("snap/save",{chan_id:id,ym,subs:num(v("#cr-s-subs")),views:num(v("#cr-s-views")),posts:num(v("#cr-s-posts")),memo:v("#cr-s-memo")});S.snaps=S.snaps.filter(s=>!(s.chan_id===id&&s.ym===ym));if(r.snap)S.snaps.push(r.snap);closeModal();route();toast("저장했습니다.");}catch(err){failToast(err);}break;}
+    case"snap-del":{if(!confirm("이 달 기록을 지울까요?"))break;try{await call("snap/del",{id});S.snaps=S.snaps.filter(s=>s.id!==id);route();if(snapsOf(b.dataset.chan).length)snapList(b.dataset.chan);else closeModal();}catch(err){failToast(err);}break;}
+    /* 협찬 */
+    case"deal-new":dealModal(null,b.dataset.amount?{amount:Number(b.dataset.amount)}:null);break;
+    case"deal-open":dealView(id);break;
+    case"deal-edit":{const d=dealById(id);if(d)dealModal(d);break;}
+    case"deal-save":dealSave(id);break;
+    case"deal-del":{if(!confirm("이 협찬 건을 지울까요?\n만든 콘텐츠와 수익 기록은 남고 연결만 끊깁니다. 보낸 확인서·보고서 링크는 닫힙니다."))break;try{await call("deal/del",{id});S.deals=S.deals.filter(d=>d.id!==id);S.conts.forEach(c=>{if(c.deal_id===id)c.deal_id="";});S.incs.forEach(i=>{if(i.deal_id===id)i.deal_id="";});closeModal();route();toast("지웠습니다.");}catch(err){failToast(err);}break;}
+    case"deal-stage":{const d=dealById(id);if(!d||d.stage===b.dataset.v)break;await dealPatch(id,{stage:b.dataset.v},`‘${STG[b.dataset.v][0]}’ 단계로 옮겼습니다.`);break;}
+    case"deal-sheet":linkModal("cr-deal",id);break;
+    case"deal-report":{const R=$("#cr-v-urls")?resultRead():null;if(R&&!await dealPatch(id,R,"",false))break;linkModal("cr-report",id);break;}
+    case"deal-result":await dealPatch(id,resultRead(),"결과를 저장했습니다.");break;
+    case"deal-disc":await dealPatch(id,{disc:{how:$("#cr-v-how").value.trim(),ok:$$(".cr-v-ok:checked").map(x=>x.value)}},"저장했습니다.");break;
+    case"deal-how":{const i=$("#cr-v-how");if(i&&!i.value.trim())i.value=b.dataset.v;else if(i&&confirm("적어 둔 문구를 기본 문구로 바꿀까요?"))i.value=b.dataset.v;break;}
+    case"deal-reask":await dealPatch(id,{reply:""},"다시 확인받도록 돌렸습니다. 조건 확인서를 보내 주세요.");break;
+    case"deal-pay":e.stopPropagation();payModal(id);break;
+    case"deal-paid":{b.disabled=true;try{const r=await call("deal/paid",{id,date:$("#cr-p-date").value,amount:num($("#cr-p-amount").value)});upd(S.deals,r.deal);upd(S.incs,r.inc);if(onPage())route();toast("입금을 확인했습니다. 수익 탭에 기록됐습니다.");dealView(id);}catch(err){b.disabled=false;failToast(err);}break;}
+    case"deal-unpaid":{if(!confirm("입금 확인을 취소할까요? 수익 탭의 기록도 함께 지워집니다."))break;try{const r=await call("deal/unpaid",{id});upd(S.deals,r.deal);S.incs=S.incs.filter(i=>i.id!==r.incId);const dropped=r.incId&&finDrop("i:"+r.incId);if(onPage())route();toast(dropped?"취소했습니다. 돈 메뉴의 기록도 지웠습니다.":"취소했습니다.");dealView(id);}catch(err){failToast(err);}break;}
+    case"deal-lost":lostModal(id);break;
+    case"deal-lost-go":await dealPatch(id,{stage:"lost",lost_reason:$("#cr-l-why").value.trim()},"무산으로 옮겼습니다.");break;
+    /* 콘텐츠 */
+    case"cont-new":contModal(null,{deal_id:b.dataset.deal||"",post_date:b.dataset.date||"",stage:b.dataset.date||b.dataset.deal?"plan":"idea"});break;
+    case"cont-open":{e.stopPropagation();const c=contById(id);if(c)contModal(c);break;}
+    case"cont-save":contSave(id);break;
+    case"cont-del":{if(!confirm("이 콘텐츠를 지울까요?"))break;try{await call("cont/del",{id});S.conts=S.conts.filter(c=>c.id!==id);finDrop("c:"+id);closeModal();route();toast("지웠습니다.");}catch(err){failToast(err);}break;}
+    case"idea-open":ideaModal();break;
+    case"idea-save":{const ch=$("#cr-i-chan").value,f=$("#cr-i-fmt").value,rows=$("#cr-i-text").value.split("\n").map(s=>s.trim()).filter(Boolean).slice(0,100).map(t=>({title:t,chan_id:ch,format:f,stage:"idea"}));if(!rows.length){toast("주제를 한 줄에 하나씩 적어 주세요.");break;}b.disabled=true;try{const r=await call("cont/bulk",{rows});closeModal();await reload(`아이디어 ${r.made}개를 담았습니다.`);}catch(err){b.disabled=false;failToast(err);}break;}
+    /* 수익 */
+    case"inc-new":incModal(null);break;
+    case"inc-edit":{const i=S.incs.find(x=>x.id===id);if(i)incModal(i);break;}
+    case"inc-save":incSave(id);break;
+    case"inc-del":{const i=S.incs.find(x=>x.id===id);if(!i||!confirm(i.deal_id&&dealById(i.deal_id)?"이 기록을 지울까요? 협찬 건의 입금 확인도 함께 취소됩니다.":"이 기록을 지울까요?"))break;try{await call("inc/del",{id});const dropped=finDrop("i:"+id);closeModal();await reload(dropped?"지웠습니다. 돈 메뉴의 기록도 지웠습니다.":"지웠습니다.");}catch(err){failToast(err);}break;}
+    case"inc-csv":{const ym=U.iym||ymOf();dlCsv(`마이크리에이터_수익_${ym}.csv`,["입금일","귀속 월","어디서","내용","채널","통화","외화 금액","환율","세금 전","부가세","원천징수","입금","메모"],incOf(ym).map(i=>[i.date,i.ym,SRC[i.src][0],i.title,chanName(i.chan_id),i.cur,i.fx_amount??"",i.fx_rate??"",i.gross,i.vat,i.wht,i.net,i.memo]));break;}
+    case"fin-send":finSend(U.iym||ymOf());break;
+    /* 단가 · 견적 */
+    case"calc-mode":U.calc.mode=b.dataset.v;route();break;
+    case"quote-copy":copyText(quoteText(),"견적 문구를 복사했습니다.");break;
+    case"quote-deal":{const Q=quote();if(Q.total)dealModal(null,{amount:Q.total});break;}
+    case"rate-new":rateModal(null);break;
+    case"rate-edit":{const r=S.rates.find(x=>x.id===id);if(r)rateModal(r);break;}
+    case"rate-save":{const v=s=>$(s).value.trim(),o={name:v("#cr-r-name"),chan_id:v("#cr-r-chan"),format:v("#cr-r-fmt"),price:num(v("#cr-r-price")),note:v("#cr-r-note")};if(!o.name){toast("이름을 적어 주세요.");break;}if(id){o.id=id;o.active=$("#cr-r-active").checked;}try{const r=await call("rate/save",o);const i=S.rates.findIndex(x=>x.id===r.rate.id);if(i>-1)S.rates[i]=r.rate;else S.rates.push(r.rate);closeModal();route();toast("저장했습니다.");}catch(err){failToast(err);}break;}
+    case"rate-del":{if(!confirm("이 항목을 지울까요?"))break;try{await call("rate/del",{id});S.rates=S.rates.filter(r=>r.id!==id);if(U.calc.rate===id)U.calc.rate="";closeModal();route();}catch(err){failToast(err);}break;}
+    /* 미디어킷 */
+    case"kit-on":{const k=kitRead();if(!k)break;b.disabled=true;if(!S.kitLink&&!await kitLink()){b.disabled=false;break;}if(await saveSet({kit:Object.assign(k,{on:true})},"미디어킷을 열었습니다. 주소를 복사해 프로필에 넣어 두세요."))route();else b.disabled=false;break;}
+    case"kit-off":{if(!confirm("미디어킷을 닫을까요? 주소를 받은 사람이 열어도 보이지 않습니다. 다시 열면 같은 주소로 보입니다."))break;if(await saveSet({kit:{on:false}},"미디어킷을 닫았습니다."))route();break;}
+    case"kit-link":{if(!confirm("새 주소로 바꿀까요? 지금 주소는 더 열리지 않으니, 프로필에 넣어 둔 링크도 바꿔야 합니다."))break;if(await kitLink()){route();toast("새 주소를 만들었습니다.");}break;}
+    case"kit-save":{const k=kitRead();if(k&&await saveSet({kit:k},"저장했습니다."))route();break;}
+    /* 설정 */
+    case"set-save":{const v=s=>$(s).value.trim(),t=($('input[name="cr-biz"]:checked')||{}).value||"none";if(await saveSet({set:true,biz:{type:t,wht:num(v("#cr-t-wht")),name:v("#cr-t-name"),person:v("#cr-t-person"),email:v("#cr-t-email"),phone:v("#cr-t-phone")},opts:{usage:num(v("#cr-t-usage")),excl:num(v("#cr-t-excl")),rush:num(v("#cr-t-rush"))},cpv:num(v("#cr-t-cpv"))},"저장했습니다."))route();break;}
+    /* 공개 페이지 */
+    case"inq-send":inqSend(b);break;
+  }
+});
+document.addEventListener("change",e=>{
+  const el=e.target;if(!el.dataset||!el.dataset.crc)return;
+  const k=el.dataset.crc;
+  if(k==="dst"){U.dst=el.value;route();}
+  else if(k==="cch"){U.cch=el.value;route();}
+  else if(k==="dtax")dealTaxOut();
+  else if(k==="ncur"){const fx=$("#cr-n-fx");if(fx)fx.style.display=el.value==="KRW"?"none":"";}
+  else if(k==="snapym"){if(el.value)snapModal(el.dataset.id,el.value);}
+  else if(k==="calc"){U.calc[el.dataset.k]=el.value;const o=$("#cr-q-out");if(o)o.innerHTML=quoteHtml();}
+  else if(k==="calc-opt"){U.calc[el.value]=el.checked;const o=$("#cr-q-out");if(o)o.innerHTML=quoteHtml();}
+});
+document.addEventListener("input",e=>{
+  const el=e.target;if(!el.dataset||!el.dataset.cri)return;
+  const k=el.dataset.cri;
+  if(k==="dq"){U.dq=el.value;route();const a=$('[data-cri="dq"]');if(a){a.focus();const n=a.value.length;a.setSelectionRange(n,n);}}
+  else if(k==="dtax")dealTaxOut();
+  else if(k==="ptax"){const a=Number(num(el.value))||0,ln=$("#cr-p-line"),m=ln?ln.dataset.mode:"none";if(ln){ln.textContent=taxLine(a,m);$("#cr-p-net").textContent=won(taxOf(a,m).net);}}
+  else if(k==="nfx"){const a=Number(num($("#cr-n-fxa").value))||0,r=Number(num($("#cr-n-fxr").value))||0;if(a&&r){$("#cr-n-gross").value=fmt(Math.round(a*r));incNet();}}
+  else if(k==="nnet")incNet();
+  else if(k==="calc"){U.calc[el.dataset.k]=el.value;const o=$("#cr-q-out");if(o)o.innerHTML=quoteHtml();}
+});
+document.addEventListener("change",e=>{const el=e.target;if(el.classList&&el.classList.contains("cr-c-chk")){const o=$("#cr-c-chkn");if(o)o.textContent=$$(".cr-c-chk:checked").length+"/"+CHK.length;}});
+
+function view(arg){
+  const sub=String(arg||"").split("/")[0]||"";
+  const head=`<div class="page-head"><div><h1><span class="bars"></span>마이크리에이터</h1></div></div>`;
+  if(MODE!=="cloud"||!mgr()){$("#view").innerHTML=`${head}<div class="card"><div class="empty"><b>이 계정에서는 쓸 수 없습니다</b>마이크리에이터는 관리자·직원이 클라우드 모드에서 씁니다.</div></div>`;return;}
+  if(!modOn("creator")){$("#view").innerHTML=`${head}<div class="card"><div class="empty"><b>마이크리에이터가 꺼져 있습니다</b>${isAdmin()?`확장판 화면에서 켜면 메뉴에 나타납니다. 지금은 무료로 쓸 수 있습니다.<div style="margin-top:12px"><button class="btn btn-sm" data-nav="ext">확장판 열기</button></div>`:"관리자에게 켜 달라고 요청하세요."}</div></div>`;return;}
+  if(!S.ready){
+    $("#view").innerHTML=`${head}<div class="card"><div class="empty">${S.err?`<b>불러오지 못했습니다</b>${esc(S.err)}<div style="margin-top:12px"><button class="btn btn-sm" id="cr-retry">다시 시도</button></div>`:"불러오는 중…"}</div></div>`;
+    const rb=$("#cr-retry");if(rb)rb.onclick=()=>{S.err="";view(arg);};
+    if(!S.loading&&!S.err)load().then(()=>{if(onPage())route();}).catch(e=>{if(e.code==="unauthorized")return;S.err=errMsg(e)||"잠시 후 다시 시도해 주세요.";if(onPage())route();});
+    return;
+  }
+  refresh(false);
+  ({deal:vDeals,cont:vConts,inc:vInc,chan:vChans,rate:vRates,kit:vKit,set:vSet}[sub]||vDash)();
+}
+return{view,fillDash,onVersion,reset,refresh,weekText,linkPage,sheetHtml,_t:{S,U,alerts,taxOf,myRates,quote,avgView,weekItems}};
 })();
 
 /* ═══════════ 총괄관리 — 운영자 전용 (현황 · 워크스페이스 · 가입·베타 · 결제·매출 · 문의 · 공지 · 기록 · 오픈 준비) ═══════════
