@@ -6,17 +6,17 @@
    · 처음 설정한 계정이 운영자가 되어 새 워크스페이스 가입을 승인합니다.
      운영자도 각 워크스페이스의 업무 내용은 볼 수 없고, 가입·이용 상태와 등급만 관리합니다.
    · 등급: 베이직(나 혼자 + 구성원 2명, 브랜드 2개, 읽기 토큰 1개) / 프로(구성원 10명 포함, 업종 모듈, 쓰기 토큰).
-     업종 모듈: space(스페이스) · outsourcing(아웃소싱) · commerce(커머스) — 프로 워크스페이스에서 켜고 끕니다.
+     업종 모듈: space(마이스토어) · outsourcing(거래) · commerce(마이셀러) · tax(마이택스) · people(마이피플) · marketing(마이마케팅) — 프로 워크스페이스에서 켜고 끕니다.
    · AI 접속: 개인 API 토큰(Bearer)으로 외부 AI가 /api/ai/* 를 읽고, 쓰기 토큰은 "제안"을 올립니다. /mcp 는 같은 기능의 MCP 서버입니다.
    · 확인 링크: 계정 없는 고객·거래처가 /#/link/<token> 에서 견적 승인·납품 확인만 합니다.
    · 스페이스: 예약 → 청소 배정 → 체크리스트 → 확인 → 손익. HOSTDB(읽기)는 운영자 워크스페이스에서만, SPACEDB(1회 가져오기)는 운영자만.
    · 무료 요금제 한도(요청당 쿼리 50회)를 넘지 않도록 여러 건의 쓰기는 한 문장으로 묶어 처리합니다. */
 
-const SCHEMA = "11";
+const SCHEMA = "12";
 const PLANS = ["basic", "pro"];
-const MODULES = ["space", "outsourcing", "commerce", "tax", "people"];
+const MODULES = ["space", "outsourcing", "commerce", "tax", "people", "marketing"];
 const BASE_MODULES = ["outsourcing"];          // 거래 — 기본 기능이라 등급과 관계없이 늘 켜져 있습니다
-const EXT_MODULES = ["space", "commerce", "tax", "people"];     // 확장판 — 마이스토어 · 마이셀러 · 마이택스 · 마이피플 (워크스페이스 관리자가 켜고 끕니다)
+const EXT_MODULES = ["space", "commerce", "tax", "people", "marketing"];     // 확장판 — 마이스토어 · 마이셀러 · 마이택스 · 마이피플 · 마이마케팅 (워크스페이스 관리자가 켜고 끕니다)
 const PLAN_LIMITS = { basic: { brands: 2, members: 2, tokens: 1 }, pro: { brands: 1000, members: 10, tokens: 20 }, beta: { brands: 1000, members: 30, tokens: 20 } };   // members = 관리자 외 구성원 수
 /* 무료 공개 기간 — 결제를 붙이기 전까지 모든 워크스페이스가 프로 기능과 확장판을 무료로 씁니다.
    유료로 바꿀 때 false로 바꾸면 워크스페이스마다 저장된 등급(베이직·프로·기한)이 다시 적용됩니다. 데이터는 그대로입니다. */
@@ -193,7 +193,7 @@ async function ensure(db) {
   try { const r = await db.prepare("SELECT v FROM mw_meta WHERE k='schema'").first(); v = r && r.v; } catch (e) { v = null; }
   if (v !== SCHEMA) {
     // 표 만들기는 묶음(exec)으로 — 무료 플랜의 요청당 쿼리 수 한도를 넘지 않도록
-    for (const group of [DDL, SP_DDL, OS_DDL, CM_DDL, TX_DDL, PP_DDL, ADM_DDL, INV_DDL]) await db.exec(group.join("\n"));
+    for (const group of [DDL, SP_DDL, OS_DDL, CM_DDL, TX_DDL, PP_DDL, MK_DDL, ADM_DDL, INV_DDL]) await db.exec(group.join("\n"));
     const have = {};
     for (const t of [...new Set(ADD_COLS.map(x => x[0]))]) have[t] = new Set((((await db.prepare(`PRAGMA table_info(${t})`).all()).results) || []).map(c => c.name));
     for (const [t, col] of ADD_COLS) {
@@ -980,7 +980,7 @@ const PRIVATE = {
       return json({ ok: true });
     }
     if (act === "delete") {
-      await db.exec(SP_TABLES.concat(OS_TABLES, CM_TABLES, TX_TABLES, PP_TABLES, ["ws_set", "api_tokens", "links", "mod_set", "invites"]).map(t => `DELETE FROM ${t} WHERE ws=${wsLit(w.id)}`).join("\n"));
+      await db.exec(SP_TABLES.concat(OS_TABLES, CM_TABLES, TX_TABLES, PP_TABLES, MK_TABLES, ["ws_set", "api_tokens", "links", "mod_set", "invites"]).map(t => `DELETE FROM ${t} WHERE ws=${wsLit(w.id)}`).join("\n"));
       await db.batch([
         db.prepare("DELETE FROM ent WHERE ws=?1").bind(w.id),
         db.prepare("DELETE FROM sess WHERE ws=?1").bind(w.id),
@@ -2075,10 +2075,10 @@ function spRestoreStmts(db, ws, sp) {
   }
   return { dels, stmts };
 }
-const modTables = () => OS_TABLES.concat(CM_TABLES, TX_TABLES, PP_TABLES);
+const modTables = () => OS_TABLES.concat(CM_TABLES, TX_TABLES, PP_TABLES, MK_TABLES);
 async function modBackupRaw(db, ws) {
   const MOD_TABLES = modTables();
-  const rs = await db.batch(MOD_TABLES.map(t => db.prepare(spSel(t, "ws=?1")).bind(ws)).concat([db.prepare("SELECT json_object('mod',mod,'k',k,'v',CASE WHEN json_valid(v) THEN json(v) ELSE json('null') END) AS j FROM mod_set WHERE ws=?1").bind(ws)]));
+  const rs = await db.batch(MOD_TABLES.map(t => db.prepare(spSel(t, "ws=?1")).bind(ws)).concat([db.prepare("SELECT json_object('mod',mod,'k',k,'v',CASE WHEN json_valid(v) THEN json(v) ELSE json('null') END) AS j FROM mod_set WHERE ws=?1 AND NOT (mod='mk' AND k='conn')").bind(ws)]));
   return '{"v":1,' + MOD_TABLES.map((t, i) => JSON.stringify(t) + ":" + rawArr(rs[i])).join(",") + ',"mod_set":' + rawArr(rs[MOD_TABLES.length]) + "}";
 }
 function modRestoreStmts(db, ws, m) {
@@ -2090,8 +2090,8 @@ function modRestoreStmts(db, ws, m) {
     stmts.push(...spBulk(db, t, ws, m[t].slice(0, 200000), "ignore"));
   }
   if (Array.isArray(m.mod_set)) {
-    dels.push(`DELETE FROM mod_set WHERE ws=${wsLit(ws)}`);
-    stmts.push(db.prepare("INSERT OR IGNORE INTO mod_set(ws,mod,k,v) SELECT ?1, json_extract(value,'$.mod'), json_extract(value,'$.k'), json_extract(value,'$.v') FROM json_each(?2) WHERE true").bind(ws, JSON.stringify(m.mod_set.slice(0, 200).map(r => ({ mod: clip(r && r.mod, 10), k: clip(r && r.k, 40), v: JSON.stringify(r && r.v !== undefined ? r.v : null) })))));
+    dels.push(`DELETE FROM mod_set WHERE ws=${wsLit(ws)} AND NOT (mod='mk' AND k='conn')`);
+    stmts.push(db.prepare("INSERT OR IGNORE INTO mod_set(ws,mod,k,v) SELECT ?1, json_extract(value,'$.mod'), json_extract(value,'$.k'), json_extract(value,'$.v') FROM json_each(?2) WHERE true").bind(ws, JSON.stringify(m.mod_set.filter(r => !(r && r.mod === "mk" && r.k === "conn")).slice(0, 200).map(r => ({ mod: clip(r && r.mod, 10), k: clip(r && r.k, 40), v: JSON.stringify(r && r.v !== undefined ? r.v : null) })))));
   }
   return { dels, stmts };
 }
@@ -2753,7 +2753,7 @@ function cmNorm(s) {
    · 쓰기 토큰은 바로 고치지 않고 "제안"(ent kind=prop)을 올리며, 관리자·직원이 홈에서 승인하면 반영됩니다.
    · 확인 링크(/#/link/<token>)는 계정 없는 상대방이 견적 승인·납품 확인·청구 확인만 할 수 있는 공개 페이지입니다. */
 const TASK_ST = ["대기", "진행중", "검토", "완료"];
-const AI_KINDS = ["create-task", "update-status", "add-note", "create-contact", "create-job"];
+const AI_KINDS = ["create-task", "update-status", "add-note", "create-contact", "create-job", "mk-action", "mk-post"];
 async function sha256(s) { return hex(new Uint8Array(await crypto.subtle.digest("SHA-256", enc.encode(s)))); }
 async function wsSettings(db, ws) {
   const rs = (await db.prepare("SELECT k, v FROM ws_set WHERE ws=?1 AND k IN ('ai_auto','ai_note')").bind(ws).all()).results || [];
@@ -2907,6 +2907,7 @@ const AIFN = {
   async space(db, me) { if (!aiMod(me, "space")) return { error: "module-off" }; return await spAiToday(db, me); },
   async outsourcing(db, me) { if (!aiMod(me, "outsourcing")) return { error: "module-off" }; return await osAiSummary(db, me); },
   async commerce(db, me) { if (!aiMod(me, "commerce")) return { error: "module-off" }; return await cmAiSummary(db, me); },
+  async marketing(db, me) { if (!aiMod(me, "marketing")) return { error: "module-off" }; return await mkAiSummary(db, me); },
   async propose(db, me, p) {
     if (me.ai.scope !== "write") return { error: "forbidden", hint: "읽기 토큰입니다. 쓰기 토큰으로 제안할 수 있습니다." };
     if (me.role !== "admin" && me.role !== "staff") return { error: "forbidden" };
@@ -2914,6 +2915,7 @@ const AIFN = {
     if (!AI_KINDS.includes(kind)) return { error: "bad-request", kinds: AI_KINDS };
     const payload = p.payload && typeof p.payload === "object" ? p.payload : {};
     if (kind === "create-job" && !hasMod(me, "outsourcing")) return { error: "module-off" };
+    if (kind.startsWith("mk-") && !hasMod(me, "marketing")) return { error: "module-off" };
     const chk = propCheck(kind, payload);
     if (chk.error) return chk;
     const set = await wsSettings(db, me.ws);
@@ -2950,6 +2952,12 @@ function propCheck(kind, p) {
   } else if (kind === "create-job") {
     out.title = clip(p.title, 120); if (!out.title) return { error: "bad-request", hint: "title이 필요합니다." };
     out.client = clip(p.client, 60); out.detail = clip(p.detail, 2000); out.due = dOk(p.due); out.amount = Math.max(0, intOr(p.amount, 0));
+  } else if (kind === "mk-action") {   // 마이마케팅 실행안 — 예산·입찰·소재·타겟을 어떻게 바꿀지
+    out.title = clip(p.title, 120); if (!out.title) return { error: "bad-request", hint: "title이 필요합니다." };
+    out.detail = clip(p.detail, 2000); out.campaign = clip(p.campaign, 80); out.kind = clip(p.kind, 20) || "etc"; out.from = clip(p.from, 40); out.to = clip(p.to, 40);
+  } else if (kind === "mk-post") {   // 마이마케팅 콘텐츠 초안
+    out.title = clip(p.title, 120); if (!out.title) return { error: "bad-request", hint: "title이 필요합니다." };
+    out.body = clip(p.body, 6000); out.channel = clip(p.channel, 60); out.date = dOk(p.date); out.format = clip(p.format, 20); out.tags = clip(p.tags, 300);
   }
   return { payload: out };
 }
@@ -3001,6 +3009,10 @@ async function propApply(db, me, prop) {   // 제안을 실제 데이터로 — 
   if (prop.kind === "create-job") {
     if (!hasMod(me, "outsourcing")) return { error: "module-off" };
     return await osCreateJobItems(db, me, p);
+  }
+  if (prop.kind === "mk-action" || prop.kind === "mk-post") {
+    if (!hasMod(me, "marketing")) return { error: "module-off" };
+    return await mkPropItems(db, me, prop);
   }
   return { error: "bad-request" };
 }
@@ -3065,7 +3077,7 @@ function txBizIn(b) {
   if ("links" in b) {
     const l = b.links && typeof b.links === "object" ? b.links : {};
     const arr = (a, n) => (Array.isArray(a) ? a : []).map(x => clip(x, 60)).filter(Boolean).slice(0, n);
-    o.links = JSON.stringify({ brands: arr(l.brands, 40), stores: arr(l.stores, 200), mods: arr(l.mods, 5).filter(x => ["space", "commerce", "outsourcing", "people"].includes(x)), main: !!l.main });
+    o.links = JSON.stringify({ brands: arr(l.brands, 40), stores: arr(l.stores, 200), mods: arr(l.mods, 5).filter(x => ["space", "commerce", "outsourcing", "people", "marketing"].includes(x)), main: !!l.main });
   }
   return o;
 }
@@ -3654,6 +3666,691 @@ const PEOP = {
   }
 };
 
+/* ═══════════ 마이마케팅 — 광고·홍보 채널, 캠페인, 성과, 콘텐츠, 키워드, 최적화·부스터 실행안 ═══════════
+   · 성과는 날짜 × 채널 × 캠페인 × 라벨(소재·광고그룹·키워드) 한 줄입니다. 같은 날짜·채널·캠페인을 다시 올리면 그 칸을 통째로 바꿔서 두 번 세지 않습니다.
+   · 진단(최적화)과 실행안(부스터) 계산은 화면에서 하고, 서버는 기록과 실행안 대기열을 맡습니다.
+   · 광고 계정 연결(네이버 검색광고·메타)은 선택입니다. 연결 정보는 MW_VAULT_KEY로 암호화해 두고 화면으로 다시 보내지 않습니다.
+     성과를 읽기만 하며, 광고 계정의 예산·입찰·소재는 바꾸지 않습니다. */
+const MK_DDL = [
+  "CREATE TABLE IF NOT EXISTS mk_chan(ws TEXT NOT NULL, id TEXT NOT NULL, name TEXT NOT NULL, kind TEXT NOT NULL DEFAULT 'etc', cat TEXT NOT NULL DEFAULT 'etc', url TEXT, handle TEXT, ext TEXT, active INTEGER NOT NULL DEFAULT 1, sort INTEGER NOT NULL DEFAULT 0, memo TEXT, created_at TEXT, updated_at TEXT, PRIMARY KEY(ws,id))",
+  "CREATE TABLE IF NOT EXISTS mk_camp(ws TEXT NOT NULL, id TEXT NOT NULL, chan_id TEXT NOT NULL, name TEXT NOT NULL, cat TEXT NOT NULL DEFAULT 'etc', goal TEXT NOT NULL DEFAULT 'lead', status TEXT NOT NULL DEFAULT 'live', mode TEXT NOT NULL DEFAULT '', budget INTEGER NOT NULL DEFAULT 0, budget_type TEXT NOT NULL DEFAULT 'month', start_date TEXT, end_date TEXT, target_cpa INTEGER, target_roas INTEGER, landing TEXT, audience TEXT, brand TEXT, store_id TEXT, project_id TEXT, ext_id TEXT, memo TEXT, created_by TEXT, created_at TEXT, updated_at TEXT, PRIMARY KEY(ws,id))",
+  "CREATE INDEX IF NOT EXISTS idx_mk_camp_ext ON mk_camp(ws,ext_id)",
+  "CREATE TABLE IF NOT EXISTS mk_stat(ws TEXT NOT NULL, id TEXT NOT NULL, date TEXT NOT NULL, chan_id TEXT NOT NULL, camp_id TEXT NOT NULL DEFAULT '', label TEXT NOT NULL DEFAULT '', cost INTEGER NOT NULL DEFAULT 0, imp INTEGER NOT NULL DEFAULT 0, clk INTEGER NOT NULL DEFAULT 0, conv REAL NOT NULL DEFAULT 0, rev INTEGER NOT NULL DEFAULT 0, view INTEGER NOT NULL DEFAULT 0, eng INTEGER NOT NULL DEFAULT 0, fol INTEGER, src TEXT, memo TEXT, updated_at TEXT, PRIMARY KEY(ws,id))",
+  "CREATE UNIQUE INDEX IF NOT EXISTS idx_mk_stat_key ON mk_stat(ws,date,chan_id,camp_id,label)",
+  "CREATE TABLE IF NOT EXISTS mk_post(ws TEXT NOT NULL, id TEXT NOT NULL, chan_id TEXT NOT NULL DEFAULT '', camp_id TEXT NOT NULL DEFAULT '', date TEXT, time TEXT, title TEXT NOT NULL, body TEXT, format TEXT, status TEXT NOT NULL DEFAULT 'idea', url TEXT, tags TEXT, view INTEGER NOT NULL DEFAULT 0, eng INTEGER NOT NULL DEFAULT 0, clk INTEGER NOT NULL DEFAULT 0, paid INTEGER NOT NULL DEFAULT 0, memo TEXT, created_by TEXT, created_at TEXT, updated_at TEXT, PRIMARY KEY(ws,id))",
+  "CREATE INDEX IF NOT EXISTS idx_mk_post_date ON mk_post(ws,date)",
+  "CREATE TABLE IF NOT EXISTS mk_kw(ws TEXT NOT NULL, id TEXT NOT NULL, word TEXT NOT NULL, grp TEXT, chan_id TEXT, vol_pc INTEGER, vol_mo INTEGER, comp TEXT, bid INTEGER, rank TEXT, state TEXT NOT NULL DEFAULT 'watch', memo TEXT, checked_at TEXT, created_at TEXT, updated_at TEXT, PRIMARY KEY(ws,id))",
+  "CREATE UNIQUE INDEX IF NOT EXISTS idx_mk_kw_word ON mk_kw(ws,word)",
+  "CREATE TABLE IF NOT EXISTS mk_act(ws TEXT NOT NULL, id TEXT NOT NULL, key TEXT, kind TEXT NOT NULL DEFAULT 'etc', mode TEXT NOT NULL DEFAULT 'opt', camp_id TEXT NOT NULL DEFAULT '', chan_id TEXT NOT NULL DEFAULT '', title TEXT NOT NULL, detail TEXT, from_v TEXT, to_v TEXT, status TEXT NOT NULL DEFAULT 'todo', base TEXT, task_id TEXT, by TEXT, created_at TEXT, done_at TEXT, updated_at TEXT, PRIMARY KEY(ws,id))",
+  "CREATE UNIQUE INDEX IF NOT EXISTS idx_mk_act_key ON mk_act(ws,key) WHERE key IS NOT NULL"
+];
+const MK_TABLES = ["mk_chan", "mk_camp", "mk_stat", "mk_post", "mk_kw", "mk_act"];
+Object.assign(SPC, {
+  mk_chan: ["id", "name", "kind", "cat", "url", "handle", "ext", "active", "sort", "memo", "created_at", "updated_at"],
+  mk_camp: ["id", "chan_id", "name", "cat", "goal", "status", "mode", "budget", "budget_type", "start_date", "end_date", "target_cpa", "target_roas", "landing", "audience", "brand", "store_id", "project_id", "ext_id", "memo", "created_by", "created_at", "updated_at"],
+  mk_stat: ["id", "date", "chan_id", "camp_id", "label", "cost", "imp", "clk", "conv", "rev", "view", "eng", "fol", "src", "memo", "updated_at"],
+  mk_post: ["id", "chan_id", "camp_id", "date", "time", "title", "body", "format", "status", "url", "tags", "view", "eng", "clk", "paid", "memo", "created_by", "created_at", "updated_at"],
+  mk_kw: ["id", "word", "grp", "chan_id", "vol_pc", "vol_mo", "comp", "bid", "rank", "state", "memo", "checked_at", "created_at", "updated_at"],
+  mk_act: ["id", "key", "kind", "mode", "camp_id", "chan_id", "title", "detail", "from_v", "to_v", "status", "base", "task_id", "by", "created_at", "done_at", "updated_at"]
+});
+Object.assign(SPJ, { mk_chan: { ext: "{}" }, mk_act: { base: "null" } });
+const MK_CAT = ["search", "target", "content", "video", "influ", "message", "local", "etc"];   // 검색광고 · 타겟(디스플레이)광고 · 콘텐츠 · 영상 · 체험단·인플루언서 · 메시지 · 지역·오프라인 · 기타
+const MK_KIND = ["naver_sa", "naver_shop", "naver_place", "naver_gfa", "naver_blog", "google_ads", "youtube_ads", "youtube", "meta_ads", "instagram", "facebook", "threads", "tiktok", "kakao_ads", "kakao_ch", "daangn", "influencer", "message", "offline", "site", "etc"];
+const MK_GOAL = ["aware", "traffic", "lead", "sale", "visit", "retain"];   // 알리기 · 방문 늘리기 · 문의·예약 · 구매 · 매장 방문 · 다시 오게
+const MK_CAMP_ST = ["plan", "live", "pause", "done"];
+const MK_MODES = ["basic", "opt", "boost"];
+const MK_POST_ST = ["idea", "draft", "ready", "posted", "skip"];
+const MK_KW_ST = ["use", "watch", "neg"];
+const MK_ACT_ST = ["todo", "done", "skip"];
+const MK_SRC = ["manual", "file", "naver", "meta", "yt", "ai"];
+const MK_LIMIT = { chans: 40, camps: 500, kws: 2000, acts: 300, posts: 3000 };
+const META_VER = "v26.0";   // 메타 그래프 API 버전 — 종료된 버전으로 부르면 메타가 가장 오래된 지원 버전으로 돌려 응답합니다
+const mkUrl = u => { u = clip(u, 400); return /^https?:\/\//i.test(u) ? u : ""; };
+const mkInt = (v, max) => Math.max(0, Math.min(max, intOr(String(v ?? "").replace(/[^\d.-]/g, ""), 0)));
+const mkDec = v => { const n = Number(String(v ?? "").replace(/[^\d.-]/g, "")); return Number.isFinite(n) ? Math.max(0, Math.min(1e9, Math.round(n * 100) / 100)) : 0; };
+const mkWord = s => clip(String(s ?? "").replace(/\s+/g, " "), 40);
+const mkNm = s => String(s ?? "").replace(/\s+/g, "").toLowerCase();
+function mkNorm(s) {   // 설정 — 사업 정보, 모드, 목표, 지키는 선, 점검 기준, 점검표 체크
+  s = s && typeof s === "object" ? s : {};
+  const obj = k => (s[k] && typeof s[k] === "object" ? s[k] : {});
+  const b = obj("biz"), t = obj("target"), g = obj("guard"), r = obj("ref"), sy = obj("synced"), p = obj("plan");
+  const ref = {};
+  for (const c of MK_CAT) {
+    const x = r[c] && typeof r[c] === "object" ? r[c] : null; if (!x) continue;
+    const ctr = numOrNull(x.ctr), cvr = numOrNull(x.cvr);
+    if (ctr !== null || cvr !== null) ref[c] = { ctr: ctr === null ? null : Math.max(0, Math.min(100, ctr)), cvr: cvr === null ? null : Math.max(0, Math.min(100, cvr)) };
+  }
+  return {
+    set: !!s.set,
+    mode: MK_MODES.includes(s.mode) ? s.mode : "basic",
+    biz: { type: clip(b.type, 20), name: clip(b.name, 60), offer: clip(b.offer, 300), aud: clip(b.aud, 300), region: clip(b.region, 60), goal: MK_GOAL.includes(b.goal) ? b.goal : "lead", aov: mkInt(b.aov, 1e10), margin: clampInt(b.margin, 0, 100, 0), assets: (Array.isArray(b.assets) ? b.assets : []).map(x => clip(x, 20)).filter(Boolean).slice(0, 20) },
+    budget: mkInt(s.budget, 1e11),
+    target: { cpa: mkInt(t.cpa, 1e10), roas: clampInt(t.roas, 0, 100000, 0) },
+    guard: { step: clampInt(g.step, 5, 50, 20), minClk: clampInt(g.minClk, 5, 1000, 30), minImp: clampInt(g.minImp, 100, 100000, 1000), minConv: clampInt(g.minConv, 1, 100, 3), days: clampInt(g.days, 3, 30, 7) },
+    ref,
+    checks: (Array.isArray(s.checks) ? s.checks : []).map(x => clip(x, 40)).filter(Boolean).slice(-400),
+    metaConv: ["purchase", "lead", "message"].includes(s.metaConv) ? s.metaConv : "purchase",
+    plan: p.at ? { at: clip(p.at, 30), type: clip(p.type, 20), goal: clip(p.goal, 20), budget: mkInt(p.budget, 1e11) } : null,
+    synced: { naver: clip(sy.naver, 30), meta: clip(sy.meta, 30), yt: clip(sy.yt, 30) }
+  };
+}
+async function mkSettings(db, ws) { const m = await modSettings(db, ws, "mk"); return mkNorm(m.settings); }
+function mkChanIn(b) {
+  const o = {};
+  if ("name" in b) o.name = clip(b.name, 40);
+  if ("kind" in b) o.kind = MK_KIND.includes(b.kind) ? b.kind : "etc";
+  if ("cat" in b) o.cat = MK_CAT.includes(b.cat) ? b.cat : "etc";
+  if ("url" in b) o.url = mkUrl(b.url);
+  if ("handle" in b) o.handle = clip(b.handle, 80);
+  if ("active" in b) o.active = b.active === false || b.active === 0 ? 0 : 1;
+  if ("memo" in b) o.memo = clip(b.memo, 500);
+  return o;
+}
+function mkCampIn(b) {
+  const o = {};
+  if ("name" in b) o.name = clip(b.name, 80);
+  if ("chan_id" in b) o.chan_id = clip(b.chan_id, 60);
+  if ("cat" in b) o.cat = MK_CAT.includes(b.cat) ? b.cat : "etc";
+  if ("goal" in b) o.goal = MK_GOAL.includes(b.goal) ? b.goal : "lead";
+  if ("status" in b) o.status = MK_CAMP_ST.includes(b.status) ? b.status : "live";
+  if ("mode" in b) o.mode = MK_MODES.includes(b.mode) ? b.mode : "";
+  if ("budget" in b) o.budget = mkInt(b.budget, 1e11);
+  if ("budget_type" in b) o.budget_type = ["day", "month", "total"].includes(b.budget_type) ? b.budget_type : "month";
+  if ("start_date" in b) o.start_date = dOk(b.start_date) || null;
+  if ("end_date" in b) o.end_date = dOk(b.end_date) || null;
+  if ("target_cpa" in b) o.target_cpa = numOrNull(b.target_cpa) === null ? null : mkInt(b.target_cpa, 1e10);
+  if ("target_roas" in b) o.target_roas = numOrNull(b.target_roas) === null ? null : clampInt(b.target_roas, 0, 100000, 0);
+  if ("landing" in b) o.landing = mkUrl(b.landing);
+  if ("audience" in b) o.audience = clip(b.audience, 300);
+  if ("brand" in b) o.brand = clip(b.brand, 40);
+  if ("store_id" in b) o.store_id = clip(b.store_id, 60) || null;
+  if ("project_id" in b) o.project_id = clip(b.project_id, 60) || null;
+  if ("ext_id" in b) o.ext_id = clip(b.ext_id, 80) || null;
+  if ("memo" in b) o.memo = clip(b.memo, 1000);
+  return o;
+}
+function mkStatIn(r) {
+  return { date: dOk(r.date), label: clip(r.label, 80), cost: mkInt(r.cost, 1e11), imp: mkInt(r.imp, 1e12), clk: mkInt(r.clk, 1e11), conv: mkDec(r.conv), rev: mkInt(r.rev, 1e12), view: mkInt(r.view, 1e12), eng: mkInt(r.eng, 1e11), fol: r.fol === "" || r.fol === null || r.fol === undefined ? null : mkInt(r.fol, 1e10), memo: clip(r.memo, 200) };
+}
+const mkCampRow = (me, o, now) => Object.assign({ id: bulkId("mc"), chan_id: "", name: "", cat: "etc", goal: "lead", status: "live", mode: "", budget: 0, budget_type: "month", start_date: null, end_date: null, target_cpa: null, target_roas: null, landing: "", audience: "", brand: "", store_id: null, project_id: null, ext_id: null, memo: "", created_by: me.id, created_at: now, updated_at: now }, o);
+const mkChanRow = (o, now, sort) => Object.assign({ id: bulkId("mh"), name: "", kind: "etc", cat: "etc", url: "", handle: "", ext: {}, active: 1, sort: sort || 0, memo: "", created_at: now, updated_at: now }, o);
+/* 성과 줄 정리 — 캠페인은 id · 광고 계정의 캠페인 번호(ext_id) · 이름 순으로 찾고, 없으면 만들어 붙입니다.
+   같은 칸(날짜·채널·캠페인)에 합계 줄과 라벨 줄이 섞여 들어오면 라벨 줄만 남깁니다. */
+function mkBuildStats(me, raw, opt) {
+  const now = iso(), chans = opt.chans, camps = opt.camps.slice(), newCamps = [], extFix = [], cells = new Map();
+  const byId = new Map(camps.map(c => [c.id, c])), byExt = new Map(camps.filter(c => c.ext_id).map(c => [c.chan_id + "|" + c.ext_id, c])), byName = new Map(camps.map(c => [c.chan_id + "|" + mkNm(c.name), c]));
+  let skipped = 0;
+  for (const r0 of raw) {
+    if (!r0 || typeof r0 !== "object") { skipped++; continue; }
+    const s = mkStatIn(r0);
+    if (!s.date) { skipped++; continue; }
+    let camp = r0.camp_id ? byId.get(String(r0.camp_id)) : null;
+    const chanId = camp ? camp.chan_id : (clip(r0.chan_id, 60) || opt.defChan);
+    if (!chans.has(chanId)) { skipped++; continue; }
+    const ext = clip(r0.ext_id, 80), nm = clip(r0.camp, 80);
+    if (!camp && ext) camp = byExt.get(chanId + "|" + ext) || null;
+    if (!camp && nm) camp = byName.get(chanId + "|" + mkNm(nm)) || null;
+    if (camp && ext && !camp.ext_id) { camp.ext_id = ext; if (!newCamps.includes(camp)) extFix.push({ id: camp.id, ext }); }
+    if (!camp && nm && opt.mkcamp && camps.length < MK_LIMIT.camps) {
+      camp = mkCampRow(me, { chan_id: chanId, name: nm, cat: chans.get(chanId) || "etc", ext_id: ext || null, budget: mkInt(r0.camp_budget, 1e11), budget_type: r0.camp_budget ? "day" : "month" }, now);
+      camps.push(camp); newCamps.push(camp); byId.set(camp.id, camp); byName.set(chanId + "|" + mkNm(nm), camp); if (ext) byExt.set(chanId + "|" + ext, camp);
+    }
+    const cellKey = [s.date, chanId, camp ? camp.id : ""].join("|");
+    if (!cells.has(cellKey)) cells.set(cellKey, new Map());
+    const cell = cells.get(cellKey), ex = cell.get(s.label);
+    if (ex) { for (const k of ["cost", "imp", "clk", "rev", "view", "eng"]) ex[k] += s[k]; ex.conv = Math.round((ex.conv + s.conv) * 100) / 100; if (s.fol !== null) ex.fol = s.fol; }
+    else cell.set(s.label, Object.assign({ id: bulkId("ms"), chan_id: chanId, camp_id: camp ? camp.id : "", src: opt.src, updated_at: now }, s));
+  }
+  const rows = [];
+  for (const cell of cells.values()) { const labeled = [...cell.keys()].some(k => k !== ""); for (const [k, v] of cell) { if (labeled && k === "") continue; rows.push(v); } }
+  const dates = rows.map(r => r.date).sort();
+  return { rows, newCamps, extFix, keys: [...cells.keys()], skipped, from: dates[0] || "", to: dates[dates.length - 1] || "" };
+}
+function mkStatStmts(db, ws, r) {
+  const out = [];
+  if (r.newCamps.length) out.push(...spBulk(db, "mk_camp", ws, r.newCamps));
+  if (r.extFix && r.extFix.length) out.push(db.prepare("UPDATE mk_camp SET ext_id=(SELECT json_extract(value,'$.ext') FROM json_each(?2) WHERE json_extract(value,'$.id')=mk_camp.id) WHERE ws=?1 AND id IN (SELECT json_extract(value,'$.id') FROM json_each(?2))").bind(ws, JSON.stringify(r.extFix)));
+  if (r.keys.length) out.push(db.prepare("DELETE FROM mk_stat WHERE ws=?1 AND date>=?3 AND date<=?4 AND (date||'|'||chan_id||'|'||camp_id) IN (SELECT value FROM json_each(?2))").bind(ws, JSON.stringify(r.keys), r.from, r.to));
+  out.push(...spBulk(db, "mk_stat", ws, r.rows));
+  return out;
+}
+async function mkRefs(db, ws) {
+  const [a, b] = await db.batch([db.prepare("SELECT id, kind, cat, name, handle, ext FROM mk_chan WHERE ws=?1").bind(ws), db.prepare("SELECT id, chan_id, name, ext_id FROM mk_camp WHERE ws=?1").bind(ws)]);
+  const chanRows = (a && a.results) || [];
+  return { chanRows, chans: new Map(chanRows.map(c => [c.id, c.cat])), camps: ((b && b.results) || []).map(c => ({ id: c.id, chan_id: c.chan_id, name: c.name, ext_id: c.ext_id })) };
+}
+/* ── 연결 정보 금고 — AES-GCM. 키는 Cloudflare 비밀값 MW_VAULT_KEY(16자 이상)에서 만듭니다 ── */
+const vaultKey = env => { const k = env && typeof env.MW_VAULT_KEY === "string" ? env.MW_VAULT_KEY.trim() : ""; return k.length >= 16 ? k : ""; };
+const unhex = s => new Uint8Array((String(s || "").match(/../g) || []).map(h => parseInt(h, 16)));
+async function vaultCrypto(env) { return crypto.subtle.importKey("raw", await crypto.subtle.digest("SHA-256", enc.encode("mw-vault:" + vaultKey(env))), "AES-GCM", false, ["encrypt", "decrypt"]); }
+async function seal(env, text) { const iv = crypto.getRandomValues(new Uint8Array(12)); return "v1." + hex(iv) + "." + hex(new Uint8Array(await crypto.subtle.encrypt({ name: "AES-GCM", iv }, await vaultCrypto(env), enc.encode(text)))); }
+async function unseal(env, s) {
+  const m = String(s || "").split("."); if (m.length !== 3 || m[0] !== "v1" || !vaultKey(env)) return "";
+  try { return new TextDecoder().decode(await crypto.subtle.decrypt({ name: "AES-GCM", iv: unhex(m[1]) }, await vaultCrypto(env), unhex(m[2]))); } catch (e) { return ""; }
+}
+const mkTail = s => { s = String(s || ""); return s.length > 8 ? "…" + s.slice(-4) : "…"; };
+async function mkConnRaw(db, ws) { const r = await db.prepare("SELECT v FROM mod_set WHERE ws=?1 AND mod='mk' AND k='conn'").bind(ws).first(); const o = r ? parse(r.v) : null; return o && typeof o === "object" ? o : {}; }
+const mkConnPublic = c => ({ naver: c.naver ? { on: true, cid: c.naver.cid, tail: c.naver.tail, at: c.naver.at } : { on: false }, meta: c.meta ? { on: true, acct: c.meta.acct, tail: c.meta.tail, at: c.meta.at } : { on: false } });
+async function mkSecret(env, c) { const t = c && c.sealed ? await unseal(env, c.sealed) : ""; return t ? parse(t) : null; }
+/* 네이버 검색광고 API — 서명: HMAC-SHA256(시크릿, "시각.메서드.경로")를 base64로 */
+async function naverSa(c, method, uri, query) {
+  const t = String(Date.now());
+  const key = await crypto.subtle.importKey("raw", enc.encode(c.secret), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
+  const sig = btoa(String.fromCharCode(...new Uint8Array(await crypto.subtle.sign("HMAC", key, enc.encode(t + "." + method + "." + uri)))));
+  let r;
+  try { r = await fetch("https://api.searchad.naver.com" + uri + (query ? "?" + new URLSearchParams(query).toString() : ""), { method, headers: { "X-Timestamp": t, "X-API-KEY": c.key, "X-Customer": String(c.cid), "X-Signature": sig, accept: "application/json" } }); }
+  catch (e) { return { ok: false, status: 0, j: null }; }
+  return { ok: r.ok, status: r.status, j: await r.json().catch(() => null) };
+}
+async function metaGet(pathOrUrl, query) {
+  const u = /^https:\/\/graph\.facebook\.com\//.test(pathOrUrl) ? pathOrUrl : "https://graph.facebook.com/" + META_VER + pathOrUrl + "?" + new URLSearchParams(query).toString();
+  let r;
+  try { r = await fetch(u, { headers: { accept: "application/json" } }); } catch (e) { return { ok: false, status: 0, j: null }; }
+  return { ok: r.ok, status: r.status, j: await r.json().catch(() => null) };
+}
+const META_CONV = { purchase: ["omni_purchase", "purchase", "offsite_conversion.fb_pixel_purchase"], lead: ["lead", "onsite_conversion.lead_grouped", "offsite_conversion.fb_pixel_lead"], message: ["onsite_conversion.messaging_conversation_started_7d", "onsite_conversion.total_messaging_connection"] };
+function metaPick(list, types) {   // 같은 전환이 이름만 달리 여러 번 나오므로 앞선 이름 하나만 씁니다
+  const m = new Map((Array.isArray(list) ? list : []).map(a => [String(a && a.action_type), Number(a && a.value) || 0]));
+  for (const t of types) if (m.has(t)) return m.get(t);
+  return 0;
+}
+const upErr = (x, extra) => fail(x.status === 401 || x.status === 403 ? "conn-denied" : x.status === 429 ? "conn-busy" : "upstream", 502, Object.assign({ status: x.status, msg: clip(x.j && (x.j.title || x.j.message || (x.j.error && (x.j.error.message || x.j.error)) || x.j.detail), 200) }, extra || {}));
+async function mkAiSummary(db, me) {
+  const today = kstToday(), d30 = addDaysS(today, -29), d7 = addDaysS(today, -6);
+  const agg = "SELECT chan_id, camp_id, SUM(cost) AS cost, SUM(imp) AS imp, SUM(clk) AS clk, SUM(conv) AS conv, SUM(rev) AS rev, SUM(view) AS view, SUM(eng) AS eng FROM mk_stat WHERE ws=?1 AND date>=?2 GROUP BY chan_id, camp_id";
+  const rs = await db.batch([
+    db.prepare("SELECT v FROM mod_set WHERE ws=?1 AND mod='mk' AND k='settings'").bind(me.ws),
+    db.prepare("SELECT id, name, kind, cat, active FROM mk_chan WHERE ws=?1 ORDER BY sort, created_at").bind(me.ws),
+    db.prepare("SELECT id, chan_id, name, cat, goal, status, mode, budget, budget_type, target_cpa, target_roas FROM mk_camp WHERE ws=?1 AND status<>'done' ORDER BY updated_at DESC LIMIT 200").bind(me.ws),
+    db.prepare(agg).bind(me.ws, d30), db.prepare(agg).bind(me.ws, d7),
+    db.prepare("SELECT id, kind, mode, camp_id, title, detail, from_v, to_v, created_at FROM mk_act WHERE ws=?1 AND status='todo' ORDER BY created_at DESC LIMIT 40").bind(me.ws),
+    db.prepare("SELECT id, chan_id, date, title, format, status FROM mk_post WHERE ws=?1 AND status NOT IN ('posted','skip') AND (date IS NULL OR date<=?2) ORDER BY COALESCE(date,'9999') LIMIT 40").bind(me.ws, addDaysS(today, 14))
+  ]);
+  const R = i => (rs[i] && rs[i].results) || [], s0 = R(0)[0], set = mkNorm(s0 ? parse(s0.v) : null);
+  const chN = new Map(R(1).map(c => [c.id, c.name])), cpN = new Map(R(2).map(c => [c.id, c.name]));
+  const m = x => { const cost = Number(x.cost) || 0, imp = Number(x.imp) || 0, clk = Number(x.clk) || 0, conv = Number(x.conv) || 0, rev = Number(x.rev) || 0; return { cost, impressions: imp, clicks: clk, conversions: conv, revenue: rev, ctr: imp ? Math.round(clk / imp * 10000) / 100 : null, cpc: clk ? Math.round(cost / clk) : null, cvr: clk ? Math.round(conv / clk * 10000) / 100 : null, cpa: conv ? Math.round(cost / conv) : null, roas: cost ? Math.round(rev / cost * 100) : null }; };
+  // 여러 캠페인을 묶은 ROAS는 매출을 기록한 캠페인의 광고비만 분모로 씁니다
+  const sum = (list, f) => { const t = { cost: 0, imp: 0, clk: 0, conv: 0, rev: 0 }; let rc = 0; for (const x of list) if (!f || f(x)) { for (const k of Object.keys(t)) t[k] += Number(x[k]) || 0; if (Number(x.rev) > 0) rc += Number(x.cost) || 0; } const o = m(t); o.roas = rc ? Math.round(t.rev / rc * 100) : null; return o; };
+  const A30 = R(3), A7 = R(4);
+  return {
+    today, mode: set.mode, monthlyBudget: set.budget, target: set.target, business: { type: set.biz.type, goal: set.biz.goal, averageOrder: set.biz.aov, marginPct: set.biz.margin },
+    last30: sum(A30), last7: sum(A7),
+    channels: R(1).map(c => Object.assign({ id: c.id, name: c.name, kind: c.kind, category: c.cat, active: !!c.active }, { last30: sum(A30, x => x.chan_id === c.id) })),
+    campaigns: R(2).map(c => ({ id: c.id, name: c.name, channel: chN.get(c.chan_id) || "", category: c.cat, goal: c.goal, status: c.status, mode: c.mode || set.mode, budget: c.budget, budgetType: c.budget_type, targetCpa: c.target_cpa, targetRoas: c.target_roas, last30: sum(A30, x => x.camp_id === c.id), last7: sum(A7, x => x.camp_id === c.id) })),
+    openActions: R(5).map(a => ({ id: a.id, kind: a.kind, mode: a.mode, campaign: cpN.get(a.camp_id) || "", title: a.title, detail: clip(a.detail, 300), from: a.from_v || "", to: a.to_v || "", createdAt: a.created_at })),
+    upcomingContent: R(6).map(p => ({ id: p.id, channel: chN.get(p.chan_id) || "", date: p.date || "", title: p.title, format: p.format || "", status: p.status })),
+    hint: "비용은 원, ctr·cvr은 %, roas는 %(매출÷광고비×100)입니다. 쓰기 토큰은 propose의 mk-action(실행안)·mk-post(콘텐츠 초안)로 제안할 수 있습니다."
+  };
+}
+async function mkPropItems(db, me, prop) {   // AI 제안 → 실행안·콘텐츠 초안
+  const p = prop.payload, now = iso(), bump = db.prepare("UPDATE workspaces SET sp_ver=sp_ver+1 WHERE id=?1").bind(me.ws);
+  const findRow = async (t, key) => { if (!key) return null; return await db.prepare(`SELECT id, name${t === "mk_camp" ? ", chan_id" : ""} FROM ${t} WHERE ws=?1 AND (id=?2 OR name=?2 OR name LIKE ?3) ORDER BY (id=?2) DESC, (name=?2) DESC, LENGTH(name) LIMIT 1`).bind(me.ws, key, "%" + key + "%").first(); };
+  if (prop.kind === "mk-action") {
+    const cp = await findRow("mk_camp", p.campaign);
+    const row = { id: bulkId("ma"), key: null, kind: p.kind, mode: "boost", camp_id: cp ? cp.id : "", chan_id: cp ? cp.chan_id : "", title: p.title, detail: p.detail, from_v: p.from, to_v: p.to, status: "todo", base: null, task_id: null, by: "ai", created_at: now, done_at: null, updated_at: now };
+    return { items: [actRow(me, `AI 제안으로 마케팅 실행안 "${row.title}"을(를) 더했습니다.`)], stmts: spBulk(db, "mk_act", me.ws, [row]).concat([bump]), applied: { actionId: row.id, title: row.title, campaign: cp ? cp.name : "" } };
+  }
+  const ch = await findRow("mk_chan", p.channel);
+  const row = { id: bulkId("mp"), chan_id: ch ? ch.id : "", camp_id: "", date: p.date || null, time: "", title: p.title, body: p.body, format: p.format, status: "draft", url: "", tags: p.tags, view: 0, eng: 0, clk: 0, paid: 0, memo: "", created_by: me.id, created_at: now, updated_at: now };
+  return { items: [actRow(me, `AI 제안으로 콘텐츠 초안 "${row.title}"을(를) 더했습니다.`)], stmts: spBulk(db, "mk_post", me.ws, [row]).concat([bump]), applied: { postId: row.id, title: row.title, channel: ch ? ch.name : "" } };
+}
+const MKT = {
+  async data(db, me, b, req, url, env) {
+    if (!isMgr(me)) return fail("forbidden", 403);
+    const today = kstToday(), from = dOk(url.searchParams.get("from")) || addDaysS(today, -150);
+    const rs = await db.batch([
+      db.prepare("SELECT k, v FROM mod_set WHERE ws=?1 AND mod='mk'").bind(me.ws),
+      db.prepare(spSel("mk_chan", "ws=?1", "ORDER BY sort, created_at")).bind(me.ws),
+      db.prepare(spSel("mk_camp", "ws=?1", "ORDER BY created_at")).bind(me.ws),
+      db.prepare(spSel("mk_stat", "ws=?1 AND date>=?2", "ORDER BY date LIMIT 60000")).bind(me.ws, from),
+      db.prepare(spSel("mk_post", "ws=?1", "ORDER BY COALESCE(date,'9999') DESC, created_at DESC LIMIT 1500")).bind(me.ws),
+      db.prepare(spSel("mk_kw", "ws=?1", "ORDER BY created_at LIMIT 2000")).bind(me.ws),
+      db.prepare(spSel("mk_act", "ws=?1 AND (status='todo' OR updated_at>=?2)", "ORDER BY created_at DESC LIMIT 600")).bind(me.ws, new Date(Date.now() - 120 * 864e5).toISOString())
+    ]);
+    const kv = new Map(((rs[0] && rs[0].results) || []).map(r => [r.k, parse(r.v)]));
+    const conn = kv.get("conn") && typeof kv.get("conn") === "object" ? kv.get("conn") : {};
+    return rawJson({ ok: true, v: me.spv, today, from, settings: mkNorm(kv.get("settings")), conn: mkConnPublic(conn), keys: { vault: !!vaultKey(env), yt: !!(env && env.YT_API_KEY), datalab: !!(env && env.NAVER_CLIENT_ID && env.NAVER_CLIENT_SECRET) } },
+      ',"chans":' + rawArr(rs[1]) + ',"camps":' + rawArr(rs[2]) + ',"stats":' + rawArr(rs[3]) + ',"posts":' + rawArr(rs[4]) + ',"kws":' + rawArr(rs[5]) + ',"acts":' + rawArr(rs[6]));
+  },
+  async settings(db, me, b) {
+    if (!isMgr(me)) return fail("forbidden", 403);
+    const cur = await mkSettings(db, me.ws);
+    const s = mkNorm(Object.assign({}, cur, b && b.set && typeof b.set === "object" ? b.set : {}));
+    if (JSON.stringify(s).length > 40000) return fail("too-large", 413);
+    const { v } = await spRun(db, me, [db.prepare("INSERT INTO mod_set(ws,mod,k,v) VALUES(?1,'mk','settings',?2) ON CONFLICT(ws,mod,k) DO UPDATE SET v=excluded.v").bind(me.ws, JSON.stringify(s))]);
+    return json({ ok: true, v, settings: s });
+  },
+  async "chan/save"(db, me, b) {
+    if (!isMgr(me)) return fail("forbidden", 403);
+    const id = clip(b.id, 60), o = mkChanIn(b || {}), now = iso();
+    if (!id) {
+      if (!o.name) return fail("bad-request");
+      const n = await db.prepare("SELECT COUNT(*) AS n FROM mk_chan WHERE ws=?1").bind(me.ws).first();
+      if (Number(n && n.n) >= MK_LIMIT.chans) return fail("limit", 409);
+      const row = mkChanRow(o, now, Number(n && n.n) + 1);
+      const { v } = await spRun(db, me, spBulk(db, "mk_chan", me.ws, [row]));
+      return json({ ok: true, v, chan: await spOne(db, "mk_chan", me.ws, row.id) });
+    }
+    if (!await spOne(db, "mk_chan", me.ws, id)) return fail("not-found", 404);
+    if ("name" in o && !o.name) return fail("bad-request");
+    o.updated_at = now;
+    const { v } = await spRun(db, me, [db.prepare(`UPDATE mk_chan SET ${setCols(o, 3)} WHERE ws=?1 AND id=?2`).bind(me.ws, id, ...Object.values(o))]);
+    return json({ ok: true, v, chan: await spOne(db, "mk_chan", me.ws, id) });
+  },
+  async "chan/del"(db, me, b) {   // 캠페인·성과·콘텐츠가 붙어 있으면 지우지 않습니다 (대신 '쓰지 않음'으로)
+    if (!isMgr(me)) return fail("forbidden", 403);
+    const id = clip(b.id, 60);
+    const u = await db.prepare("SELECT (SELECT COUNT(*) FROM mk_camp WHERE ws=?1 AND chan_id=?2) + (SELECT COUNT(*) FROM mk_stat WHERE ws=?1 AND chan_id=?2) + (SELECT COUNT(*) FROM mk_post WHERE ws=?1 AND chan_id=?2) AS n").bind(me.ws, id).first();
+    if (Number(u && u.n) > 0) return fail("in-use", 409, { n: Number(u.n) });
+    const { v } = await spRun(db, me, [db.prepare("DELETE FROM mk_chan WHERE ws=?1 AND id=?2").bind(me.ws, id), db.prepare("UPDATE mk_kw SET chan_id=NULL WHERE ws=?1 AND chan_id=?2").bind(me.ws, id)]);
+    return json({ ok: true, v });
+  },
+  async "camp/save"(db, me, b) {
+    if (!isMgr(me)) return fail("forbidden", 403);
+    const id = clip(b.id, 60), o = mkCampIn(b || {}), now = iso();
+    if ("chan_id" in o && !await db.prepare("SELECT 1 AS x FROM mk_chan WHERE ws=?1 AND id=?2").bind(me.ws, o.chan_id).first()) return fail("bad-channel");
+    if (!id) {
+      if (!o.name || !o.chan_id) return fail("bad-request");
+      const n = await db.prepare("SELECT COUNT(*) AS n FROM mk_camp WHERE ws=?1").bind(me.ws).first();
+      if (Number(n && n.n) >= MK_LIMIT.camps) return fail("limit", 409);
+      const row = mkCampRow(me, o, now);
+      const { v } = await spRun(db, me, spBulk(db, "mk_camp", me.ws, [row]));
+      return json({ ok: true, v, camp: await spOne(db, "mk_camp", me.ws, row.id) });
+    }
+    const cur = await spOne(db, "mk_camp", me.ws, id);
+    if (!cur) return fail("not-found", 404);
+    if ("name" in o && !o.name) return fail("bad-request");
+    o.updated_at = now;
+    const stmts = [db.prepare(`UPDATE mk_camp SET ${setCols(o, 3)} WHERE ws=?1 AND id=?2`).bind(me.ws, id, ...Object.values(o))];
+    if (o.chan_id && o.chan_id !== cur.chan_id) stmts.push(db.prepare("UPDATE mk_stat SET chan_id=?3 WHERE ws=?1 AND camp_id=?2").bind(me.ws, id, o.chan_id));   // 채널을 옮기면 성과도 따라갑니다
+    const { v } = await spRun(db, me, stmts);
+    return json({ ok: true, v, camp: await spOne(db, "mk_camp", me.ws, id) });
+  },
+  async "camp/del"(db, me, b) {   // 캠페인과 그 성과 기록을 함께 지웁니다. 실행안·콘텐츠는 남기고 연결만 뗍니다
+    if (!isMgr(me)) return fail("forbidden", 403);
+    const id = clip(b.id, 60);
+    if (!id) return fail("bad-request");
+    const { v, rs } = await spRun(db, me, [
+      db.prepare("DELETE FROM mk_stat WHERE ws=?1 AND camp_id=?2").bind(me.ws, id),
+      db.prepare("DELETE FROM mk_camp WHERE ws=?1 AND id=?2").bind(me.ws, id),
+      db.prepare("UPDATE mk_act SET camp_id='' WHERE ws=?1 AND camp_id=?2").bind(me.ws, id),
+      db.prepare("UPDATE mk_post SET camp_id='' WHERE ws=?1 AND camp_id=?2").bind(me.ws, id)
+    ]);
+    return json({ ok: true, v, stats: Number(rs[0] && rs[0].meta && rs[0].meta.changes) || 0 });
+  },
+  // 성과 한 줄 — 직접 적을 때. 합계 줄을 적으려는 칸에 파일로 올린 상세 줄이 있으면 replace로 확인받고 바꿉니다
+  async "stat/save"(db, me, b) {
+    if (!isMgr(me)) return fail("forbidden", 403);
+    const s = mkStatIn(b || {});
+    if (!s.date) return fail("bad-date");
+    const refs = await mkRefs(db, me.ws), campId = clip(b.camp_id, 60), camp = campId ? refs.camps.find(c => c.id === campId) : null;
+    if (campId && !camp) return fail("not-found", 404);
+    const chanId = camp ? camp.chan_id : clip(b.chan_id, 60);
+    if (!refs.chans.has(chanId)) return fail("bad-channel");
+    const ex = (await db.prepare("SELECT id, label FROM mk_stat WHERE ws=?1 AND date=?2 AND chan_id=?3 AND camp_id=?4").bind(me.ws, s.date, chanId, campId).all()).results || [];
+    if (!s.label && ex.some(x => x.label) && !b.replace) return fail("has-detail", 409, { n: ex.filter(x => x.label).length });
+    const row = Object.assign({ id: bulkId("ms"), chan_id: chanId, camp_id: campId, src: MK_SRC.includes(b.src) ? b.src : "manual", updated_at: iso() }, s);
+    const del = s.label ? "AND label IN ('',?5)" : "";   // 라벨 줄을 적으면 그 칸의 합계 줄은 지웁니다
+    const { v } = await spRun(db, me, [db.prepare(`DELETE FROM mk_stat WHERE ws=?1 AND date=?2 AND chan_id=?3 AND camp_id=?4 ${del}`).bind(...[me.ws, s.date, chanId, campId].concat(s.label ? [s.label] : [])), ...spBulk(db, "mk_stat", me.ws, [row])]);
+    return json({ ok: true, v, stat: await spOne(db, "mk_stat", me.ws, row.id), replaced: ex.length });
+  },
+  async "stat/del"(db, me, b) {
+    if (!isMgr(me)) return fail("forbidden", 403);
+    const ids = (Array.isArray(b.ids) ? b.ids : [b.id]).map(x => clip(x, 60)).filter(Boolean).slice(0, 5000);
+    if (!ids.length) return fail("bad-request");
+    const { v } = await spRun(db, me, [db.prepare("DELETE FROM mk_stat WHERE ws=?1 AND id IN (SELECT value FROM json_each(?2))").bind(me.ws, JSON.stringify(ids))]);
+    return json({ ok: true, v, deleted: ids.length });
+  },
+  // 광고 관리자에서 내려받은 보고서(엑셀·CSV)를 화면에서 읽어 보냅니다 — 날짜·채널·캠페인 칸 단위로 바꿔 넣습니다
+  async "stat/import"(db, me, b) {
+    if (!isMgr(me)) return fail("forbidden", 403);
+    const raw = (Array.isArray(b.rows) ? b.rows : []).slice(0, 5000);
+    if (!raw.length) return fail("empty");
+    const refs = await mkRefs(db, me.ws), defChan = clip(b.chan_id, 60);
+    if (defChan && !refs.chans.has(defChan)) return fail("bad-channel");
+    const r = mkBuildStats(me, raw, { defChan, src: MK_SRC.includes(b.src) ? b.src : "file", chans: refs.chans, camps: refs.camps, mkcamp: b.mkcamp !== false });
+    if (!r.rows.length) return fail("empty", 400, { skipped: r.skipped });
+    const { v } = await spRun(db, me, mkStatStmts(db, me.ws, r));
+    return json({ ok: true, v, added: r.rows.length, camps: r.newCamps.length, skipped: r.skipped, from: r.from, to: r.to });
+  },
+  async "post/save"(db, me, b) {
+    if (!isMgr(me)) return fail("forbidden", 403);
+    const id = clip(b.id, 60), o = {}, now = iso();
+    if ("chan_id" in b) o.chan_id = clip(b.chan_id, 60);
+    if ("camp_id" in b) o.camp_id = clip(b.camp_id, 60);
+    if ("date" in b) o.date = dOk(b.date) || null;
+    if ("time" in b) o.time = tOk(b.time);
+    if ("title" in b) o.title = clip(b.title, 120);
+    if ("body" in b) o.body = clip(b.body, 6000);
+    if ("format" in b) o.format = clip(b.format, 20);
+    if ("status" in b) o.status = MK_POST_ST.includes(b.status) ? b.status : "idea";
+    if ("url" in b) o.url = mkUrl(b.url);
+    if ("tags" in b) o.tags = clip(b.tags, 300);
+    if ("view" in b) o.view = mkInt(b.view, 1e12);
+    if ("eng" in b) o.eng = mkInt(b.eng, 1e11);
+    if ("clk" in b) o.clk = mkInt(b.clk, 1e11);
+    if ("paid" in b) o.paid = b.paid ? 1 : 0;
+    if ("memo" in b) o.memo = clip(b.memo, 1000);
+    if (!id) {
+      if (!o.title) return fail("bad-request");
+      const n = await db.prepare("SELECT COUNT(*) AS n FROM mk_post WHERE ws=?1").bind(me.ws).first();
+      if (Number(n && n.n) >= MK_LIMIT.posts) return fail("limit", 409);
+      const row = Object.assign({ id: bulkId("mp"), chan_id: "", camp_id: "", date: null, time: "", body: "", format: "", status: "idea", url: "", tags: "", view: 0, eng: 0, clk: 0, paid: 0, memo: "", created_by: me.id, created_at: now, updated_at: now }, o);
+      const { v } = await spRun(db, me, spBulk(db, "mk_post", me.ws, [row]));
+      return json({ ok: true, v, post: await spOne(db, "mk_post", me.ws, row.id) });
+    }
+    if (!await spOne(db, "mk_post", me.ws, id)) return fail("not-found", 404);
+    if ("title" in o && !o.title) return fail("bad-request");
+    o.updated_at = now;
+    const { v } = await spRun(db, me, [db.prepare(`UPDATE mk_post SET ${setCols(o, 3)} WHERE ws=?1 AND id=?2`).bind(me.ws, id, ...Object.values(o))]);
+    return json({ ok: true, v, post: await spOne(db, "mk_post", me.ws, id) });
+  },
+  async "post/del"(db, me, b) {
+    if (!isMgr(me)) return fail("forbidden", 403);
+    const { v } = await spRun(db, me, [db.prepare("DELETE FROM mk_post WHERE ws=?1 AND id=?2").bind(me.ws, clip(b.id, 60))]);
+    return json({ ok: true, v });
+  },
+  async "kw/save"(db, me, b) {
+    if (!isMgr(me)) return fail("forbidden", 403);
+    const id = clip(b.id, 60), o = {}, now = iso();
+    if ("word" in b) o.word = mkWord(b.word);
+    if ("grp" in b) o.grp = clip(b.grp, 30);
+    if ("chan_id" in b) o.chan_id = clip(b.chan_id, 60) || null;
+    if ("vol_pc" in b) o.vol_pc = numOrNull(b.vol_pc) === null ? null : mkInt(b.vol_pc, 1e10);
+    if ("vol_mo" in b) o.vol_mo = numOrNull(b.vol_mo) === null ? null : mkInt(b.vol_mo, 1e10);
+    if ("comp" in b) o.comp = clip(b.comp, 10);
+    if ("bid" in b) o.bid = numOrNull(b.bid) === null ? null : mkInt(b.bid, 1e8);
+    if ("rank" in b) o.rank = clip(b.rank, 20);
+    if ("state" in b) o.state = MK_KW_ST.includes(b.state) ? b.state : "watch";
+    if ("memo" in b) o.memo = clip(b.memo, 300);
+    if (!id) {
+      if (!o.word) return fail("bad-request");
+      if (await db.prepare("SELECT 1 AS x FROM mk_kw WHERE ws=?1 AND word=?2").bind(me.ws, o.word).first()) return fail("dup", 409);
+      const n = await db.prepare("SELECT COUNT(*) AS n FROM mk_kw WHERE ws=?1").bind(me.ws).first();
+      if (Number(n && n.n) >= MK_LIMIT.kws) return fail("limit", 409);
+      const row = Object.assign({ id: bulkId("mw"), grp: "", chan_id: null, vol_pc: null, vol_mo: null, comp: "", bid: null, rank: "", state: "watch", memo: "", checked_at: null, created_at: now, updated_at: now }, o);
+      const { v } = await spRun(db, me, spBulk(db, "mk_kw", me.ws, [row]));
+      return json({ ok: true, v, kw: await spOne(db, "mk_kw", me.ws, row.id) });
+    }
+    if (!await spOne(db, "mk_kw", me.ws, id)) return fail("not-found", 404);
+    if ("word" in o) { if (!o.word) return fail("bad-request"); if (await db.prepare("SELECT 1 AS x FROM mk_kw WHERE ws=?1 AND word=?2 AND id<>?3").bind(me.ws, o.word, id).first()) return fail("dup", 409); }
+    o.updated_at = now;
+    const { v } = await spRun(db, me, [db.prepare(`UPDATE mk_kw SET ${setCols(o, 3)} WHERE ws=?1 AND id=?2`).bind(me.ws, id, ...Object.values(o))]);
+    return json({ ok: true, v, kw: await spOne(db, "mk_kw", me.ws, id) });
+  },
+  // 키워드 여러 개 — 같은 낱말이 있으면 검색량·경쟁 정도만 새로 고칩니다 (묶음·상태·메모는 그대로)
+  async "kw/import"(db, me, b) {
+    if (!isMgr(me)) return fail("forbidden", 403);
+    const now = iso(), seen = new Set(), rows = [];
+    for (const r of (Array.isArray(b.rows) ? b.rows : []).slice(0, 500)) {
+      const word = mkWord(r && r.word); if (!word || seen.has(word)) continue; seen.add(word);
+      const has = r.vol_pc != null || r.vol_mo != null;
+      rows.push({ id: bulkId("mw"), word, grp: clip(r.grp, 30), chan_id: null, vol_pc: numOrNull(r.vol_pc) === null ? null : mkInt(r.vol_pc, 1e10), vol_mo: numOrNull(r.vol_mo) === null ? null : mkInt(r.vol_mo, 1e10), comp: clip(r.comp, 10), bid: null, rank: "", state: MK_KW_ST.includes(r.state) ? r.state : "watch", memo: clip(r.memo, 300), checked_at: has ? now : null, created_at: now, updated_at: now });
+    }
+    if (!rows.length) return fail("empty");
+    const n = await db.prepare("SELECT COUNT(*) AS n FROM mk_kw WHERE ws=?1").bind(me.ws).first();
+    if (Number(n && n.n) + rows.length > MK_LIMIT.kws + 500) return fail("limit", 409);
+    const { v } = await spRun(db, me, spBulk(db, "mk_kw", me.ws, rows, "ON CONFLICT(ws,word) DO UPDATE SET vol_pc=COALESCE(excluded.vol_pc,vol_pc), vol_mo=COALESCE(excluded.vol_mo,vol_mo), comp=CASE WHEN excluded.comp<>'' THEN excluded.comp ELSE comp END, checked_at=COALESCE(excluded.checked_at,checked_at), updated_at=excluded.updated_at"));
+    const out = await db.prepare(spSel("mk_kw", "ws=?1", "ORDER BY created_at LIMIT 2000")).bind(me.ws).all();
+    return rawJson({ ok: true, v, n: rows.length }, ',"kws":' + rawArr(out));
+  },
+  async "kw/del"(db, me, b) {
+    if (!isMgr(me)) return fail("forbidden", 403);
+    const ids = (Array.isArray(b.ids) ? b.ids : [b.id]).map(x => clip(x, 60)).filter(Boolean).slice(0, 2000);
+    if (!ids.length) return fail("bad-request");
+    const { v } = await spRun(db, me, [db.prepare("DELETE FROM mk_kw WHERE ws=?1 AND id IN (SELECT value FROM json_each(?2))").bind(me.ws, JSON.stringify(ids))]);
+    return json({ ok: true, v, deleted: ids.length });
+  },
+  async "act/save"(db, me, b) {
+    if (!isMgr(me)) return fail("forbidden", 403);
+    const id = clip(b.id, 60), o = {}, now = iso();
+    if ("title" in b) o.title = clip(b.title, 120);
+    if ("detail" in b) o.detail = clip(b.detail, 2000);
+    if ("kind" in b) o.kind = clip(b.kind, 20) || "etc";
+    if ("mode" in b) o.mode = b.mode === "boost" ? "boost" : "opt";
+    if ("camp_id" in b) o.camp_id = clip(b.camp_id, 60);
+    if ("chan_id" in b) o.chan_id = clip(b.chan_id, 60);
+    if ("from_v" in b) o.from_v = clip(b.from_v, 40);
+    if ("to_v" in b) o.to_v = clip(b.to_v, 40);
+    if ("task_id" in b) o.task_id = clip(b.task_id, 60) || null;
+    if ("status" in b && MK_ACT_ST.includes(b.status)) { o.status = b.status; o.done_at = b.status === "todo" ? null : now; }
+    if ("base" in b) { const s = JSON.stringify(b.base && typeof b.base === "object" ? b.base : null); o.base = s.length > 2000 ? "null" : s; }
+    if (!id) {
+      if (!o.title) return fail("bad-request");
+      const n = await db.prepare("SELECT COUNT(*) AS n FROM mk_act WHERE ws=?1 AND status='todo'").bind(me.ws).first();
+      if (Number(n && n.n) >= MK_LIMIT.acts) return fail("limit", 409);
+      const row = Object.assign({ id: bulkId("ma"), key: null, kind: "etc", mode: "opt", camp_id: "", chan_id: "", detail: "", from_v: "", to_v: "", status: "todo", base: null, task_id: null, by: me.id, created_at: now, done_at: null, updated_at: now }, o);
+      const { v } = await spRun(db, me, spBulk(db, "mk_act", me.ws, [row]));
+      return json({ ok: true, v, act: await spOne(db, "mk_act", me.ws, row.id) });
+    }
+    if (!await spOne(db, "mk_act", me.ws, id)) return fail("not-found", 404);
+    if ("title" in o && !o.title) return fail("bad-request");
+    o.updated_at = now;
+    const { v } = await spRun(db, me, [db.prepare(`UPDATE mk_act SET ${setCols(o, 3)} WHERE ws=?1 AND id=?2`).bind(me.ws, id, ...Object.values(o))]);
+    return json({ ok: true, v, act: await spOne(db, "mk_act", me.ws, id) });
+  },
+  // 진단·부스터가 만든 실행안을 대기열에 넣습니다 — 같은 열쇠(key)는 한 번만 들어갑니다
+  async "act/bulk"(db, me, b) {
+    if (!isMgr(me)) return fail("forbidden", 403);
+    const now = iso(), seen = new Set(), rows = [];
+    for (const r of (Array.isArray(b.rows) ? b.rows : []).slice(0, 60)) {
+      const key = clip(r && r.key, 120), title = clip(r && r.title, 120);
+      if (!key || !title || seen.has(key)) continue; seen.add(key);
+      const base = JSON.stringify(r.base && typeof r.base === "object" ? r.base : null);
+      rows.push({ id: bulkId("ma"), key, kind: clip(r.kind, 20) || "etc", mode: r.mode === "boost" ? "boost" : "opt", camp_id: clip(r.camp_id, 60), chan_id: clip(r.chan_id, 60), title, detail: clip(r.detail, 2000), from_v: clip(r.from_v, 40), to_v: clip(r.to_v, 40), status: "todo", base: base.length > 2000 ? null : parse(base), task_id: null, by: "auto", created_at: now, done_at: null, updated_at: now });
+    }
+    if (!rows.length) return fail("empty");
+    const n = await db.prepare("SELECT COUNT(*) AS n FROM mk_act WHERE ws=?1 AND status='todo'").bind(me.ws).first();
+    if (Number(n && n.n) + rows.length > MK_LIMIT.acts) return fail("limit", 409);
+    const { v } = await spRun(db, me, spBulk(db, "mk_act", me.ws, rows, "ignore"));
+    const out = await db.prepare(spSel("mk_act", "ws=?1 AND key IN (SELECT value FROM json_each(?2))")).bind(me.ws, JSON.stringify(rows.map(r => r.key))).all();
+    return rawJson({ ok: true, v }, ',"acts":' + rawArr(out));
+  },
+  async "act/del"(db, me, b) {
+    if (!isMgr(me)) return fail("forbidden", 403);
+    const { v } = await spRun(db, me, [db.prepare("DELETE FROM mk_act WHERE ws=?1 AND id=?2").bind(me.ws, clip(b.id, 60))]);
+    return json({ ok: true, v });
+  },
+  // 기획안 한 번에 만들기 — 기획 마법사와 클로드가 정리해 준 기획 파일(myworks-marketing/v1)이 같은 길을 씁니다
+  async "plan/apply"(db, me, b) {
+    if (!isMgr(me)) return fail("forbidden", 403);
+    const now = iso(), refs = await mkRefs(db, me.ws), stmts = [], made = { chans: 0, camps: 0, posts: 0, acts: 0, kws: 0 };
+    const chanBy = new Map();   // 이름·종류 → id
+    for (const c of refs.chanRows) { chanBy.set("n:" + mkNm(c.name), c.id); if (!chanBy.has("k:" + c.kind)) chanBy.set("k:" + c.kind, c.id); }
+    const chanCat = new Map(refs.chans), newCh = [];
+    for (const c of (Array.isArray(b.chans) ? b.chans : []).slice(0, 20)) {
+      const o = mkChanIn(c || {}); if (!o.name) continue;
+      if (chanBy.has("n:" + mkNm(o.name)) || (o.kind && o.kind !== "etc" && chanBy.has("k:" + o.kind))) continue;
+      if (refs.chanRows.length + newCh.length >= MK_LIMIT.chans) break;
+      const row = mkChanRow(o, now, refs.chanRows.length + newCh.length + 1);
+      newCh.push(row); chanBy.set("n:" + mkNm(row.name), row.id); if (!chanBy.has("k:" + row.kind)) chanBy.set("k:" + row.kind, row.id); chanCat.set(row.id, row.cat);
+    }
+    const chanOf = x => { const s = clip(x, 60); return !s ? "" : chanCat.has(s) ? s : chanBy.get("k:" + s) || chanBy.get("n:" + mkNm(s)) || ""; };
+    if (newCh.length) { stmts.push(...spBulk(db, "mk_chan", me.ws, newCh)); made.chans = newCh.length; }
+    const campNames = new Set(refs.camps.map(c => c.chan_id + "|" + mkNm(c.name))), newCp = [], campBy = new Map(refs.camps.map(c => [mkNm(c.name), c.id]));
+    for (const c of (Array.isArray(b.camps) ? b.camps : []).slice(0, 40)) {
+      const o = mkCampIn(c || {}), ch = chanOf(c && (c.chan_id || c.chan || c.channel));
+      if (!o.name || !ch || campNames.has(ch + "|" + mkNm(o.name)) || refs.camps.length + newCp.length >= MK_LIMIT.camps) continue;
+      const row = mkCampRow(me, Object.assign({ status: "plan" }, o, { chan_id: ch, cat: o.cat || chanCat.get(ch) || "etc" }), now);
+      if (!("cat" in o)) row.cat = chanCat.get(ch) || "etc";
+      newCp.push(row); campNames.add(ch + "|" + mkNm(o.name)); campBy.set(mkNm(o.name), row.id);
+    }
+    if (newCp.length) { stmts.push(...spBulk(db, "mk_camp", me.ws, newCp)); made.camps = newCp.length; }
+    const posts = [];
+    for (const p of (Array.isArray(b.posts) ? b.posts : []).slice(0, 60)) {
+      const title = clip(p && p.title, 120); if (!title) continue;
+      posts.push({ id: bulkId("mp"), chan_id: chanOf(p.chan_id || p.chan || p.channel), camp_id: campBy.get(mkNm(p.camp || p.campaign)) || "", date: dOk(p.date) || null, time: tOk(p.time), title, body: clip(p.body, 6000), format: clip(p.format, 20), status: MK_POST_ST.includes(p.status) ? p.status : "idea", url: "", tags: clip(p.tags, 300), view: 0, eng: 0, clk: 0, paid: p.paid ? 1 : 0, memo: clip(p.memo, 1000), created_by: me.id, created_at: now, updated_at: now });
+    }
+    if (posts.length) { stmts.push(...spBulk(db, "mk_post", me.ws, posts)); made.posts = posts.length; }
+    const acts = [];
+    for (const a of (Array.isArray(b.acts) ? b.acts : []).slice(0, 40)) {
+      const title = clip(a && a.title, 120); if (!title) continue;
+      acts.push({ id: bulkId("ma"), key: clip(a.key, 120) || null, kind: clip(a.kind, 20) || "setup", mode: a.mode === "boost" ? "boost" : "opt", camp_id: campBy.get(mkNm(a.camp || a.campaign)) || "", chan_id: chanOf(a.chan_id || a.chan || a.channel), title, detail: clip(a.detail, 2000), from_v: "", to_v: "", status: "todo", base: null, task_id: null, by: b.by === "ai" ? "ai" : me.id, created_at: now, done_at: null, updated_at: now });
+    }
+    if (acts.length) { stmts.push(...spBulk(db, "mk_act", me.ws, acts, "ignore")); made.acts = acts.length; }
+    const seen = new Set(), kws = [];
+    for (const k of (Array.isArray(b.kws) ? b.kws : []).slice(0, 200)) {
+      const word = mkWord(typeof k === "string" ? k : k && k.word); if (!word || seen.has(word)) continue; seen.add(word);
+      kws.push({ id: bulkId("mw"), word, grp: clip(k && k.grp, 30), chan_id: null, vol_pc: null, vol_mo: null, comp: "", bid: null, rank: "", state: k && k.state === "neg" ? "neg" : "watch", memo: "", checked_at: null, created_at: now, updated_at: now });
+    }
+    if (kws.length) { stmts.push(...spBulk(db, "mk_kw", me.ws, kws, "ON CONFLICT(ws,word) DO NOTHING")); made.kws = kws.length; }
+    if (b.set && typeof b.set === "object") {
+      const s = mkNorm(Object.assign({}, await mkSettings(db, me.ws), b.set));
+      stmts.push(db.prepare("INSERT INTO mod_set(ws,mod,k,v) VALUES(?1,'mk','settings',?2) ON CONFLICT(ws,mod,k) DO UPDATE SET v=excluded.v").bind(me.ws, JSON.stringify(s)));
+    }
+    if (!stmts.length) return fail("empty");
+    const { v } = await spRun(db, me, stmts);
+    return json({ ok: true, v, made });
+  },
+  /* ── 광고 계정 연결 (선택) — 워크스페이스 관리자만 넣고 지웁니다 ── */
+  async "conn/save"(db, me, b, req, url, env) {
+    if (me.role !== "admin") return fail("forbidden", 403);
+    if (!vaultKey(env)) return fail("no-vault", 400, { hint: "Cloudflare Pages → Settings → Variables and Secrets에 MW_VAULT_KEY(16자 이상)를 넣어 주세요." });
+    const conn = await mkConnRaw(db, me.ws), now = iso();
+    if (b.src === "naver") {
+      const key = clip(b.key, 200), secret = clip(b.secret, 200), cid = String(b.cid || "").replace(/[^0-9]/g, "").slice(0, 20);
+      if (!key || !secret || !cid) return fail("bad-request");
+      conn.naver = { cid, tail: mkTail(key), sealed: await seal(env, JSON.stringify({ key, secret, cid })), at: now, by: me.id };
+    } else if (b.src === "meta") {
+      const token = clip(b.token, 600), acct = String(b.acct || "").replace(/[^0-9]/g, "").slice(0, 30);
+      if (!token || !acct) return fail("bad-request");
+      conn.meta = { acct, tail: mkTail(token), sealed: await seal(env, JSON.stringify({ token, acct })), at: now, by: me.id };
+    } else return fail("bad-request");
+    await db.prepare("INSERT INTO mod_set(ws,mod,k,v) VALUES(?1,'mk','conn',?2) ON CONFLICT(ws,mod,k) DO UPDATE SET v=excluded.v").bind(me.ws, JSON.stringify(conn)).run();
+    return json({ ok: true, conn: mkConnPublic(conn) });
+  },
+  async "conn/del"(db, me, b) {
+    if (me.role !== "admin") return fail("forbidden", 403);
+    const conn = await mkConnRaw(db, me.ws);
+    if (b.src !== "naver" && b.src !== "meta") return fail("bad-request");
+    delete conn[b.src];
+    await db.prepare("INSERT INTO mod_set(ws,mod,k,v) VALUES(?1,'mk','conn',?2) ON CONFLICT(ws,mod,k) DO UPDATE SET v=excluded.v").bind(me.ws, JSON.stringify(conn)).run();
+    return json({ ok: true, conn: mkConnPublic(conn) });
+  },
+  async "conn/test"(db, me, b, req, url, env) {
+    if (!isMgr(me)) return fail("forbidden", 403);
+    const conn = await mkConnRaw(db, me.ws);
+    if (b.src === "naver") {
+      const c = await mkSecret(env, conn.naver); if (!c) return fail("no-conn");
+      const x = await naverSa(c, "GET", "/ncc/campaigns");
+      if (!x.ok || !Array.isArray(x.j)) return upErr(x);
+      return json({ ok: true, campaigns: x.j.length });
+    }
+    if (b.src === "meta") {
+      const c = await mkSecret(env, conn.meta); if (!c) return fail("no-conn");
+      const x = await metaGet("/act_" + c.acct, { fields: "name,currency,account_status", access_token: c.token });
+      if (!x.ok || !x.j || x.j.error) return upErr(x);
+      return json({ ok: true, name: clip(x.j.name, 80), currency: clip(x.j.currency, 8) });
+    }
+    return fail("bad-request");
+  },
+  /* 성과 가져오기 — 네이버 검색광고·메타 광고·유튜브 채널. 화면을 열 때 몇 시간에 한 번 부릅니다 */
+  async sync(db, me, b, req, url, env) {
+    if (!isMgr(me)) return fail("forbidden", 403);
+    const src = b.src, today = kstToday(), days = clampInt(b.days, 1, 90, 14), since = addDaysS(today, -(days - 1)), now = iso();
+    const set = await mkSettings(db, me.ws), refs = await mkRefs(db, me.ws), raw = [], extra = [];
+    if (["naver", "meta", "yt"].includes(src) && set.synced[src] && Date.now() - Date.parse(set.synced[src]) < (src === "yt" ? 30 : 1) * 60000) return fail("too-soon", 429);   // 유튜브는 운영자 키를 함께 쓰므로 30분에 한 번
+    const ensureChan = (kind, name, cat) => {
+      const ex = refs.chanRows.find(c => c.kind === kind); if (ex) return ex.id;
+      const row = mkChanRow({ name, kind, cat }, now, refs.chanRows.length + 1);
+      extra.push(...spBulk(db, "mk_chan", me.ws, [row])); refs.chanRows.push(row); refs.chans.set(row.id, cat); return row.id;
+    };
+    if (src === "naver") {
+      const c = await mkSecret(env, (await mkConnRaw(db, me.ws)).naver); if (!c) return fail("no-conn");
+      const cs = await naverSa(c, "GET", "/ncc/campaigns");
+      if (!cs.ok || !Array.isArray(cs.j)) return upErr(cs);
+      const list = cs.j.filter(x => x && x.nccCampaignId).slice(0, 30), chan = ensureChan("naver_sa", "네이버 검색광고", "search");
+      const q = { fields: JSON.stringify(["impCnt", "clkCnt", "salesAmt", "ccnt", "convAmt"]), timeRange: JSON.stringify({ since, until: today }), timeIncrement: "1" };
+      let bad = 0;
+      for (let i = 0; i < list.length; i += 5) {
+        const got = await Promise.all(list.slice(i, i + 5).map(x => naverSa(c, "GET", "/stats", Object.assign({ id: x.nccCampaignId }, q))));
+        got.forEach((g, k) => {
+          const cp = list[i + k], data = g.ok && g.j ? (Array.isArray(g.j.data) ? g.j.data : Array.isArray(g.j) ? g.j : []) : null;
+          if (!data) { bad++; return; }
+          for (const d of data) {
+            const date = dOk(String(d.dateStart || d.date || d.statDt || "").slice(0, 10)); if (!date) continue;
+            const row = { date, chan_id: chan, ext_id: cp.nccCampaignId, camp: clip(cp.name, 80), camp_budget: cp.useDailyBudget ? cp.dailyBudget : 0, cost: d.salesAmt, imp: d.impCnt, clk: d.clkCnt, conv: d.ccnt, rev: d.convAmt };
+            if (Number(row.cost) || Number(row.imp) || Number(row.clk) || Number(row.conv)) raw.push(row);
+          }
+        });
+      }
+      if (bad === list.length && list.length) return fail("upstream", 502, { status: 0, msg: "성과 조회가 모두 실패했습니다." });
+      set.synced.naver = now;
+    } else if (src === "meta") {
+      const c = await mkSecret(env, (await mkConnRaw(db, me.ws)).meta); if (!c) return fail("no-conn");
+      const chan = ensureChan("meta_ads", "메타 광고 (인스타그램·페이스북)", "target"), types = META_CONV[set.metaConv] || META_CONV.purchase;
+      let x = await metaGet("/act_" + c.acct + "/insights", { level: "campaign", time_increment: "1", time_range: JSON.stringify({ since, until: today }), fields: "campaign_id,campaign_name,spend,impressions,inline_link_clicks,clicks,actions,action_values", limit: "500", access_token: c.token });
+      for (let page = 0; page < 6; page++) {
+        if (!x.ok || !x.j || x.j.error || !Array.isArray(x.j.data)) { if (!page) return upErr(x); break; }
+        for (const d of x.j.data) {
+          const date = dOk(d.date_start); if (!date || !d.campaign_id) continue;
+          raw.push({ date, chan_id: chan, ext_id: String(d.campaign_id), camp: clip(d.campaign_name, 80), cost: Math.round(Number(d.spend) || 0), imp: d.impressions, clk: d.inline_link_clicks != null ? d.inline_link_clicks : d.clicks, conv: metaPick(d.actions, types), rev: Math.round(metaPick(d.action_values, META_CONV.purchase)) });
+        }
+        const next = x.j.paging && x.j.paging.next;
+        if (!next) break;
+        x = await metaGet(next);
+      }
+      set.synced.meta = now;
+    } else if (src === "yt") {
+      const key = env && env.YT_API_KEY; if (!key) return fail("no-key");
+      const list = refs.chanRows.filter(c => c.kind === "youtube" && String(c.handle || "").trim()).slice(0, 5);
+      if (!list.length) return fail("no-channel");
+      const out = [];
+      for (const c of list) {
+        const h = String(c.handle).trim(), q = new URLSearchParams({ part: "statistics", key });
+        if (/^UC[\w-]{20,}$/.test(h)) q.set("id", h); else q.set("forHandle", h.startsWith("@") ? h : "@" + h);
+        let r, j = null;
+        try { r = await fetch("https://www.googleapis.com/youtube/v3/channels?" + q.toString(), { headers: { accept: "application/json" } }); j = await r.json().catch(() => null); } catch (e) { r = null; }
+        const st = r && r.ok && j && Array.isArray(j.items) && j.items[0] && j.items[0].statistics;
+        if (!st) { out.push({ id: c.id, ok: false }); continue; }
+        const ext = parse(c.ext) || {}, subs = mkInt(st.subscriberCount, 1e10), views = mkInt(st.viewCount, 1e13), delta = ext.views != null && views >= ext.views ? views - ext.views : 0;
+        extra.push(db.prepare("UPDATE mk_chan SET ext=?3, updated_at=?4 WHERE ws=?1 AND id=?2").bind(me.ws, c.id, JSON.stringify(Object.assign({}, ext, { subs, views, videos: mkInt(st.videoCount, 1e9), at: now })), now));
+        extra.push(db.prepare("INSERT INTO mk_stat(ws,id,date,chan_id,camp_id,label,cost,imp,clk,conv,rev,view,eng,fol,src,memo,updated_at) VALUES(?1,?2,?3,?4,'','',0,0,0,0,0,?5,0,?6,'yt','',?7) ON CONFLICT(ws,date,chan_id,camp_id,label) DO UPDATE SET view=mk_stat.view+excluded.view, fol=excluded.fol, updated_at=excluded.updated_at").bind(me.ws, bulkId("ms"), today, c.id, delta, subs, now));
+        out.push({ id: c.id, ok: true, subs, views });
+      }
+      if (!out.some(x => x.ok)) return fail("upstream", 502, { status: 0 });
+      set.synced.yt = now;
+      extra.push(db.prepare("INSERT INTO mod_set(ws,mod,k,v) VALUES(?1,'mk','settings',?2) ON CONFLICT(ws,mod,k) DO UPDATE SET v=excluded.v").bind(me.ws, JSON.stringify(set)));
+      const { v } = await spRun(db, me, extra);
+      return json({ ok: true, v, channels: out, synced: set.synced });
+    } else return fail("bad-request");
+    const r = raw.length ? mkBuildStats(me, raw, { defChan: "", src, chans: refs.chans, camps: refs.camps, mkcamp: true }) : { rows: [], newCamps: [], extFix: [], keys: [], skipped: 0, from: "", to: "" };
+    const stmts = extra.concat(r.rows.length ? mkStatStmts(db, me.ws, r) : []);
+    stmts.push(db.prepare("INSERT INTO mod_set(ws,mod,k,v) VALUES(?1,'mk','settings',?2) ON CONFLICT(ws,mod,k) DO UPDATE SET v=excluded.v").bind(me.ws, JSON.stringify(set)));
+    const { v } = await spRun(db, me, stmts);
+    return json({ ok: true, v, rows: r.rows.length, camps: r.newCamps.length, since, until: today, synced: set.synced });
+  },
+  // 네이버 키워드 도구 — 연관 키워드와 월간 검색 수 (네이버 검색광고 연결이 있어야 합니다)
+  async kwtool(db, me, b, req, url, env) {
+    if (!isMgr(me)) return fail("forbidden", 403);
+    const words = [...new Set((Array.isArray(b.words) ? b.words : []).map(w => String(w || "").replace(/\s+/g, "").slice(0, 40)).filter(Boolean))].slice(0, 5);
+    if (!words.length) return fail("bad-request");
+    const c = await mkSecret(env, (await mkConnRaw(db, me.ws)).naver); if (!c) return fail("no-conn");
+    const x = await naverSa(c, "GET", "/keywordstool", { hintKeywords: words.join(","), showDetail: "1" });
+    if (!x.ok || !x.j || !Array.isArray(x.j.keywordList)) return upErr(x);
+    const num = v => { const n = Number(String(v ?? "").replace(/[^\d.]/g, "")); return Number.isFinite(n) ? Math.round(n) : 0; };   // 10 미만은 "< 10"으로 옵니다
+    return json({ ok: true, items: x.j.keywordList.slice(0, 120).map(k => ({ word: clip(k.relKeyword, 40), vol_pc: num(k.monthlyPcQcCnt), vol_mo: num(k.monthlyMobileQcCnt), low: /</.test(String(k.monthlyPcQcCnt) + String(k.monthlyMobileQcCnt)), comp: clip(k.compIdx, 10), depth: num(k.plAvgDepth) })).filter(k => k.word) });
+  },
+  // 검색 관심도 추이 — 네이버 데이터랩 통합검색어 트렌드 (운영자가 NAVER_CLIENT_ID·NAVER_CLIENT_SECRET을 넣어 두었을 때)
+  async trend(db, me, b, req, url, env) {
+    if (!isMgr(me)) return fail("forbidden", 403);
+    const id = env && env.NAVER_CLIENT_ID, sec = env && env.NAVER_CLIENT_SECRET;
+    if (!id || !sec) return fail("no-key");
+    const groups = (Array.isArray(b.groups) ? b.groups : []).slice(0, 5).map(g => ({ groupName: clip(g && g.name, 30), keywords: (Array.isArray(g && g.words) ? g.words : []).map(w => clip(w, 40)).filter(Boolean).slice(0, 20) })).filter(g => g.groupName && g.keywords.length);
+    if (!groups.length) return fail("bad-request");
+    const today = kstToday(), months = clampInt(b.months, 1, 36, 12);
+    // 운영자 키 하나를 모든 워크스페이스가 함께 쓰므로 워크스페이스마다 하루 40번까지만
+    const q0 = await db.prepare("SELECT v FROM mod_set WHERE ws=?1 AND mod='mk' AND k='quota'").bind(me.ws).first(), Q = (q0 && parse(q0.v)) || {}, used = Q.d === today ? Number(Q.trend) || 0 : 0;
+    if (used >= 40) return fail("quota", 429);
+    let r;
+    try { r = await fetch("https://openapi.naver.com/v1/datalab/search", { method: "POST", headers: { "X-Naver-Client-Id": id, "X-Naver-Client-Secret": sec, "content-type": "application/json" }, body: JSON.stringify({ startDate: addDaysS(today, -months * 30), endDate: addDaysS(today, -1), timeUnit: months > 6 ? "week" : "date", keywordGroups: groups }) }); } catch (e) { return fail("upstream", 502); }
+    const j = await r.json().catch(() => null);
+    if (!r.ok || !j || !Array.isArray(j.results)) return fail("upstream", 502, { status: r.status });
+    await db.prepare("INSERT INTO mod_set(ws,mod,k,v) VALUES(?1,'mk','quota',?2) ON CONFLICT(ws,mod,k) DO UPDATE SET v=excluded.v").bind(me.ws, JSON.stringify({ d: today, trend: used + 1 })).run();
+    return json({ ok: true, unit: months > 6 ? "week" : "date", results: j.results.slice(0, 5).map(x => ({ name: clip(x.title, 30), data: (Array.isArray(x.data) ? x.data : []).slice(0, 400).map(d => ({ d: clip(d.period, 10), v: Math.round((Number(d.ratio) || 0) * 100) / 100 })) })) });
+  }
+};
+
 const LINK_KINDS = {
   quote: {   // 견적 승인·수정 요청
     exists: async (db, me, id) => !!(await db.prepare("SELECT 1 AS x FROM os_quote WHERE ws=?1 AND id=?2").bind(me.ws, id).first()),
@@ -3977,10 +4674,11 @@ const MCP_TOOLS = [
   { name: "myworks_space", description: "마이스토어: 오늘·내일 예약, 청소·점검 확인 대기, 최근 일 마감, 시설 이슈, 소모품 부족, 답할 리뷰·문의", input: {} },
   { name: "myworks_outsourcing", description: "거래: 진행 안건, 견적 회신 대기, 미수금, 이번 주 납기", input: {} },
   { name: "myworks_commerce", description: "마이셀러: 발송할 주문, 답할 문의, 재고 부족, 발주·입고, 이달 매출", input: {} },
-  { name: "myworks_propose", description: "변경 제안 올리기(쓰기 토큰). kind: create-task(title, project|store, detail, due, priority, assignee) · update-status(task, status|due) · add-note(text, project|store|task) · create-contact(name, company, phone, email, kind) · create-job(title, client, detail, due, amount). 관리자가 승인하면 반영됩니다", input: { kind: "string", payload: "object", reason: "string" }, required: ["kind", "payload"] }
+  { name: "myworks_marketing", description: "마이마케팅: 최근 30일·7일 광고비·노출·클릭·전환·매출과 채널·캠페인별 성과, 목표(CPA·ROAS), 남은 실행안, 예정된 콘텐츠", input: {} },
+  { name: "myworks_propose", description: "변경 제안 올리기(쓰기 토큰). kind: create-task(title, project|store, detail, due, priority, assignee) · update-status(task, status|due) · add-note(text, project|store|task) · create-contact(name, company, phone, email, kind) · create-job(title, client, detail, due, amount) · mk-action(title, detail, campaign, kind, from, to — 마케팅 실행안) · mk-post(title, body, channel, date, format, tags — 콘텐츠 초안). 관리자가 승인하면 반영됩니다", input: { kind: "string", payload: "object", reason: "string" }, required: ["kind", "payload"] }
 ];
 const mcpSchema = t => ({ type: "object", properties: Object.fromEntries(Object.entries(t.input).map(([k, v]) => [k, v === "object" ? { type: "object" } : { type: "string" }])), required: t.required || [] });
-const mcpFn = { myworks_me: "me", myworks_today: "today", myworks_projects: "projects", myworks_project: "project", myworks_stores: "stores", myworks_tasks: "tasks", myworks_search: "search", myworks_contacts: "contacts", myworks_space: "space", myworks_outsourcing: "outsourcing", myworks_commerce: "commerce", myworks_propose: "propose" };
+const mcpFn = { myworks_me: "me", myworks_today: "today", myworks_projects: "projects", myworks_project: "project", myworks_stores: "stores", myworks_tasks: "tasks", myworks_search: "search", myworks_contacts: "contacts", myworks_space: "space", myworks_outsourcing: "outsourcing", myworks_commerce: "commerce", myworks_marketing: "marketing", myworks_propose: "propose" };
 const rpc = (id, result, error) => json(error ? { jsonrpc: "2.0", id, error } : { jsonrpc: "2.0", id, result });
 async function mcp(db, request) {
   if (request.method === "GET") return fail("method-not-allowed", 405, { hint: "POST JSON-RPC only (Streamable HTTP, no SSE)" });
@@ -4074,7 +4772,7 @@ const codeOut = c => ({ code: c.code, label: c.label || "", plan: planOk(c.plan)
 const payOut = p => ({ id: p.id, ws: p.ws || "", wsName: p.ws_name || "", paidAt: p.paid_at, amount: Number(p.amount) || 0, method: p.method || "", item: p.item || "", from: p.period_from || "", to: p.period_to || "", invoice: !!Number(p.invoice), memo: p.memo || "", createdAt: p.created_at });
 const fbOut = f => ({ id: f.id, ws: f.ws, wsName: f.ws_name || "", loginId: f.login_id || "", name: f.name || "", role: f.role || "", kind: f.kind, body: f.body, page: f.page || "", ua: f.ua || "", contact: f.contact || "", status: f.status, reply: f.reply || "", replyAt: f.reply_at || "", memo: f.memo || "", createdAt: f.created_at, updatedAt: f.updated_at || "" });
 // 전체 백업에 넣는 표 — 로그인 세션(sess)과 오류 기록은 빼고, AI 토큰은 해시를 지웁니다
-const EXPORT_TABLES = () => ["mw_meta", "workspaces", "accounts", "ent", "ws_set", "api_tokens", "links", "invites", "mod_set", ...SP_TABLES, ...OS_TABLES, ...CM_TABLES, ...TX_TABLES, ...PP_TABLES, "adm_pay", "adm_code", "fb", "adm_log"];
+const EXPORT_TABLES = () => ["mw_meta", "workspaces", "accounts", "ent", "ws_set", "api_tokens", "links", "invites", "mod_set", ...SP_TABLES, ...OS_TABLES, ...CM_TABLES, ...TX_TABLES, ...PP_TABLES, ...MK_TABLES, "adm_pay", "adm_code", "fb", "adm_log"];
 const EXPORT_PAGE = 800;
 /* ───────── 본사 운영팀 — 역할별 권한 ─────────
    총괄(운영자 계정)이 운영자 워크스페이스의 구성원에게 역할을 줍니다. 모든 역할은 워크스페이스의 업무 내용은 보지 못합니다. */
@@ -4535,7 +5233,7 @@ export async function onRequest(context) {
       const r = await AIFN[fn](db, me, p);
       return json(r, r && r.error ? ({ "not-found": 404, forbidden: 403, "module-off": 403 }[r.error] || 400) : 200);
     }
-    const MODS = { "sp/": ["space", SPACE], "os/": ["outsourcing", OUTS], "cm/": ["commerce", COMM], "tx/": ["tax", TAX], "pp/": ["people", PEOP] };
+    const MODS = { "sp/": ["space", SPACE], "os/": ["outsourcing", OUTS], "cm/": ["commerce", COMM], "tx/": ["tax", TAX], "pp/": ["people", PEOP], "mk/": ["marketing", MKT] };
     const mk = Object.keys(MODS).find(k => path.startsWith(k));
     if (mk) {   // 업종 모듈 — 프로 워크스페이스에서 켠 모듈만, 협력사 역할은 쓰지 않습니다
       const [mod, H] = MODS[mk], fn = path.slice(3);

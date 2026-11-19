@@ -1315,6 +1315,96 @@ a.linkbtn{display:inline-block;margin-top:6px}
   .mp-mywk{gap:3px}
   .mp-mywk b{font-size:10.5px}.mp-mywk i{font-size:10px;margin-top:-3px}.mp-mywk i::before{content:""}
 }
+/* ═══ 마이마케팅 ═══ */
+.mk-mode{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.mk-bars{display:flex;align-items:flex-end;gap:5px;height:150px;padding:8px 2px 0;overflow-x:auto}
+.mk-bar{flex:1;min-width:16px;display:flex;flex-direction:column;align-items:center;gap:5px;height:100%}
+.mk-bar span{flex:1;width:100%;display:flex;align-items:flex-end;justify-content:center;gap:2px;border-bottom:1px solid var(--line)}
+.mk-bar i{display:block;width:44%;max-width:14px;border-radius:3px 3px 0 0;min-height:1px}
+.mk-bar i.c{background:#DDD8CE}.mk-bar i.v{background:var(--accent)}
+.mk-bar em{font-size:10.5px;color:var(--faint);font-style:normal;margin:0}
+.mk-bar.on em{color:var(--ink);font-weight:700}
+.mk-share{display:block;height:6px;background:var(--wait-soft);border-radius:9px;overflow:hidden;min-width:60px}
+.mk-share i{display:block;height:100%;background:var(--accent);border-radius:9px}
+.mk-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:12px}
+.mk-camp{border:1px solid var(--line);border-radius:var(--r);background:var(--card);padding:14px 16px;cursor:pointer;display:flex;flex-direction:column;gap:8px;min-width:0}
+.mk-camp:hover{border-color:var(--accent)}
+.mk-camp.off{opacity:.62}
+.mk-ch{display:flex;align-items:flex-start;gap:8px;justify-content:space-between}
+.mk-ch b{font-size:14.5px;line-height:1.4;min-width:0;overflow-wrap:anywhere}
+.mk-tags{display:flex;gap:5px;flex-wrap:wrap}
+.mk-nums{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;border-top:1px solid var(--line-soft);padding-top:8px}
+.mk-nums div{display:flex;flex-direction:column;min-width:0}
+.mk-nums span{font-size:11px;color:var(--faint);white-space:nowrap}
+.mk-nums b{font-family:var(--mono);font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mk-funnel{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:14px}
+.mk-funnel>div{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;min-width:0}
+.mk-funnel b{display:block;font-family:var(--mono);font-size:20px;font-weight:600;letter-spacing:-.02em;line-height:1.3}
+.mk-funnel span{font-size:12.5px;color:var(--sub)}
+.mk-funnel em{display:block;font-style:normal;font-size:11.5px;color:var(--faint);margin-top:2px;line-height:1.5}
+.mk-iss{border:1px solid var(--line);border-radius:var(--r);background:var(--card);padding:14px 16px}
+.mk-iss.s3{border-color:#F3B9AE;background:#FFFBF9}
+.mk-iss h3{font-size:14.5px;font-weight:700;display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px}
+.mk-iss .why{font-size:13px;color:var(--sub);margin-bottom:8px;overflow-wrap:anywhere}
+.mk-iss ol{margin:0 0 10px 18px;font-size:13.5px;line-height:1.7}
+.mk-iss .act,.mk-act .act{display:flex;gap:6px;flex-wrap:wrap}
+.mk-act{border-bottom:1px solid var(--line-soft);padding:12px 2px}
+.mk-act:last-of-type{border-bottom:0}
+.mk-act h3{font-size:14.5px;font-weight:700;line-height:1.45;display:flex;gap:8px;align-items:flex-start;flex-wrap:wrap}
+.mk-act pre{font-family:inherit;white-space:pre-wrap;overflow-wrap:anywhere;font-size:13px;color:var(--sub);line-height:1.7;margin:6px 0 8px}
+.mk-ft{display:flex;gap:6px 14px;flex-wrap:wrap;align-items:center;font-size:12.5px;color:var(--sub);margin:4px 0 8px}
+.mk-ft b{font-family:var(--mono);color:var(--ink);font-weight:600}
+.mk-eff{font-size:12.5px;font-weight:700}.mk-eff.ok{color:var(--ok)}.mk-eff.bad{color:var(--late)}.mk-eff.wait{color:var(--faint);font-weight:500}
+.mk-cal{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
+.mk-dow{font-size:11.5px;color:var(--faint);text-align:center;font-weight:700;padding-bottom:2px}
+.mk-day{min-height:92px;border:1px solid var(--line);border-radius:9px;background:var(--card);padding:6px 7px;display:flex;flex-direction:column;gap:4px;cursor:pointer;min-width:0}
+.mk-day.out{background:transparent;border-style:dashed;opacity:.5}
+.mk-day.today{border-color:var(--accent)}
+.mk-day>span{font-family:var(--mono);font-size:11.5px;color:var(--sub)}
+.mk-post{display:block;font-size:12px;line-height:1.35;border-radius:6px;padding:3px 6px;background:var(--wait-soft);color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:left;width:100%}
+.mk-post.s-ready{background:var(--review-soft);color:var(--review)}.mk-post.s-posted{background:var(--ok-soft);color:var(--ok)}.mk-post.s-draft{background:var(--amber-soft);color:var(--amber)}.mk-post.s-skip{text-decoration:line-through;color:var(--faint)}
+.mk-chk{border:1px solid var(--line);border-radius:var(--r);background:var(--card);margin-bottom:10px}
+.mk-chk summary{padding:12px 16px;font-weight:700;font-size:14.5px;cursor:pointer;display:flex;align-items:center;gap:10px;list-style:none}
+.mk-chk summary::-webkit-details-marker{display:none}
+.mk-chk summary em{margin-left:auto;font-style:normal;font-family:var(--mono);font-size:12.5px;color:var(--sub);font-weight:500}
+.mk-ci{display:grid;grid-template-columns:22px minmax(0,1fr);gap:2px 10px;padding:10px 16px;border-top:1px solid var(--line-soft);cursor:pointer;margin:0}
+.mk-ci input{width:17px;height:17px;accent-color:var(--accent);margin-top:3px;padding:0}
+.mk-ci b{font-size:14px;font-weight:600;color:var(--ink)}
+.mk-ci span{grid-column:2;font-size:12.5px;color:var(--sub);line-height:1.65;font-weight:400}
+.mk-ci.done b{color:var(--faint);text-decoration:line-through}
+.mk-form{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:0 12px}
+.mk-form>div{min-width:0}
+.mk-form label,.mkx label.mk-lb{display:block;font-size:13px;font-weight:600;color:var(--sub);margin:12px 0 5px}
+.mk-conn{display:flex;flex-direction:column;gap:10px}
+.mk-conn>div{border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;background:var(--card)}
+.mk-conn h3{font-size:14.5px;font-weight:700;display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px}
+.mk-conn p{font-size:13px;color:var(--sub);line-height:1.7;margin-top:4px}
+.mk-conn .act{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.mk-mix{display:flex;flex-direction:column;gap:8px;margin:8px 0}
+.mk-mix>div{display:grid;grid-template-columns:minmax(0,1fr) 74px 104px;gap:8px;align-items:center;font-size:13.5px}
+.mk-mix small{display:block;color:var(--sub);font-size:12px;line-height:1.5}
+.mk-mix input{padding:6px 8px;font-size:13px;text-align:right}
+.mk-mix>div>b{font-family:var(--mono);font-weight:600;text-align:right;font-size:13px;white-space:nowrap}
+.mk-pick{display:flex;gap:6px;flex-wrap:wrap}
+.m-box .mk-pick label{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:999px;padding:5px 12px;font-size:13px;margin:0;cursor:pointer;background:var(--card);color:var(--ink);font-weight:500}
+.mk-pick input{width:15px;height:15px;accent-color:var(--accent);padding:0}
+.mk-line{width:100%;height:160px;display:block}
+.mk-leg{display:flex;gap:6px 14px;flex-wrap:wrap;font-size:12.5px;color:var(--sub);margin-top:6px}
+.mk-leg i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+.m-box:has(.mk-wide){width:min(820px,calc(100% - 32px));margin-top:5vh}
+.mk-sub{font-size:13.5px;font-weight:700;margin:16px 0 8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.mkx .tbl td.num,.mkx .tbl th.r,.mk-wide .tbl td.num,.mk-wide .tbl th.r{white-space:nowrap}
+.mk-up{color:var(--ok)}.mk-dn{color:var(--late)}
+@media (max-width:820px){
+  .mk-funnel{grid-template-columns:1fr 1fr}
+  .mk-cal{grid-template-columns:1fr}
+  .mk-dow,.mk-day.out,.mk-day.blank{display:none}
+  .mk-day{min-height:0;flex-direction:row;flex-wrap:wrap;align-items:center}
+  .mk-day>span{width:58px;flex:none}
+  .mk-post{width:auto;max-width:100%;flex:1 1 60%}
+  .mk-mix>div{grid-template-columns:minmax(0,1fr) 60px 92px}
+  .m-box:has(.mk-wide){padding:22px 16px 20px}
+}
 </style>
 </head>
 <body>
@@ -1511,9 +1601,9 @@ const ID_RE=/^[a-z0-9][a-z0-9._-]{3,19}$/;
 const KINDS=[["member","members"],["project","projects"],["store","stores"],["task","tasks"],["comment","comments"],["fin","finance"],["routine","routines"],["template","templates"],["plan","plans"],["act","activity"],["contact","contacts"],["prop","proposals"]];
 /* 등급·모듈 — 서버가 state/sync 로 알려 줍니다. 구버전 서버라면 예전처럼 프로 + 스페이스로 봅니다 */
 const TIER0=()=>({plan:"pro",modules:["space"],limits:{brands:1000,members:1000,tokens:0},planUntil:"",legacy:true});
-const MOD_LABEL={space:"마이스토어",outsourcing:"거래",commerce:"마이셀러",tax:"마이택스",people:"마이피플"};
-const MOD_DESC={space:"매장·공간 운영 — 예약·영업, 일 마감, 근무·점검, 시설, 지점별 손익",outsourcing:"고객·안건, 견적 승인, 납품 확인, 청구·입금·미수금",commerce:"온라인 판매 — 주문·발송, 재고·수발주, 문의, 정산·손익",tax:"매출·비용·이익 구조, 현금흐름, KPI, 부가세·종소세 신고 자료, 증빙, 세금 달력, 절세·지원사업",people:"파트너·레퍼런스·명함, 근무표·출퇴근, 급여 계산과 임금명세서"};
-const EXT_ROUTES=["space","commerce","tax","people"];   // 확장판 (켜고 끄는 것). 거래(outsourcing)는 기본 기능입니다
+const MOD_LABEL={space:"마이스토어",outsourcing:"거래",commerce:"마이셀러",tax:"마이택스",people:"마이피플",marketing:"마이마케팅"};
+const MOD_DESC={space:"매장·공간 운영 — 예약·영업, 일 마감, 근무·점검, 시설, 지점별 손익",outsourcing:"고객·안건, 견적 승인, 납품 확인, 청구·입금·미수금",commerce:"온라인 판매 — 주문·발송, 재고·수발주, 문의, 정산·손익",tax:"매출·비용·이익 구조, 현금흐름, KPI, 부가세·종소세 신고 자료, 증빙, 세금 달력, 절세·지원사업",people:"파트너·레퍼런스·명함, 근무표·출퇴근, 급여 계산과 임금명세서",marketing:"광고·홍보 채널과 캠페인, 광고비·클릭·전환 성과, 콘텐츠 달력, 키워드, 남은 실행안"};
+const EXT_ROUTES=["space","commerce","tax","people","marketing"];   // 확장판 (켜고 끄는 것). 거래(outsourcing)는 기본 기능입니다
 const tier=()=>MODE==="cloud"?(CLOUD.tier||TIER0()):{plan:"local",modules:[],limits:{brands:1000,members:1000,tokens:0},planUntil:""};
 const modOn=m=>MODE==="cloud"&&tier().modules.includes(m);
 const isPro=()=>MODE!=="cloud"||tier().plan==="pro";
@@ -1604,7 +1694,7 @@ async function pollSync(force){
     SYNC_AT=res.now;OFFLINE=false;
     const prevRole=ME.role;
     const a=applyRemote(res.rows||[]);
-    if(res.spv!=null){SPACE.onVersion(res.spv);OUTS.onVersion(res.spv);COMM.onVersion(res.spv);TX.onVersion(res.spv);MP.onVersion(res.spv);}
+    if(res.spv!=null){SPACE.onVersion(res.spv);OUTS.onVersion(res.spv);COMM.onVersion(res.spv);TX.onVersion(res.spv);MP.onVersion(res.spv);MK.onVersion(res.spv);}
     let n=a.changed;
     if(res.badges&&JSON.stringify(res.badges)!==JSON.stringify(CLOUD.badges)){CLOUD.badges=res.badges;renderNav();ADM.onBadges();n++;}
     if(res.tier&&setTier(res.tier)){renderNav();n++;}
@@ -1632,7 +1722,7 @@ function applyState(st){
   hydrate(st);
   CLOUD.owner=!!st.owner;CLOUD.op=st.op||(st.owner?"owner":"");CLOUD.perms=Array.isArray(st.perms)?st.perms:[];CLOUD.ws=st.ws||null;CLOUD.badges=st.badges||{};
   setTier(st.tier);
-  if(st.spv!=null){SPACE.onVersion(st.spv);OUTS.onVersion(st.spv);COMM.onVersion(st.spv);TX.onVersion(st.spv);MP.onVersion(st.spv);}
+  if(st.spv!=null){SPACE.onVersion(st.spv);OUTS.onVersion(st.spv);COMM.onVersion(st.spv);TX.onVersion(st.spv);MP.onVersion(st.spv);MK.onVersion(st.spv);}
   ME=DB.members.find(x=>x.id===st.me)||null;
   buildSnap();PENDING={};SYNC_AT=st.now;
   persistPending();persistMeta();
@@ -1676,7 +1766,7 @@ async function cloudRefresh(){
 function cloudSignOut(reason){
   stopPoll();clearTimeout(pushTimer);TOKEN="";ME=null;PENDING={};
   [TKEY,CKEY,CMETA,CPEND].forEach(k=>{try{localStorage.removeItem(k);}catch(e){}});
-  CLOUD={owner:false,op:"",perms:[],ws:null,badges:{},tier:null};ADMIN=null;REQS=null;ADMIN_AT=0;REQS_AT=0;TOKENS=null;SPACE.reset();OUTS.reset();COMM.reset();TX.reset();MP.reset();ADM.reset();PPL.reset();
+  CLOUD={owner:false,op:"",perms:[],ws:null,badges:{},tier:null};ADMIN=null;REQS=null;ADMIN_AT=0;REQS_AT=0;TOKENS=null;SPACE.reset();OUTS.reset();COMM.reset();TX.reset();MP.reset();MK.reset();ADM.reset();PPL.reset();
   if($("#modal-root").classList.contains("show"))closeModal();
   location.hash="";showGate("login");
   if(reason==="expired")toast("로그인이 만료되었습니다. 다시 로그인하세요.");
@@ -1915,7 +2005,7 @@ async function doLogout(){if(MODE==="cloud"){try{await flushPush();}catch(e){}ap
 
 /* ═══════════ 앱 셸·라우터 ═══════════ */
 const NAV=[["dashboard","홈","⌂"],["plan","플랜","▥"],["projects","프로젝트","▤"],["stores","매장","▣"],["board","업무보드","☰","보드"],["members","사람","◉"],["data","연동·데이터","⇅","연동"]];
-const MOD_ROUTES=["space","outsourcing","commerce","tax","people"];
+const MOD_ROUTES=["space","outsourcing","commerce","tax","people","marketing"];
 function enterApp(){
   showGate("app");
   runRoutines();
@@ -1938,6 +2028,7 @@ function navList(){
   if(MODE==="cloud"&&mgr&&modOn("outsourcing"))ins.push(["outsourcing","거래","◇"]);
   if(mgr)ins.push(["money","돈","₩"]);
   if(MODE==="cloud"&&mgr&&modOn("tax"))ins.push(["tax","마이택스","§","택스"]);
+  if(MODE==="cloud"&&mgr&&modOn("marketing"))ins.push(["marketing","마이마케팅","◈","마케팅"]);
   if(MODE==="cloud"&&mgr&&modOn("people")){const i=L.findIndex(n=>n[0]==="members");if(i>-1)L[i]=["members","마이피플","◉","피플"];}
   if(MODE==="cloud"&&ME&&ME.role!=="partner"){
     if(modOn("space"))ins.push(["space","마이스토어","▦","스토어"]);
@@ -1981,6 +2072,13 @@ function route(){
     TX.view(arg);
     return;
   }
+  if(page==="marketing"){
+    if(!canFinance()){location.hash="#/"+(isField()?navList()[0][0]:"dashboard");return;}
+    setNav("marketing");
+    const sw=$("#side-ws");if(sw)sw.textContent=DB.meta.workspace;
+    MK.view(arg);
+    return;
+  }
   if(page==="people"){
     if(ME.role==="partner"){location.hash="#/dashboard";return;}
     setNav(canFinance()?"members":"people/me");
@@ -2006,7 +2104,7 @@ function route(){
   const sw=$("#side-ws");if(sw)sw.textContent=DB.meta.workspace;
   v.innerHTML=VIEWS[pg]();
   if(pg==="data"){wireDropzone();if(MODE==="cloud"&&canFinance()){if(modOn("space"))SPACE.prefetch(weekRange(1)[0],weekRange(0)[1]);loadTokens();loadWsSet();}}
-  if(pg==="dashboard"){if(modOn("space"))SPACE.fillDash();if(modOn("outsourcing"))OUTS.fillDash();if(modOn("commerce"))COMM.fillDash();if(modOn("tax"))TX.fillDash();if(modOn("people"))MP.fillDash();}
+  if(pg==="dashboard"){if(modOn("space"))SPACE.fillDash();if(modOn("outsourcing"))OUTS.fillDash();if(modOn("commerce"))COMM.fillDash();if(modOn("tax"))TX.fillDash();if(modOn("people"))MP.fillDash();if(modOn("marketing"))MK.fillDash();}
   if(pg==="admin")ADM.view(arg);
   if(pg==="members"&&MODE==="cloud"&&isAdmin())loadReqs();
   if(pg==="members"&&MODE==="cloud"&&canFinance()&&F.peopleTab!=="contacts"){PPL.loadInvites(true).then(()=>{const c=$("#iv-card");if(c)c.outerHTML=PPL.invitesCard();});PPL.fillRef();}
@@ -2081,7 +2179,7 @@ function setReview(t,review,note,by){
   else if(review==="redo")t.status="진행중";
   t.updatedAt=new Date().toISOString();
 }
-const PROP_KIND={"create-task":"업무 추가","update-status":"상태 변경","add-note":"메모 추가","create-contact":"연락처 추가","create-job":"안건 추가"};
+const PROP_KIND={"create-task":"업무 추가","update-status":"상태 변경","add-note":"메모 추가","create-contact":"연락처 추가","create-job":"안건 추가","mk-action":"마케팅 실행안","mk-post":"콘텐츠 초안"};
 function propText(p){
   const d=p.payload||{};
   switch(p.kind){
@@ -2090,6 +2188,8 @@ function propText(p){
     case"add-note":return`${esc(d.project||d.store||d.task||"")} — "${esc(d.text)}"`;
     case"create-contact":return`${esc(d.name)}${d.company?` (${esc(d.company)})`:""}${d.kind?` · ${esc(d.kind)}`:""}`;
     case"create-job":return`"${esc(d.title)}"${d.client?` · ${esc(d.client)}`:""}${d.amount?` · ${fmtWon(d.amount)}`:""}`;
+    case"mk-action":return`"${esc(d.title)}"${d.campaign?` · ${esc(d.campaign)}`:""}${d.from||d.to?` · ${esc(d.from||"")}${d.from&&d.to?" → ":""}${esc(d.to||"")}`:""}`;
+    case"mk-post":return`"${esc(d.title)}"${d.channel?` · ${esc(d.channel)}`:""}${d.date?` · ${fmtD(d.date)}`:""}`;
   }
   return esc(JSON.stringify(d)).slice(0,120);
 }
@@ -2121,6 +2221,7 @@ async function decideProp(id,approve){
     saveDB();route();
     toast(approve?"반영했습니다.":"제안을 거절했습니다.");
     if(approve&&p.kind==="create-job")OUTS.refresh(true);
+    if(approve&&String(p.kind).startsWith("mk-"))MK.refresh(true);
   }catch(e){
     btns.forEach(b=>b.disabled=false);
     if(e.code==="unauthorized")return;
@@ -2238,6 +2339,7 @@ function vDashboard(){
   ${modOn("commerce")&&canFinance()?`<div id="cm-dash-slot" style="margin-bottom:14px"></div>`:""}
   ${modOn("tax")&&canFinance()?`<div id="tx-dash-slot" style="margin-bottom:14px"></div>`:""}
   ${modOn("people")&&canFinance()?`<div id="pp-dash-slot" style="margin-bottom:14px"></div>`:""}
+  ${modOn("marketing")&&canFinance()?`<div id="mk-dash-slot" style="margin-bottom:14px"></div>`:""}
   <div class="two-col">
     <div>
       <div class="card">
@@ -2501,6 +2603,7 @@ function finWhere(f){
   if(f.storeId&&f.source!=="space"){const x=storeById(f.storeId);return["매장",x?x.name:"삭제된 매장"];}
   if(f.source==="space"||/^스페이스 집계|^마이스토어/.test(f.memo||"")){const x=f.storeId?storeById(f.storeId):null;return["마이스토어",x?x.name:""];}
   if(f.source==="commerce"||/^커머스 |^마이셀러 /.test(f.memo||""))return["마이셀러",""];
+  if(f.source==="marketing")return["마이마케팅",""];
   if(f.source==="outsourcing"||/^외주 입금|^거래 입금/.test(f.memo||""))return["거래",""];
   return["직접 기록",""];
 }
@@ -2558,6 +2661,7 @@ const EXT_CAT=[
   {id:"commerce",name:"마이셀러",color:"#0E8A8A",ico:"▧",who:"온라인 판매자 · 부업 셀러 · 소규모 도소매",one:"주문·재고·발송·정산을 하루 한 번에 끝냅니다",pts:["채널별 주문 엑셀을 열 이름으로 자동 맞춤","상품·재고, 공급처 발주와 입고","송장 일괄 처리, 발송 담당 화면(금액 미전송)","문의·반품·교환","채널별 손익과 정산 대사 → 돈"]},
   {id:"tax",name:"마이택스",color:"#6B4ED6",ico:"§",who:"개인·법인 사업자 · 3.3% 프리랜서 · 여러 사업자를 가진 분",one:"매출·비용·이익과 세금 준비를 한 화면에서 챙깁니다",pts:["손익 구조를 내 사업에 맞게 — 매출원가·수수료·인건비 항목을 직접 정합니다","매출 흐름·현금흐름 그래프, 기간별 KPI 목표와 달성률","부가세·종소세 신고 자료 — 사업자별로 나누고, 사업과 무관한 돈은 사유를 남겨 뺍니다","홈택스 엑셀을 올리면 세금계산서·현금영수증·카드 자료와 자동 대조","세금 달력(휴대폰 일정으로 내보내기), 절세 체크리스트, 지원사업 찾기"]},
   {id:"people",name:"마이피플",color:"#C2410C",ico:"◉",who:"파트너와 일하는 프리랜서 · 아르바이트·직원·건당 근무자를 쓰는 사업자",one:"함께 일하는 사람과 근무·급여를 한곳에서 관리합니다",pts:["파트너 평가·레퍼런스 체크·협업 이력, 명함 사진과 글자 붙여넣기","근무표·출퇴근(휴대폰으로, 매장 위치 확인)","시급·일급·주급·월급·건당 급여 자동 계산 — 주휴수당, 4대보험·3.3%·일용직 공제","임금명세서 링크, 근로계약서 인쇄, 지급하면 인건비가 돈 메뉴로"]},
+  {id:"marketing",name:"마이마케팅",color:"#D6336C",ico:"◈",who:"광고·홍보를 직접 챙기는 1인 사업자 · 자영업자 · 온라인 판매자",one:"광고비가 어디로 가고 무엇이 돌아오는지 한 화면에서 봅니다",pts:["검색광고·타겟광고·콘텐츠·영상·체험단·메시지를 채널이 달라도 같은 눈금으로","보고서 파일을 올리면 열을 알아서 맞추고, 네이버 검색광고·메타 광고는 연결해 두면 가져옵니다","최적화 모드 — 무엇을 고칠지 짚고 채널별 설정 점검표로 안내","부스터 모드 — 목표에 맞춰 예산·입찰·소재를 얼마나 바꿀지 숫자로, 바꾼 뒤 효과까지","콘텐츠 달력, 키워드 조합기, 기획 마법사와 클로드 연동"]},
   {id:"edu",name:"마이에듀",color:"#B45309",ico:"✎",who:"학원 · 교습소 · 공방 · 강사",one:"수강생과 수업, 수강료를 한 장부로",pts:["반·시간표·출결, 수강료 청구·수납"],soon:"준비 예정"},
   {id:"building",name:"마이빌딩",color:"#2B4FD6",ico:"▥",who:"소규모 건물주 · 임대인",one:"임대차와 건물 관리를 혼자서 챙깁니다",pts:["호실·계약·수납·공실·법정 점검"],soon:"준비 예정"}
 ];
@@ -2583,6 +2687,7 @@ function vExt(){
       <div><b>파티룸·스터디룸·숙박</b><span>마이스토어 ‘공간대여·숙박’ — 예약이 들어오면 청소 일정이 자동으로 생깁니다.</span></div>
       <div><b>스마트스토어·쿠팡 판매</b><span>마이셀러를 켜고 채널별 주문 엑셀을 올립니다.</span></div>
       <div><b>매장 + 온라인 판매</b><span>둘 다 켜면 손익이 각각 돈 메뉴로 모입니다.</span></div>
+      <div><b>광고를 하고 있거나 시작하려는 분</b><span>마이마케팅을 켜고 기획 마법사로 시작하거나, 광고 관리자에서 받은 보고서 파일을 올립니다.</span></div>
     </div>
   </div>`;
 }
@@ -3385,7 +3490,7 @@ function weekRange(off){
 }
 function reportCopy(off){
   let text=buildWeekReport(off);
-  if(MODE==="cloud"&&canFinance()){const r=weekRange(off);if(modOn("space"))text+=SPACE.weekText(...r);if(modOn("outsourcing"))text+=OUTS.weekText(...r);if(modOn("commerce"))text+=COMM.weekText(...r);if(modOn("tax"))text+=TX.weekText(...r);if(modOn("people"))text+=MP.weekText(...r);}
+  if(MODE==="cloud"&&canFinance()){const r=weekRange(off);if(modOn("space"))text+=SPACE.weekText(...r);if(modOn("outsourcing"))text+=OUTS.weekText(...r);if(modOn("commerce"))text+=COMM.weekText(...r);if(modOn("tax"))text+=TX.weekText(...r);if(modOn("people"))text+=MP.weekText(...r);if(modOn("marketing"))text+=MK.weekText(...r);}
   copyText(text,"주간 리포트를 복사했습니다. 클로드에 붙여넣어 회고를 요청해 보세요.");
 }
 function copyText(text,okMsg){
@@ -3541,7 +3646,7 @@ async function planSave(id){
 }
 
 /* ═══════════ AI 접속 (토큰·MCP·자동 반영) ═══════════ */
-const AI_KIND_LABEL={"create-task":"업무 추가","update-status":"업무 상태·마감 변경","add-note":"메모·의견 추가","create-contact":"연락처 추가","create-job":"외주 안건 추가"};
+const AI_KIND_LABEL={"create-task":"업무 추가","update-status":"업무 상태·마감 변경","add-note":"메모·의견 추가","create-contact":"연락처 추가","create-job":"외주 안건 추가","mk-action":"마케팅 실행안 추가","mk-post":"콘텐츠 초안 추가"};
 function loadTokens(force){
   if(!canFinance())return;
   if(!force&&TOKENS)return renderTokens();
@@ -7128,7 +7233,7 @@ function bizOf(f){
   if(f.storeId){const b=act.find(b=>(L(b).stores||[]).includes(f.storeId));if(b)return b.id;}
   const brand=f.projectId?((projectById(f.projectId)||{}).brand||""):f.storeId?((storeById(f.storeId)||{}).brand||""):"";
   if(brand){const b=act.find(b=>(L(b).brands||[]).includes(brand));if(b)return b.id;}
-  const mod={space:"space",commerce:"commerce",outsourcing:"outsourcing",people:"people"}[f.source]||(/^마이스토어|^스페이스/.test(f.memo||"")?"space":/^마이셀러|^커머스/.test(f.memo||"")?"commerce":/^거래 입금|^외주 입금/.test(f.memo||"")?"outsourcing":"");
+  const mod={space:"space",commerce:"commerce",outsourcing:"outsourcing",people:"people",marketing:"marketing"}[f.source]||(/^마이스토어|^스페이스/.test(f.memo||"")?"space":/^마이셀러|^커머스/.test(f.memo||"")?"commerce":/^거래 입금|^외주 입금/.test(f.memo||"")?"outsourcing":"");
   if(mod){const b=act.find(b=>(L(b).mods||[]).includes(mod));if(b)return b.id;}
   return(act.find(b=>L(b).main)||act[0]).id;
 }
@@ -7936,7 +8041,7 @@ const fixRow=(f,i)=>`<div class="tx-fx" data-fx="${i}"><input data-fxf="name" va
 function bizModal(b){
   const isNew=!b;b=b||{name:"",kind:"indiv",vat:"general",biz_no:"",industry:"",open_date:"",region:"other",young:0,incl_vat:1,card_credit:0,active:1,memo:"",links:{brands:[],stores:[],mods:[],main:!S.biz.length}};
   const l=b.links||{},stores=DB.stores||[],brands=DB.brands||[];
-  const MODS=[["space","마이스토어"],["commerce","마이셀러"],["outsourcing","거래"],["people","마이피플 급여"]];
+  const MODS=[["space","마이스토어"],["commerce","마이셀러"],["outsourcing","거래"],["people","마이피플 급여"],["marketing","마이마케팅 광고비"]];
   openModal(`<h2><span class="bars"></span>${isNew?"사업자 등록":"사업자 수정"}</h2>
   <div class="m-grid2">
     <div><label>이름</label><input id="bz-name" value="${esc(b.name)}" maxlength="60" placeholder="예: 하루상회 (개인)"></div>
@@ -8793,6 +8898,1329 @@ function weekText(s0,s1){
 /* 연락처 목록에 붙이는 작은 표시 */
 const ctBadge=c=>!usable()?"":`${c.rating?stars(c.rating):""}${c.again==="yes"?` <span class="pill p-green">다시 함께</span>`:c.again==="no"?` <span class="pill p-gray">보류</span>`:""}${(c.refs||[]).length?` <span class="tag">레퍼런스 ${(c.refs||[]).length}</span>`:""}`;
 return{view,fillDash,onVersion,reset,refresh,weekText,partnerModal,parseCard,ctBadge,tabs:tabsHtml,usable,slipHtml};
+})();
+
+/* ═══════════ 마이마케팅 — 광고·홍보 채널과 캠페인, 성과, 콘텐츠, 키워드, 최적화·부스터 ═══════════
+   성과 기록은 서버(mk_)에 두고, 진단(최적화)과 실행안(부스터)은 이 화면에서 기록을 보고 계산합니다.
+   광고 계정의 예산·입찰·소재를 대신 바꾸지는 않습니다. 무엇을 얼마나 바꿀지 숫자로 적어 주고, 바꾼 뒤의 효과를 다시 잽니다.
+   점검 기준과 손익분기 숫자는 모두 참고값이고 화면에서도 그렇게 안내합니다. */
+const MK=(()=>{
+const S={ready:false,loading:null,err:"",at:0,stale:false,v:-1,today:"",from:"",settings:null,chans:[],camps:[],stats:[],posts:[],kws:[],acts:[],conn:{naver:{on:false},meta:{on:false}},keys:{}};
+const U0=()=>({cat:"all",cst:"open",cch:"",cq:"",per:"30",grp:"chan",pch:"",ym:"",fym:"",tried:{},kq:"",kst:"all",kg:"",imp:null,tool:null,trend:null,plan:null,pim:null,setTab:0,syncing:"",syncMsg:"",autoAt:0,pushed:new Set(),recN:15,done:false});
+const U=U0();
+let IX={camp:new Map(),chan:new Map(),min:""};
+const XLSX_URL="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js";
+/* 분류 — [이름, 짧은 이름] */
+const CAT={search:["검색광고","검색"],target:["타겟광고","타겟"],content:["콘텐츠","콘텐츠"],video:["영상","영상"],influ:["체험단·인플루언서","체험단"],message:["메시지","메시지"],local:["지역·오프라인","지역"],etc:["기타","기타"]};
+/* 채널 종류 — [이름, 기본 분류, 돈을 내는 광고인지, 묶음] */
+const KIND={
+  naver_sa:["네이버 파워링크 (검색광고)","search",1,"네이버"],naver_shop:["네이버 쇼핑검색","search",1,"네이버"],naver_place:["네이버 플레이스 광고","local",1,"네이버"],naver_gfa:["네이버 디스플레이 (GFA·애드부스트)","target",1,"네이버"],naver_blog:["네이버 블로그","content",0,"네이버"],
+  meta_ads:["메타 광고 (인스타그램·페이스북)","target",1,"메타"],instagram:["인스타그램 계정","content",0,"메타"],facebook:["페이스북 페이지","content",0,"메타"],threads:["스레드","content",0,"메타"],
+  google_ads:["구글 검색·디스플레이","search",1,"구글·유튜브"],youtube_ads:["유튜브 영상광고","video",1,"구글·유튜브"],youtube:["유튜브 채널","video",0,"구글·유튜브"],
+  kakao_ads:["카카오 광고 (모먼트·키워드)","target",1,"카카오·당근"],kakao_ch:["카카오톡 채널","message",0,"카카오·당근"],daangn:["당근 광고·비즈프로필","local",1,"카카오·당근"],
+  tiktok:["틱톡","video",0,"그 밖에"],influencer:["체험단·인플루언서","influ",1,"그 밖에"],message:["문자·알림톡·이메일","message",1,"그 밖에"],offline:["전단·현수막·오프라인","local",1,"그 밖에"],site:["홈페이지·스마트스토어","content",0,"그 밖에"],etc:["기타","etc",0,"그 밖에"]};
+const GOAL={lead:"문의·예약 받기",sale:"구매·매출",visit:"매장 방문",traffic:"방문 늘리기 (클릭)",aware:"알리기 (노출·도달)",retain:"다시 오게 하기"};
+const CST={plan:["준비","p-gray"],live:["진행 중","p-green"],pause:["멈춤","p-amber"],done:["끝남","p-line"]};
+const MDS={basic:["기본","기록하고 봅니다"],opt:["최적화","무엇을 고칠지 짚어 주고 설정을 안내합니다"],boost:["부스터","목표에 맞춰 예산·입찰·소재를 어떻게 바꿀지 숫자로 냅니다"]};
+const PST={idea:["아이디어","p-gray"],draft:["작성 중","p-amber"],ready:["게시 준비","p-blue"],posted:["게시함","p-green"],skip:["안 함","p-line"]};
+const KST={use:["쓰는 중","p-green"],watch:["지켜보는 중","p-gray"],neg:["제외","p-line"]};
+const AKIND={budget:"예산",bid:"입찰",creative:"소재",target:"타겟",landing:"도착 페이지",measure:"측정",keyword:"키워드",content:"콘텐츠",setup:"설정",auto:"자동화",etc:"기타"};
+const FORMATS=["피드","릴스","스토리","카드뉴스","블로그 글","영상","쇼츠","스레드 글","메시지","기타"];
+/* 점검 기준(참고값) — 이보다 낮으면 살펴보라는 선입니다. 업종·상품마다 다르므로 설정에서 고치고, 기록이 쌓이면 내 평균과도 견줍니다 */
+const REF0={search:{ctr:1.0,cvr:1.5},target:{ctr:0.6,cvr:0.8},video:{ctr:0.3,cvr:0.5},local:{ctr:1.0,cvr:1.5},content:{ctr:null,cvr:null},influ:{ctr:null,cvr:null},message:{ctr:2.0,cvr:1.0},etc:{ctr:null,cvr:null}};
+const ERR={forbidden:"권한이 없습니다.","not-found":"대상을 찾을 수 없습니다.","bad-request":"입력 내용을 확인해 주세요.","bad-date":"날짜를 확인해 주세요.","bad-channel":"채널을 먼저 골라 주세요.",dup:"이미 있는 항목입니다.",limit:"더 만들 수 없습니다. 쓰지 않는 항목을 정리해 주세요.",empty:"넣을 내용이 없습니다.","in-use":"캠페인이나 성과 기록이 붙어 있어 지울 수 없습니다. ‘쓰지 않음’으로 바꿔 주세요.","module-off":"마이마케팅이 꺼져 있습니다. 확장판 화면에서 켜 주세요.","no-vault":"아직 연결 기능을 쓸 수 없습니다. 운영자가 보관용 암호 키를 설정해야 합니다.","no-conn":"연결된 광고 계정이 없습니다. 설정 → 연결을 확인해 주세요.","no-key":"이 기능에 필요한 키가 아직 없습니다.","no-channel":"유튜브 채널을 먼저 등록하고 핸들(@이름)을 적어 주세요.","conn-denied":"광고 계정이 접근을 거절했습니다. 키와 계정 번호, 권한을 확인해 주세요.","conn-busy":"광고 계정 쪽 요청 한도에 걸렸습니다. 잠시 뒤 다시 해 주세요.","too-soon":"방금 가져왔습니다. 잠시 뒤에 다시 해 주세요.",quota:"오늘 쓸 수 있는 횟수를 다 썼습니다. 내일 다시 해 주세요.",upstream:"바깥 서비스가 응답하지 않습니다. 잠시 뒤 다시 해 주세요.","too-large":"설정이 너무 큽니다.","has-detail":"이 날짜에는 파일로 올린 상세 기록이 있습니다."};
+const errMsg=e=>e&&e.code==="unauthorized"?"":(e&&ERR[e.code])||"처리하지 못했습니다. 잠시 후 다시 시도하세요.";
+const failToast=e=>{const m=errMsg(e);if(m)toast(m);};
+const fmt=n=>Math.round(Number(n)||0).toLocaleString("ko-KR");
+const won=n=>fmt(n)+"원";
+const man=n=>{n=Math.round(Number(n)||0);const a=Math.abs(n);return(n<0?"−":"")+(a>=1e8?(Math.round(a/1e6)/100).toLocaleString("ko-KR")+"억":a>=1e4?(Math.round(a/1e3)/10).toLocaleString("ko-KR")+"만":a.toLocaleString("ko-KR"))+"원";};
+const fP=v=>v==null||!Number.isFinite(v)?"—":(Math.round(v*100)/100).toLocaleString("ko-KR",{maximumFractionDigits:v>=10?1:2})+"%";
+const fW=v=>v==null||!Number.isFinite(v)?"—":won(v);
+const fN=v=>v==null||!Number.isFinite(v)?"—":(Math.round(v*10)/10).toLocaleString("ko-KR");
+const pad2=n=>String(n).padStart(2,"0");
+const r100=n=>Math.round(n/100)*100;
+const ro=w=>{const c=w.charCodeAt(w.length-1);if(c<0xAC00||c>0xD7A3)return w+"(으)로";const j=(c-0xAC00)%28;return w+(j===0||j===8?"로":"으로");};   // 조사 ‘로/으로’
+const mgr=()=>!!ME&&(ME.role==="admin"||ME.role==="staff");
+const onPage=()=>/^#\/marketing(\/|$)/.test(location.hash);
+const st=()=>S.settings||{set:false,mode:"basic",biz:{type:"",name:"",offer:"",aud:"",region:"",goal:"lead",aov:0,margin:0,assets:[]},budget:0,target:{cpa:0,roas:0},guard:{step:20,minClk:30,minImp:1000,minConv:3,days:7},ref:{},checks:[],metaConv:"purchase",plan:null,synced:{naver:"",meta:"",yt:""}};
+const loadScript=src=>new Promise((res,rej)=>{const ex=[...document.scripts].find(s=>s.src===src);if(ex&&ex.dataset.ok)return res();const s=document.createElement("script");s.src=src;s.onload=()=>{s.dataset.ok="1";res();};s.onerror=()=>{s.remove();rej(new Error("load"));};document.head.appendChild(s);});
+function dlCsv(name,H,rows){const csv="﻿"+[H].concat(rows).map(r=>r.map(c=>`"${String(c??"").replace(/"/g,'""')}"`).join(",")).join("\n");const b=new Blob([csv],{type:"text/csv;charset=utf-8"});const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},400);}
+const ask=(msg,okLabel)=>new Promise(res=>{openModal(`<h2><span class="bars"></span>확인</h2><p style="font-size:14.5px;line-height:1.75">${msg}</p><div class="m-foot"><button class="btn btn-ghost" id="mk-no">취소</button><button class="btn btn-pri" id="mk-yes">${okLabel||"확인"}</button></div>`);$("#mk-no").onclick=()=>{closeModal();res(false);};$("#mk-yes").onclick=()=>{closeModal();res(true);};});
+const T=()=>todayStr();
+const ymOf=d=>(d||T()).slice(0,7);
+const daysIn=ym=>new Date(+ym.slice(0,4),+ym.slice(5),0).getDate();
+const dgap=(a,b)=>Math.round((new Date(b+"T00:00:00")-new Date(a+"T00:00:00"))/864e5);
+
+/* ── 서버 ── */
+function reindex(){IX={camp:new Map(),chan:new Map(),min:""};for(const r of S.stats){if(!IX.min||r.date<IX.min)IX.min=r.date;if(r.camp_id){let a=IX.camp.get(r.camp_id);if(!a)IX.camp.set(r.camp_id,a=[]);a.push(r);}let b=IX.chan.get(r.chan_id);if(!b)IX.chan.set(r.chan_id,b=[]);b.push(r);}}
+async function load(){
+  if(S.loading){try{await S.loading;}catch(e){}return;}
+  const p=api("mk/data").then(d=>{Object.assign(S,{ready:true,err:"",at:Date.now(),stale:false,v:d.v,today:d.today,from:d.from,settings:d.settings,chans:d.chans||[],camps:d.camps||[],stats:d.stats||[],posts:d.posts||[],kws:d.kws||[],acts:d.acts||[],conn:d.conn||{naver:{on:false},meta:{on:false}},keys:d.keys||{}});reindex();});
+  S.loading=p;try{await p;}finally{if(S.loading===p)S.loading=null;}
+}
+async function call(path,body){const r=await api("mk/"+path,body||{});if(r&&r.v!=null){if(r.v===S.v+1)S.v=r.v;else S.stale=true;}return r;}
+const upd=(arr,row,key)=>{if(!row)return;key=key||"id";const i=arr.findIndex(x=>x[key]===row[key]);if(i>-1)arr[i]=row;else arr.push(row);};
+function refresh(force){if(!S.ready||S.loading||MODE!=="cloud")return;if(!force&&!S.stale&&Date.now()-S.at<90000)return;load().then(()=>{if(onPage()&&uiSafe())route();}).catch(()=>{});}
+function onVersion(v){if(v==null||!S.ready||v===S.v)return;S.stale=true;if(onPage())refresh(true);}
+function reset(){Object.assign(S,{ready:false,loading:null,err:"",at:0,stale:false,v:-1,settings:null,chans:[],camps:[],stats:[],posts:[],kws:[],acts:[],conn:{naver:{on:false},meta:{on:false}},keys:{}});IX={camp:new Map(),chan:new Map(),min:""};Object.assign(U,U0());}
+async function saveSet(patch,msg){try{const r=await call("settings",{set:patch});S.settings=r.settings;if(msg)toast(msg);return true;}catch(e){failToast(e);return false;}}
+async function reload(msg){try{await load();if(onPage())route();if(msg)toast(msg);}catch(e){failToast(e);}}
+
+/* ── 찾기 · 셈 ── */
+const chanById=id=>S.chans.find(c=>c.id===id)||null;
+const campById=id=>S.camps.find(c=>c.id===id)||null;
+const chanName=id=>{const c=chanById(id);return c?c.name:"";};
+const kindOf=id=>{const c=chanById(id);return c?c.kind:"etc";};
+const isPaid=c=>!!(KIND[c.kind]||KIND.etc)[2];
+const chansAct=()=>S.chans.filter(c=>c.active!==0);
+const openCamps=()=>S.camps.filter(c=>c.status==="live"||c.status==="pause");
+function agg(rows,from,to){const t={cost:0,imp:0,clk:0,conv:0,rev:0,view:0,eng:0,n:0};for(const r of rows||[]){if(from&&r.date<from)continue;if(to&&r.date>to)continue;t.cost+=r.cost;t.imp+=r.imp;t.clk+=r.clk;t.conv+=r.conv;t.rev+=r.rev;t.view+=r.view;t.eng+=r.eng;t.n++;}t.conv=Math.round(t.conv*100)/100;return t;}
+const R={ctr:t=>t.imp?t.clk/t.imp*100:null,cpc:t=>t.clk?t.cost/t.clk:null,cvr:t=>t.clk?t.conv/t.clk*100:null,cpa:t=>t.conv?t.cost/t.conv:null,roas:t=>t.cost?t.rev/t.cost*100:null,cpm:t=>t.imp?t.cost/t.imp*1000:null};
+/* 여러 캠페인을 묶은 ROAS — 매출을 기록하는 캠페인의 광고비만 분모로 씁니다. 매출을 재지 않는 광고비까지 넣으면 실제보다 낮게 나옵니다 */
+function roasOf(rows,from,to){const by=new Map();for(const r of rows||[]){if(from&&r.date<from)continue;if(to&&r.date>to)continue;const k=r.camp_id||"ch:"+r.chan_id;let t=by.get(k);if(!t)by.set(k,t={cost:0,rev:0});t.cost+=r.cost;t.rev+=r.rev;}let c=0,v=0;for(const t of by.values())if(t.rev>0){c+=t.cost;v+=t.rev;}return c?v/c*100:null;}
+const yday=()=>addDaysStr(T(),-1);
+const hasFrom=d=>!!IX.min&&IX.min<=d;   // 그 날짜부터의 기록이 있는가 — 앞 기간과 견줄 때, 기록이 중간부터 시작됐으면 견주지 않습니다
+/* 진단·실행안은 어제까지를 봅니다 — 오늘 숫자는 아직 덜 찼기 때문입니다 */
+function win(rows,days,off){const to=addDaysStr(yday(),-(off||0)),from=addDaysStr(to,-(days-1));return Object.assign(agg(rows,from,to),{from,to,days});}
+const campRows=c=>IX.camp.get(c.id)||[];
+const beCpa=()=>{const b=st().biz;return b.aov&&b.margin?Math.round(b.aov*b.margin/100):0;};      // 손익분기 CPA = 객단가 × 마진율
+const beRoas=()=>{const m=st().biz.margin;return m?Math.round(10000/m):0;};                         // 손익분기 ROAS(%) = 100 ÷ 마진율
+function tgt(c){const cpa=(c&&c.target_cpa)||st().target.cpa||0,roas=(c&&c.target_roas)||st().target.roas||0;return{cpa:cpa||beCpa(),roas:roas||beRoas(),own:!!(cpa||roas)};}
+const byRoas=(c,t)=>c.goal==="sale"&&t.rev>0&&tgt(c).roas>0;
+/* 목표 대비 효율 — 1보다 크면 목표보다 잘하는 것. 구매 목표이고 매출 기록이 있으면 ROAS로, 아니면 CPA로 봅니다 */
+function eff(c,t){const G=tgt(c);if(byRoas(c,t)){const r=R.roas(t);return r==null?null:r/G.roas;}if(G.cpa&&t.conv>0)return G.cpa/R.cpa(t);return null;}
+const effMode=c=>(c&&c.mode)||st().mode;
+function dayBudget(c){if(!c.budget)return 0;if(c.budget_type==="day")return c.budget;if(c.budget_type==="total"){const n=c.start_date&&c.end_date?dgap(c.start_date,c.end_date)+1:0;return n>0?c.budget/n:0;}return c.budget/30.4;}
+const weekKey=()=>mondayOf(T());
+const refOf=cat=>Object.assign({},REF0[cat]||{},st().ref[cat]||{});
+/* 같은 분류의 다른 캠페인 평균 — 견줄 캠페인이 둘 이상일 때만 씁니다 (브랜드 검색 하나와 견주면 어긋나기 때문) */
+function catAvg(cat,exceptId){const rows=[];let n=0;for(const c of S.camps){if(c.cat!==cat||c.id===exceptId)continue;const r=campRows(c);if(r.some(x=>x.date>=addDaysStr(T(),-30))){n++;rows.push(...r);}}return Object.assign(win(rows,30),{camps:n});}
+
+/* ── 채널별 설정 점검표 — [열쇠, 할 일, 왜·어디서] ── */
+const CHK={
+  common:{n:"공통 — 측정과 도착 페이지",items:[
+    ["goal","광고마다 ‘전환’ 한 가지를 정한다","문의·예약·구매 가운데 하나를 정해야 잘됐는지 판단할 수 있습니다. 캠페인 수정에서 목표를 고릅니다."],
+    ["track","전환이 실제로 기록되는지 직접 눌러 본다","광고를 눌러 들어가 문의·예약·결제까지 한 번 해 보고, 광고 관리자에 전환이 1건 찍히는지 확인합니다."],
+    ["utm","광고 링크에 꼬리표(UTM)를 붙인다","어느 광고에서 왔는지 방문 통계에서 구분됩니다. 아래 ‘링크 꼬리표 만들기’를 쓰세요."],
+    ["landing","도착 페이지 첫 화면에 무엇을·얼마에·어떻게 하는지 보인다","광고 문구와 같은 말이 첫 화면에 있어야 합니다. 전화·예약·구매 버튼은 스크롤 없이 보이게 둡니다."],
+    ["speed","휴대폰에서 3초 안에 열린다","큰 이미지는 줄이고 팝업은 하나만 둡니다. 광고 클릭의 대부분은 휴대폰에서 옵니다."],
+    ["ask","전화·방문 문의에는 ‘어디서 보셨어요?’를 묻고 적는다","추적되지 않는 문의는 성과 탭의 ‘성과 적기’로 채널에 직접 적어야 채널끼리 견줄 수 있습니다."]]},
+  naver_sa:{n:"네이버 파워링크",items:[
+    ["group","키워드를 주제별 광고그룹으로 나눈다","성격이 다른 키워드가 한 그룹에 섞이면 문안이 겉돕니다. ‘지역+업종’, ‘브랜드명’, ‘가격·후기’처럼 나눕니다."],
+    ["copy","제목과 설명에 검색한 낱말을 넣는다","검색어와 같은 말은 굵게 보여 눈에 띕니다. 그룹마다 문안을 두 개 이상 두고 견줍니다."],
+    ["ext","확장소재를 채운다 — 전화번호·위치·추가제목·서브링크·가격","광고가 차지하는 자리가 넓어집니다. 광고그룹의 확장소재에서 등록합니다."],
+    ["neg","제외 키워드를 넣는다","‘무료’, ‘알바’, ‘중고’처럼 살 뜻이 없는 검색을 뺍니다. 키워드 탭에서 ‘제외’로 모아 두었다가 등록합니다."],
+    ["bid","키워드마다 입찰가를 따로 준다","전환이 나는 키워드는 올리고 클릭만 나가는 키워드는 내립니다. 1위가 목표는 아닙니다."],
+    ["time","요일·시간·지역·기기별로 입찰을 조정한다","문의를 못 받는 시간은 낮추고, 서비스하지 않는 지역은 뺍니다."],
+    ["conv","전환 추적을 연결한다","광고 시스템의 도구에서 프리미엄 로그 분석(전환 추적)을 연결해야 키워드별 전환이 보입니다."],
+    ["quality","품질지수가 낮은 키워드를 손본다","막대가 낮으면 같은 순위에 더 비싸게 삽니다. 문안과 도착 페이지를 그 키워드에 맞춥니다."]]},
+  naver_shop:{n:"네이버 쇼핑검색",items:[
+    ["title","상품명 앞쪽에 핵심 낱말을 둔다","브랜드·상품 종류·핵심 속성 순서로 적고, 같은 말을 되풀이하지 않습니다."],
+    ["cat","카테고리와 속성을 정확히 고른다","카테고리가 어긋나면 엉뚱한 검색에 나옵니다."],
+    ["img","대표 이미지를 깨끗하게 둔다","흰 바탕에 상품이 크게 보이는 사진이 기본입니다. 글자를 얹은 이미지는 반려될 수 있습니다."],
+    ["review","리뷰와 찜을 모은다","구매 후 리뷰 요청 메시지, 포토리뷰 혜택을 걸어 둡니다."],
+    ["bid","상품마다 입찰가를 다르게 둔다","팔리는 상품에 올리고, 클릭만 나가는 상품은 내리거나 뺍니다."],
+    ["neg","제외 키워드를 넣는다","내 상품과 맞지 않는 검색어를 보고서에서 골라 뺍니다."]]},
+  naver_place:{n:"네이버 플레이스",items:[
+    ["info","스마트플레이스 정보를 끝까지 채운다","영업시간·휴무·메뉴와 가격·주차·찾아오는 길. 빈칸이 있으면 클릭해도 그냥 나갑니다."],
+    ["photo","대표 사진 10장 이상, 분기마다 새로","첫 사진이 클릭을 좌우합니다. 밝은 내부 전경을 맨 앞에 둡니다."],
+    ["book","예약·톡톡·전화 버튼을 켠다","누르면 바로 행동할 수 있어야 광고비가 문의로 이어집니다."],
+    ["kw","대표 키워드를 ‘지역+업종’으로 넣는다","손님이 실제로 치는 말로 다섯 개를 채웁니다."],
+    ["reply","리뷰에 답글을 단다","새 리뷰는 사흘 안에. 나쁜 리뷰일수록 차분히 답합니다."],
+    ["news","소식·쿠폰을 달마다 올린다","플레이스에 새 글이 있으면 살아 있는 가게로 보입니다."],
+    ["ad","플레이스 광고는 하루 예산을 작게 시작한다","일주일 돌려 클릭 단가와 문의 수를 본 뒤 올립니다."]]},
+  naver_gfa:{n:"네이버 디스플레이 (GFA·애드부스트)",items:[
+    ["conv","전환 추적을 먼저 붙인다","전환이 잡혀야 자동 입찰과 애드부스트가 배웁니다."],
+    ["asset","이미지·문구를 여러 벌 넣는다","크기와 소구점이 다른 소재를 넉넉히 넣어야 자동 조합이 됩니다."],
+    ["aud","처음에는 타겟을 넓게 둔다","좁게 자르면 배울 재료가 모자랍니다. 전환이 쌓인 뒤 좁힙니다."],
+    ["wait","켠 뒤 일주일은 건드리지 않는다","자주 고치면 학습이 처음부터 다시 시작됩니다."]]},
+  naver_blog:{n:"네이버 블로그",items:[
+    ["title","제목에 찾는 말을 넣는다","‘지역+업종+무엇’처럼 손님이 검색하는 말로 씁니다."],
+    ["body","직접 찍은 사진과 구체적인 숫자를 넣는다","가격·시간·인원처럼 문의로 물어보는 내용을 글에서 먼저 답합니다."],
+    ["link","글 끝에 지도와 예약 링크를 붙인다","읽고 나서 갈 곳이 있어야 합니다."],
+    ["cadence","주 1회 이상 꾸준히 올린다","콘텐츠 탭에 한 달 치를 미리 잡아 둡니다."],
+    ["paid","협찬 글은 제목이나 첫머리에 밝힌다","대가를 받은 글은 ‘광고’, ‘협찬’을 제목이나 본문 첫 부분에 적어야 합니다."]]},
+  meta_ads:{n:"메타 광고 (인스타그램·페이스북)",items:[
+    ["pixel","픽셀과 전환 API를 설치한다","이벤트 관리자에서 구매·문의 이벤트가 들어오는지 확인합니다. 전환이 안 잡히면 자동 최적화가 일하지 못합니다."],
+    ["goal","캠페인 목표를 실제 목표와 맞춘다","문의가 목표면 ‘잠재 고객’, 구매면 ‘판매’. ‘트래픽’으로 두면 누르기만 하는 사람에게 갑니다."],
+    ["merge","광고 세트를 잘게 쪼개지 않는다","세트마다 주에 전환 50건 안팎이 모여야 학습이 끝납니다. 예산이 작으면 세트를 합칩니다."],
+    ["adv","타겟과 노출 위치는 어드밴티지+로 넓게 시작한다","관심사를 좁게 고르는 것보다 소재로 사람을 고르는 편이 잘 맞습니다."],
+    ["creative","소재를 3~5개, 형식을 섞어 넣는다","세로 9:16 릴스, 이미지, 슬라이드를 함께. 소구점(혜택·후기·문제 해결)을 다르게 잡습니다."],
+    ["hook","영상은 첫 3초에 결론을 보여 준다","소리를 꺼도 알 수 있게 자막을 넣습니다."],
+    ["retarget","방문자·영상 시청자에게 다시 보여 준다","작은 예산으로도 전환율이 높은 자리입니다."],
+    ["wait","학습 중에는 자주 고치지 않는다","예산은 한 번에 20% 안에서, 사나흘 간격으로 바꿉니다."]]},
+  instagram:{n:"인스타그램 계정",items:[
+    ["bio","프로필에 무엇을 하는 곳인지, 어떻게 예약하는지 적는다","소개 한 줄, 링크, 전화·예약 버튼."],
+    ["high","하이라이트에 가격·위치·후기를 묶는다","처음 온 사람이 묻는 것을 먼저 보여 줍니다."],
+    ["reels","릴스를 주 2~3회 올린다","첫 3초에 결과를 보여 주고, 위치 태그를 답니다."],
+    ["dm","댓글과 DM에 하루 안에 답한다","문의의 대부분이 DM으로 옵니다."],
+    ["insight","달마다 인사이트에서 잘된 글 세 개를 본다","콘텐츠 탭에 조회·반응 수를 적어 두면 무엇이 통했는지 남습니다."]]},
+  threads:{n:"스레드",items:[
+    ["voice","말하듯이 짧게 쓴다","홍보 글보다 일하면서 겪은 이야기와 질문이 잘 퍼집니다."],
+    ["reply","다른 글에 먼저 답글을 단다","팔로워가 적을 때는 답글이 노출의 대부분입니다."],
+    ["link","프로필 링크를 채워 둔다","본문 링크보다 프로필로 들어오는 사람이 많습니다."]]},
+  youtube:{n:"유튜브 채널",items:[
+    ["thumb","제목과 썸네일을 영상보다 먼저 정한다","누르지 않으면 내용은 보이지 않습니다."],
+    ["shorts","쇼츠로 자주, 긴 영상으로 깊게","쇼츠는 발견용, 긴 영상은 신뢰용입니다."],
+    ["desc","설명란 첫 줄과 고정 댓글에 링크를 둔다","예약·구매로 가는 길을 한 번에 보이게 합니다."]]},
+  youtube_ads:{n:"유튜브 영상광고",items:[
+    ["first5","첫 5초에 누구에게 무엇을 주는지 말한다","건너뛰기 전에 핵심이 끝나야 합니다."],
+    ["conv","전환 추적을 연결한다","구글 태그로 문의·구매를 잡아야 전환 중심 입찰을 쓸 수 있습니다."],
+    ["aud","내 고객이 검색하는 말로 타겟을 만든다","맞춤 세그먼트에 검색어와 경쟁 사이트를 넣습니다."]]},
+  google_ads:{n:"구글 검색·디스플레이",items:[
+    ["conv","전환 추적을 먼저 붙인다","구글 태그나 애널리틱스 전환을 가져옵니다."],
+    ["rsa","반응형 검색광고에 제목과 설명을 넉넉히 넣는다","키워드를 넣은 제목과 혜택을 말하는 제목을 섞습니다."],
+    ["neg","검색어 보고서를 보고 제외 키워드를 넣는다","2주마다 한 번 봅니다."],
+    ["net","검색 캠페인의 디스플레이 확장은 끄고 시작한다","섞이면 무엇이 통했는지 알기 어렵습니다."],
+    ["pmax","실적 최대화는 전환이 쌓인 뒤에 쓴다","전환 기록이 적으면 엉뚱한 곳에 예산이 갑니다."]]},
+  kakao_ads:{n:"카카오 광고",items:[
+    ["pixel","카카오 픽셀을 설치한다","전환이 잡혀야 전환 최적화를 쓸 수 있습니다."],
+    ["place","처음에는 비즈보드와 디스플레이를 따로 본다","자리마다 단가와 반응이 크게 다릅니다."],
+    ["aud","채널 친구·방문자 타겟부터 쓴다","이미 아는 사람에게 먼저 보여 주는 편이 쌉니다."]]},
+  kakao_ch:{n:"카카오톡 채널",items:[
+    ["add","친구 추가 이유를 준다","첫 방문 쿠폰이나 예약 알림처럼 추가할 이유를 겁니다."],
+    ["rule","광고 메시지 규칙을 지킨다","(광고) 표시, 보내는 곳 이름과 연락처, 수신거부 방법. 밤 9시부터 아침 8시 사이에는 보내지 않습니다."],
+    ["seg","전체 발송보다 나눠서 보낸다","다녀간 사람, 오래 안 온 사람을 나눠 다른 말을 겁니다."]]},
+  daangn:{n:"당근",items:[
+    ["profile","비즈프로필을 채운다","사진·가격·영업시간. 동네 사람이 보는 첫 화면입니다."],
+    ["area","광고 지역을 실제로 올 수 있는 거리로 잡는다","넓히면 싸 보이지만 오지 않는 사람에게 갑니다."],
+    ["news","소식과 쿠폰을 올린다","단골 맺은 이웃에게 알림이 갑니다."]]},
+  influencer:{n:"체험단·인플루언서",items:[
+    ["pick","팔로워 수보다 내 손님과 겹치는지를 본다","지역·나이대·최근 글의 반응을 봅니다."],
+    ["guide","가이드를 한 장으로 준다","꼭 들어갈 말, 사진 수, 올리는 날짜, 링크."],
+    ["mark","대가를 받은 글임을 제목이나 첫머리에 밝히게 한다","‘광고’, ‘협찬’, ‘체험단’ 표시는 본문 끝이 아니라 제목이나 첫 부분에 있어야 합니다. AI로 만든 가상 인물이 추천하면 그 사실도 밝힙니다."],
+    ["collect","올라온 글의 링크와 반응을 모은다","콘텐츠 탭에 링크와 조회 수를 적어 두면 다음 선정이 쉬워집니다."],
+    ["reuse","사진·글을 다시 써도 되는지 미리 받는다","상세페이지나 광고 소재로 쓰려면 동의가 필요합니다."]]},
+  message:{n:"문자·알림톡·이메일",items:[
+    ["consent","받겠다고 한 사람에게만 보낸다","수신 동의를 받은 날짜를 남기고, 2년마다 다시 확인합니다."],
+    ["mark","(광고) 표시와 수신거부 방법을 넣는다","맨 앞에 (광고)와 보내는 곳 이름, 끝에 무료 수신거부 방법을 적습니다."],
+    ["night","밤 9시부터 아침 8시 사이에는 보내지 않는다","이 시간에 보내려면 따로 동의를 받아야 합니다."],
+    ["seg","누구에게 왜 보내는지 한 줄로 정한다","전체 발송보다 대상을 나눈 메시지가 반응이 좋고 수신거부가 적습니다."]]},
+  offline:{n:"전단·현수막·오프라인",items:[
+    ["code","전용 쿠폰 코드나 QR을 넣는다","그래야 몇 명이 보고 왔는지 셀 수 있습니다."],
+    ["one","한 장에 할 말 하나만 적는다","무엇을, 언제까지, 어떻게."]]},
+  site:{n:"홈페이지·스마트스토어",items:[
+    ["search","검색 등록을 한다","네이버 서치어드바이저와 구글 서치콘솔에 사이트를 등록하고 사이트맵을 냅니다."],
+    ["title","페이지마다 제목과 설명을 다르게 쓴다","검색 결과에 보이는 문장입니다."],
+    ["cta","모든 페이지에서 문의·구매로 갈 수 있다","위쪽에 고정된 버튼 하나를 둡니다."]]}
+};
+const CHK_ALIAS={facebook:"instagram",tiktok:"youtube",etc:null};
+const chkKey=k=>k in CHK?k:(CHK_ALIAS[k]||null);
+function chkGroups(){const ks=[...new Set(chansAct().map(c=>chkKey(c.kind)).filter(Boolean))];return["common"].concat(ks);}
+const chkDone=(g,k)=>st().checks.includes(g+":"+k);
+function chkProg(){let n=0,d=0;for(const g of chkGroups())for(const it of CHK[g].items){n++;if(chkDone(g,it[0]))d++;}return{n,d};}
+
+/* ── 진단 — 캠페인마다 고칠 것을 찾습니다 ── */
+const FIX={
+  notrack:c=>["광고를 직접 눌러 문의·예약·결제까지 해 보고 광고 관리자에 전환이 찍히는지 확인합니다.",kindOf(c.chan_id)==="meta_ads"?"메타 이벤트 관리자에서 픽셀·전환 API 이벤트가 들어오는지 봅니다.":kindOf(c.chan_id).startsWith("naver")?"네이버 광고 시스템의 도구에서 프리미엄 로그 분석(전환 추적) 연결을 확인합니다.":"광고 매체의 전환 추적 태그가 도착 페이지에 붙어 있는지 확인합니다.","전화·방문처럼 추적이 안 되는 문의는 ‘성과 적기’로 전환 수를 직접 적습니다."],
+  lowctr:c=>c.cat==="search"?["검색어와 같은 낱말을 제목 맨 앞에 넣습니다.","확장소재(전화·위치·가격·서브링크)를 채워 자리를 넓힙니다.","엉뚱한 검색에 나오지 않도록 제외 키워드를 넣습니다."]:c.cat==="video"?["첫 3초에 결과나 혜택을 먼저 보여 줍니다.","소리 없이도 알 수 있게 자막을 넣습니다.","길이를 줄인 판을 하나 더 만들어 견줍니다."]:["소구점이 다른 소재를 세 개 만들어 함께 돌립니다 — 혜택, 후기, 문제 해결.","세로 9:16 영상 소재를 하나 넣습니다.","타겟이 너무 넓거나 엉뚱하지 않은지 봅니다."],
+  fatigue:()=>["같은 사람에게 여러 번 보인 소재입니다. 새 소재를 두세 개 넣습니다.","잘됐던 소재의 첫 장면과 문구만 바꾼 판을 만듭니다.","오래된 소재는 끄고 새 소재에 예산이 가게 합니다."],
+  highcpc:c=>c.cat==="search"?["클릭만 나가고 전환이 없는 키워드의 입찰가를 내립니다.","품질지수가 낮은 키워드는 문안과 도착 페이지를 그 키워드에 맞춥니다.","경쟁이 덜한 세부 키워드(지역+업종+상황)를 더합니다."]:["타겟을 넓혀 경쟁이 덜한 사람에게도 보이게 합니다.","클릭률이 높은 소재로 바꾸면 같은 돈으로 클릭이 늡니다.","노출 위치를 자동으로 두어 싼 자리를 쓰게 합니다."],
+  lowcvr:()=>["광고 문구와 도착 페이지 첫 화면의 말이 같은지 봅니다.","가격·구성·후기가 스크롤 없이 보이는지, 버튼이 한눈에 보이는지 확인합니다.","휴대폰으로 열어 3초 안에 뜨는지, 입력 칸이 많지 않은지 봅니다.","문의가 전화·카톡으로 새고 있다면 ‘성과 적기’로 직접 적습니다."],
+  highcpa:()=>["전환이 나는 키워드·소재만 남기고 나머지 예산을 줄입니다.","예산은 한 번에 조금씩 내리고 사나흘 뒤 다시 봅니다.","도착 페이지 전환율을 먼저 올릴 수 있는지 봅니다."],
+  lowroas:()=>["매출이 나는 상품·소재에 예산을 모읍니다.","객단가를 올릴 묶음·추가 구성을 도착 페이지에 넣습니다.","첫 구매 손해를 재구매로 메우는 상품이라면 목표 ROAS를 설정에서 다시 정합니다."],
+  capped:()=>["효율이 목표 안이면 하루 예산을 올립니다.","효율이 나쁘면 예산은 두고 입찰가나 타겟을 먼저 손봅니다."],
+  under:c=>c.cat==="search"?["입찰가가 낮아 노출이 안 되는 키워드가 있는지 봅니다.","키워드를 더합니다 — 키워드 탭의 조합기를 써 보세요.","지역·시간 설정이 너무 좁지 않은지 봅니다."]:["타겟이 너무 좁지 않은지 봅니다.","소재가 반려되거나 검수 중인지 확인합니다.","입찰 상한을 두었다면 올립니다."],
+  stale:()=>["광고 관리자에서 보고서를 내려받아 ‘보고서 파일 올리기’로 넣습니다.","네이버 검색광고·메타 광고는 설정 → 연결에서 자동으로 가져오게 할 수 있습니다.","끝난 캠페인이면 상태를 ‘끝남’으로 바꿉니다."],
+  ended:()=>["기간이 지났습니다. 계속 돌린다면 종료일을 고치고, 끝났다면 상태를 ‘끝남’으로 바꿉니다."],
+  nolanding:()=>["캠페인 수정에서 도착 페이지 주소를 적어 둡니다. 꼬리표(UTM)를 붙이면 방문 통계에서 구분됩니다."]
+};
+const ITITLE={notrack:"전환이 한 건도 기록되지 않았습니다",lowctr:"클릭률이 낮습니다",fatigue:"소재가 지쳤습니다",highcpc:"클릭 단가가 높습니다",lowcvr:"클릭은 오는데 전환이 적습니다",highcpa:"전환 한 건이 목표보다 비쌉니다",lowroas:"광고비 대비 매출이 목표에 못 미칩니다",capped:"하루 예산에 걸려 노출이 끊깁니다",under:"예산을 다 쓰지 못하고 있습니다",stale:"최근 성과 기록이 없습니다",ended:"기간이 끝난 캠페인이 진행 중으로 남아 있습니다",nolanding:"도착 페이지가 적혀 있지 않습니다"};
+const IKIND={notrack:"measure",lowctr:"creative",fatigue:"creative",highcpc:"bid",lowcvr:"landing",highcpa:"budget",lowroas:"budget",capped:"budget",under:"bid",stale:"measure",ended:"setup",nolanding:"setup"};
+function diagnose(c){
+  const out=[],g=st().guard,rows=campRows(c),W=g.days,cur=win(rows,W),prev=win(rows,W,W),c2=win(rows,W*2),c30=win(rows,30),ref=refOf(c.cat),G=tgt(c),conv=["lead","sale","visit"].includes(c.goal),paid=isPaid(chanById(c.chan_id)||{kind:"etc"});
+  const add=(code,sev,why)=>out.push({code,sev,camp:c,title:ITITLE[code],why,fix:FIX[code](c),kind:IKIND[code],key:`${code}:${c.id}:${weekKey()}`});
+  if(c.status==="live"&&c.end_date&&c.end_date<T())add("ended",1,`종료일 ${fmtD(c.end_date)}`);
+  if(c.status!=="live")return out;
+  if(!rows.some(r=>r.date>=addDaysStr(T(),-7))){if(paid&&(!c.start_date||c.start_date<=addDaysStr(T(),-3))&&dgap((c.created_at||"").slice(0,10)||T(),T())>=3)add("stale",1,rows.length?`마지막 기록 ${fmtD(rows[rows.length-1].date)}`:"아직 기록이 없습니다");return out;}
+  if(conv&&paid&&c30.clk>=Math.max(50,g.minClk)&&c30.conv===0&&c30.cost>0)add("notrack",3,`최근 30일 클릭 ${fmt(c30.clk)}번, 광고비 ${won(c30.cost)}에 전환 0건`);
+  const ctr=R.ctr(cur),own=catAvg(c.cat,c.id),ownCtr=own.camps>=2&&own.imp>=g.minImp?R.ctr(own):null;
+  if(cur.imp>=g.minImp&&ctr!=null&&((ref.ctr!=null&&ctr<ref.ctr)||(ownCtr!=null&&ctr<ownCtr*0.5&&(ref.ctr==null||ctr<ref.ctr*2))))add("lowctr",2,`최근 ${W}일 클릭률 ${fP(ctr)}${ref.ctr!=null?` · 점검 기준 ${fP(ref.ctr)}`:""}${ownCtr!=null?` · 내 ${CAT[c.cat][0]} 평균 ${fP(ownCtr)}`:""}`);
+  else if(["target","video"].includes(c.cat)&&cur.imp>=g.minImp&&prev.imp>=g.minImp&&R.ctr(prev)>0&&ctr<=R.ctr(prev)*0.7)add("fatigue",2,`클릭률이 지난 ${W}일 ${fP(R.ctr(prev))}에서 ${fP(ctr)}로 떨어졌습니다`);
+  const cpc=R.cpc(cur),ownCpc=own.camps>=2&&own.clk>=g.minClk?R.cpc(own):null,pCpc=prev.clk>=g.minClk?R.cpc(prev):null;
+  if(cur.clk>=g.minClk&&cpc!=null&&((ownCpc!=null&&cpc>ownCpc*2)||(pCpc!=null&&cpc>pCpc*1.3)))add("highcpc",1,`클릭당 ${won(cpc)}${pCpc!=null?` · 지난 ${W}일 ${won(pCpc)}`:""}${ownCpc!=null?` · 내 ${CAT[c.cat][0]} 평균 ${won(ownCpc)}`:""}`);
+  if(conv&&paid&&c2.clk>=Math.max(100,g.minClk*2)&&c2.conv>0&&ref.cvr!=null&&R.cvr(c2)<ref.cvr)add("lowcvr",2,`최근 ${W*2}일 클릭 ${fmt(c2.clk)}번에 전환 ${fN(c2.conv)}건 — 전환율 ${fP(R.cvr(c2))} (점검 기준 ${fP(ref.cvr)})`);
+  if(paid&&byRoas(c,c2)){if(c2.cost>0&&R.roas(c2)<G.roas*0.8)add("lowroas",3,`최근 ${W*2}일 ROAS ${fP(R.roas(c2))} · 목표 ${fP(G.roas)}${G.own?"":" (손익분기)"}`);}
+  else if(paid&&G.cpa&&c2.conv>=g.minConv&&R.cpa(c2)>G.cpa*1.2)add("highcpa",3,`최근 ${W*2}일 전환당 ${won(R.cpa(c2))} · 목표 ${won(G.cpa)}${G.own?"":" (손익분기)"}`);
+  const db=dayBudget(c);
+  if(db>0&&paid){const by={};for(const r of rows)if(r.date>=cur.from&&r.date<=cur.to)by[r.date]=(by[r.date]||0)+r.cost;const hit=Object.values(by).filter(v=>v>=db*0.95).length;
+    if(c.budget_type==="day"&&hit>=Math.min(5,W-1))add("capped",1,`최근 ${W}일 가운데 ${hit}일이 하루 예산 ${won(db)}을 다 썼습니다`);
+    else if(cur.imp>0&&cur.cost<db*W*0.5)add("under",1,`최근 ${W}일 ${won(cur.cost)} 사용 · 예산 ${won(db*W)}의 ${Math.round(cur.cost/(db*W)*100)}%`);}
+  if(conv&&paid&&!c.landing&&cur.clk>0)add("nolanding",1,"");
+  return out;
+}
+function issues(mode){   // mode를 주면 그 모드로 도는 캠페인만
+  const out=[];for(const c of S.camps){if(c.status==="done"||c.status==="plan")continue;if(mode&&!mode.includes(effMode(c)))continue;out.push(...diagnose(c));}
+  // 콘텐츠 채널이 2주 넘게 조용하면
+  for(const ch of chansAct()){if(isPaid(ch)||!["content","video"].includes(ch.cat))continue;const ps=S.posts.filter(p=>p.chan_id===ch.id);if(!ps.length)continue;const last=ps.filter(p=>p.status==="posted"&&p.date).map(p=>p.date).sort().pop(),next=ps.some(p=>["draft","ready","idea"].includes(p.status)&&p.date&&p.date>=T()&&p.date<=addDaysStr(T(),7));
+    if((!last||last<addDaysStr(T(),-14))&&!next)out.push({code:"cadence",sev:1,chan:ch,title:"콘텐츠가 2주 넘게 끊겼습니다",why:last?`마지막 게시 ${fmtD(last)}`:"게시한 글이 없습니다",fix:["콘텐츠 탭에서 이번 주에 올릴 글을 하나 잡습니다.","아이디어가 없으면 ‘아이디어 받기’에서 고릅니다."],kind:"content",key:`cadence:${ch.id}:${weekKey()}`});}
+  return out.sort((a,b)=>b.sev-a.sev||((b.camp?win(campRows(b.camp),7).cost:0)-(a.camp?win(campRows(a.camp),7).cost:0)));
+}
+
+/* ── 부스터 — 목표에 맞춰 무엇을 얼마나 바꿀지 ── */
+function snap(c){const w=win(campRows(c),st().guard.days);return{days:w.days,to:w.to,cost:w.cost,imp:w.imp,clk:w.clk,conv:w.conv,rev:w.rev};}
+function boostPlan(){
+  const g=st().guard,W=g.days,wk=weekKey(),out=[],cs=S.camps.filter(c=>c.status==="live"&&effMode(c)==="boost"&&isPaid(chanById(c.chan_id)||{kind:"etc"}));
+  const rowsOf=cs.map(c=>{const rows=campRows(c),w=win(rows,W),w2=win(rows,W*2),w30=win(rows,30),G=tgt(c),e=eff(c,w2.conv>=g.minConv?w2:w),db=dayBudget(c),roasMode=byRoas(c,w2);
+    let verdict="keep";
+    if(w2.clk>=g.minClk&&w2.conv===0&&G.cpa&&w2.cost>=G.cpa*2)verdict="stop";
+    else if(e!=null&&w2.conv>=g.minConv){if(e>=1.1)verdict="scale";else if(e<0.75)verdict="cut";}
+    else if(w2.clk<g.minClk)verdict="wait";
+    return{c,w,w2,w30,G,e,db,verdict,roasMode};});
+  const mline=x=>x.roasMode?`ROAS ${fP(R.roas(x.w2))} · 목표 ${fP(x.G.roas)}`:`전환당 ${fW(R.cpa(x.w2))} · 목표 ${fW(x.G.cpa)}`;
+  const base=x=>({days:x.w.days,to:x.w.to,cost:x.w.cost,imp:x.w.imp,clk:x.w.clk,conv:x.w.conv,rev:x.w.rev});
+  const push=(x,o)=>out.push(Object.assign({mode:"boost",camp_id:x?x.c.id:"",chan_id:x?x.c.chan_id:"",base:x?base(x):null,from_v:"",to_v:""},o));
+  const scale=rowsOf.filter(x=>x.verdict==="scale").sort((a,b)=>b.e-a.e),weak=rowsOf.filter(x=>x.verdict==="cut"||x.verdict==="stop").sort((a,b)=>(a.e??0)-(b.e??0));
+  const used=new Set();
+  // 1) 예산 옮기기 — 가장 잘하는 곳과 가장 못하는 곳이 함께 있을 때
+  const best=scale.find(x=>x.db>0),worst=weak.find(x=>x.db>0&&x.verdict==="cut");
+  if(best&&worst){
+    const amt=Math.max(100,r100(Math.min(best.db,worst.db)*g.step/100)),gain=!best.roasMode&&!worst.roasMode&&R.cpa(best.w2)&&R.cpa(worst.w2)?Math.round((amt*30/R.cpa(best.w2)-amt*30/R.cpa(worst.w2))*10)/10:null;
+    push(best,{key:`move:${worst.c.id}>${best.c.id}:${wk}`,kind:"budget",title:`하루 ${won(amt)}을 “${worst.c.name}”에서 “${best.c.name}”로 옮기기`,
+      detail:`받는 쪽: ${mline(best)} (최근 ${W*2}일 전환 ${fN(best.w2.conv)}건)\n주는 쪽: ${mline(worst)}\n한 번에 ${g.step}%만 옮기고 사나흘 뒤 다시 봅니다.${gain!=null&&gain>0?`\n지금 효율이 그대로라면 한 달 전환이 약 ${fN(gain)}건 늘어나는 셈입니다(단순 계산).`:""}`,
+      from_v:`${won(r100(worst.db))} → ${won(r100(worst.db)-amt)}`,to_v:`${won(r100(best.db))} → ${won(r100(best.db)+amt)}`});
+    used.add(best.c.id);used.add(worst.c.id);
+  }
+  // 2) 늘리기 · 줄이기 · 멈추기
+  for(const x of rowsOf){
+    if(used.has(x.c.id))continue;
+    const bt=x.c.budget_type==="day"?"하루 예산":x.c.budget_type==="total"?"전체 예산":"월 예산";
+    if(x.verdict==="scale")push(x,{key:`scale:${x.c.id}:${wk}`,kind:"budget",title:`“${x.c.name}” 예산 ${g.step}% 늘리기`,detail:`${mline(x)} — 목표보다 ${Math.round((x.e-1)*100)}% 잘하고 있습니다 (최근 ${W*2}일 전환 ${fN(x.w2.conv)}건).\n한 번에 ${g.step}%까지만 올리고 사나흘 뒤 효율이 유지되는지 봅니다. 크게 올리면 학습이 흔들립니다.`,from_v:x.c.budget?`${bt} ${won(x.c.budget)}`:"",to_v:x.c.budget?won(r100(x.c.budget*(1+g.step/100))):`+${g.step}%`});
+    else if(x.verdict==="cut")push(x,{key:`cut:${x.c.id}:${wk}`,kind:"budget",title:`“${x.c.name}” 예산 ${g.step}% 줄이기`,detail:`${mline(x)} — 목표의 ${Math.round(x.e*100)}% 수준입니다.\n예산을 줄이면서 최적화 탭의 고칠 것을 함께 손봅니다. 다음 주에도 그대로면 멈춥니다.`,from_v:x.c.budget?`${bt} ${won(x.c.budget)}`:"",to_v:x.c.budget?won(r100(x.c.budget*(1-g.step/100))):`−${g.step}%`});
+    else if(x.verdict==="stop")push(x,{key:`stop:${x.c.id}:${wk}`,kind:"budget",title:`“${x.c.name}” 멈추고 원인 확인하기`,detail:`최근 ${W*2}일 동안 전환 없이 ${won(x.w2.cost)}을 썼습니다 — 목표 전환당 비용 ${won(x.G.cpa)}의 ${fN(x.w2.cost/x.G.cpa)}배입니다.\n먼저 전환 추적이 살아 있는지 확인하고, 살아 있다면 멈춘 뒤 소재·타겟·도착 페이지를 바꿔 작은 예산으로 다시 시험합니다.`,from_v:"진행 중",to_v:"멈춤"});
+  }
+  // 3) 소재·키워드 겨루기 — 상세 줄(라벨)이 있는 캠페인
+  for(const x of rowsOf){
+    const by=new Map();for(const r of campRows(x.c)){if(!r.label||r.date<x.w2.from||r.date>x.w2.to)continue;let t=by.get(r.label);if(!t)by.set(r.label,t={label:r.label,cost:0,imp:0,clk:0,conv:0,rev:0});t.cost+=r.cost;t.imp+=r.imp;t.clk+=r.clk;t.conv+=r.conv;t.rev+=r.rev;}
+    const L=[...by.values()],ok=L.filter(l=>l.clk>=g.minClk),word=x.c.cat==="search"?"키워드":"소재";
+    if(ok.length>=2){
+      const sc=l=>l.conv>0?l.conv/l.cost:R.ctr(l)/1e9,bs=ok.slice().sort((a,b)=>sc(b)-sc(a)),b=bs[0],w=bs[bs.length-1];
+      const bad=(w.conv===0&&b.conv>0&&(!x.G.cpa||w.cost>=x.G.cpa))||(w.conv>0&&b.conv>0&&R.cpa(w)>R.cpa(b)*1.5)||(b.conv===0&&w.conv===0&&R.ctr(w)<R.ctr(b)*0.5);
+      if(bad)push(x,{key:`duel:${x.c.id}:${w.label}:${wk}`,kind:x.c.cat==="search"?"keyword":"creative",title:`“${x.c.name}” — ${word} “${w.label}” 끄고 “${b.label}”에 모으기`,detail:`잘하는 쪽 “${b.label}”: 클릭 ${fmt(b.clk)} · 전환 ${fN(b.conv)} · 전환당 ${fW(R.cpa(b))} · 클릭률 ${fP(R.ctr(b))}\n못하는 쪽 “${w.label}”: 클릭 ${fmt(w.clk)} · 전환 ${fN(w.conv)} · 전환당 ${fW(R.cpa(w))} · 클릭률 ${fP(R.ctr(w))} · 쓴 돈 ${won(w.cost)}\n${x.c.cat==="search"?"못하는 키워드는 입찰가를 내리거나 끄고, 잘하는 키워드의 순위를 지킵니다.":"못하는 소재를 끄면 남은 소재에 예산이 갑니다. 잘하는 소재의 첫 장면을 살린 새 소재를 하나 더 만듭니다."}`,from_v:w.label,to_v:b.label});
+    }
+    if(["target","video"].includes(x.c.cat)&&x.w2.cost>0&&L.length>0&&L.length<3)push(x,{key:`creative:${x.c.id}:${ymOf()}`,kind:"creative",title:`“${x.c.name}” 소재를 3개 이상으로 늘리기`,detail:`지금 돌고 있는 소재가 ${L.length}개입니다. 소구점을 달리한 소재를 함께 돌려야 무엇이 통하는지 알 수 있습니다.\n① 혜택·가격을 앞세운 소재 ② 후기·사용 장면 ③ 겪는 문제와 해결\n소재마다 노출 ${fmt(g.minImp)}번, 클릭 ${g.minClk}번이 모인 뒤에 판단합니다.`,from_v:`${L.length}개`,to_v:"3개 이상"});
+  }
+  // 4) 전환이 쌓인 캠페인 — 매체의 자동 최적화 상품을 나란히 시험
+  const AUTO={meta_ads:"어드밴티지+ 캠페인",naver_gfa:"애드부스트(ADVoost)",naver_shop:"애드부스트 쇼핑",naver_place:"플레이스 애드부스트",google_ads:"실적 최대화(PMax)"};
+  for(const x of rowsOf){const k=kindOf(x.c.chan_id);if(AUTO[k]&&x.w30.conv>=30&&x.verdict!=="stop")push(x,{key:`auto:${x.c.id}:${T().slice(0,4)}Q${Math.ceil(+T().slice(5,7)/3)}`,kind:"auto",title:`“${x.c.name}” 옆에 ${AUTO[k]}를 작게 시험하기`,detail:`최근 30일 전환이 ${fN(x.w30.conv)}건 쌓였습니다. 매체의 자동 최적화가 배울 재료가 생겼으니, 지금 캠페인은 그대로 두고 예산의 20%쯤으로 ${AUTO[k]}를 나란히 돌려 2주 뒤 전환당 비용을 견줍니다.\n전환 추적이 정확해야 하고, 소재(이미지·문구)를 넉넉히 넣어야 합니다.`,from_v:"",to_v:"예산의 20%"});}
+  // 5) 검색광고 키워드 — 넓히기와 덜어내기
+  if(cs.some(c=>c.cat==="search")){
+    const cand=S.kws.filter(k=>k.state==="watch"&&((k.vol_pc||0)+(k.vol_mo||0))>0&&k.comp!=="높음").sort((a,b)=>((b.vol_pc||0)+(b.vol_mo||0))-((a.vol_pc||0)+(a.vol_mo||0))).slice(0,5);
+    if(cand.length>=2)push(null,{key:`kwadd:${ymOf()}`,kind:"keyword",title:`지켜보는 키워드 ${cand.length}개를 광고에 넣어 보기`,detail:cand.map(k=>`· ${k.word} — 월 검색 ${fmt((k.vol_pc||0)+(k.vol_mo||0))}${k.comp?` · 경쟁 ${k.comp}`:""}`).join("\n")+"\n검색량이 있고 경쟁이 세지 않은 키워드입니다. 낮은 입찰가로 넣고 2주 뒤 전환을 봅니다. 넣은 뒤에는 키워드 탭에서 ‘쓰는 중’으로 바꿉니다."});
+  }
+  // 6) 월 예산 속도
+  const B=st().budget,ym=ymOf(),day=+T().slice(8),N=daysIn(ym);
+  if(B>0&&day>=7){const spent=agg(S.stats,ym+"-01",T()).cost,proj=spent/day*N;
+    if(proj>B*1.1)push(null,{key:`pace:over:${ym}`,kind:"budget",title:`이 속도면 이달 광고비가 예산을 ${Math.round((proj/B-1)*100)}% 넘습니다`,detail:`${day}일까지 ${won(spent)} · 이대로면 월말 ${won(proj)} (월 예산 ${won(B)}).\n효율이 목표에 못 미치는 캠페인부터 하루 예산을 줄입니다.`,from_v:won(proj),to_v:won(B)});
+    else if(proj<B*0.7&&scale.length)push(null,{key:`pace:under:${ym}`,kind:"budget",title:`이달 예산이 ${Math.round((1-proj/B)*100)}% 남을 것 같습니다`,detail:`${day}일까지 ${won(spent)} · 이대로면 월말 ${won(proj)} (월 예산 ${won(B)}).\n목표보다 잘하고 있는 “${scale[0].c.name}”부터 늘립니다.`,from_v:won(proj),to_v:won(B)});}
+  return{rows:rowsOf,acts:out};
+}
+/* 실행안을 한 뒤의 효과 — 한 날 다음 날부터 같은 길이만큼을 전과 견줍니다 */
+function effect(a){
+  if(a.status!=="done"||!a.done_at||!a.camp_id||!a.base||!a.base.days)return null;
+  const c=campById(a.camp_id);if(!c)return null;
+  const d0=new Date(a.done_at),from=addDaysStr(`${d0.getFullYear()}-${pad2(d0.getMonth()+1)}-${pad2(d0.getDate())}`,1),to=addDaysStr(from,a.base.days-1);
+  if(to>=T())return{wait:dgap(T(),to)+1};
+  const af=agg(campRows(c),from,to),b=a.base;
+  let name,bv,av,pctFmt=false;
+  if(c.goal==="sale"&&b.rev>0&&af.rev>0){name="ROAS";bv=R.roas(b);av=R.roas(af);pctFmt=true;}
+  else if(b.conv>0&&af.conv>0){name="전환당 비용";bv=R.cpa(b);av=R.cpa(af);}
+  else if(b.clk>0&&af.clk>0){name="클릭당 비용";bv=R.cpc(b);av=R.cpc(af);}
+  else return{none:true};
+  if(!bv||av==null)return{none:true};
+  const d=(av-bv)/bv*100;
+  return{name,bv,av,d,good:pctFmt?d>0:d<0,pctFmt,from,to,af};
+}
+/* 부스터로 도는 캠페인이 있으면, 새 실행안을 대기열에 넣어 둡니다 (같은 것은 한 번만) */
+async function autoQueue(){
+  if(!S.ready||MODE!=="cloud"||!mgr()||!modOn("marketing")||Date.now()-U.autoAt<60000)return;
+  if(!S.camps.some(c=>c.status==="live"&&effMode(c)==="boost"))return;
+  U.autoAt=Date.now();
+  const have=new Set(S.acts.map(a=>a.key).filter(Boolean)),add=boostPlan().acts.filter(a=>a.key&&!have.has(a.key)&&!U.pushed.has(a.key));
+  if(!add.length)return;
+  add.forEach(a=>U.pushed.add(a.key));
+  try{const r=await call("act/bulk",{rows:add.slice(0,40)});(r.acts||[]).forEach(a=>upd(S.acts,a));if(onPage()&&uiSafe())route();else fillDash();}catch(e){}
+}
+/* 남은 실행안 — 돈이 새는 것부터: 멈춤 → 옮기기 → 줄이기·늘리기 → 예산 속도 → 소재·키워드 → 자동화 → 그 밖 */
+const APRI=["stop:","move:","cut:","scale:","pace:","duel:","creative:","kwadd:","auto:"];
+const aPri=a=>{const i=APRI.findIndex(p=>a.key&&a.key.startsWith(p));return i<0?APRI.length:i;};
+const todoActs=mode=>S.acts.filter(a=>a.status==="todo"&&(!mode||a.mode===mode)).sort((a,b)=>aPri(a)-aPri(b)||String(b.created_at).localeCompare(String(a.created_at)));
+
+/* ── 화면 뼈대 ── */
+const TABS=[["","현황"],["camp","캠페인"],["perf","성과"],["content","콘텐츠"],["kw","키워드"],["opt","최적화"],["boost","부스터"],["set","설정"]];
+function shell(sub,inner,head){
+  const h=head||{},nB=todoActs("boost").length,nO=todoActs("opt").length;
+  $("#view").innerHTML=`
+  <div class="page-head"><div><h1><span class="bars"></span>${esc(h.title||"마이마케팅")}</h1><div class="desc">${h.desc||"광고와 홍보를 한곳에서 봅니다. 어디에 얼마를 썼고, 무엇이 돌아왔고, 다음에 무엇을 바꿀지."}</div></div>${h.actions?`<div style="display:flex;gap:6px;flex-wrap:wrap">${h.actions}</div>`:""}</div>
+  <nav class="sp-tabs">${TABS.map(([k,l])=>`<button class="${sub===k?"on":""}" data-mk="go" data-to="${k}">${l}${k==="boost"&&nB?`<b class="nbadge">${nB}</b>`:k==="opt"&&nO?`<b class="nbadge">${nO}</b>`:""}</button>`).join("")}</nav>
+  <div class="mkx">${inner}</div>`;
+  const tb=$("#view .sp-tabs"),on=tb&&tb.querySelector("button.on");if(on&&tb.scrollWidth>tb.clientWidth)tb.scrollLeft=Math.max(0,on.offsetLeft-(tb.clientWidth-on.offsetWidth)/2);   // 좁은 화면에서 고른 탭이 보이게
+}
+const empty=(t,s)=>`<div class="sp-empty"><b>${t}</b>${s||""}</div>`;
+const chanOpts=(sel,all)=>(all?`<option value="">${all}</option>`:"")+S.chans.filter(c=>c.active!==0||c.id===sel).map(c=>`<option value="${esc(c.id)}" ${c.id===sel?"selected":""}>${esc(c.name)}</option>`).join("");
+const modeSeg=()=>{const m=st().mode;return`<div class="mk-mode"><div class="seg" role="group" aria-label="모드">${Object.entries(MDS).map(([k,[l]])=>`<button class="${m===k?"on":""}" data-mk="mode" data-v="${k}">${l}</button>`).join("")}</div><span class="hint">${MDS[m][0]} 모드 — ${MDS[m][1]}.</span></div>`;};
+const modePill=c=>{const m=effMode(c);return m==="basic"||c.status==="plan"||c.status==="done"?"":`<span class="pill nodot ${m==="boost"?"p-red":"p-blue"}">${MDS[m][0]}</span>`;};
+/* 앞 기간 대비 — lowGood: 낮을수록 좋은 숫자(전환당 비용), "plain": 좋고 나쁨이 없는 숫자(광고비) */
+const dlt=(a,b,lowGood)=>{if(!b||a==null)return"";const d=Math.round((a-b)/b*100);if(!d)return"";const good=lowGood?d<0:d>0;return` <span class="${lowGood==="plain"?"":good?"mk-up":"mk-dn"}" style="font-size:11.5px">${d>0?"+":""}${d}%</span>`;};
+function bars2(rows){   // 옅은 막대 광고비, 진한 막대 전환 — 저마다의 가장 큰 값에 맞춥니다
+  const mc=Math.max(1,...rows.map(r=>r.c)),mv=Math.max(1,...rows.map(r=>r.v));
+  return`<div class="mk-bars">${rows.map(r=>`<div class="mk-bar ${r.on?"on":""}" title="${esc(r.title||"")}"><span><i class="c" style="height:${Math.round(r.c/mc*100)}%"></i><i class="v" style="height:${Math.round(r.v/mv*100)}%"></i></span><em>${esc(r.label)}</em></div>`).join("")}</div>`;
+}
+function setupCard(){
+  return`<div class="card welcome"><h2><span class="bars"></span>마이마케팅 시작하기</h2>
+  <div style="font-size:13.5px;color:var(--sub);line-height:1.7;margin:-4px 0 12px">광고를 이미 하고 있다면 광고 관리자에서 받은 보고서 파일을 올리는 것부터, 이제 시작한다면 기획부터 받는 것이 빠릅니다. 어느 쪽이든 5분이면 됩니다.</div>
+  <div class="sp-start">
+    <div class="f-step"><div class="f-no">1</div><b>채널과 캠페인</b><p>네이버·인스타그램·유튜브처럼 쓰는 채널을 등록하고, 광고마다 목표와 예산을 적습니다. 기획 마법사가 한 번에 만들어 줍니다.</p></div>
+    <div class="f-step"><div class="f-no">2</div><b>성과 모으기</b><p>보고서 파일(엑셀·CSV)을 올리면 열을 알아서 맞춥니다. 네이버 검색광고와 메타 광고는 연결해 두면 열 때마다 가져옵니다.</p></div>
+    <div class="f-step"><div class="f-no">3</div><b>고치고 키우기</b><p>최적화 모드는 무엇을 고칠지와 설정 방법을, 부스터 모드는 예산·입찰·소재를 얼마나 바꿀지를 숫자로 알려 줍니다.</p></div>
+  </div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-pri btn-sm" data-mk="plan-open">기획부터 받기</button><button class="btn btn-sm" data-mk="up-open">보고서 파일 올리기</button><button class="btn btn-sm" data-mk="chan-new">채널 직접 추가</button></div></div>`;
+}
+
+/* ── 현황 ── */
+function syncLine(){
+  const s=st().synced,parts=[],ago=x=>{if(!x)return"아직 안 가져옴";const m=Math.round((Date.now()-Date.parse(x))/60000);return m<60?`${Math.max(1,m)}분 전`:m<1440?`${Math.round(m/60)}시간 전`:`${Math.round(m/1440)}일 전`;};
+  if(S.conn.naver.on)parts.push(`네이버 검색광고 ${ago(s.naver)}`);if(S.conn.meta.on)parts.push(`메타 광고 ${ago(s.meta)}`);if(S.keys.yt&&S.chans.some(c=>c.kind==="youtube"&&c.handle))parts.push(`유튜브 ${ago(s.yt)}`);
+  if(!parts.length)return"";
+  return`<div class="hint" style="margin:-6px 0 12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span>자동으로 가져오기: ${parts.join(" · ")}</span><button class="btn btn-xs" data-mk="sync-all" ${U.syncing?"disabled":""}>${U.syncing?"가져오는 중…":"지금 가져오기"}</button>${U.syncMsg?`<span>${esc(U.syncMsg)}</span>`:""}</div>`;
+}
+function vDash(){
+  if(!S.chans.length&&!S.camps.length){shell("",setupCard());return;}
+  const t=T(),ym=ymOf(),d=+t.slice(8),N=daysIn(ym),m=agg(S.stats,ym+"-01",t),p0=monShift(ym,-1),pm=hasFrom(p0+"-01")?agg(S.stats,p0+"-01",p0+"-"+pad2(Math.min(d,daysIn(p0)))):{cost:0,conv:0,clk:0},B=st().budget,G=tgt(null);
+  const days=[];for(let i=13;i>=0;i--){const ds=addDaysStr(t,-i),a=agg(S.stats,ds,ds);days.push({label:String(+ds.slice(8)),c:a.cost,v:a.conv,on:ds===t,title:`${fmtD(ds)} 광고비 ${won(a.cost)} · 클릭 ${fmt(a.clk)} · 전환 ${fN(a.conv)}`});}
+  const byCh=S.chans.map(c=>({c,a:agg(IX.chan.get(c.id)||[],ym+"-01",t)})).filter(x=>x.a.n).sort((a,b)=>b.a.cost-a.a.cost||b.a.clk-a.a.clk);
+  const inc=(DB.finance||[]).filter(f=>f.kind==="수입"&&f.date&&f.date.startsWith(ym)).reduce((s,f)=>s+f.amount,0);
+  const mr=roasOf(S.stats,ym+"-01",t),CP=chkProg();
+  // 목표 대비 — [이름, 지금 값, 목표 설명, 달성률(%), 좋은 쪽이면 "ok"]
+  const kp=[];
+  if(B)kp.push(["이달 광고비",man(m.cost),`월 예산 ${man(B)}`,Math.round(m.cost/B*100),m.cost>B?"over":""]);
+  if(G.cpa&&m.conv>0)kp.push(["전환당 비용",won(R.cpa(m)),`목표 ${won(G.cpa)}${G.own?"":" (손익분기)"}`,Math.round(G.cpa/R.cpa(m)*100),"ok"]);
+  if(G.roas&&mr!=null)kp.push(["ROAS",fP(mr),`목표 ${fP(G.roas)}${G.own?"":" (손익분기)"}`,Math.round(mr/G.roas*100),"ok"]);
+  if(B&&G.cpa)kp.push(["이달 전환",fN(m.conv)+"건",`예산을 목표 단가로 쓰면 ${fmt(Math.floor(B/G.cpa))}건`,Math.round(m.conv/(B/G.cpa)*100),"ok"]);
+  if(CP.n)kp.push(["설정 점검",`${CP.d}/${CP.n}`,"최적화 탭의 점검표",Math.round(CP.d/CP.n*100),"ok"]);
+  const acts=todoActs().slice(0,4),iss=st().mode==="basic"?[]:issues().slice(0,4),soon=S.posts.filter(p=>p.date&&p.date>=t&&p.date<=addDaysStr(t,7)&&!["posted","skip"].includes(p.status)).sort((a,b)=>a.date.localeCompare(b.date)).slice(0,5);
+  shell("",`${modeSeg()}${syncLine()}
+  <div class="sp-kpis">
+    <div class="stat ${B&&m.cost>B?"warn":""}"><div class="s-num">${man(m.cost)}</div><div class="s-lb">${+ym.slice(5)}월 광고비${dlt(m.cost,pm.cost,"plain")}</div><div class="s-sub">${B?`월 예산 ${man(B)}의 ${Math.round(m.cost/B*100)}% · ${d}/${N}일`:`<a data-mk="go" data-to="set" style="cursor:pointer;text-decoration:underline">월 예산을 정하면 쓰는 속도를 봅니다</a>`}</div></div>
+    <div class="stat"><div class="s-num">${fN(m.conv)}<em>건</em></div><div class="s-lb">전환 (문의·예약·구매)${dlt(m.conv,pm.conv)}</div><div class="s-sub">전환당 ${fW(R.cpa(m))}${G.cpa?` · 목표 ${won(G.cpa)}`:""}</div></div>
+    <div class="stat">${m.rev?`<div class="s-num">${fP(mr)}</div><div class="s-lb">광고비 대비 매출 (ROAS)</div><div class="s-sub">광고 매출 ${man(m.rev)} · 매출을 기록한 광고 기준${G.roas?` · 목표 ${fP(G.roas)}`:""}</div>`:`<div class="s-num">${fmt(m.clk)}<em>번</em></div><div class="s-lb">클릭${dlt(m.clk,pm.clk)}</div><div class="s-sub">클릭률 ${fP(R.ctr(m))} · 클릭당 ${fW(R.cpc(m))}</div>`}</div>
+    <div class="stat"><div class="s-num">${inc?fP(m.cost/inc*100):"—"}</div><div class="s-lb">매출 대비 광고비</div><div class="s-sub">${inc?`돈 메뉴의 이달 수입 ${man(inc)} 기준`:"돈 메뉴에 이달 수입을 적으면 보입니다"}</div></div>
+  </div>
+  <div class="sp-grid2">
+    <div>
+      <div class="card"><h2><span class="bars"></span>최근 14일 <span class="cnt">옅은 막대 광고비 · 진한 막대 전환</span></h2>${bars2(days)}</div>
+      <div class="card"><h2><span class="bars"></span>채널별 ${+ym.slice(5)}월 <button class="btn btn-sm btn-ghost" data-mk="go" data-to="perf" style="margin-left:auto">자세히 →</button></h2>
+        ${byCh.length?`<div class="tblwrap"><table class="tbl" style="min-width:460px"><thead><tr><th>채널</th><th class="r">광고비</th><th class="r">클릭</th><th class="r">전환</th><th class="r">전환당</th><th>비중</th></tr></thead><tbody>${byCh.map(x=>`<tr><td><b>${esc(x.c.name)}</b></td><td class="r num">${fmt(x.a.cost)}</td><td class="r num">${fmt(x.a.clk)}</td><td class="r num">${fN(x.a.conv)}</td><td class="r num">${fW(R.cpa(x.a))}</td><td><span class="mk-share"><i style="width:${m.cost?Math.round(x.a.cost/m.cost*100):0}%"></i></span></td></tr>`).join("")}</tbody></table></div>`:`<div class="empty" style="padding:18px">이달 성과 기록이 없습니다.<div style="margin-top:10px"><button class="btn btn-sm" data-mk="up-open">보고서 파일 올리기</button> <button class="btn btn-sm" data-mk="stat-new">성과 적기</button></div></div>`}
+      </div>
+    </div>
+    <div>
+      <div class="card"><h2><span class="bars"></span>지금 할 일 <span class="cnt">${acts.length+iss.length}가지</span></h2>
+        ${acts.map(a=>`<div class="pj-line" data-mk="go" data-to="boost"><span class="pj-nm">${esc(a.title)}</span><span class="pill nodot ${a.mode==="boost"?"p-red":"p-blue"}">${AKIND[a.kind]||"실행안"}</span></div>`).join("")}
+        ${iss.map(i=>`<div class="pj-line" data-mk="go" data-to="opt"><span class="pj-nm">${esc(i.camp?i.camp.name:i.chan.name)} — ${esc(i.title)}</span><span class="pill nodot ${i.sev>=3?"p-red":i.sev===2?"p-amber":"p-gray"}">고칠 것</span></div>`).join("")}
+        ${!acts.length&&!iss.length?`<div class="empty" style="padding:16px">${st().mode==="basic"?"최적화 모드를 켜면 고칠 것을 여기에 짚어 줍니다.":"지금은 따로 챙길 것이 없습니다."}</div>`:""}
+      </div>
+      ${kp.length?`<div class="card"><h2><span class="bars"></span>목표 대비 <span class="cnt">${+ym.slice(5)}월</span></h2>${kp.map(([n,v,tg,r,k])=>`<div class="tx-kline"><span>${n} <span class="hint">${tg}</span></span><b>${v}</b><span class="tx-prog"><i style="width:${Math.max(0,Math.min(100,r))}%;${k==="over"?"background:var(--late)":""}" class="${k==="ok"&&r>=100?"ok":""}"></i></span><em>${r}%</em></div>`).join("")}<div class="hint" style="margin-top:8px">전환당 비용과 ROAS는 100%가 목표와 같은 효율이고, 넘으면 목표보다 잘하는 것입니다. 목표는 설정 → 사업·목표에서 정합니다.</div></div>`:""}
+      <div class="card"><h2><span class="bars"></span>이번 주 콘텐츠 <button class="btn btn-sm btn-ghost" data-mk="go" data-to="content" style="margin-left:auto">달력 →</button></h2>
+        ${soon.length?soon.map(p=>`<div class="pj-line" data-mk="post-open" data-id="${p.id}"><span class="pj-nm">${esc(p.title)}</span><span class="hint">${esc(chanName(p.chan_id))}</span><span class="mono hint">${fmtD(p.date)}</span></div>`).join(""):`<div class="empty" style="padding:16px">이레 안에 잡힌 글이 없습니다.</div>`}
+      </div>
+    </div>
+  </div>`,{actions:`<button class="btn" data-mk="up-open">보고서 파일 올리기</button><button class="btn btn-pri" data-mk="stat-new">성과 적기</button>`});
+}
+
+/* ── 캠페인 ── */
+function campCard(c){
+  const w=win(campRows(c),7),ch=chanById(c.chan_id),n=c.status==="live"?diagnose(c).filter(i=>i.sev>=2).length:0,roasMode=byRoas(c,w);
+  return`<div class="mk-camp ${c.status==="done"||c.status==="pause"?"off":""}" data-mk="camp-open" data-id="${c.id}" tabindex="0">
+    <div class="mk-ch"><b>${esc(c.name)}</b><span class="pill ${CST[c.status][1]}">${CST[c.status][0]}</span></div>
+    <div class="mk-tags"><span class="tag">${esc(ch?ch.name:"채널 없음")}</span><span class="tag">${CAT[c.cat][1]}</span><span class="tag">${esc(GOAL[c.goal].split(" (")[0])}</span>${modePill(c)}${n?`<span class="pill nodot p-amber">고칠 것 ${n}</span>`:""}</div>
+    <div class="mk-nums"><div><span>7일 광고비</span><b>${fmt(w.cost)}</b></div><div><span>클릭</span><b>${fmt(w.clk)}</b></div><div><span>전환</span><b>${fN(w.conv)}</b></div><div><span>${roasMode?"ROAS":"전환당"}</span><b>${roasMode?fP(R.roas(w)):fW(R.cpa(w))}</b></div></div>
+    ${c.budget?`<div class="hint">${c.budget_type==="day"?"하루":c.budget_type==="total"?"전체":"월"} 예산 ${won(c.budget)}${c.end_date?` · ${fmtD(c.end_date)}까지`:""}</div>`:""}
+  </div>`;
+}
+function vCamps(){
+  const q=norm(U.cq),list=S.camps.filter(c=>(U.cat==="all"||c.cat===U.cat)&&(U.cst==="all"||(U.cst==="open"?c.status!=="done":c.status===U.cst))&&(!U.cch||c.chan_id===U.cch)&&(!q||norm(c.name+chanName(c.chan_id)).includes(q))).sort((a,b)=>({live:0,pause:1,plan:2,done:3}[a.status]-{live:0,pause:1,plan:2,done:3}[b.status])||win(campRows(b),7).cost-win(campRows(a),7).cost);
+  const cats=["all"].concat(Object.keys(CAT).filter(k=>S.camps.some(c=>c.cat===k)));
+  shell("camp",`
+  <div class="sp-bar"><div class="seg">${cats.map(k=>`<button class="${U.cat===k?"on":""}" data-mk="cat" data-v="${k}">${k==="all"?"전체":CAT[k][1]}</button>`).join("")}</div>
+    <select data-mkc="cst" aria-label="상태"><option value="open" ${U.cst==="open"?"selected":""}>끝난 것 빼고</option><option value="all" ${U.cst==="all"?"selected":""}>모두</option>${Object.entries(CST).map(([k,[l]])=>`<option value="${k}" ${U.cst===k?"selected":""}>${l}</option>`).join("")}</select>
+    ${S.chans.length>1?`<select data-mkc="cch" aria-label="채널">${chanOpts(U.cch,"모든 채널")}</select>`:""}
+    <input data-mki="cq" value="${esc(U.cq)}" placeholder="캠페인 이름 검색" style="flex:1 1 160px;min-width:0" aria-label="검색"></div>
+  ${list.length?`<div class="mk-cards">${list.map(campCard).join("")}</div>`:empty(S.camps.length?"조건에 맞는 캠페인이 없습니다":"캠페인이 없습니다",S.camps.length?"":"광고 하나하나를 캠페인으로 적어 두면 채널이 달라도 같은 눈금으로 견줄 수 있습니다. 보고서 파일을 올리면 캠페인이 자동으로 만들어집니다.")}
+  <div class="hint" style="margin-top:12px">숫자는 어제까지 7일 기준입니다. 캠페인을 누르면 날짜별 기록과 소재·키워드별 성과, 고칠 것을 봅니다.</div>`,
+  {actions:`<button class="btn" data-mk="plan-open">기획 마법사</button><button class="btn btn-pri" data-mk="camp-new">＋ 캠페인</button>`});
+}
+function campView(id){
+  const c=campById(id);if(!c)return;
+  const rows=campRows(c),ch=chanById(c.chan_id),G=tgt(c),W=[["어제까지 7일",win(rows,7)],["어제까지 30일",win(rows,30)],["전체",agg(rows)]],iss=diagnose(c).sort((a,b)=>b.sev-a.sev),acts=S.acts.filter(a=>a.camp_id===c.id&&a.status==="todo");
+  const by=new Map();const f14=addDaysStr(T(),-14);for(const r of rows){if(!r.label||r.date<f14)continue;let t=by.get(r.label);if(!t)by.set(r.label,t={label:r.label,cost:0,imp:0,clk:0,conv:0,rev:0});t.cost+=r.cost;t.imp+=r.imp;t.clk+=r.clk;t.conv+=r.conv;t.rev+=r.rev;}
+  const L=[...by.values()].sort((a,b)=>b.cost-a.cost).slice(0,30);
+  const dates=[...new Set(rows.map(r=>r.date))].sort().reverse().slice(0,14);
+  openModal(`<div class="mk-wide"><h2><span class="bars"></span>${esc(c.name)} <span class="pill ${CST[c.status][1]}">${CST[c.status][0]}</span>${modePill(c)}</h2>
+  <div class="mk-tags" style="margin:-8px 0 12px"><span class="tag">${esc(ch?ch.name:"채널 없음")}</span><span class="tag">${CAT[c.cat][0]}</span><span class="tag">목표: ${esc(GOAL[c.goal])}</span>${c.budget?`<span class="tag">${c.budget_type==="day"?"하루":c.budget_type==="total"?"전체":"월"} 예산 ${won(c.budget)}</span>`:""}${G.cpa?`<span class="tag">목표 전환당 ${won(G.cpa)}${G.own?"":" (손익분기)"}</span>`:""}${c.goal==="sale"&&G.roas?`<span class="tag">목표 ROAS ${fP(G.roas)}</span>`:""}</div>
+  ${c.landing?`<div class="hint" style="margin-bottom:10px;overflow-wrap:anywhere">도착 페이지 <a href="${esc(c.landing)}" target="_blank" rel="noopener">${esc(c.landing)}</a></div>`:""}${c.memo?`<div class="sp-box memo">${esc(c.memo)}</div>`:""}
+  <div class="tblwrap"><table class="tbl" style="min-width:640px;font-size:13px"><thead><tr><th>기간</th><th class="r">광고비</th><th class="r">노출</th><th class="r">클릭</th><th class="r">클릭률</th><th class="r">클릭당</th><th class="r">전환</th><th class="r">전환당</th><th class="r">ROAS</th></tr></thead><tbody>${W.map(([l,t])=>`<tr><td>${l}</td><td class="r num">${fmt(t.cost)}</td><td class="r num">${fmt(t.imp)}</td><td class="r num">${fmt(t.clk)}</td><td class="r num">${fP(R.ctr(t))}</td><td class="r num">${fW(R.cpc(t))}</td><td class="r num">${fN(t.conv)}</td><td class="r num">${fW(R.cpa(t))}</td><td class="r num">${t.rev?fP(R.roas(t)):"—"}</td></tr>`).join("")}</tbody></table></div>
+  ${iss.length?`<div class="mk-sub">고칠 것 <span class="hint">${iss.length}가지</span></div><div class="sp-list">${iss.map(i=>issCard(i,true)).join("")}</div>`:""}
+  ${acts.length?`<div class="mk-sub">남은 실행안</div>${acts.map(a=>`<div class="pj-line" data-mk="go" data-to="boost"><span class="pj-nm">${esc(a.title)}</span><span class="pill nodot p-gray">${AKIND[a.kind]||"기타"}</span></div>`).join("")}`:""}
+  ${L.length?`<div class="mk-sub">${c.cat==="search"?"키워드·광고그룹별":"소재·광고세트별"} <span class="hint">최근 14일</span></div><div class="tblwrap"><table class="tbl" style="min-width:560px;font-size:13px"><thead><tr><th>이름</th><th class="r">광고비</th><th class="r">클릭</th><th class="r">클릭률</th><th class="r">전환</th><th class="r">전환당</th></tr></thead><tbody>${L.map(t=>`<tr><td>${esc(t.label)}</td><td class="r num">${fmt(t.cost)}</td><td class="r num">${fmt(t.clk)}</td><td class="r num">${fP(R.ctr(t))}</td><td class="r num">${fN(t.conv)}</td><td class="r num">${fW(R.cpa(t))}</td></tr>`).join("")}</tbody></table></div>`:""}
+  <div class="mk-sub">날짜별 <span class="hint">최근 기록 ${dates.length}일</span></div>
+  ${dates.length?`<div class="tblwrap"><table class="tbl" style="min-width:520px;font-size:13px"><thead><tr><th>날짜</th><th class="r">광고비</th><th class="r">노출</th><th class="r">클릭</th><th class="r">전환</th><th class="r">매출</th><th></th></tr></thead><tbody>${dates.map(ds=>{const t=agg(rows,ds,ds);return`<tr><td class="mono">${fmtD(ds)}</td><td class="r num">${fmt(t.cost)}</td><td class="r num">${fmt(t.imp)}</td><td class="r num">${fmt(t.clk)}</td><td class="r num">${fN(t.conv)}</td><td class="r num">${fmt(t.rev)}</td><td class="r"><button class="btn btn-xs btn-ghost" data-mk="stat-new" data-camp="${c.id}" data-date="${ds}">고치기</button></td></tr>`;}).join("")}</tbody></table></div>`:`<div class="hint">아직 기록이 없습니다.</div>`}
+  <div class="m-foot"><button class="btn btn-ghost left" data-mk="camp-edit" data-id="${c.id}">수정</button>${c.status==="live"?`<button class="btn btn-ghost" data-mk="camp-st" data-id="${c.id}" data-v="pause">멈춤으로</button>`:c.status!=="done"?`<button class="btn btn-ghost" data-mk="camp-st" data-id="${c.id}" data-v="live">진행 중으로</button>`:""}<button class="btn" data-mk="stat-new" data-camp="${c.id}">성과 적기</button><button class="btn btn-pri" data-g="modal-close">닫기</button></div></div>`);
+}
+function issCard(i,inView){
+  const queued=S.acts.some(a=>a.key===i.key),nm=i.camp?i.camp.name:i.chan.name;
+  return`<div class="mk-iss s${i.sev}"><h3><span class="pill nodot ${i.sev>=3?"p-red":i.sev===2?"p-amber":"p-gray"}">${i.sev>=3?"먼저":i.sev===2?"살펴보기":"참고"}</span>${esc(i.title)}</h3>
+    <div class="why"><b style="color:var(--ink)">${esc(nm)}</b>${i.why?` · ${esc(i.why)}`:""}</div>
+    <ol>${i.fix.map(f=>`<li>${esc(f)}</li>`).join("")}</ol>
+    <div class="act">${queued?`<span class="pill nodot p-gray">실행안에 담김</span>`:`<button class="btn btn-sm" data-mk="iss-queue" data-key="${esc(i.key)}">실행안에 담기</button>`}${inView===true?"":i.camp?`<button class="btn btn-sm btn-ghost" data-mk="camp-open" data-id="${i.camp.id}">캠페인 보기</button>`:`<button class="btn btn-sm btn-ghost" data-mk="go" data-to="content">콘텐츠 달력</button>`}</div></div>`;
+}
+
+/* ── 성과 ── */
+const PERS=[["7","7일"],["14","14일"],["30","30일"],["90","90일"],["mon","이번 달"],["pmon","지난달"]];
+function perRange(){
+  const t=T();
+  if(U.per==="mon"){const ym=ymOf();return[ym+"-01",t,monShift(ym,-1)+"-01",monShift(ym,-1)+"-"+pad2(Math.min(+t.slice(8),daysIn(monShift(ym,-1))))];}
+  if(U.per==="pmon"){const ym=monShift(ymOf(),-1),p=monShift(ym,-1);return[ym+"-01",ym+"-"+pad2(daysIn(ym)),p+"-01",p+"-"+pad2(daysIn(p))];}
+  const n=+U.per;return[addDaysStr(t,-(n-1)),t,addDaysStr(t,-(2*n-1)),addDaysStr(t,-n)];
+}
+function perfGroups(from,to){
+  const rows=S.stats.filter(r=>r.date>=from&&r.date<=to&&(!U.pch||r.chan_id===U.pch)),m=new Map();
+  const keyOf=r=>U.grp==="date"?r.date:U.grp==="camp"?(r.camp_id||"ch:"+r.chan_id):U.grp==="cat"?((campById(r.camp_id)||chanById(r.chan_id)||{cat:"etc"}).cat):r.chan_id;
+  for(const r of rows){const k=keyOf(r);let a=m.get(k);if(!a)m.set(k,a=[]);a.push(r);}
+  const name=k=>U.grp==="date"?fmtD(k):U.grp==="camp"?(k.startsWith("ch:")?chanName(k.slice(3))+" (캠페인 없음)":(campById(k)||{name:"지워진 캠페인"}).name):U.grp==="cat"?CAT[k][0]:chanName(k)||"지워진 채널";
+  const out=[...m.entries()].map(([k,rs])=>({k,name:name(k),sub:U.grp==="camp"&&!k.startsWith("ch:")&&campById(k)?chanName(campById(k).chan_id):"",a:agg(rs),roas:roasOf(rs)}));
+  return{rows,list:U.grp==="date"?out.sort((a,b)=>b.k.localeCompare(a.k)):out.sort((a,b)=>b.a.cost-a.a.cost||b.a.clk-a.a.clk)};
+}
+function vPerf(){
+  const[from,to,pf,pt]=perRange(),G=perfGroups(from,to),t=agg(G.rows),all=S.stats.filter(r=>!U.pch||r.chan_id===U.pch),cmp=hasFrom(pf),p=cmp?agg(all,pf,pt):agg([]),tr=roasOf(G.rows),pr=cmp?roasOf(all,pf,pt):null;
+  const organic=t.view||t.eng,rec=S.stats.filter(r=>!U.pch||r.chan_id===U.pch).slice().sort((a,b)=>b.date.localeCompare(a.date)||String(b.updated_at).localeCompare(String(a.updated_at)));
+  const ym=U.fym||ymOf(),mrows=S.chans.map(c=>({c,cost:agg(IX.chan.get(c.id)||[],ym+"-01",ym+"-"+pad2(daysIn(ym))).cost})).filter(x=>x.cost>0),sent=(DB.finance||[]).filter(f=>f.source==="marketing"&&f.mkKey&&f.mkKey.startsWith(ym+":"));
+  shell("perf",`
+  <div class="sp-bar"><div class="seg">${PERS.map(([k,l])=>`<button class="${U.per===k?"on":""}" data-mk="per" data-v="${k}">${l}</button>`).join("")}</div>
+    ${S.chans.length>1?`<select data-mkc="pch" aria-label="채널">${chanOpts(U.pch,"모든 채널")}</select>`:""}<span class="hint">${fmtD(from)} ~ ${fmtD(to)}${cmp?" · 앞 기간과 비교":""}</span></div>
+  <div class="mk-funnel">
+    <div><span>광고비</span><b>${man(t.cost)}</b><em>${p.cost?`앞 기간 ${man(p.cost)}`:"&nbsp;"}</em></div>
+    <div><span>노출 → 클릭</span><b>${fmt(t.clk)}</b><em>노출 ${fmt(t.imp)} · 클릭률 ${fP(R.ctr(t))}${dlt(R.ctr(t),R.ctr(p))}</em></div>
+    <div><span>클릭 → 전환</span><b>${fN(t.conv)}</b><em>전환율 ${fP(R.cvr(t))}${dlt(R.cvr(t),R.cvr(p))} · 전환당 ${fW(R.cpa(t))}${dlt(R.cpa(t),R.cpa(p),true)}</em></div>
+    <div><span>광고 매출</span><b>${t.rev?man(t.rev):"—"}</b><em>${t.rev?`ROAS ${fP(tr)}${dlt(tr,pr)} · 매출을 기록한 광고 기준`:"매출이 기록된 광고가 없습니다"}</em></div>
+  </div>
+  <div class="card"><h2><span class="bars"></span>나눠 보기 <div class="seg" style="margin-left:auto">${[["chan","채널"],["cat","분류"],["camp","캠페인"],["date","날짜"]].map(([k,l])=>`<button class="${U.grp===k?"on":""}" data-mk="grp" data-v="${k}">${l}</button>`).join("")}</div></h2>
+    ${G.list.length?`<div class="tblwrap"><table class="tbl" style="min-width:${organic?980:820}px;font-size:13px"><thead><tr><th>${{chan:"채널",cat:"분류",camp:"캠페인",date:"날짜"}[U.grp]}</th><th class="r">광고비</th><th class="r">노출</th><th class="r">클릭</th><th class="r">클릭률</th><th class="r">클릭당</th><th class="r">전환</th><th class="r">전환율</th><th class="r">전환당</th><th class="r">매출</th><th class="r">ROAS</th>${organic?`<th class="r">조회</th><th class="r">반응</th>`:""}</tr></thead><tbody>
+    ${G.list.slice(0,200).map(x=>`<tr ${U.grp==="camp"&&!x.k.startsWith("ch:")&&campById(x.k)?`data-mk="camp-open" data-id="${x.k}" style="cursor:pointer"`:""}><td><b>${esc(x.name)}</b>${x.sub?` <span class="hint">${esc(x.sub)}</span>`:""}</td><td class="r num">${fmt(x.a.cost)}</td><td class="r num">${fmt(x.a.imp)}</td><td class="r num">${fmt(x.a.clk)}</td><td class="r num">${fP(R.ctr(x.a))}</td><td class="r num">${fW(R.cpc(x.a))}</td><td class="r num">${fN(x.a.conv)}</td><td class="r num">${fP(R.cvr(x.a))}</td><td class="r num">${fW(R.cpa(x.a))}</td><td class="r num">${fmt(x.a.rev)}</td><td class="r num">${x.a.rev?fP(x.roas):"—"}</td>${organic?`<td class="r num">${fmt(x.a.view)}</td><td class="r num">${fmt(x.a.eng)}</td>`:""}</tr>`).join("")}
+    <tr class="sum"><td>합계</td><td class="r num">${fmt(t.cost)}</td><td class="r num">${fmt(t.imp)}</td><td class="r num">${fmt(t.clk)}</td><td class="r num">${fP(R.ctr(t))}</td><td class="r num">${fW(R.cpc(t))}</td><td class="r num">${fN(t.conv)}</td><td class="r num">${fP(R.cvr(t))}</td><td class="r num">${fW(R.cpa(t))}</td><td class="r num">${fmt(t.rev)}</td><td class="r num">${t.rev?fP(tr):"—"}</td>${organic?`<td class="r num">${fmt(t.view)}</td><td class="r num">${fmt(t.eng)}</td>`:""}</tr></tbody></table></div>`
+    :empty("이 기간의 성과 기록이 없습니다","광고 관리자에서 받은 보고서 파일을 올리거나 ‘성과 적기’로 직접 적습니다.")}
+    <div class="hint" style="margin-top:10px">클릭률 = 클릭 ÷ 노출 · 전환율 = 전환 ÷ 클릭 · 전환당(CPA) = 광고비 ÷ 전환 · ROAS = 광고 매출 ÷ 광고비(여러 캠페인을 묶을 때는 매출을 기록한 캠페인의 광고비만 셉니다). 네이버 검색광고에서 가져온 광고비는 부가세가 든 금액입니다.</div>
+  </div>
+  <div class="card"><h2><span class="bars"></span>기록 <span class="cnt">${rec.length}줄</span></h2>
+    ${rec.length?`<div class="tblwrap"><table class="tbl" style="min-width:680px;font-size:13px"><thead><tr><th>날짜</th><th>채널 · 캠페인</th><th class="r">광고비</th><th class="r">노출</th><th class="r">클릭</th><th class="r">전환</th><th class="r">매출</th><th>어디서</th><th></th></tr></thead><tbody>${rec.slice(0,U.recN).map(r=>{const cp=campById(r.camp_id);return`<tr><td class="mono">${fmtD(r.date)}</td><td>${esc(chanName(r.chan_id))}${cp?` · ${esc(cp.name)}`:""}${r.label?` <span class="hint">${esc(r.label)}</span>`:""}${r.view||r.eng||r.fol!=null?`<div class="hint">${[r.view?`조회 ${fmt(r.view)}`:"",r.eng?`반응 ${fmt(r.eng)}`:"",r.fol!=null?`팔로워 ${fmt(r.fol)}`:""].filter(Boolean).join(" · ")}</div>`:""}${r.memo?`<div class="hint">${esc(r.memo)}</div>`:""}</td><td class="r num">${fmt(r.cost)}</td><td class="r num">${fmt(r.imp)}</td><td class="r num">${fmt(r.clk)}</td><td class="r num">${fN(r.conv)}</td><td class="r num">${fmt(r.rev)}</td><td><span class="hint">${{manual:"직접",file:"파일",naver:"네이버",meta:"메타",yt:"유튜브",ai:"AI"}[r.src]||""}</span></td><td class="r"><button class="btn btn-xs btn-ghost" data-mk="stat-del" data-id="${r.id}" aria-label="기록 지우기">지우기</button></td></tr>`;}).join("")}</tbody></table></div>${rec.length>U.recN?`<div style="margin-top:10px"><button class="btn btn-sm" data-mk="rec-more">더 보기</button></div>`:""}`:`<div class="hint">아직 기록이 없습니다.</div>`}
+  </div>
+  <div class="card"><h2><span class="bars"></span>광고비를 돈에 기록 <div class="seg" style="margin-left:auto"><button data-mk="ym" data-k="fym" data-d="-1" aria-label="이전 달">◀</button><button class="on">${monLabel(ym)}</button><button data-mk="ym" data-k="fym" data-d="1" ${ym>=ymOf()?"disabled":""} aria-label="다음 달">▶</button></div></h2>
+    ${mrows.length?`${mrows.map(x=>{const f=sent.find(s=>s.mkKey===ym+":"+x.c.id);return`<div class="pj-line" style="cursor:default"><span class="pj-nm">${esc(x.c.name)}</span><span class="mono" style="font-size:13px">${won(x.cost)}</span>${f?`<span class="pill nodot ${f.amount===x.cost?"p-green":"p-amber"}">${f.amount===x.cost?"기록됨":"금액 달라짐"}</span>`:""}</div>`;}).join("")}
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:12px"><button class="btn btn-sm" data-mk="fin-send">${monLabel(ym)} 광고비를 돈에 기록</button><span class="hint">채널마다 지출 한 줄로 들어가고, 다시 누르면 금액만 고칩니다. 카드 내역을 돈 메뉴에 따로 적었다면 겹치니 한쪽만 쓰세요.</span></div>`:`<div class="hint">이 달에 기록된 광고비가 없습니다.</div>`}
+  </div>`,
+  {actions:`<button class="btn btn-ghost" data-mk="perf-csv">CSV</button><button class="btn" data-mk="up-open">보고서 파일 올리기</button><button class="btn btn-pri" data-mk="stat-new">성과 적기</button>`});
+}
+function perfCsv(){
+  const[from,to]=perRange(),rows=S.stats.filter(r=>r.date>=from&&r.date<=to&&(!U.pch||r.chan_id===U.pch)).sort((a,b)=>a.date.localeCompare(b.date));
+  dlCsv(`마이마케팅_성과_${from}_${to}.csv`,["날짜","채널","분류","캠페인","상세","광고비","노출","클릭","전환","매출","조회","반응","팔로워"],rows.map(r=>{const c=campById(r.camp_id),ch=chanById(r.chan_id);return[r.date,ch?ch.name:"",CAT[(c||ch||{cat:"etc"}).cat][0],c?c.name:"",r.label,r.cost,r.imp,r.clk,r.conv,r.rev,r.view,r.eng,r.fol??""];}));
+}
+
+/* ── 콘텐츠 ── */
+const IDEAS={
+  local:["처음 오는 분이 가장 많이 묻는 것 세 가지","가격과 구성 한눈에 보기","오는 길 — 역에서 문 앞까지 30초 영상","이번 달 실제 이용 후기 소개","준비하는 모습 (오픈 전 10분)","자주 하는 실수와 예약 전 확인할 것","시즌·기념일에 맞춘 이용 방법","단골이 고르는 조합","사장이 직접 말하는 ‘이건 꼭’","비 오는 날·평일 낮처럼 한가한 시간 혜택","새로 들인 것 소개","한 달 동안 받은 질문에 답하기"],
+  online:["이 상품을 만든 이유","쓰기 전과 쓴 뒤","상세페이지에 못 담은 사용 팁 세 가지","후기에서 가장 많이 나온 말","비슷한 상품과 다른 점 한 가지","포장하고 보내는 과정","자주 묻는 질문 — 배송·교환","이럴 때 쓰면 좋습니다 (상황 세 가지)","재입고·신상품 알림","고객이 보낸 사진 소개","잘못 쓰는 방법과 바로잡기","세트로 사면 좋은 조합"],
+  b2b:["의뢰 전에 정해 오면 좋은 것 다섯 가지","최근 작업 사례 — 문제, 한 일, 결과","견적이 달라지는 이유","일이 진행되는 순서","자주 받는 질문에 답하기","이런 경우에는 맡지 않습니다","직접 해 볼 수 있는 점검표","업계에서 올해 달라진 것","고객이 놓치기 쉬운 비용","작업 도구와 방식 소개","맡기기 전에 물어봐야 할 질문","한 줄 후기와 그 뒷이야기"]};
+const BIZ={food:["음식점·카페","local"],space:["공간대여·파티룸·스터디룸","local"],beauty:["미용·뷰티·필라테스 (예약형)","local"],stay:["숙박·펜션","local"],edu:["학원·클래스·교육","local"],life:["동네 생활서비스 (수리·청소·인테리어)","local"],retail:["오프라인 소매","local"],online:["온라인 판매 (스마트스토어·자사몰)","online"],service:["전문 서비스·프리랜서·B2B","b2b"],etc:["그 밖의 업종","b2b"]};
+const arch=()=>(BIZ[st().biz.type]||BIZ.etc)[1];
+function vContent(){
+  const ym=U.ym||ymOf(),y=+ym.slice(0,4),mo=+ym.slice(5),first=new Date(y,mo-1,1),start=addDaysStr(ym+"-01",-((first.getDay()+6)%7)),t=T();
+  const cells=[];for(let i=0;i<42;i++){const ds=addDaysStr(start,i);if(i>=35&&ds.slice(0,7)!==ym)break;cells.push(ds);}
+  const byDate=new Map();for(const p of S.posts){if(!p.date)continue;let a=byDate.get(p.date);if(!a)byDate.set(p.date,a=[]);a.push(p);}
+  const ideas=S.posts.filter(p=>!p.date&&p.status!=="posted"&&p.status!=="skip"),posted=S.posts.filter(p=>p.status==="posted").sort((a,b)=>String(b.date).localeCompare(String(a.date))).slice(0,30);
+  shell("content",`
+  <div class="sp-bar"><div class="seg"><button data-mk="ym" data-d="-1" aria-label="이전 달">◀</button><button class="on">${monLabel(ym)}</button><button data-mk="ym" data-d="1" aria-label="다음 달">▶</button></div><span class="hint">칸을 누르면 그 날짜로 글을 잡습니다.</span></div>
+  <div class="mk-cal">${["월","화","수","목","금","토","일"].map(d=>`<div class="mk-dow">${d}</div>`).join("")}
+    ${cells.map(ds=>{const ps=byDate.get(ds)||[],out=ds.slice(0,7)!==ym;return`<div class="mk-day ${out?"out":""} ${ds===t?"today":""} ${!ps.length&&ds!==t?"blank":""}" data-mk="post-new" data-date="${ds}"><span>${+ds.slice(8)}${ds===t?" 오늘":""}</span>${ps.map(p=>`<button class="mk-post s-${p.status}" data-mk="post-open" data-id="${p.id}" title="${esc(p.title)}">${p.paid?"[광고] ":""}${esc(p.title)}</button>`).join("")}</div>`;}).join("")}
+  </div>
+  <div class="sp-grid2" style="margin-top:14px">
+    <div class="card"><h2><span class="bars"></span>날짜를 아직 안 잡은 것 <span class="cnt">${ideas.length}</span></h2>
+      ${ideas.length?ideas.map(p=>`<div class="pj-line" data-mk="post-open" data-id="${p.id}"><span class="pj-nm">${esc(p.title)}</span><span class="hint">${esc(chanName(p.chan_id))}</span><span class="pill ${PST[p.status][1]}">${PST[p.status][0]}</span></div>`).join(""):`<div class="empty" style="padding:16px">떠오른 것을 적어 두면 달력으로 옮기기 쉽습니다.</div>`}
+    </div>
+    <div class="card"><h2><span class="bars"></span>올린 글의 반응 <span class="cnt">최근 ${posted.length}개</span></h2>
+      ${posted.length?`<div class="tblwrap"><table class="tbl" style="min-width:420px;font-size:13px"><thead><tr><th>글</th><th class="r">조회</th><th class="r">반응</th><th class="r">반응률</th></tr></thead><tbody>${posted.map(p=>`<tr data-mk="post-open" data-id="${p.id}" style="cursor:pointer"><td><b>${esc(p.title)}</b><div class="hint">${esc(chanName(p.chan_id))} · ${fmtD(p.date)}</div></td><td class="r num">${fmt(p.view)}</td><td class="r num">${fmt(p.eng)}</td><td class="r num">${p.view?fP(p.eng/p.view*100):"—"}</td></tr>`).join("")}</tbody></table></div><div class="hint" style="margin-top:8px">조회·반응(좋아요·댓글·저장·공유) 수는 글을 열어 적습니다. 무엇이 통했는지 남겨 두는 용도입니다.</div>`:`<div class="empty" style="padding:16px">게시한 글이 없습니다.</div>`}
+    </div>
+  </div>`,{actions:`<button class="btn" data-mk="idea-open">아이디어 받기</button><button class="btn btn-pri" data-mk="post-new">＋ 콘텐츠</button>`});
+}
+
+/* ── 키워드 ── */
+function lineChart(series){   // [{name,data:[{d,v}]}] — 0~100 눈금
+  const C=["#FF4712","#2456C8","#1E7F4D","#B45309","#6B4ED6"],W=600,H=160,n=Math.max(1,...series.map(s=>s.data.length)),mx=Math.max(1,...series.flatMap(s=>s.data.map(p=>p.v)));
+  const path=s=>s.data.map((p,i)=>`${i?"L":"M"}${(i/(Math.max(1,n-1))*(W-10)+5).toFixed(1)},${(H-8-(p.v/mx)*(H-18)).toFixed(1)}`).join("");
+  return`<svg class="mk-line" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="검색 관심도 추이">${series.map((s,i)=>`<path d="${path(s)}" fill="none" stroke="${C[i%5]}" stroke-width="2" vector-effect="non-scaling-stroke"/>`).join("")}</svg><div class="mk-leg">${series.map((s,i)=>`<span><i style="background:${C[i%5]}"></i>${esc(s.name)}</span>`).join("")}<span>${series[0]&&series[0].data.length?esc(series[0].data[0].d)+" ~ "+esc(series[0].data[series[0].data.length-1].d):""}</span></div>`;
+}
+function vKw(){
+  const q=norm(U.kq),groups=[...new Set(S.kws.map(k=>k.grp).filter(Boolean))].sort(),list=S.kws.filter(k=>(U.kst==="all"||k.state===U.kst)&&(!U.kg||k.grp===U.kg)&&(!q||norm(k.word).includes(q))).sort((a,b)=>((b.vol_pc||0)+(b.vol_mo||0))-((a.vol_pc||0)+(a.vol_mo||0))||a.word.localeCompare(b.word));
+  const tool=U.tool,tr=U.trend;
+  shell("kw",`
+  <div class="sp-grid2">
+    <div class="card"><h2><span class="bars"></span>연관 키워드 찾기</h2>
+      ${S.conn.naver.on?`<div class="hint" style="margin-bottom:8px">낱말을 다섯 개까지 쉼표로 적으면 네이버에서 함께 검색되는 말과 한 달 검색 수를 가져옵니다.</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap"><input id="mk-seed" placeholder="예: 홍대 파티룸, 소규모 모임" style="flex:1 1 200px;min-width:0" value="${esc(tool?tool.seed:"")}"><button class="btn" data-mk="tool-go">찾기</button></div>
+      ${tool&&tool.items?`<div class="tblwrap" style="margin-top:10px;max-height:320px;overflow:auto"><table class="tbl" style="min-width:420px;font-size:13px"><thead><tr><th style="width:28px"></th><th>키워드</th><th class="r">PC</th><th class="r">모바일</th><th>경쟁</th></tr></thead><tbody>${tool.items.map((k,i)=>`<tr><td><input type="checkbox" class="mk-tk" value="${i}" ${S.kws.some(x=>x.word===k.word)?"disabled checked":""} aria-label="${esc(k.word)} 담기" style="width:16px;height:16px;accent-color:var(--accent)"></td><td>${esc(k.word)}</td><td class="r num">${k.low&&k.vol_pc<=10?"10 미만":fmt(k.vol_pc)}</td><td class="r num">${k.low&&k.vol_mo<=10?"10 미만":fmt(k.vol_mo)}</td><td>${esc(k.comp)}</td></tr>`).join("")}</tbody></table></div><div style="margin-top:10px"><button class="btn btn-sm btn-pri" data-mk="tool-add">고른 키워드 담기</button></div>`:""}`
+      :`<div class="hint">네이버 검색광고 계정을 연결하면 연관 키워드와 한 달 검색 수를 여기서 바로 찾습니다. 연결하지 않아도 아래 조합기와 직접 입력은 쓸 수 있습니다.</div><div style="margin-top:10px"><button class="btn btn-sm" data-mk="go" data-to="set" data-st="2">연결 설정</button></div>`}
+    </div>
+    <div class="card"><h2><span class="bars"></span>검색 관심도 추이</h2>
+      ${S.keys.datalab?`<div class="hint" style="margin-bottom:8px">낱말을 다섯 개까지 쉼표로 적습니다. 가장 많이 검색된 때를 100으로 본 상대값입니다(네이버 데이터랩).</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap"><input id="mk-trq" placeholder="예: 파티룸, 스터디룸" style="flex:1 1 200px;min-width:0" value="${esc(tr?tr.q:"")}"><button class="btn" data-mk="trend-go">보기</button></div>
+      ${tr&&tr.results?(tr.results.length?`<div style="margin-top:12px">${lineChart(tr.results)}</div>`:`<div class="hint" style="margin-top:10px">결과가 없습니다.</div>`):""}`
+      :`<div class="hint">네이버 데이터랩 연결 키가 들어가면 낱말별 검색 관심도가 1년 동안 어떻게 움직였는지 봅니다. 성수기를 미리 알고 예산을 잡는 데 씁니다.${CLOUD.owner?" 설정 → 연결에 넣는 방법이 있습니다.":""}</div>`}
+    </div>
+  </div>
+  <div class="card" style="margin-top:14px"><h2><span class="bars"></span>내 키워드 <span class="cnt">${S.kws.length}개</span></h2>
+    <div class="sp-bar"><div class="seg">${[["all","전체"]].concat(Object.entries(KST).map(([k,[l]])=>[k,l])).map(([k,l])=>`<button class="${U.kst===k?"on":""}" data-mk="kst" data-v="${k}">${l}</button>`).join("")}</div>
+      ${groups.length?`<select data-mkc="kg" aria-label="묶음"><option value="">모든 묶음</option>${groups.map(g=>`<option ${U.kg===g?"selected":""}>${esc(g)}</option>`).join("")}</select>`:""}
+      <input data-mki="kq" value="${esc(U.kq)}" placeholder="키워드 검색" style="flex:1 1 140px;min-width:0" aria-label="검색"></div>
+    ${list.length?`<div class="tblwrap"><table class="tbl" style="min-width:680px;font-size:13px"><thead><tr><th>키워드</th><th>묶음</th><th>상태</th><th class="r">PC</th><th class="r">모바일</th><th>경쟁</th><th class="r">입찰가</th><th>메모</th><th></th></tr></thead><tbody>${list.slice(0,400).map(k=>`<tr><td><b>${esc(k.word)}</b></td><td>${esc(k.grp||"")}</td><td><select data-mkk="${k.id}" aria-label="${esc(k.word)} 상태" style="width:auto;padding:4px 26px 4px 8px;font-size:12.5px">${Object.entries(KST).map(([v,[l]])=>`<option value="${v}" ${k.state===v?"selected":""}>${l}</option>`).join("")}</select></td><td class="r num">${k.vol_pc==null?"—":fmt(k.vol_pc)}</td><td class="r num">${k.vol_mo==null?"—":fmt(k.vol_mo)}</td><td>${esc(k.comp||"")}</td><td class="r num">${k.bid?fmt(k.bid):"—"}</td><td><span class="hint">${esc(k.memo||"")}${k.rank?` · 순위 ${esc(k.rank)}`:""}</span></td><td class="r"><button class="btn btn-xs btn-ghost" data-mk="kw-edit" data-id="${k.id}">수정</button></td></tr>`).join("")}</tbody></table></div>${list.length>400?`<div class="hint" style="margin-top:8px">400개까지만 보여 줍니다. 검색으로 좁혀 주세요.</div>`:""}`
+    :empty(S.kws.length?"조건에 맞는 키워드가 없습니다":"키워드가 없습니다",S.kws.length?"":"손님이 검색창에 치는 말을 모아 두는 곳입니다. ‘쓰는 중’은 광고에 넣은 것, ‘지켜보는 중’은 후보, ‘제외’는 광고에서 뺄 말입니다.")}
+    <div class="hint" style="margin-top:10px">검색 수는 네이버 한 달 검색 수(PC·모바일)이고, 직접 적은 키워드는 연관 키워드 찾기를 거치면 채워집니다. 제외 키워드는 모아 두었다가 광고 관리자에 등록합니다.</div>
+  </div>`,{actions:`<button class="btn btn-ghost" data-mk="kw-csv">CSV</button><button class="btn" data-mk="kw-mix">조합기</button><button class="btn btn-pri" data-mk="kw-new">＋ 키워드</button>`});
+}
+
+/* ── 최적화 — 고칠 것과 설정 안내 ── */
+function vOpt(){
+  const iss=issues(),P=chkProg(),G=chkGroups(),todo=todoActs("opt");
+  shell("opt",`${modeSeg()}
+  ${st().mode==="basic"?`<div class="sp-box info"><b>최적화 모드가 꺼져 있습니다</b>이 화면은 그대로 쓸 수 있습니다. 모드를 ‘최적화’로 바꾸면 현황과 홈 화면에도 고칠 것이 나타납니다. 캠페인마다 따로 정할 수도 있습니다.</div>`:""}
+  <div class="tx-h3">고칠 것 <span class="hint">${iss.length?`${iss.length}가지 · 어제까지 ${st().guard.days}일 기록 기준`:"기록이 쌓이면 여기서 짚어 줍니다"}</span></div>
+  ${iss.length?`<div class="sp-list">${iss.map(issCard).join("")}</div>`:empty(S.stats.length?"지금 기록으로는 따로 고칠 것이 보이지 않습니다":"성과 기록이 아직 없습니다",S.stats.length?"클릭과 노출이 일정 수 이상 모인 캠페인만 판단합니다. 기준은 설정 → 판단 기준에서 고칩니다.":"보고서 파일을 올리거나 광고 계정을 연결하면 클릭률·클릭 단가·전환율을 보고 무엇을 고칠지 알려 줍니다.")}
+  ${todo.length?`<div class="card" style="margin-top:14px"><h2><span class="bars"></span>담아 둔 할 일 <span class="cnt">${todo.length}</span></h2>${todo.map(a=>actCard(a,false)).join("")}</div>`:""}
+  <div class="tx-h3">설정 점검표 <span class="hint"><span id="mk-chk-tot">${P.d}/${P.n}</span> 완료 · 쓰는 채널에 맞춰 나옵니다</span></div>
+  ${G.map((g,gi)=>{const it=CHK[g].items,dn=it.filter(x=>chkDone(g,x[0])).length;return`<details class="mk-chk" ${gi===0&&dn<it.length?"open":""}><summary><span class="bars"></span>${esc(CHK[g].n)}<em>${dn}/${it.length}</em></summary>${it.map(x=>`<label class="mk-ci ${chkDone(g,x[0])?"done":""}"><input type="checkbox" data-mkc="chk" value="${g}:${x[0]}" ${chkDone(g,x[0])?"checked":""}><b>${esc(x[1])}</b><span>${esc(x[2])}</span></label>`).join("")}</details>`;}).join("")}
+  ${G.length<2?`<div class="hint" style="margin-bottom:14px">채널을 등록하면 네이버 파워링크·플레이스·메타 광고·인스타그램처럼 채널에 맞는 점검표가 더해집니다.</div>`:""}
+  <div class="card"><h2><span class="bars"></span>링크 꼬리표 만들기 (UTM)</h2>
+    <div class="hint" style="margin-bottom:6px">광고 링크 끝에 어디서 왔는지 알려 주는 표시를 붙입니다. 홈페이지 방문 통계에서 광고별로 나눠 볼 수 있습니다.</div>
+    <div class="mk-form"><div><label for="mk-u-url">도착 페이지 주소</label><input id="mk-u-url" data-mki="utm" placeholder="https://"></div><div><label for="mk-u-src">어디서 (source)</label><input id="mk-u-src" data-mki="utm" placeholder="naver, instagram …"></div><div><label for="mk-u-med">어떤 광고 (medium)</label><input id="mk-u-med" data-mki="utm" placeholder="cpc, social, blog …"></div><div><label for="mk-u-cmp">캠페인 이름 (campaign)</label><input id="mk-u-cmp" data-mki="utm" placeholder="winter_event"></div></div>
+    <div class="sp-box info" id="mk-u-out" style="margin-top:12px;overflow-wrap:anywhere">주소를 적으면 여기에 만들어집니다.</div>
+    <button class="btn btn-sm" data-mk="utm-copy">복사</button>
+  </div>`);
+}
+
+/* ── 부스터 — 무엇을 얼마나 바꿀지 ── */
+const VD={scale:["늘리기","p-green"],keep:["그대로","p-gray"],cut:["줄이기","p-amber"],stop:["멈춤","p-red"],wait:["더 모으는 중","p-line"]};
+function actCard(a,done){
+  const c=campById(a.camp_id),e=done?effect(a):null;
+  return`<div class="mk-act"><h3><span class="pill nodot ${a.mode==="boost"?"p-red":"p-blue"}">${AKIND[a.kind]||"기타"}</span><span style="flex:1;min-width:0">${esc(a.title)}</span>${a.by==="ai"?`<span class="pill p-via">AI 제안</span>`:""}</h3>
+    ${a.from_v||a.to_v?`<div class="mk-ft">${a.key&&a.key.startsWith("move:")?`<span>주는 쪽 <b>${esc(a.from_v)}</b></span><span>받는 쪽 <b>${esc(a.to_v)}</b></span>`:`<span>${a.from_v?`지금 <b>${esc(a.from_v)}</b>`:""}${a.from_v&&a.to_v?" → ":""}${a.to_v?`바꾼 뒤 <b>${esc(a.to_v)}</b>`:""}</span>`}</div>`:""}
+    ${a.detail?`<pre>${esc(a.detail)}</pre>`:""}
+    ${done?`<div class="mk-ft"><span>${a.status==="skip"?"건너뜀":"함"} ${fmtD((a.done_at||"").slice(0,10))}</span>${e?(e.wait?`<span class="mk-eff wait">효과 재는 중 — ${e.wait}일 뒤</span>`:e.none?`<span class="mk-eff wait">견줄 기록이 모자랍니다</span>`:`<span class="mk-eff ${e.good?"ok":"bad"}">${e.name} ${e.pctFmt?fP(e.bv):won(e.bv)} → ${e.pctFmt?fP(e.av):won(e.av)} (${e.d>0?"+":""}${Math.round(e.d)}%)</span>`):""}<button class="btn btn-xs btn-ghost" data-mk="act-st" data-id="${a.id}" data-v="todo">되돌리기</button></div>`
+    :`<div class="act"><button class="btn btn-sm btn-pri" data-mk="act-st" data-id="${a.id}" data-v="done">했어요</button>${a.task_id?`<span class="pill nodot p-gray">업무로 보냄</span>`:`<button class="btn btn-sm" data-mk="act-task" data-id="${a.id}">업무로 보내기</button>`}<button class="btn btn-sm btn-ghost" data-mk="act-st" data-id="${a.id}" data-v="skip">건너뛰기</button>${c?`<button class="btn btn-sm btn-ghost" data-mk="camp-open" data-id="${c.id}">캠페인 보기</button>`:""}</div>`}
+  </div>`;
+}
+function vBoost(){
+  const g=st().guard,G=tgt(null),P=boostPlan(),todo=todoActs("boost"),setup=todoActs("opt"),done=S.acts.filter(a=>a.status!=="todo").sort((a,b)=>String(b.done_at).localeCompare(String(a.done_at))).slice(0,20),on=S.camps.filter(c=>c.status==="live"&&effMode(c)==="boost").length;
+  const B=st().budget,ym=ymOf(),spent=agg(S.stats,ym+"-01",T()).cost,day=+T().slice(8),N=daysIn(ym);
+  shell("boost",`${modeSeg()}
+  <div class="sp-kpis">
+    <div class="stat"><div class="s-num">${G.cpa?man(G.cpa):"—"}</div><div class="s-lb">목표 전환당 비용</div><div class="s-sub">${st().target.cpa?"직접 정한 값":beCpa()?"객단가 × 마진율로 본 손익분기":"설정에서 객단가·마진율을 적어 주세요"}</div></div>
+    <div class="stat"><div class="s-num">${G.roas?fP(G.roas):"—"}</div><div class="s-lb">목표 ROAS</div><div class="s-sub">${st().target.roas?"직접 정한 값":beRoas()?"100 ÷ 마진율로 본 손익분기":"구매가 목표인 광고에 씁니다"}</div></div>
+    <div class="stat ${B&&spent/day*N>B*1.1?"warn":""}"><div class="s-num">${B?Math.round(spent/B*100)+"<em>%</em>":"—"}</div><div class="s-lb">이달 예산 사용</div><div class="s-sub">${B?`${man(spent)} / ${man(B)} · ${day}/${N}일`:"월 예산을 정하면 속도를 봅니다"}</div></div>
+    <div class="stat"><div class="s-num">${on}<em>개</em></div><div class="s-lb">부스터로 도는 캠페인</div><div class="s-sub">한 번에 ${g.step}%씩 · 어제까지 ${g.days*2}일 기준</div></div>
+  </div>
+  ${!G.cpa&&!G.roas?`<div class="sp-box warn"><b>목표가 없어 판단할 수 없습니다</b>설정 → 사업·목표에서 객단가와 마진율을 적거나 목표 전환당 비용을 정해 주세요. 얼마까지 써도 남는지 알아야 늘릴지 줄일지 정할 수 있습니다. <a data-mk="go" data-to="set" style="cursor:pointer;text-decoration:underline">설정 열기</a></div>`:""}
+  ${!on?`<div class="sp-box info"><b>부스터로 도는 캠페인이 없습니다</b>위에서 모드를 ‘부스터’로 바꾸면 진행 중인 광고 캠페인이 모두 대상이 됩니다. 캠페인 수정에서 하나씩 정할 수도 있습니다. 부스터는 전환이 기록되는 캠페인에서만 뜻이 있으니, 먼저 최적화 탭의 측정 점검을 마쳐 두세요.</div>`:""}
+  <div class="card"><h2><span class="bars"></span>지금 할 일 <span class="cnt">${todo.length}</span><button class="btn btn-sm btn-ghost" data-mk="act-new" data-mode="boost" style="margin-left:auto">＋ 직접 적기</button></h2>
+    ${todo.length?todo.map(a=>actCard(a,false)).join(""):`<div class="empty" style="padding:18px">${on?"지금은 바꿀 것이 없습니다. 기록이 더 모이거나 효율이 목표에서 벗어나면 여기에 나옵니다.":"남은 실행안이 없습니다."}</div>`}
+    <div class="hint" style="margin-top:10px">광고 관리자에서 직접 바꾼 뒤 ‘했어요’를 누르세요. 그날 뒤 ${g.days}일의 숫자를 전과 견줘 효과를 보여 줍니다. 마이마케팅이 광고 계정의 예산이나 입찰을 대신 바꾸지는 않습니다.</div>
+  </div>
+  ${setup.length?`<details class="mk-chk" style="margin-top:14px"><summary><span class="bars"></span>설정·점검 할 일<em>${setup.length}개 · 최적화 탭에서도 봅니다</em></summary><div style="padding:0 16px 6px">${setup.map(a=>actCard(a,false)).join("")}</div></details>`:""}
+  ${P.rows.length?`<div class="card"><h2><span class="bars"></span>예산 판단 <span class="cnt">어제까지 ${g.days*2}일</span></h2>
+    <div class="tblwrap"><table class="tbl" style="min-width:680px;font-size:13px"><thead><tr><th>캠페인</th><th class="r">하루 예산</th><th class="r">광고비</th><th class="r">전환</th><th class="r">전환당 · ROAS</th><th class="r">목표 대비</th><th>판단</th></tr></thead><tbody>
+    ${P.rows.sort((a,b)=>b.w2.cost-a.w2.cost).map(x=>`<tr data-mk="camp-open" data-id="${x.c.id}" style="cursor:pointer"><td><b>${esc(x.c.name)}</b> <span class="hint">${esc(chanName(x.c.chan_id))}</span></td><td class="r num">${x.db?fmt(r100(x.db)):"—"}</td><td class="r num">${fmt(x.w2.cost)}</td><td class="r num">${fN(x.w2.conv)}</td><td class="r num">${x.roasMode?fP(R.roas(x.w2)):fW(R.cpa(x.w2))}</td><td class="r num">${x.e==null?"—":Math.round(x.e*100)+"%"}</td><td><span class="pill nodot ${VD[x.verdict][1]}">${VD[x.verdict][0]}</span></td></tr>`).join("")}</tbody></table></div>
+    <div class="hint" style="margin-top:10px">목표 대비 100%가 목표와 같은 효율입니다. 110% 이상이고 전환이 ${g.minConv}건 넘으면 늘리고, 75% 아래면 줄이며, 전환 없이 목표 전환당 비용의 두 배를 쓰면 멈춤을 권합니다. 클릭이 ${g.minClk}번 모이기 전에는 판단하지 않습니다.</div></div>`:""}
+  ${done.length?`<div class="card"><h2><span class="bars"></span>한 일과 효과 <span class="cnt">최근 ${done.length}</span></h2>${done.map(a=>actCard(a,true)).join("")}</div>`:""}
+  <div class="card"><h2><span class="bars"></span>부스터가 하는 일</h2>
+    <div class="ext-rec">
+      <div><b>예산 옮기기</b><span>목표보다 잘하는 캠페인과 못하는 캠페인이 함께 있으면, 못하는 쪽 하루 예산의 ${g.step}%를 잘하는 쪽으로 옮기라고 알려 줍니다.</span></div>
+      <div><b>늘리기·줄이기·멈추기</b><span>캠페인마다 목표 대비 효율을 보고 예산을 얼마에서 얼마로 바꿀지 적어 줍니다. 한 번에 크게 바꾸지 않습니다.</span></div>
+      <div><b>소재·키워드 겨루기</b><span>보고서에 소재·키워드 이름이 들어 있으면 잘하는 것과 못하는 것을 골라, 무엇을 끄고 어디에 모을지 알려 줍니다.</span></div>
+      <div><b>자동화 상품 시험</b><span>전환이 한 달 30건 넘게 쌓인 캠페인에는 어드밴티지+·애드부스트·실적 최대화 같은 매체의 자동 최적화를 작게 나란히 돌려 보라고 권합니다.</span></div>
+      <div><b>월 예산 속도</b><span>이달 쓴 돈으로 월말 금액을 가늠해, 넘칠 것 같으면 줄일 곳을, 남을 것 같으면 늘릴 곳을 짚습니다.</span></div>
+      <div><b>효과 다시 재기</b><span>‘했어요’를 누른 날 앞뒤 같은 기간의 전환당 비용(또는 ROAS)을 견줘 바꾼 것이 통했는지 보여 줍니다.</span></div>
+    </div>
+  </div>`);
+}
+
+/* ── 설정 ── */
+function vSet(){
+  const s=st(),b=s.biz,tab=U.setTab||0,adm=isAdmin();
+  const seg=`<div class="seg" style="margin-bottom:14px">${["사업·목표","채널","연결","판단 기준"].map((l,i)=>`<button class="${tab===i?"on":""}" data-mk="set-tab" data-v="${i}">${l}</button>`).join("")}</div>`;
+  let body="";
+  if(tab===0)body=`
+  <div class="card"><h2><span class="bars"></span>사업과 목표</h2>
+    <div class="hint">객단가와 마진율을 알면 광고에 얼마까지 써도 남는지(손익분기)가 나옵니다. 최적화와 부스터는 이 숫자를 기준으로 판단합니다.</div>
+    <div class="mk-form">
+      <div><label for="mk-s-type">업종</label><select id="mk-s-type"><option value="">고르기</option>${Object.entries(BIZ).map(([k,[l]])=>`<option value="${k}" ${b.type===k?"selected":""}>${l}</option>`).join("")}</select></div>
+      <div><label for="mk-s-goal">광고로 얻으려는 것</label><select id="mk-s-goal">${Object.entries(GOAL).map(([k,l])=>`<option value="${k}" ${b.goal===k?"selected":""}>${l}</option>`).join("")}</select></div>
+      <div><label for="mk-s-region">지역 <span style="font-weight:500;color:var(--faint)">(전국이면 비움)</span></label><input id="mk-s-region" value="${esc(b.region)}" maxlength="60" placeholder="예: 서울 마포·서대문"></div>
+      <div><label for="mk-s-aov">손님 한 명이 한 번에 쓰는 돈 (객단가)</label><input id="mk-s-aov" type="number" min="0" step="1000" value="${b.aov||""}" data-mki="be" placeholder="원"></div>
+      <div><label for="mk-s-margin">마진율 % <span style="font-weight:500;color:var(--faint)">(원가·수수료 뺀 몫)</span></label><input id="mk-s-margin" type="number" min="0" max="100" value="${b.margin||""}" data-mki="be" placeholder="%"></div>
+      <div><label for="mk-s-budget">한 달 광고 예산</label><input id="mk-s-budget" type="number" min="0" step="10000" value="${s.budget||""}" placeholder="원"></div>
+      <div><label for="mk-s-cpa">목표 전환당 비용 <span style="font-weight:500;color:var(--faint)">(비우면 손익분기)</span></label><input id="mk-s-cpa" type="number" min="0" step="100" value="${s.target.cpa||""}" placeholder="원"></div>
+      <div><label for="mk-s-roas">목표 ROAS % <span style="font-weight:500;color:var(--faint)">(비우면 손익분기)</span></label><input id="mk-s-roas" type="number" min="0" step="10" value="${s.target.roas||""}" placeholder="%"></div>
+    </div>
+    <label class="mk-lb" for="mk-s-offer">무엇을 파는지 한두 줄로</label><input id="mk-s-offer" value="${esc(b.offer)}" maxlength="300" placeholder="예: 홍대입구역 3분, 20명까지 들어가는 파티룸. 평일 낮 3시간 6만 원부터">
+    <label class="mk-lb" for="mk-s-aud">누구에게</label><input id="mk-s-aud" value="${esc(b.aud)}" maxlength="300" placeholder="예: 생일·브라이덜 샤워를 준비하는 20~30대, 소규모 워크숍을 찾는 팀">
+    <div class="sp-box info" id="mk-be" style="margin-top:14px">${beText(b.aov,b.margin)}</div>
+    <button class="btn btn-pri" data-mk="set-save">저장</button>
+  </div>
+  <div class="card"><h2><span class="bars"></span>기획 받기</h2>
+    <div class="ext-rec">
+      <div><b>기획 마법사</b><span>업종·목표·예산을 고르면 채널 배분과 캠페인, 한 달 콘텐츠, 처음 할 일을 한 번에 만들어 줍니다.</span><div style="margin-top:8px"><button class="btn btn-sm btn-pri" data-mk="plan-open">열기</button></div></div>
+      <div><b>클로드에게 맡기기</b><span>내 사업 정보와 최근 성과를 담은 문장을 복사해 클로드에 붙여 넣으면 기획 파일을 만들어 줍니다. 받은 내용을 아래로 가져옵니다.</span><div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap"><button class="btn btn-sm" data-mk="plan-prompt">문장 복사</button><button class="btn btn-sm" data-mk="pim-open">기획 파일 가져오기</button></div></div>
+      <div><b>클로드를 직접 연결</b><span>연동·데이터 → AI 접속에서 마이마케팅을 고른 토큰을 만들면, 클로드가 성과를 읽고 실행안과 콘텐츠 초안을 제안합니다. 제안은 홈에서 승인해야 들어옵니다.</span><div style="margin-top:8px"><button class="btn btn-sm" data-nav="data">AI 접속 열기</button></div></div>
+    </div>
+  </div>`;
+  else if(tab===1)body=`
+  <div class="card"><h2><span class="bars"></span>채널 <span class="cnt">${S.chans.length}개</span><button class="btn btn-sm btn-pri" data-mk="chan-new" style="margin-left:auto">＋ 채널</button></h2>
+    ${S.chans.length?S.chans.map(c=>`<div class="pj-line" data-mk="chan-edit" data-id="${c.id}"><span class="pj-nm">${esc(c.name)}</span><span class="hint">${esc((KIND[c.kind]||KIND.etc)[0])}</span><span class="tag">${CAT[c.cat][1]}</span>${c.active===0?`<span class="pill nodot p-line">쓰지 않음</span>`:""}</div>`).join(""):`<div class="empty" style="padding:18px">등록한 채널이 없습니다. 네이버·인스타그램·유튜브처럼 광고나 홍보를 하는 곳을 등록하세요.</div>`}
+    <div class="hint" style="margin-top:10px">분류는 검색광고 · 타겟광고 · 콘텐츠 · 영상 · 체험단·인플루언서 · 메시지 · 지역·오프라인 가운데 하나입니다. 성과 탭에서 분류별로 묶어 볼 수 있습니다.</div>
+  </div>`;
+  else if(tab===2){
+    const n=S.conn.naver,m=S.conn.meta,yts=S.chans.filter(c=>c.kind==="youtube"&&c.handle);
+    body=`
+  ${!S.keys.vault?`<div class="sp-box warn"><b>아직 광고 계정을 연결할 수 없습니다</b>연결 정보를 암호화해 보관하는 키가 서버에 없습니다. ${CLOUD.owner?"아래 ‘운영자 설정’대로 MW_VAULT_KEY를 넣으면 켜집니다.":"운영자가 설정하면 켜집니다."} 연결하지 않아도 보고서 파일 올리기로 모든 기능을 쓸 수 있습니다.</div>`:""}
+  <div class="mk-conn">
+    <div><h3>네이버 검색광고 ${n.on?`<span class="pill p-green">연결됨</span>`:`<span class="pill p-gray">연결 안 됨</span>`}</h3>
+      <p>파워링크·쇼핑검색·플레이스 광고의 캠페인별 노출·클릭·광고비·전환을 날짜별로 가져오고, 키워드 탭의 연관 키워드 찾기를 켭니다. 네이버 검색광고 → 도구 → API 사용 관리에서 액세스라이선스와 비밀키를 발급받습니다. 성과를 읽기만 하고 광고 설정은 바꾸지 않습니다.</p>
+      ${n.on?`<p>고객 ID ${esc(n.cid)} · 키 ${esc(n.tail)} · ${fmtD((n.at||"").slice(0,10))} 연결</p>`:""}
+      <div class="act">${n.on?`<button class="btn btn-sm" data-mk="sync" data-src="naver">지금 가져오기</button><button class="btn btn-sm btn-ghost" data-mk="conn-test" data-src="naver">연결 확인</button>${adm?`<button class="btn btn-sm btn-ghost" data-mk="conn-open" data-src="naver">키 바꾸기</button><button class="btn btn-sm btn-ghost" data-mk="conn-del" data-src="naver">끊기</button>`:""}`:adm?`<button class="btn btn-sm btn-pri" data-mk="conn-open" data-src="naver" ${S.keys.vault?"":"disabled"}>연결하기</button>`:`<span class="hint">연결은 워크스페이스 관리자가 합니다.</span>`}</div></div>
+    <div><h3>메타 광고 (인스타그램·페이스북) ${m.on?`<span class="pill p-green">연결됨</span>`:`<span class="pill p-gray">연결 안 됨</span>`}</h3>
+      <p>캠페인별 노출·링크 클릭·지출·전환을 날짜별로 가져옵니다. 메타 비즈니스 설정 → 시스템 사용자에서 광고 계정을 읽을 수 있는(ads_read) 토큰을 만들고, 광고 계정 ID(act_ 뒤의 숫자)와 함께 넣습니다.</p>
+      ${m.on?`<p>광고 계정 ${esc(m.acct)} · 토큰 ${esc(m.tail)} · ${fmtD((m.at||"").slice(0,10))} 연결</p>`:""}
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:8px"><span class="hint">전환으로 셀 것</span><select data-mkc="metaconv" style="width:auto" aria-label="메타 전환 기준"><option value="purchase" ${s.metaConv==="purchase"?"selected":""}>구매</option><option value="lead" ${s.metaConv==="lead"?"selected":""}>잠재 고객 (문의·신청)</option><option value="message" ${s.metaConv==="message"?"selected":""}>메시지 대화 시작</option></select></div>
+      <div class="act">${m.on?`<button class="btn btn-sm" data-mk="sync" data-src="meta">지금 가져오기</button><button class="btn btn-sm btn-ghost" data-mk="conn-test" data-src="meta">연결 확인</button>${adm?`<button class="btn btn-sm btn-ghost" data-mk="conn-open" data-src="meta">토큰 바꾸기</button><button class="btn btn-sm btn-ghost" data-mk="conn-del" data-src="meta">끊기</button>`:""}`:adm?`<button class="btn btn-sm btn-pri" data-mk="conn-open" data-src="meta" ${S.keys.vault?"":"disabled"}>연결하기</button>`:`<span class="hint">연결은 워크스페이스 관리자가 합니다.</span>`}</div></div>
+    <div><h3>유튜브 채널 ${S.keys.yt?`<span class="pill ${yts.length?"p-green":"p-gray"}">${yts.length?`채널 ${yts.length}개`:"채널 등록 필요"}</span>`:`<span class="pill p-gray">준비 안 됨</span>`}</h3>
+      <p>채널에 ‘유튜브 채널’을 등록하고 핸들(@이름)을 적어 두면 구독자 수와 조회 수를 날마다 남깁니다. 공개된 숫자만 읽습니다.${S.keys.yt?"":" 서버에 유튜브 키가 들어가면 켜집니다."}</p>
+      ${S.keys.yt&&yts.length?`<div class="act"><button class="btn btn-sm" data-mk="sync" data-src="yt">지금 가져오기</button></div>`:""}</div>
+    <div><h3>그 밖의 매체</h3><p>구글 광고·카카오모먼트·당근·틱톡과 인스타그램 계정 통계는 각 매체의 관리 화면에서 보고서를 내려받아 ‘보고서 파일 올리기’로 넣습니다. 열 이름을 보고 날짜·캠페인·비용·노출·클릭·전환을 알아서 맞춥니다.</p><div class="act"><button class="btn btn-sm" data-mk="up-open">보고서 파일 올리기</button></div></div>
+  </div>
+  ${CLOUD.owner?`<div class="card" style="margin-top:14px"><h2><span class="bars"></span>운영자 설정 <span class="cnt">Cloudflare 비밀값</span></h2>
+    <div class="hint" style="line-height:1.8">Cloudflare → Workers &amp; Pages → myworkspro → Settings → Variables and Secrets → Add에서 이름과 값을 넣고 Encrypt로 저장한 뒤, Deployments에서 Retry deployment를 누릅니다.</div>
+    <div class="tblwrap" style="margin-top:8px"><table class="tbl" style="min-width:520px;font-size:13px"><thead><tr><th>이름</th><th>쓰임</th><th>지금</th></tr></thead><tbody>
+      <tr><td class="mono">MW_VAULT_KEY</td><td>광고 계정 연결 정보를 암호화하는 키. 16자 이상 아무 문자열. 바꾸면 기존 연결을 다시 해야 합니다.</td><td>${S.keys.vault?"있음":"없음"}</td></tr>
+      <tr><td class="mono">YT_API_KEY</td><td>유튜브 채널 구독자·조회 수 (구글 클라우드 콘솔 → YouTube Data API v3 키)</td><td>${S.keys.yt?"있음":"없음"}</td></tr>
+      <tr><td class="mono">NAVER_CLIENT_ID<br>NAVER_CLIENT_SECRET</td><td>검색 관심도 추이 (네이버 개발자센터 → 애플리케이션 등록 → 데이터랩 검색어트렌드)</td><td>${S.keys.datalab?"있음":"없음"}</td></tr>
+    </tbody></table></div></div>`:""}`;
+  }else{
+    const g=s.guard;
+    body=`
+  <div class="card"><h2><span class="bars"></span>판단할 때 지키는 선</h2>
+    <div class="mk-form">
+      <div><label for="mk-g-days">보는 기간 (일)</label><input id="mk-g-days" type="number" min="3" max="30" value="${g.days}"></div>
+      <div><label for="mk-g-step">예산을 한 번에 바꾸는 폭 (%)</label><input id="mk-g-step" type="number" min="5" max="50" value="${g.step}"></div>
+      <div><label for="mk-g-clk">판단에 필요한 클릭 수</label><input id="mk-g-clk" type="number" min="5" max="1000" value="${g.minClk}"></div>
+      <div><label for="mk-g-imp">판단에 필요한 노출 수</label><input id="mk-g-imp" type="number" min="100" max="100000" value="${g.minImp}"></div>
+      <div><label for="mk-g-conv">늘리기·줄이기에 필요한 전환 수</label><input id="mk-g-conv" type="number" min="1" max="100" value="${g.minConv}"></div>
+    </div>
+    <div class="hint" style="margin-top:10px">기록이 이보다 적은 캠페인은 우연일 수 있어 판단을 미룹니다. 광고비가 작으면 보는 기간을 14일로 늘려 보세요.</div>
+  </div>
+  <div class="card"><h2><span class="bars"></span>점검 기준 <span class="cnt">참고값</span></h2>
+    <div class="hint" style="margin-bottom:10px">클릭률과 전환율이 이 선보다 낮으면 ‘고칠 것’에 올립니다. 업종과 상품에 따라 크게 다르니 내 사업에 맞게 고쳐 쓰세요. 기록이 쌓이면 같은 분류의 내 평균과도 견줍니다.</div>
+    <div class="tblwrap"><table class="tbl" style="min-width:420px;font-size:13px"><thead><tr><th>분류</th><th class="r">클릭률 % 아래면</th><th class="r">전환율 % 아래면</th></tr></thead><tbody>${["search","target","video","local","message"].map(c=>{const r=refOf(c);return`<tr><td>${CAT[c][0]}</td><td class="r"><input class="mini" type="number" step="0.1" min="0" data-ref="${c}" data-k="ctr" value="${r.ctr??""}" aria-label="${CAT[c][0]} 클릭률 기준"></td><td class="r"><input class="mini" type="number" step="0.1" min="0" data-ref="${c}" data-k="cvr" value="${r.cvr??""}" aria-label="${CAT[c][0]} 전환율 기준"></td></tr>`;}).join("")}</tbody></table></div>
+    <div style="margin-top:14px"><button class="btn btn-pri" data-mk="guard-save">저장</button></div>
+  </div>`;
+  }
+  shell("set",seg+body);
+}
+function beText(aov,margin){
+  aov=Number(aov)||0;margin=Number(margin)||0;
+  if(!aov||!margin)return"객단가와 마진율을 적으면 손익분기가 계산됩니다.";
+  const cpa=Math.round(aov*margin/100),roas=Math.round(10000/margin);
+  return`<b>손익분기 (참고값)</b>전환 한 건에 ${won(cpa)}까지 쓰면 본전입니다 (${won(aov)} × ${margin}%). ROAS로는 ${roas}%가 본전입니다 (100 ÷ ${margin}%). 여기서 남기려는 만큼을 뺀 값이 목표가 됩니다. 재방문이 많은 사업이라면 첫 구매에서 본전보다 더 써도 됩니다.`;
+}
+
+/* ── 채널 · 캠페인 모달 ── */
+function chanModal(c){
+  const isNew=!c;c=c||{name:"",kind:"naver_sa",cat:"search",url:"",handle:"",memo:"",active:1};
+  const groups={};for(const[k,v]of Object.entries(KIND))(groups[v[3]]=groups[v[3]]||[]).push([k,v[0]]);
+  openModal(`<h2><span class="bars"></span>${isNew?"채널 추가":"채널 수정"}</h2>
+  <label for="mk-c-kind">종류</label><select id="mk-c-kind">${Object.entries(groups).map(([g,list])=>`<optgroup label="${g}">${list.map(([k,l])=>`<option value="${k}" ${c.kind===k?"selected":""}>${l}</option>`).join("")}</optgroup>`).join("")}</select>
+  <label for="mk-c-name">이름</label><input id="mk-c-name" value="${esc(c.name)}" maxlength="40" placeholder="예: 인스타그램 @haru_studio">
+  <div class="m-grid2"><div><label for="mk-c-cat">분류</label><select id="mk-c-cat">${Object.entries(CAT).map(([k,[l]])=>`<option value="${k}" ${c.cat===k?"selected":""}>${l}</option>`).join("")}</select></div>
+    <div><label for="mk-c-handle">계정·핸들</label><input id="mk-c-handle" value="${esc(c.handle||"")}" maxlength="80" placeholder="@이름"></div></div>
+  <label for="mk-c-url">주소</label><input id="mk-c-url" value="${esc(c.url||"")}" maxlength="300" placeholder="https://">
+  <label for="mk-c-memo">메모</label><input id="mk-c-memo" value="${esc(c.memo||"")}" maxlength="500">
+  ${isNew?"":`<label class="checkline"><input type="checkbox" id="mk-c-active" ${c.active!==0?"checked":""}>쓰는 중</label>`}
+  <div class="m-foot">${isNew?"":`<button class="btn btn-ghost left" data-mk="chan-del" data-id="${c.id}">삭제</button>`}<button class="btn btn-ghost" data-g="modal-close">취소</button><button class="btn btn-pri" data-mk="chan-save" data-id="${isNew?"":c.id}">저장</button></div>`);
+  const kd=$("#mk-c-kind"),nm=$("#mk-c-name");let auto=isNew;
+  nm.oninput=()=>{auto=false;};
+  const sync=()=>{const k=KIND[kd.value]||KIND.etc;if(isNew){$("#mk-c-cat").value=k[1];if(auto||!nm.value.trim()){nm.value=k[0].split(" (")[0];auto=true;}}};
+  kd.onchange=sync;if(isNew)sync();
+}
+async function chanSave(id){
+  const b={name:$("#mk-c-name").value.trim(),kind:$("#mk-c-kind").value,cat:$("#mk-c-cat").value,handle:$("#mk-c-handle").value.trim(),url:$("#mk-c-url").value.trim(),memo:$("#mk-c-memo").value.trim()};
+  if(!b.name)return toast("이름을 적어 주세요.");
+  if(b.url&&!/^https?:\/\//i.test(b.url))b.url="https://"+b.url;
+  if(id){b.id=id;b.active=$("#mk-c-active").checked;}
+  try{const r=await call("chan/save",b);upd(S.chans,r.chan);closeModal();if(onPage())route();toast("저장했습니다.");return r.chan;}catch(e){failToast(e);}
+}
+function campModal(c,pre){
+  if(!S.chans.length){toast("채널을 먼저 등록해 주세요.");chanModal(null);return;}
+  const isNew=!c;c=c||Object.assign({name:"",chan_id:U.cch||chansAct()[0].id,cat:"",goal:st().biz.goal||"lead",status:"live",mode:"",budget:"",budget_type:"month",start_date:"",end_date:"",target_cpa:"",target_roas:"",landing:"",audience:"",brand:"",memo:""},pre||{});
+  openModal(`<h2><span class="bars"></span>${isNew?"캠페인 추가":"캠페인 수정"}</h2>
+  <label for="mk-p-name">이름</label><input id="mk-p-name" value="${esc(c.name)}" maxlength="80" placeholder="예: 12월 연말 모임 — 지역 키워드">
+  <div class="m-grid2">
+    <div><label for="mk-p-chan">채널</label><select id="mk-p-chan">${chanOpts(c.chan_id)}</select></div>
+    <div><label for="mk-p-cat">분류</label><select id="mk-p-cat">${Object.entries(CAT).map(([k,[l]])=>`<option value="${k}" ${c.cat===k?"selected":""}>${l}</option>`).join("")}</select></div>
+    <div><label for="mk-p-goal">목표</label><select id="mk-p-goal">${Object.entries(GOAL).map(([k,l])=>`<option value="${k}" ${c.goal===k?"selected":""}>${l}</option>`).join("")}</select></div>
+    <div><label for="mk-p-status">상태</label><select id="mk-p-status">${Object.entries(CST).map(([k,[l]])=>`<option value="${k}" ${c.status===k?"selected":""}>${l}</option>`).join("")}</select></div>
+    <div><label for="mk-p-budget">예산 (원)</label><input id="mk-p-budget" type="number" min="0" step="1000" value="${c.budget||""}"></div>
+    <div><label for="mk-p-bt">예산 단위</label><select id="mk-p-bt"><option value="day" ${c.budget_type==="day"?"selected":""}>하루</option><option value="month" ${c.budget_type==="month"?"selected":""}>한 달</option><option value="total" ${c.budget_type==="total"?"selected":""}>기간 전체</option></select></div>
+    <div><label for="mk-p-start">시작일</label><input id="mk-p-start" type="date" value="${c.start_date||""}"></div>
+    <div><label for="mk-p-end">종료일</label><input id="mk-p-end" type="date" value="${c.end_date||""}"></div>
+    <div><label for="mk-p-cpa">목표 전환당 비용</label><input id="mk-p-cpa" type="number" min="0" step="100" value="${c.target_cpa??""}" placeholder="비우면 기본값"></div>
+    <div><label for="mk-p-roas">목표 ROAS %</label><input id="mk-p-roas" type="number" min="0" step="10" value="${c.target_roas??""}" placeholder="비우면 기본값"></div>
+  </div>
+  <label for="mk-p-mode">모드</label><select id="mk-p-mode"><option value="">기본값을 따름 (지금 ${MDS[st().mode][0]})</option>${Object.entries(MDS).map(([k,[l,d]])=>`<option value="${k}" ${c.mode===k?"selected":""}>${l} — ${d}</option>`).join("")}</select>
+  <label for="mk-p-landing">도착 페이지</label><input id="mk-p-landing" value="${esc(c.landing||"")}" maxlength="400" placeholder="https://">
+  <label for="mk-p-aud">타겟·키워드 메모</label><input id="mk-p-aud" value="${esc(c.audience||"")}" maxlength="300" placeholder="예: 반경 5km, 25~39세 / 지역+파티룸 키워드 20개">
+  ${(DB.brands||[]).length?`<label for="mk-p-brand">브랜드</label><select id="mk-p-brand"><option value="">없음</option>${DB.brands.map(x=>`<option ${c.brand===x?"selected":""}>${esc(x)}</option>`).join("")}</select>`:""}
+  <label for="mk-p-memo">메모</label><textarea id="mk-p-memo" maxlength="1000" style="min-height:60px">${esc(c.memo||"")}</textarea>
+  <div class="m-foot">${isNew?"":`<button class="btn btn-ghost left" data-mk="camp-del" data-id="${c.id}">삭제</button>`}<button class="btn btn-ghost" data-g="modal-close">취소</button><button class="btn btn-pri" data-mk="camp-save" data-id="${isNew?"":c.id}">저장</button></div>`);
+  const ch=$("#mk-p-chan"),cat=$("#mk-p-cat");
+  const sync=()=>{const x=chanById(ch.value);if(x)cat.value=x.cat;};
+  ch.onchange=sync;if(isNew&&!c.cat)sync();
+}
+async function campSave(id){
+  const v=s=>$(s).value,b={name:v("#mk-p-name").trim(),chan_id:v("#mk-p-chan"),cat:v("#mk-p-cat"),goal:v("#mk-p-goal"),status:v("#mk-p-status"),mode:v("#mk-p-mode"),budget:v("#mk-p-budget"),budget_type:v("#mk-p-bt"),start_date:v("#mk-p-start"),end_date:v("#mk-p-end"),target_cpa:v("#mk-p-cpa"),target_roas:v("#mk-p-roas"),landing:v("#mk-p-landing").trim(),audience:v("#mk-p-aud").trim(),brand:$("#mk-p-brand")?v("#mk-p-brand"):"",memo:v("#mk-p-memo").trim()};
+  if(!b.name)return toast("이름을 적어 주세요.");
+  if(b.start_date&&b.end_date&&b.end_date<b.start_date)return toast("종료일이 시작일보다 앞섭니다.");
+  if(b.landing&&!/^https?:\/\//i.test(b.landing))b.landing="https://"+b.landing;
+  if(id)b.id=id;
+  try{const r=await call("camp/save",b);const moved=id&&campById(id)&&campById(id).chan_id!==r.camp.chan_id;upd(S.camps,r.camp);closeModal();if(moved)await load();if(onPage())route();toast("저장했습니다.");if(effMode(r.camp)==="boost"){U.autoAt=0;autoQueue();}}catch(e){failToast(e);}
+}
+
+/* ── 성과 적기 ── */
+function statModal(pre){
+  if(!S.chans.length){toast("채널을 먼저 등록해 주세요.");chanModal(null);return;}
+  pre=pre||{};
+  const sel=pre.camp?pre.camp:pre.chan?"ch:"+pre.chan:(U.pch?"ch:"+U.pch:"");
+  openModal(`<h2><span class="bars"></span>성과 적기</h2>
+  <div class="m-grid2"><div><label for="mk-t-date">날짜</label><input id="mk-t-date" type="date" value="${pre.date||yday()}" max="${T()}"></div>
+    <div><label for="mk-t-camp">채널 · 캠페인</label><select id="mk-t-camp">${S.chans.filter(c=>c.active!==0).map(c=>`<optgroup label="${esc(c.name)}"><option value="ch:${c.id}" ${sel==="ch:"+c.id?"selected":""}>${esc(c.name)} (캠페인 없이)</option>${S.camps.filter(p=>p.chan_id===c.id&&p.status!=="done").map(p=>`<option value="${p.id}" ${sel===p.id?"selected":""}>${esc(p.name)}</option>`).join("")}</optgroup>`).join("")}</select></div></div>
+  <div class="m-grid2">
+    <div><label for="mk-t-cost">광고비 (원)</label><input id="mk-t-cost" type="number" min="0" inputmode="numeric"></div>
+    <div><label for="mk-t-imp">노출</label><input id="mk-t-imp" type="number" min="0" inputmode="numeric"></div>
+    <div><label for="mk-t-clk">클릭</label><input id="mk-t-clk" type="number" min="0" inputmode="numeric"></div>
+    <div><label for="mk-t-conv">전환 (문의·예약·구매 수)</label><input id="mk-t-conv" type="number" min="0" step="any" inputmode="decimal"></div>
+    <div><label for="mk-t-rev">광고로 생긴 매출 (원)</label><input id="mk-t-rev" type="number" min="0" inputmode="numeric"></div>
+    <div><label for="mk-t-fol">팔로워·구독자 수</label><input id="mk-t-fol" type="number" min="0" inputmode="numeric" placeholder="그날 기준 수"></div>
+    <div><label for="mk-t-view">조회·도달</label><input id="mk-t-view" type="number" min="0" inputmode="numeric"></div>
+    <div><label for="mk-t-eng">반응 (좋아요·댓글·저장)</label><input id="mk-t-eng" type="number" min="0" inputmode="numeric"></div>
+  </div>
+  <label for="mk-t-memo">메모</label><input id="mk-t-memo" maxlength="200" placeholder="예: 전화 문의 3건은 ‘네이버 보고 왔다’고 함">
+  <div class="hint" id="mk-t-hint" style="margin-top:10px">아는 칸만 채우면 됩니다. 같은 날짜·캠페인에 다시 적으면 앞의 숫자를 바꿉니다.</div>
+  <div class="m-foot"><button class="btn btn-ghost" data-g="modal-close">취소</button><button class="btn btn-pri" data-mk="stat-save">저장</button></div>`);
+  const F=["cost","imp","clk","conv","rev","fol","view","eng"];
+  const fill=()=>{const d=$("#mk-t-date").value,k=$("#mk-t-camp").value,camp=k.startsWith("ch:")?"":k,chan=camp?(campById(camp)||{}).chan_id:k.slice(3);
+    const ex=S.stats.filter(r=>r.date===d&&r.chan_id===chan&&r.camp_id===camp),tot=ex.find(r=>!r.label),det=ex.filter(r=>r.label);
+    F.forEach(f=>{$("#mk-t-"+f).value=tot&&tot[f]?tot[f]:"";});$("#mk-t-memo").value=tot?tot.memo||"":"";
+    $("#mk-t-hint").innerHTML=det.length?`<span style="color:var(--amber)">이 날짜에는 파일로 올린 상세 기록 ${det.length}줄(광고비 ${won(det.reduce((s,r)=>s+r.cost,0))})이 있습니다. 저장하면 이 한 줄로 바꿀지 묻습니다.</span>`:tot?"이미 적은 기록입니다. 고치면 바뀝니다.":"아는 칸만 채우면 됩니다. 같은 날짜·캠페인에 다시 적으면 앞의 숫자를 바꿉니다.";};
+  $("#mk-t-date").onchange=fill;$("#mk-t-camp").onchange=fill;fill();
+}
+async function statSave(replace){
+  const k=$("#mk-t-camp").value,b={date:$("#mk-t-date").value,memo:$("#mk-t-memo").value.trim()};
+  if(!k)return toast("채널을 골라 주세요.");
+  if(k.startsWith("ch:"))b.chan_id=k.slice(3);else b.camp_id=k;
+  ["cost","imp","clk","conv","rev","fol","view","eng"].forEach(f=>{b[f]=$("#mk-t-"+f).value;});
+  if(!b.date)return toast("날짜를 골라 주세요.");
+  if(!["cost","imp","clk","conv","rev","fol","view","eng"].some(f=>Number(b[f])>0))return toast("숫자를 하나 이상 적어 주세요.");
+  if(Number(b.clk)>Number(b.imp)&&Number(b.imp)>0)return toast("클릭이 노출보다 많습니다. 숫자를 확인해 주세요.");
+  if(replace)b.replace=true;
+  try{await call("stat/save",b);closeModal();await reload("적었습니다.");U.autoAt=0;autoQueue();}
+  catch(e){if(e.code==="has-detail"){const n=(e.data&&e.data.n)||0;const keep={};["date","camp","cost","imp","clk","conv","rev","fol","view","eng","memo"].forEach(f=>{keep[f]=$("#mk-t-"+f).value;});
+      if(await ask(`이 날짜에는 파일로 올린 상세 기록 ${n}줄이 있습니다.<br>지금 적은 한 줄로 바꿀까요? 소재·키워드별 숫자는 사라집니다.`,"바꾸기")){statModal({});Object.entries(keep).forEach(([f,v])=>{$("#mk-t-"+f).value=v;});statSave(true);}
+      return;}failToast(e);}
+}
+
+/* ── 보고서 파일 올리기 — 열 이름을 보고 맞춥니다 ── */
+const UF=[["date","날짜",/^(일별|일자|날짜|기간|일$|date|day|보고\s*시작|reporting\s*starts)/i],["camp","캠페인",/(캠페인\s*(이름|명)?$|^campaign(\s*name)?$)/i],["label","상세 (소재·그룹·키워드)",/(광고\s*이름|소재|광고\s*세트\s*이름|광고그룹|키워드|검색어|^ad\s*name|ad\s*set\s*name|ad\s*group|keyword|search\s*term)/i],
+  ["cost","광고비",/(총\s*비용|광고비|지출\s*금액|소진액?|^비용|^cost|spend|amount\s*spent)/i],["imp","노출",/(노출|impressions?)/i],["clk","클릭",/(링크\s*클릭|클릭\s*수?|link\s*clicks|^clicks?)/i],["conv","전환",/(전환\s*수|^전환$|^결과$|구매\s*수?$|리드|^results?$|^conversions?$|^purchases?$|leads?$)/i],["rev","매출",/(전환\s*매출|구매\s*전환\s*값|전환\s*값|전환\s*가치|매출|conv.*value|purchase.*value|revenue)/i],["view","조회·도달",/(조회\s*수?|동영상\s*재생|도달|views?$|video\s*plays|reach)/i],["eng","반응",/(참여|좋아요|반응|engagements?)/i]];
+const UX={cost:/평균|클릭당|전환당|노출당|cpc|cpm|cpa|per|당\s*비용/i,imp:/점유|share|당|per|빈도|rate|률/i,clk:/률|rate|당|per|ctr|cpc|고유|unique/i,conv:/률|rate|당|per|가치|값|매출|value|cost/i,rev:/당|per|roas|수익률/i,view:/률|rate|당|per/i,eng:/률|rate|당|per/i};
+async function readBook(f){if(!window.XLSX)await loadScript(XLSX_URL);const buf=await f.arrayBuffer();if(/\.(csv|txt)$/i.test(f.name)){let t;try{t=new TextDecoder("utf-8",{fatal:true}).decode(buf);}catch(e){t=new TextDecoder("euc-kr").decode(buf);}return XLSX.read(t.replace(/^﻿/,""),{type:"string",raw:true});}return XLSX.read(buf,{type:"array"});}
+const toDate=v=>{if(v instanceof Date)return`${v.getFullYear()}-${pad2(v.getMonth()+1)}-${pad2(v.getDate())}`;if(typeof v==="number"&&v>20000&&v<80000){const d=new Date(Math.round((v-25569)*864e5));return d.toISOString().slice(0,10);}const s=String(v||"").trim(),m=s.match(/(\d{4})[-./년\s]+(\d{1,2})[-./월\s]+(\d{1,2})/)||s.match(/^(\d{4})(\d{2})(\d{2})/);return m&&+m[2]>=1&&+m[2]<=12&&+m[3]>=1&&+m[3]<=31?`${m[1]}-${pad2(+m[2])}-${pad2(+m[3])}`:"";};
+const toNum=v=>{if(typeof v==="number")return v;const n=Number(String(v??"").replace(/[^0-9.-]/g,""));return Number.isFinite(n)?n:0;};
+function detectCols(H){
+  const map={},used=new Set();
+  for(const[k,,re]of UF){const i=H.findIndex((h,j)=>!used.has(j)&&re.test(String(h).trim())&&!(UX[k]&&UX[k].test(h)));map[k]=i;if(i>-1)used.add(i);}
+  return map;
+}
+function parseSheet(rows){
+  let hi=-1,best=0;
+  for(let i=0;i<Math.min(rows.length,25);i++){const H=(rows[i]||[]).map(c=>String(c??"").trim()),m=detectCols(H),sc=["cost","imp","clk","conv","view"].filter(k=>m[k]>-1).length+(m.date>-1?1:0)+(m.camp>-1?1:0);if(sc>best){best=sc;hi=i;}}
+  if(hi<0||best<2)return null;
+  const H=rows[hi].map(c=>String(c??"").trim());
+  return{H,map:detectCols(H),data:rows.slice(hi+1).filter(r=>r&&r.some(c=>String(c??"").trim()!==""))};
+}
+function upModal(){
+  U.imp=null;
+  const kinds=Object.entries(KIND).filter(([,v])=>v[2]).map(([k,v])=>`<option value="new:${k}">＋ ${v[0]} 채널 새로 만들기</option>`).join("");
+  openModal(`<div class="mk-wide"><h2><span class="bars"></span>보고서 파일 올리기</h2>
+  <div class="hint">광고 관리자에서 내려받은 보고서(엑셀·CSV)를 그대로 올립니다. 날짜별 추이를 보려면 ‘일별’로, 소재·키워드까지 견주려면 광고 이름이나 키워드 열을 넣어 내려받으세요. 파일은 이 브라우저에서 읽고, 고른 열의 숫자만 저장합니다.</div>
+  <div class="m-grid2"><div><label for="mk-up-chan">어느 채널의 보고서인가요</label><select id="mk-up-chan">${chanOpts(U.pch||"")}${kinds}</select></div>
+    <div><label for="mk-up-file">파일</label><input id="mk-up-file" type="file" accept=".xlsx,.xls,.csv,.txt"></div></div>
+  <div id="mk-up-out" style="margin-top:12px"></div>
+  <div class="m-foot"><button class="btn btn-ghost" data-g="modal-close">닫기</button></div></div>`);
+  $("#mk-up-file").onchange=async()=>{
+    const f=$("#mk-up-file").files[0],out=$("#mk-up-out");if(!f)return;out.innerHTML=`<p class="hint">읽는 중…</p>`;
+    try{
+      const wb=await readBook(f);let P=null;
+      for(const sn of wb.SheetNames){P=parseSheet(XLSX.utils.sheet_to_json(wb.Sheets[sn],{header:1,raw:true,defval:""}));if(P)break;}
+      if(!P)throw new Error("비용·노출·클릭 열을 찾지 못했습니다. 광고 관리자에서 받은 보고서 파일인지 확인해 주세요.");
+      U.imp=Object.assign(P,{file:f.name,date:yday(),mkcamp:true});upPreview();
+    }catch(e){out.innerHTML=`<div class="sp-box red">${esc(e.message==="load"?"엑셀 읽기 모듈을 불러오지 못했습니다. 인터넷 연결을 확인해 주세요.":(e.message||"파일을 읽지 못했습니다."))}</div>`;}
+  };
+}
+function upRows(){
+  const X=U.imp,g=(r,k)=>X.map[k]>-1?r[X.map[k]]:"",out=[];
+  for(const r of X.data){
+    const camp=String(g(r,"camp")||"").trim(),label=String(g(r,"label")||"").trim();
+    let date=X.map.date>-1?toDate(g(r,"date")):X.date;
+    if(!date)continue;                                          // 합계·소계 줄처럼 날짜가 아닌 줄은 건너뜁니다
+    if(X.map.date<0&&/^(합계|총계|전체|소계|total|summary)/i.test(camp||label||String(r[0]||"")))continue;
+    const o={date,camp,label,cost:Math.round(toNum(g(r,"cost"))),imp:Math.round(toNum(g(r,"imp"))),clk:Math.round(toNum(g(r,"clk"))),conv:Math.round(toNum(g(r,"conv"))*100)/100,rev:Math.round(toNum(g(r,"rev"))),view:Math.round(toNum(g(r,"view"))),eng:Math.round(toNum(g(r,"eng")))};
+    if(o.cost<0||o.imp<0||o.clk<0)continue;
+    if(o.cost||o.imp||o.clk||o.conv||o.rev||o.view||o.eng)out.push(o);
+  }
+  return out;
+}
+function upPreview(){
+  const X=U.imp,out=$("#mk-up-out");if(!X||!out)return;
+  const rows=upRows(),t=rows.reduce((a,r)=>{a.cost+=r.cost;a.imp+=r.imp;a.clk+=r.clk;a.conv+=r.conv;return a;},{cost:0,imp:0,clk:0,conv:0}),dates=rows.map(r=>r.date).sort(),camps=new Set(rows.map(r=>r.camp).filter(Boolean));
+  out.innerHTML=`<div class="sp-box info"><b style="display:inline">${esc(X.file)}</b> · 읽은 줄 ${fmt(rows.length)}개${rows.length?` · ${fmtD(dates[0])}${dates[0]!==dates[dates.length-1]?" ~ "+fmtD(dates[dates.length-1]):""} · 캠페인 ${camps.size}개 · 광고비 ${won(t.cost)} · 클릭 ${fmt(t.clk)} · 전환 ${fN(t.conv)}`:""}</div>
+  <div class="cu-map">${UF.map(([k,l])=>`<label><span>${l.split(" ")[0]}</span><select data-mk-map="${k}" aria-label="${l} 열"><option value="-1">—</option>${X.H.map((h,i)=>`<option value="${i}" ${X.map[k]===i?"selected":""}>${esc(h||"(빈 칸)")}</option>`).join("")}</select></label>`).join("")}</div>
+  ${X.map.date<0?`<div class="sp-box warn" style="margin-top:10px"><b>날짜 열이 없습니다</b>기간 합계 보고서로 보고 아래 날짜 하루에 넣습니다. 날짜별로 보려면 ‘일별’ 보고서를 받아 주세요.<div style="margin-top:6px"><input type="date" id="mk-up-date" value="${X.date}" max="${T()}" style="width:auto" aria-label="넣을 날짜"></div></div>`:""}
+  <label class="checkline" style="margin-top:10px"><input type="checkbox" id="mk-up-mk" ${X.mkcamp?"checked":""}>목록에 없는 캠페인은 새로 만들기</label>
+  ${rows.length?`<div class="tblwrap" style="margin-top:10px"><table class="tbl" style="min-width:560px;font-size:12.5px"><thead><tr><th>날짜</th><th>캠페인</th><th>상세</th><th class="r">광고비</th><th class="r">노출</th><th class="r">클릭</th><th class="r">전환</th><th class="r">매출</th></tr></thead><tbody>${rows.slice(0,5).map(r=>`<tr><td class="mono">${r.date}</td><td>${esc(r.camp)}</td><td>${esc(r.label)}</td><td class="r num">${fmt(r.cost)}</td><td class="r num">${fmt(r.imp)}</td><td class="r num">${fmt(r.clk)}</td><td class="r num">${fN(r.conv)}</td><td class="r num">${fmt(r.rev)}</td></tr>`).join("")}</tbody></table></div>
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:12px"><button class="btn btn-pri" data-mk="up-go">${fmt(rows.length)}줄 가져오기</button><span class="hint">같은 날짜·캠페인의 기록이 이미 있으면 이 파일의 숫자로 바꿉니다. 두 번 올려도 겹치지 않습니다.</span></div>`:`<div class="sp-box red" style="margin-top:10px">넣을 줄이 없습니다. 위에서 열을 다시 맞춰 보세요.</div>`}`;
+  out.querySelectorAll("[data-mk-map]").forEach(s=>s.onchange=()=>{X.map[s.dataset.mkMap]=+s.value;upPreview();});
+  const d=$("#mk-up-date");if(d){d.onchange=()=>{X.date=d.value||yday();};d.onblur=()=>upPreview();}
+  $("#mk-up-mk").onchange=e=>{X.mkcamp=e.target.checked;};
+}
+async function upGo(){
+  const rows=upRows();if(!rows.length)return;
+  const btn=$('[data-mk="up-go"]');if(btn)btn.disabled=true;
+  try{
+    let chan=$("#mk-up-chan").value;
+    if(!chan)throw Object.assign(new Error("x"),{code:"bad-channel"});
+    if(chan.startsWith("new:")){const k=chan.slice(4),ex=S.chans.find(c=>c.kind===k);if(ex)chan=ex.id;else{const r=await call("chan/save",{name:KIND[k][0].split(" (")[0],kind:k,cat:KIND[k][1]});upd(S.chans,r.chan);chan=r.chan.id;}}
+    let add=0,cm=0;
+    for(let i=0;i<rows.length;i+=4000){const r=await call("stat/import",{chan_id:chan,rows:rows.slice(i,i+4000),mkcamp:U.imp.mkcamp});add+=r.added;cm+=r.camps;}
+    closeModal();U.pch="";await reload(`${fmt(add)}줄을 가져왔습니다.${cm?` 캠페인 ${cm}개를 새로 만들었습니다.`:""}`);U.autoAt=0;autoQueue();
+  }catch(e){if(btn)btn.disabled=false;failToast(e);}
+}
+
+/* ── 광고 계정 연결 · 가져오기 ── */
+function connModal(src){
+  const nv=src==="naver";
+  openModal(`<h2><span class="bars"></span>${nv?"네이버 검색광고 연결":"메타 광고 연결"}</h2>
+  <div class="hint">${nv?"네이버 검색광고(searchad.naver.com) → 도구 → API 사용 관리에서 발급받은 값을 넣습니다. 고객 ID는 같은 화면의 CUSTOMER_ID입니다.":"메타 비즈니스 설정 → 사용자 → 시스템 사용자에서 만든 토큰(ads_read 권한)과 광고 계정 ID를 넣습니다."} 값은 암호화해 보관하고 화면에 다시 보여 주지 않습니다. 성과를 읽는 데만 씁니다.</div>
+  ${nv?`<label for="mk-k-cid">고객 ID (CUSTOMER_ID)</label><input id="mk-k-cid" inputmode="numeric" autocomplete="off" placeholder="숫자"><label for="mk-k-key">액세스라이선스</label><input id="mk-k-key" autocomplete="off"><label for="mk-k-sec">비밀키</label><input id="mk-k-sec" type="password" autocomplete="off">`
+  :`<label for="mk-k-acct">광고 계정 ID</label><input id="mk-k-acct" inputmode="numeric" autocomplete="off" placeholder="act_ 뒤의 숫자"><label for="mk-k-tok">액세스 토큰</label><input id="mk-k-tok" type="password" autocomplete="off">`}
+  <div class="m-foot"><button class="btn btn-ghost" data-g="modal-close">취소</button><button class="btn btn-pri" data-mk="conn-save" data-src="${src}">연결</button></div>`);
+}
+async function connSave(src){
+  const b=src==="naver"?{src,cid:$("#mk-k-cid").value.trim(),key:$("#mk-k-key").value.trim(),secret:$("#mk-k-sec").value.trim()}:{src,acct:$("#mk-k-acct").value.trim(),token:$("#mk-k-tok").value.trim()};
+  if(Object.values(b).some(v=>!v))return toast("빈칸을 채워 주세요.");
+  try{const r=await call("conn/save",b);S.conn=r.conn;closeModal();route();toast("연결했습니다. 확인하는 중…");
+    try{await call("conn/test",{src});toast("연결을 확인했습니다. 성과를 가져옵니다.");sync(src,30);}catch(e){toast(errMsg(e)||"연결 확인에 실패했습니다.");}}
+  catch(e){failToast(e);}
+}
+async function sync(src,days,quiet){
+  if(U.syncing)return;U.syncing=src;U.syncMsg="";U.tried[src]=Date.now();if(onPage()&&uiSafe())route();
+  try{const r=await call("sync",{src,days:days||14});S.settings=Object.assign({},st(),{synced:r.synced});U.syncing="";
+    U.syncMsg=src==="yt"?"유튜브 숫자를 가져왔습니다.":`${src==="naver"?"네이버":"메타"} ${fmt(r.rows)}줄${r.camps?` · 새 캠페인 ${r.camps}개`:""}`;
+    await load();if(onPage()&&uiSafe())route();if(!quiet)toast(U.syncMsg);U.autoAt=0;autoQueue();}
+  catch(e){U.syncing="";if(e.code!=="too-soon"||!quiet){U.syncMsg=errMsg(e);if(!quiet)failToast(e);}if(onPage()&&uiSafe())route();}
+}
+function syncDue(){   // 여섯 시간이 지난 연결만, 방금 해 본 것은 30분 동안 다시 하지 않습니다
+  const s=st().synced,old=x=>!x||Date.now()-Date.parse(x)>6*3600e3,L=[];if(S.conn.naver.on&&old(s.naver))L.push("naver");if(S.conn.meta.on&&old(s.meta))L.push("meta");if(S.keys.yt&&S.chans.some(c=>c.kind==="youtube"&&c.handle)&&old(s.yt))L.push("yt");
+  return L.filter(x=>!(U.tried[x]&&Date.now()-U.tried[x]<30*60e3));}
+async function autoSync(all){const L=all?["naver","meta","yt"].filter(x=>x==="yt"?S.keys.yt&&S.chans.some(c=>c.kind==="youtube"&&c.handle):S.conn[x].on):syncDue();for(const src of L)await sync(src,14,!all);}
+
+/* ── 콘텐츠 모달 ── */
+function postModal(p,pre){
+  const isNew=!p;p=p||Object.assign({chan_id:(chansAct().find(c=>!isPaid(c))||chansAct()[0]||{id:""}).id,camp_id:"",date:"",time:"",title:"",body:"",format:"",status:"idea",url:"",tags:"",view:0,eng:0,clk:0,paid:0,memo:""},pre||{});
+  openModal(`<h2><span class="bars"></span>${isNew?"콘텐츠 잡기":"콘텐츠"}</h2>
+  <label for="mk-o-title">제목 · 주제</label><input id="mk-o-title" value="${esc(p.title)}" maxlength="120" placeholder="예: 처음 오는 분이 가장 많이 묻는 것 세 가지">
+  <div class="m-grid2">
+    <div><label for="mk-o-chan">채널</label><select id="mk-o-chan"><option value="">아직 안 정함</option>${chanOpts(p.chan_id)}</select></div>
+    <div><label for="mk-o-format">형식</label><select id="mk-o-format"><option value="">—</option>${FORMATS.map(f=>`<option ${p.format===f?"selected":""}>${f}</option>`).join("")}</select></div>
+    <div><label for="mk-o-date">올리는 날</label><input id="mk-o-date" type="date" value="${p.date||""}"></div>
+    <div><label for="mk-o-time">시각</label><input id="mk-o-time" type="time" value="${p.time||""}"></div>
+    <div><label for="mk-o-status">상태</label><select id="mk-o-status">${Object.entries(PST).map(([k,[l]])=>`<option value="${k}" ${p.status===k?"selected":""}>${l}</option>`).join("")}</select></div>
+    <div><label for="mk-o-tags">해시태그</label><input id="mk-o-tags" value="${esc(p.tags||"")}" maxlength="300" placeholder="#홍대파티룸 #생일파티"></div>
+  </div>
+  <label for="mk-o-body">내용 · 메모</label><textarea id="mk-o-body" maxlength="6000" style="min-height:110px" placeholder="문구 초안, 찍을 장면, 넣을 링크">${esc(p.body||"")}</textarea>
+  <div style="margin-top:6px"><button class="btn btn-xs" data-mk="post-prompt">클로드에게 초안 부탁할 문장 복사</button></div>
+  <label class="checkline"><input type="checkbox" id="mk-o-paid" ${p.paid?"checked":""}>협찬·체험단처럼 대가를 주고받은 글</label>
+  <div class="sp-box warn" id="mk-o-paidbox" style="margin-top:8px;${p.paid?"":"display:none"}"><b>표시가 필요합니다</b>대가를 받은 글은 제목이나 본문 첫 부분에 ‘광고’, ‘협찬’을 밝혀야 합니다. 글 끝이나 해시태그 사이에만 두면 안 됩니다. AI로 만든 가상 인물이 추천하는 내용이면 그 사실도 함께 적습니다.</div>
+  ${isNew?"":`<div class="m-grid2"><div><label for="mk-o-url">올린 글 주소</label><input id="mk-o-url" value="${esc(p.url||"")}" maxlength="400" placeholder="https://"></div><div><label for="mk-o-view">조회</label><input id="mk-o-view" type="number" min="0" value="${p.view||""}"></div><div><label for="mk-o-eng">반응 (좋아요·댓글·저장·공유)</label><input id="mk-o-eng" type="number" min="0" value="${p.eng||""}"></div><div><label for="mk-o-clk">링크 클릭</label><input id="mk-o-clk" type="number" min="0" value="${p.clk||""}"></div></div>`}
+  <div class="m-foot">${isNew?"":`<button class="btn btn-ghost left" data-mk="post-del" data-id="${p.id}">삭제</button>`}<button class="btn btn-ghost" data-g="modal-close">취소</button><button class="btn btn-pri" data-mk="post-save" data-id="${isNew?"":p.id}">저장</button></div>`);
+  $("#mk-o-paid").onchange=e=>{$("#mk-o-paidbox").style.display=e.target.checked?"":"none";};
+}
+async function postSave(id){
+  const v=s=>$(s)?$(s).value:"",b={title:v("#mk-o-title").trim(),chan_id:v("#mk-o-chan"),format:v("#mk-o-format"),date:v("#mk-o-date"),time:v("#mk-o-time"),status:v("#mk-o-status"),tags:v("#mk-o-tags").trim(),body:v("#mk-o-body").trim(),paid:$("#mk-o-paid").checked};
+  if(!b.title)return toast("제목을 적어 주세요.");
+  if(id){b.id=id;let u=v("#mk-o-url").trim();if(u&&!/^https?:\/\//i.test(u))u="https://"+u;Object.assign(b,{url:u,view:v("#mk-o-view"),eng:v("#mk-o-eng"),clk:v("#mk-o-clk")});}
+  if(b.status==="posted"&&!b.date)b.date=T();
+  try{const r=await call("post/save",b);upd(S.posts,r.post);closeModal();if(onPage())route();toast("저장했습니다.");}catch(e){failToast(e);}
+}
+function postPrompt(){
+  const b=st().biz,ch=chanById($("#mk-o-chan").value),title=$("#mk-o-title").value.trim(),fmtv=$("#mk-o-format").value,body=$("#mk-o-body").value.trim(),paid=$("#mk-o-paid").checked;
+  if(!title)return toast("제목을 먼저 적어 주세요.");
+  copyText(`아래 조건으로 ${ch?ch.name:"SNS"}에 올릴 ${fmtv||"글"} 초안을 써 주세요.\n\n- 주제: ${title}\n- 우리 사업: ${b.offer||(BIZ[b.type]||["소규모 사업"])[0]}${b.region?`\n- 지역: ${b.region}`:""}${b.aud?`\n- 읽는 사람: ${b.aud}`:""}${body?`\n- 넣고 싶은 내용: ${body}`:""}\n\n요청:\n1. 첫 문장은 읽는 사람의 상황에서 시작하고, 과장하는 말은 쓰지 않습니다.\n2. 본문은 휴대폰에서 읽기 좋게 짧은 문단으로 씁니다.\n3. 마지막에 다음 행동(예약·문의·링크) 한 가지만 권합니다.\n4. 해시태그 5~8개를 따로 줍니다.${fmtv==="릴스"||fmtv==="쇼츠"||fmtv==="영상"?"\n5. 15~30초 분량으로 장면 순서와 화면 자막을 표로 정리합니다.":""}${paid?"\n\n이 글은 대가를 받고 쓰는 글이므로 제목이나 첫 문장에 ‘광고’ 또는 ‘협찬’ 표시를 넣어 주세요.":""}\n\n사실이 아닌 후기나 수치는 지어내지 말고, 확인이 필요한 부분은 [확인 필요]로 표시해 주세요.`,"문장을 복사했습니다. 클로드에 붙여 넣으세요.");
+}
+function ideaModal(){
+  const A=arch(),have=new Set(S.posts.map(p=>p.title));
+  openModal(`<h2><span class="bars"></span>콘텐츠 아이디어</h2>
+  <div class="hint">${st().biz.type?`${BIZ[st().biz.type][0]}에 맞춘 주제입니다.`:"설정에서 업종을 고르면 그에 맞는 주제가 나옵니다."} 고른 것은 ‘날짜를 아직 안 잡은 것’에 들어갑니다.</div>
+  <label for="mk-i-chan">채널</label><select id="mk-i-chan"><option value="">아직 안 정함</option>${chanOpts((chansAct().find(c=>!isPaid(c))||{id:""}).id)}</select>
+  <div style="margin-top:12px;display:flex;flex-direction:column;gap:6px">${IDEAS[A].map((t,i)=>`<label class="checkline" style="margin:0"><input type="checkbox" class="mk-idea" value="${i}" ${have.has(t)?"disabled":""}>${esc(t)}${have.has(t)?` <span class="hint">담김</span>`:""}</label>`).join("")}</div>
+  <div class="m-foot"><button class="btn btn-ghost" data-g="modal-close">닫기</button><button class="btn btn-pri" data-mk="idea-add">고른 것 담기</button></div>`);
+}
+
+/* ── 키워드 모달 ── */
+function kwModal(k){
+  openModal(`<h2><span class="bars"></span>키워드 수정</h2>
+  <label for="mk-w-word">키워드</label><input id="mk-w-word" value="${esc(k.word)}" maxlength="40">
+  <div class="m-grid2"><div><label for="mk-w-grp">묶음</label><input id="mk-w-grp" value="${esc(k.grp||"")}" maxlength="30" placeholder="예: 지역+업종"></div><div><label for="mk-w-state">상태</label><select id="mk-w-state">${Object.entries(KST).map(([v,[l]])=>`<option value="${v}" ${k.state===v?"selected":""}>${l}</option>`).join("")}</select></div>
+    <div><label for="mk-w-pc">월 검색 수 (PC)</label><input id="mk-w-pc" type="number" min="0" value="${k.vol_pc??""}"></div><div><label for="mk-w-mo">월 검색 수 (모바일)</label><input id="mk-w-mo" type="number" min="0" value="${k.vol_mo??""}"></div>
+    <div><label for="mk-w-bid">입찰가 (원)</label><input id="mk-w-bid" type="number" min="0" step="10" value="${k.bid??""}"></div><div><label for="mk-w-rank">내 순위 메모</label><input id="mk-w-rank" value="${esc(k.rank||"")}" maxlength="20" placeholder="예: 3위"></div></div>
+  <label for="mk-w-memo">메모</label><input id="mk-w-memo" value="${esc(k.memo||"")}" maxlength="300">
+  <div class="m-foot"><button class="btn btn-ghost left" data-mk="kw-del" data-id="${k.id}">삭제</button><button class="btn btn-ghost" data-g="modal-close">취소</button><button class="btn btn-pri" data-mk="kw-save" data-id="${k.id}">저장</button></div>`);
+}
+function kwAddModal(){
+  openModal(`<h2><span class="bars"></span>키워드 추가</h2>
+  <label for="mk-a-words">키워드 <span style="font-weight:500;color:var(--faint)">(한 줄에 하나, 쉼표로 나눠도 됩니다)</span></label><textarea id="mk-a-words" style="min-height:120px" placeholder="홍대 파티룸&#10;홍대 생일파티 장소&#10;합정 소규모 모임"></textarea>
+  <div class="m-grid2"><div><label for="mk-a-grp">묶음</label><input id="mk-a-grp" maxlength="30" placeholder="예: 지역+업종"></div><div><label for="mk-a-state">상태</label><select id="mk-a-state">${Object.entries(KST).map(([v,[l]])=>`<option value="${v}" ${v==="watch"?"selected":""}>${l}</option>`).join("")}</select></div></div>
+  <div class="m-foot"><button class="btn btn-ghost" data-g="modal-close">취소</button><button class="btn btn-pri" data-mk="kw-add">추가</button></div>`);
+}
+const splitWords=s=>[...new Set(String(s||"").split(/[\n,]+/).map(x=>x.replace(/\s+/g," ").trim()).filter(Boolean))];
+function mixModal(){
+  openModal(`<h2><span class="bars"></span>키워드 조합기</h2>
+  <div class="hint">앞말과 뒷말을 하나씩 짝지어 키워드를 만듭니다. 지역과 업종, 상황과 상품처럼 넣어 보세요.</div>
+  <div class="m-grid2"><div><label for="mk-x-a">앞말 <span style="font-weight:500;color:var(--faint)">(지역·상황)</span></label><textarea id="mk-x-a" style="min-height:120px" placeholder="홍대&#10;합정&#10;연남동">${esc((st().biz.region||"").split(/[·,\s]+/).filter(Boolean).join("\n"))}</textarea></div>
+    <div><label for="mk-x-b">뒷말 <span style="font-weight:500;color:var(--faint)">(업종·상품)</span></label><textarea id="mk-x-b" style="min-height:120px" placeholder="파티룸&#10;생일파티 장소&#10;브라이덜샤워"></textarea></div></div>
+  <div class="hint" id="mk-x-n" style="margin-top:8px">두 칸을 채우면 몇 개가 만들어지는지 보여 줍니다.</div>
+  <div class="m-foot"><button class="btn btn-ghost" data-g="modal-close">취소</button><button class="btn btn-pri" data-mk="mix-add">만들어 담기</button></div>`);
+  const upd2=()=>{const n=splitWords($("#mk-x-a").value).length*splitWords($("#mk-x-b").value).length;$("#mk-x-n").textContent=n?`${n}개가 만들어집니다${n>200?" — 한 번에 200개까지만 담습니다":""}. ‘지켜보는 중’으로 들어갑니다.`:"두 칸을 채우면 몇 개가 만들어지는지 보여 줍니다.";};
+  $("#mk-x-a").oninput=upd2;$("#mk-x-b").oninput=upd2;upd2();
+}
+async function kwImport(rows,msg){
+  if(!rows.length)return toast("담을 키워드가 없습니다.");
+  try{const r=await call("kw/import",{rows:rows.slice(0,500)});S.kws=r.kws||S.kws;closeModal();if(onPage())route();toast(msg||`${r.n}개를 담았습니다.`);}catch(e){failToast(e);}
+}
+
+/* ── 실행안 모달 · 업무로 보내기 ── */
+function actModal(mode){
+  U.actMode=mode==="boost"?"boost":"opt";
+  openModal(`<h2><span class="bars"></span>할 일 직접 적기</h2>
+  <label for="mk-n-title">할 일</label><input id="mk-n-title" maxlength="120" placeholder="예: 플레이스 대표 사진 10장 새로 올리기">
+  <div class="m-grid2"><div><label for="mk-n-kind">종류</label><select id="mk-n-kind">${Object.entries(AKIND).map(([k,l])=>`<option value="${k}" ${k==="etc"?"selected":""}>${l}</option>`).join("")}</select></div>
+    <div><label for="mk-n-camp">캠페인</label><select id="mk-n-camp"><option value="">없음</option>${openCamps().map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join("")}</select></div></div>
+  <label for="mk-n-detail">내용</label><textarea id="mk-n-detail" maxlength="2000" style="min-height:80px"></textarea>
+  <div class="m-foot"><button class="btn btn-ghost" data-g="modal-close">취소</button><button class="btn btn-pri" data-mk="act-save">담기</button></div>`);
+}
+function taskModal(a){
+  const ps=DB.projects.filter(p=>p.status!=="완료"&&canWorkProject(p)),mk=ps.find(p=>/마케팅|광고|홍보/.test(p.name));
+  openModal(`<h2><span class="bars"></span>업무로 보내기</h2>
+  <div class="sp-box info"><b>${esc(a.title)}</b>${a.from_v||a.to_v?`${esc(a.from_v||"")}${a.from_v&&a.to_v?" → ":""}${esc(a.to_v||"")}`:""}</div>
+  <label for="mk-k-proj">어느 프로젝트에 넣을까요</label><select id="mk-k-proj">${ps.map(p=>`<option value="${p.id}" ${mk&&mk.id===p.id?"selected":""}>${esc(p.name)}</option>`).join("")}<option value="__new" ${mk||ps.length?"":"selected"}>＋ ‘마케팅’ 프로젝트 새로 만들기</option></select>
+  <div class="m-grid2"><div><label for="mk-k-asg">담당</label><select id="mk-k-asg">${assigneeOpts(ME.id)}</select></div><div><label for="mk-k-due">마감</label><input id="mk-k-due" type="date" value="${addDaysStr(T(),3)}"></div></div>
+  <div class="m-foot"><button class="btn btn-ghost" data-g="modal-close">취소</button><button class="btn btn-pri" data-mk="task-go" data-id="${a.id}">업무 만들기</button></div>`);
+}
+async function taskGo(id){
+  const a=S.acts.find(x=>x.id===id);if(!a)return;
+  let pid=$("#mk-k-proj").value;const now=new Date().toISOString();
+  if(pid==="__new"){const p={id:uid("p"),name:"마케팅",brand:(DB.brands||[])[0]||"기타",status:"진행중",priority:"보통",dueDate:"",summary:"마이마케팅에서 보낸 광고·홍보 실행안을 모으는 프로젝트입니다.",memberIds:[],goals:[],links:[],updatedAt:now,ownerId:ME.id,startDate:T(),notes:"",createdAt:now,source:"마이마케팅"};DB.projects.push(p);pid=p.id;}
+  const t={id:uid("t"),projectId:pid,title:"[마케팅] "+a.title,detail:[a.from_v||a.to_v?`${a.from_v||""}${a.from_v&&a.to_v?" → ":""}${a.to_v||""}`:"",a.detail||""].filter(Boolean).join("\n"),status:"대기",assigneeId:$("#mk-k-asg").value,assigneeName:"",due:$("#mk-k-due").value,priority:"보통",source:"marketing",createdAt:now,updatedAt:now};
+  DB.tasks.push(t);logAct(`마이마케팅 실행안 "${a.title}"을(를) 업무로 보냈습니다.`);saveDB();
+  try{const r=await call("act/save",{id,task_id:t.id});upd(S.acts,r.act);}catch(e){}
+  closeModal();if(onPage())route();toast("업무보드에 넣었습니다.");
+}
+async function actStatus(id,v){
+  const a=S.acts.find(x=>x.id===id);if(!a)return;
+  const b={id,status:v},c=campById(a.camp_id);
+  if(v==="done"&&c)b.base=snap(c);      // 한 날 기준으로 '전' 숫자를 다시 찍어 둡니다
+  try{const r=await call("act/save",b);upd(S.acts,r.act);if(onPage())route();toast(v==="done"?`기록했습니다.${c?` ${st().guard.days}일 뒤 효과를 보여 드립니다.`:""}`:v==="skip"?"건너뛰었습니다.":"되돌렸습니다.");}catch(e){failToast(e);}
+}
+
+/* ── 기획 마법사 ── */
+const MIX={
+  local:[["naver_place",35,"네이버 플레이스 광고","‘지역+업종’을 검색한 사람에게 지도 위쪽에서 보입니다"],["naver_sa",25,"파워링크 — 지역 키워드","예약·문의하려는 뜻이 뚜렷한 검색어를 잡습니다"],["meta_ads",25,"인스타그램 광고 — 매장 주변","가게 반경 안의 사람에게 릴스·사진으로 알립니다"],["influencer",15,"체험단","후기 글과 사진을 쌓아 검색했을 때 믿을 거리를 만듭니다"]],
+  online:[["naver_shop",40,"네이버 쇼핑검색","사려고 검색하는 사람 앞에 상품을 올립니다"],["meta_ads",35,"인스타그램·페이스북 전환 광고","아직 검색하지 않는 사람에게 소재로 필요를 만듭니다"],["naver_sa",15,"파워링크 — 브랜드·핵심 키워드","내 이름을 검색한 사람을 놓치지 않습니다"],["influencer",10,"체험단·공동구매","후기 콘텐츠를 만들고 광고 소재로 다시 씁니다"]],
+  b2b:[["naver_sa",50,"파워링크 — 핵심 키워드","찾는 사람은 적어도 뜻이 분명합니다"],["naver_blog",20,"블로그 글 (제작비)","사례와 가이드는 검색에 오래 남습니다"],["meta_ads",20,"다시 보여 주기 (리타겟팅)","홈페이지에 왔던 사람에게 한 번 더 보입니다"],["google_ads",10,"구글 검색","전문 용어·영문 검색을 잡습니다"]]};
+const ASSET={place:"네이버 스마트플레이스",insta:"인스타그램 계정",blog:"네이버 블로그",site:"홈페이지",store:"스마트스토어·쇼핑몰",youtube:"유튜브 채널",kakao:"카카오톡 채널"};
+function planModal(){
+  const s=st(),b=s.biz,I=U.plan&&U.plan.I||{type:b.type||"",goal:b.goal||"lead",budget:s.budget||"",aov:b.aov||"",margin:b.margin||"",region:b.region||"",offer:b.offer||"",aud:b.aud||"",assets:b.assets||[],ka:"",kb:""};
+  openModal(`<div class="mk-wide"><h2><span class="bars"></span>기획 마법사 <span class="hint" style="font-weight:500">1 / 2 — 내 사업</span></h2>
+  <div class="mk-form">
+    <div><label for="mk-w1-type">업종</label><select id="mk-w1-type"><option value="">고르기</option>${Object.entries(BIZ).map(([k,[l]])=>`<option value="${k}" ${I.type===k?"selected":""}>${l}</option>`).join("")}</select></div>
+    <div><label for="mk-w1-goal">광고로 얻으려는 것</label><select id="mk-w1-goal">${["lead","sale","visit","aware"].map(k=>`<option value="${k}" ${I.goal===k?"selected":""}>${GOAL[k]}</option>`).join("")}</select></div>
+    <div><label for="mk-w1-budget">한 달 광고 예산 (원)</label><input id="mk-w1-budget" type="number" min="0" step="10000" value="${I.budget}" placeholder="예: 500000"></div>
+    <div><label for="mk-w1-region">지역 <span style="font-weight:500;color:var(--faint)">(전국이면 비움)</span></label><input id="mk-w1-region" value="${esc(I.region)}" maxlength="60" placeholder="예: 홍대 합정 연남동"></div>
+    <div><label for="mk-w1-aov">객단가 (원)</label><input id="mk-w1-aov" type="number" min="0" step="1000" value="${I.aov}" placeholder="손님 한 명이 한 번에 쓰는 돈"></div>
+    <div><label for="mk-w1-margin">마진율 (%)</label><input id="mk-w1-margin" type="number" min="0" max="100" value="${I.margin}" placeholder="원가·수수료 뺀 몫"></div>
+  </div>
+  <label for="mk-w1-offer">무엇을 파는지 한두 줄로</label><input id="mk-w1-offer" value="${esc(I.offer)}" maxlength="300">
+  <label>지금 가진 것</label><div class="mk-pick">${Object.entries(ASSET).map(([k,l])=>`<label><input type="checkbox" class="mk-w1-as" value="${k}" ${I.assets.includes(k)?"checked":""}>${l}</label>`).join("")}</div>
+  <div class="m-grid2"><div><label for="mk-w1-ka">키워드 앞말 <span style="font-weight:500;color:var(--faint)">(지역·상황, 쉼표로)</span></label><input id="mk-w1-ka" value="${esc(I.ka)}" placeholder="홍대, 합정, 연남동"></div><div><label for="mk-w1-kb">키워드 뒷말 <span style="font-weight:500;color:var(--faint)">(업종·상품)</span></label><input id="mk-w1-kb" value="${esc(I.kb)}" placeholder="파티룸, 생일파티 장소"></div></div>
+  <div class="m-foot"><button class="btn btn-ghost" data-g="modal-close">닫기</button><button class="btn btn-pri" data-mk="plan-next">기획안 보기 →</button></div></div>`);
+}
+function planRead(){
+  const v=s=>$(s).value;
+  return{type:v("#mk-w1-type"),goal:v("#mk-w1-goal"),budget:Math.max(0,Math.round(Number(v("#mk-w1-budget"))||0)),aov:Math.max(0,Math.round(Number(v("#mk-w1-aov"))||0)),margin:Math.max(0,Math.min(100,Math.round(Number(v("#mk-w1-margin"))||0))),region:v("#mk-w1-region").trim(),offer:v("#mk-w1-offer").trim(),aud:st().biz.aud||"",assets:$$(".mk-w1-as:checked").map(x=>x.value),ka:v("#mk-w1-ka").trim(),kb:v("#mk-w1-kb").trim()};
+}
+function buildPlan(I,pcts){
+  const A=(BIZ[I.type]||BIZ.etc)[1],thin=I.budget>0&&I.budget<300000,src=thin?MIX[A].slice(0,2):MIX[A],sum=src.reduce((s,m)=>s+m[1],0);
+  const mix=src.map((m,i)=>({kind:m[0],name:m[2],why:m[3],pct:pcts?pcts[i]:Math.round(m[1]/sum*20)*5}));
+  if(!pcts){const d=100-mix.reduce((s,m)=>s+m.pct,0);mix[0].pct+=d;}
+  const be=I.aov&&I.margin?Math.round(I.aov*I.margin/100):0,beR=I.margin?Math.round(10000/I.margin):0,tCpa=be?r100(be*0.7):0,tRoas=beR&&I.goal==="sale"?Math.round(beR/0.7):0;
+  const chans=[],camps=[],acts=[],posts=[],addCh=k=>{if(!chans.some(c=>c.kind===k))chans.push({name:KIND[k][0].split(" (")[0],kind:k,cat:KIND[k][1]});};
+  const gOf=k=>k==="influencer"?"aware":k==="naver_blog"?"traffic":I.goal;
+  for(const m of mix){addCh(m.kind);camps.push({chan:m.kind,name:m.name,goal:gOf(m.kind),budget:Math.round(I.budget*m.pct/100/1000)*1000,budget_type:m.kind==="influencer"||m.kind==="naver_blog"?"total":"month",status:"plan",memo:m.why});}
+  const cKind=A==="b2b"?"naver_blog":"instagram";addCh(cKind);
+  if(A==="local"&&!I.assets.includes("place"))acts.push({key:"setup:place:new",kind:"setup",mode:"opt",chan:"naver_place",title:"네이버 스마트플레이스 등록하기",detail:"플레이스 광고와 지도 검색의 바탕입니다. 사업자등록증을 준비해 스마트플레이스에서 업체를 등록하고, 영업시간·가격·사진·예약 버튼을 채웁니다."});
+  for(const g of ["common"].concat([...new Set(chans.map(c=>chkKey(c.kind)).filter(Boolean))]))for(const it of CHK[g].items.slice(0,g==="common"?3:2))acts.push({key:`setup:${g}:${it[0]}`,kind:g==="common"?"measure":"setup",mode:"opt",chan:g==="common"?"":g,title:it[1],detail:it[2]});
+  const mon=addDaysStr(mondayOf(T()),7),topics=IDEAS[A].slice(0,8),f=cKind==="naver_blog"?["블로그 글"]:["릴스","피드"];
+  topics.forEach((t,i)=>posts.push({chan:cKind,date:addDaysStr(mon,Math.floor(i/2)*7+(i%2?4:1)),title:t,format:f[i%f.length],status:"idea"}));
+  const ka=splitWords(I.ka),kb=splitWords(I.kb),kws=[];for(const a of ka)for(const b of kb)if(kws.length<40)kws.push({word:a+" "+b,grp:"지역+업종"});if(!ka.length)for(const b of kb.slice(0,40))kws.push({word:b,grp:"업종"});
+  return{mix,be,beR,tCpa,tRoas,chans,camps,acts,posts,kws,thin,
+    set:{set:true,mode:st().mode==="basic"?"opt":st().mode,budget:I.budget,biz:Object.assign({},st().biz,{type:I.type,goal:I.goal,aov:I.aov,margin:I.margin,region:I.region,offer:I.offer,assets:I.assets}),target:{cpa:st().target.cpa||tCpa,roas:st().target.roas||tRoas},plan:{at:new Date().toISOString(),type:I.type,goal:I.goal,budget:I.budget}}};
+}
+function planStep2(){
+  const X=U.plan,P=X.P,I=X.I;
+  openModal(`<div class="mk-wide"><h2><span class="bars"></span>기획 마법사 <span class="hint" style="font-weight:500">2 / 2 — 기획안</span></h2>
+  <div class="mk-sub" style="margin-top:0">채널과 예산 배분 <span class="hint">시작 배분안입니다. 비율을 고칠 수 있습니다</span></div>
+  ${P.thin?`<div class="sp-box info">한 달 30만 원 아래에서는 채널을 넷으로 나누면 어디서도 판단할 만큼 기록이 모이지 않습니다. 두 곳에 모아 시작합니다.</div>`:""}
+  <div class="mk-mix">${P.mix.map((m,i)=>`<div><span><b style="font-family:inherit;text-align:left;font-size:13.5px">${esc(m.name)}</b><small>${esc(m.why)}</small></span><input type="number" min="0" max="100" step="5" value="${m.pct}" data-mk-pct="${i}" aria-label="${esc(m.name)} 비율"><b>${I.budget?won(Math.round(I.budget*m.pct/100/1000)*1000):m.pct+"%"}</b></div>`).join("")}</div>
+  <div class="hint" id="mk-w2-sum">합계 ${P.mix.reduce((s,m)=>s+m.pct,0)}%${I.budget?` · 월 ${won(I.budget)}`:""}</div>
+  <div class="mk-sub">목표 숫자</div>
+  ${P.be?`<div class="sp-box info">전환 한 건에 <b style="display:inline">${won(P.be)}</b>까지가 본전입니다 (객단가 ${won(I.aov)} × 마진율 ${I.margin}%). 이익을 30% 남기는 선인 <b style="display:inline">${won(P.tCpa)}</b>을 목표 전환당 비용으로 시작합니다.${P.tRoas?` ROAS는 본전 ${P.beR}%, 목표 ${P.tRoas}%입니다.`:""} 2주 돌려 본 뒤 설정에서 고치세요.</div>`:`<div class="sp-box warn">객단가와 마진율이 비어 있어 목표 숫자를 정하지 못했습니다. 만든 뒤 설정 → 사업·목표에서 적어 주세요. 목표가 있어야 최적화와 부스터가 판단합니다.</div>`}
+  <div class="mk-sub">이렇게 만듭니다</div>
+  <div class="ext-rec">
+    <div><b>채널 ${P.chans.length}개 · 캠페인 ${P.camps.length}개</b><span>${P.camps.map(c=>esc(c.name)).join(" / ")} — 모두 ‘준비’ 상태로 들어갑니다. 광고를 실제로 켠 뒤 ‘진행 중’으로 바꾸세요.</span></div>
+    <div><b>처음 할 일 ${P.acts.length}가지</b><span>${P.acts.slice(0,4).map(a=>esc(a.title)).join(" / ")}${P.acts.length>4?" …":""}</span></div>
+    <div><b>4주 콘텐츠 ${P.posts.length}개</b><span>${esc(KIND[P.posts[0]?P.posts[0].chan:"instagram"][0])}에 주 2회, 아이디어 상태로 달력에 들어갑니다.</span></div>
+    ${P.kws.length?`<div><b>키워드 ${P.kws.length}개</b><span>${P.kws.slice(0,5).map(k=>esc(k.word)).join(", ")}${P.kws.length>5?" …":""}</span></div>`:""}
+  </div>
+  <div class="hint" style="margin-top:10px">이미 있는 채널·캠페인과 이름이 같으면 새로 만들지 않습니다. ${st().mode==="basic"?"모드는 ‘최적화’로 바꿔 둡니다.":`지금 모드(${MDS[P.set.mode][0]})는 그대로 둡니다.`}</div>
+  <div class="m-foot"><button class="btn btn-ghost left" data-mk="plan-back">← 고치기</button><button class="btn btn-ghost" data-g="modal-close">닫기</button><button class="btn btn-pri" data-mk="plan-apply">이대로 만들기</button></div></div>`);
+  // 비율을 고치면 금액과 합계만 그 자리에서 바꿉니다 (창을 다시 그리지 않습니다)
+  $$("[data-mk-pct]").forEach(el=>el.oninput=()=>{const p=$$("[data-mk-pct]").map(x=>Math.max(0,Math.min(100,Math.round(Number(x.value)||0))));X.P=buildPlan(I,p);$$(".mk-mix>div>b").forEach((o,i)=>{o.textContent=I.budget?won(Math.round(I.budget*p[i]/100/1000)*1000):p[i]+"%";});const sum=p.reduce((t,v)=>t+v,0);$("#mk-w2-sum").innerHTML=`합계 <b style="color:${sum===100?"inherit":"var(--late)"}">${sum}%</b>${I.budget?` · 월 ${won(I.budget)}`:""}${sum===100?"":" — 100%로 맞춰 주세요"}`;});
+}
+function planPrompt(){
+  const s=st(),b=s.biz,t=T(),m=win(S.stats,30),lines=openCamps().slice(0,25).map(c=>{const w=win(campRows(c),30);return`- ${c.name} (${chanName(c.chan_id)}, ${GOAL[c.goal].split(" (")[0]}, ${CST[c.status][0]}): 광고비 ${won(w.cost)}, 클릭 ${fmt(w.clk)}, 전환 ${fN(w.conv)}, 전환당 ${fW(R.cpa(w))}${w.rev?`, ROAS ${fP(R.roas(w))}`:""}`;});
+  copyText(`우리 사업의 다음 한 달 광고·홍보 기획을 짜 주세요. 답은 설명 몇 줄과 함께, 맨 끝에 아래 형식의 JSON 코드 블록 하나로 주세요. 마이웍스 마이마케팅에 그대로 가져올 수 있습니다.
+
+## 우리 사업
+- 업종: ${(BIZ[b.type]||["정하지 않음"])[0]}
+- 무엇을: ${b.offer||"(적지 않음)"}
+- 누구에게: ${b.aud||"(적지 않음)"}
+- 지역: ${b.region||"전국"}
+- 광고 목표: ${GOAL[b.goal]}
+- 한 달 예산: ${s.budget?won(s.budget):"(정하지 않음)"}
+- 객단가 ${b.aov?won(b.aov):"?"} · 마진율 ${b.margin?b.margin+"%":"?"} · 손익분기 전환당 비용 ${beCpa()?won(beCpa()):"?"}
+- 쓰는 채널: ${chansAct().map(c=>c.name).join(", ")||"없음"}
+
+## 최근 30일 성과 (어제까지)
+- 전체: 광고비 ${won(m.cost)}, 노출 ${fmt(m.imp)}, 클릭 ${fmt(m.clk)}, 전환 ${fN(m.conv)}, 전환당 ${fW(R.cpa(m))}
+${lines.join("\n")||"- 기록 없음"}
+
+## 부탁
+1. 예산을 어느 채널에 얼마씩 둘지와 그 이유
+2. 채널마다 캠페인 구성(목표, 예산, 타겟·키워드 방향)
+3. 4주 콘텐츠 계획(주 2회, 날짜는 ${addDaysStr(t,1)} 이후)
+4. 먼저 해야 할 설정·측정 점검
+5. 검색광고 키워드 후보와 제외 키워드
+확인되지 않은 수치는 지어내지 말고, 가정은 가정이라고 적어 주세요.
+
+## JSON 형식
+\`\`\`json
+{"format":"myworks-marketing/v1",
+ "channels":[{"name":"네이버 파워링크","kind":"naver_sa","category":"search"}],
+ "campaigns":[{"channel":"네이버 파워링크","name":"캠페인 이름","goal":"lead","budget":300000,"budget_type":"month","memo":"타겟·키워드 방향"}],
+ "posts":[{"channel":"인스타그램 계정","date":"${addDaysStr(t,3)}","title":"주제","body":"문구 초안","format":"릴스"}],
+ "actions":[{"title":"할 일","detail":"방법","campaign":"캠페인 이름","kind":"setup"}],
+ "keywords":[{"word":"키워드","group":"묶음","state":"watch"}]}
+\`\`\`
+kind는 ${Object.keys(KIND).join(", ")} 가운데 하나, category는 ${Object.keys(CAT).join(", ")}, goal은 ${Object.keys(GOAL).join(", ")}, budget_type은 day·month·total, action의 kind는 ${Object.keys(AKIND).join(", ")}, 키워드 state는 watch(후보)·neg(제외)입니다.`,"문장을 복사했습니다. 클로드에 붙여 넣고, 받은 JSON을 ‘기획 파일 가져오기’에 넣으세요.");
+}
+function pimModal(){
+  U.pim=null;
+  openModal(`<h2><span class="bars"></span>기획 파일 가져오기</h2>
+  <div class="hint">클로드가 준 답에서 JSON 부분을 붙여 넣거나 .json 파일을 고릅니다. 무엇이 만들어지는지 먼저 보여 드립니다.</div>
+  <label for="mk-j-text">내용</label><textarea id="mk-j-text" style="min-height:140px;font-family:var(--mono);font-size:12.5px" placeholder='{"format":"myworks-marketing/v1", …}'></textarea>
+  <input id="mk-j-file" type="file" accept=".json,application/json,.txt" style="margin-top:8px">
+  <div id="mk-j-out" style="margin-top:12px"></div>
+  <div class="m-foot"><button class="btn btn-ghost" data-g="modal-close">닫기</button><button class="btn" data-mk="pim-read">확인하기</button><button class="btn btn-pri" data-mk="pim-apply" disabled>만들기</button></div>`);
+  $("#mk-j-file").onchange=async()=>{const f=$("#mk-j-file").files[0];if(f){$("#mk-j-text").value=await f.text();pimRead();}};
+}
+function pimRead(){
+  const out=$("#mk-j-out"),btn=$('[data-mk="pim-apply"]');U.pim=null;btn.disabled=true;
+  let txt=$("#mk-j-text").value.trim();const m=txt.match(/```(?:json)?\s*([\s\S]*?)```/);if(m)txt=m[1].trim();else{const a=txt.indexOf("{"),z=txt.lastIndexOf("}");if(a>-1&&z>a)txt=txt.slice(a,z+1);}
+  let j;try{j=JSON.parse(txt);}catch(e){out.innerHTML=`<div class="sp-box red">JSON으로 읽지 못했습니다. 중괄호 { }로 시작하고 끝나는 부분을 통째로 붙여 넣어 주세요.</div>`;return;}
+  if(!j||typeof j!=="object"||!/^myworks-marketing\//.test(String(j.format||""))){out.innerHTML=`<div class="sp-box red">마이마케팅 기획 형식이 아닙니다. "format":"myworks-marketing/v1"이 있어야 합니다.</div>`;return;}
+  const A=x=>Array.isArray(x)?x:[];
+  const P={by:"ai",chans:A(j.channels).map(c=>({name:String(c.name||"").trim(),kind:KIND[c.kind]?c.kind:"etc",cat:CAT[c.category]?c.category:(KIND[c.kind]||KIND.etc)[1]})).filter(c=>c.name),
+    camps:A(j.campaigns).map(c=>({chan:String(c.channel||""),name:String(c.name||"").trim(),goal:GOAL[c.goal]?c.goal:"lead",budget:Math.max(0,Math.round(Number(c.budget)||0)),budget_type:["day","month","total"].includes(c.budget_type)?c.budget_type:"month",status:"plan",target_cpa:c.target_cpa||"",memo:String(c.memo||"")})).filter(c=>c.name),
+    posts:A(j.posts).map(p=>({chan:String(p.channel||""),date:toDate(p.date),title:String(p.title||"").trim(),body:String(p.body||""),format:FORMATS.includes(p.format)?p.format:"",status:p.body?"draft":"idea"})).filter(p=>p.title),
+    acts:A(j.actions).map(a=>({title:String(a.title||"").trim(),detail:String(a.detail||""),camp:String(a.campaign||""),kind:AKIND[a.kind]?a.kind:"etc",mode:"opt"})).filter(a=>a.title),
+    kws:A(j.keywords).map(k=>({word:String(k.word||"").trim(),grp:String(k.group||""),state:k.state==="neg"?"neg":"watch"})).filter(k=>k.word)};
+  const n=P.chans.length+P.camps.length+P.posts.length+P.acts.length+P.kws.length;
+  if(!n){out.innerHTML=`<div class="sp-box red">만들 것이 없습니다.</div>`;return;}
+  U.pim=P;btn.disabled=false;
+  out.innerHTML=`<div class="sp-box ok"><b>읽었습니다</b>채널 ${P.chans.length} · 캠페인 ${P.camps.length} (준비 상태) · 콘텐츠 ${P.posts.length} · 실행안 ${P.acts.length} · 키워드 ${P.kws.length}. 이미 있는 채널·캠페인과 이름이 같으면 새로 만들지 않습니다.</div>${P.camps.length?`<div class="hint">${P.camps.slice(0,6).map(c=>esc(c.name)+(c.budget?` (${won(c.budget)})`:"")).join(" / ")}</div>`:""}`;
+}
+
+/* ── 돈 · 홈 · 주간 리포트 ── */
+function finSend(){
+  const ym=U.fym||ymOf(),rows=S.chans.map(c=>({c,cost:agg(IX.chan.get(c.id)||[],ym+"-01",ym+"-"+pad2(daysIn(ym))).cost})).filter(x=>x.cost>0);
+  if(!rows.length)return toast("기록할 광고비가 없습니다.");
+  const sum=rows.reduce((s,x)=>s+x.cost,0);
+  if(!confirm(`${monLabel(ym)} 광고비 ${won(sum)}을(를) 채널 ${rows.length}곳 기준으로 돈에 기록할까요?\n이미 보낸 달이면 금액만 고칩니다.`))return;
+  const date=ym===ymOf()?T():ym+"-"+pad2(daysIn(ym)),cat=(DB.finCats.expense||[]).includes("마케팅")?"마케팅":((DB.finCats.expense||[])[0]||"기타"),now=new Date().toISOString();let add=0,fix=0;
+  for(const x of rows){const key=ym+":"+x.c.id,f=(DB.finance||[]).find(v=>v.source==="marketing"&&v.mkKey===key);
+    if(f){if(f.amount!==x.cost){f.amount=x.cost;f.date=date;f.updatedAt=now;fix++;}}
+    else{DB.finance.push({id:uid("f"),projectId:"",storeId:"",kind:"지출",amount:x.cost,category:cat,date,memo:`마이마케팅 ${monLabel(ym)} 광고비 · ${x.c.name}`,memberId:ME.id,createdAt:now,source:"marketing",mkKey:key});add++;}}
+  logAct(`${monLabel(ym)} 광고비를 돈에 기록했습니다. (${won(sum)})`);saveDB();route();toast(add||fix?`돈에 기록했습니다.${fix?` 금액 ${fix}건을 고쳤습니다.`:""}`:"이미 같은 금액으로 기록돼 있습니다.");
+}
+function fillDash(){
+  const el=$("#mk-dash-slot");if(!el||MODE!=="cloud"||!mgr()||!modOn("marketing"))return;
+  if(!S.ready){if(!S.loading)load().then(()=>{fillDash();autoQueue();}).catch(()=>{});return;}
+  refresh(false);
+  if(!S.chans.length&&!S.camps.length){el.innerHTML=`<div class="card" style="padding:14px 20px;display:flex;gap:12px;align-items:center;flex-wrap:wrap"><span style="font-size:13.5px;color:var(--sub);flex:1;min-width:220px"><b style="color:var(--ink)">마이마케팅</b> — 광고비와 문의·매출을 한곳에서 보고, 무엇을 고칠지 알려 줍니다.</span><button class="btn btn-sm" data-nav="marketing">시작하기 →</button></div>`;return;}
+  const ym=ymOf(),m=agg(S.stats,ym+"-01",T()),B=st().budget,n=todoActs().length,iss=st().mode==="basic"?0:issues().filter(i=>i.sev>=2).length,soon=S.posts.filter(p=>p.date&&p.date>=T()&&p.date<=addDaysStr(T(),7)&&!["posted","skip"].includes(p.status)).length;
+  el.innerHTML=`<div class="card"><h2><span class="bars"></span>광고·홍보 <button class="btn btn-sm btn-ghost" data-nav="marketing" style="margin-left:auto">마이마케팅 열기 →</button></h2>
+    <div class="sp-today"><span class="bchip" data-mk="go" data-to="perf"><b>${man(m.cost)}</b>이달 광고비${B?` · 예산의 ${Math.round(m.cost/B*100)}%`:""}</span><span class="bchip" data-mk="go" data-to="perf"><b>${fN(m.conv)}</b>전환${m.conv?` · 전환당 ${won(R.cpa(m))}`:""}</span>${n?`<span class="bchip warn" data-mk="go" data-to="boost"><b>${n}</b>실행안</span>`:""}${iss?`<span class="bchip warn" data-mk="go" data-to="opt"><b>${iss}</b>고칠 것</span>`:""}${soon?`<span class="bchip rev" data-mk="go" data-to="content"><b>${soon}</b>이번 주 콘텐츠</span>`:""}</div></div>`;
+}
+function weekText(s0,s1){
+  if(MODE!=="cloud"||!mgr()||!S.ready||!modOn("marketing")||(!S.chans.length&&!S.camps.length))return"";
+  const w=agg(S.stats,s0,s1),posted=S.posts.filter(p=>p.status==="posted"&&p.date>=s0&&p.date<=s1).length,by=S.chans.map(c=>({c,a:agg(IX.chan.get(c.id)||[],s0,s1)})).filter(x=>x.a.cost>0).sort((a,b)=>b.a.cost-a.a.cost).slice(0,4);
+  return`\n## 광고·홍보 (마이마케팅)\n- 이번 주 광고비 ${fmtWon(w.cost)} · 클릭 ${fmt(w.clk)} · 전환 ${fN(w.conv)}건${w.conv?` (전환당 ${fmtWon(R.cpa(w))})`:""}${w.rev?` · 광고 매출 ${fmtWon(w.rev)}`:""}\n${by.map(x=>`- ${x.c.name}: ${fmtWon(x.a.cost)}, 전환 ${fN(x.a.conv)}건`).join("\n")}${by.length?"\n":""}- 남은 실행안 ${todoActs().length}건 · 게시한 콘텐츠 ${posted}건\n`;
+}
+
+/* ── 이벤트 ── */
+function utm(){const u=$("#mk-u-url"),o=$("#mk-u-out");if(!u||!o)return"";let url=u.value.trim();if(!url){o.textContent="주소를 적으면 여기에 만들어집니다.";return"";}if(!/^https?:\/\//i.test(url))url="https://"+url;const q=[["utm_source","#mk-u-src"],["utm_medium","#mk-u-med"],["utm_campaign","#mk-u-cmp"]].map(([k,s])=>[k,$(s).value.trim()]).filter(x=>x[1]).map(([k,v])=>k+"="+encodeURIComponent(v)).join("&");const out=q?url+(url.includes("?")?"&":"?")+q:url;o.textContent=out;return out;}
+document.addEventListener("click",async e=>{
+  const b=e.target.closest("[data-mk]");if(!b)return;
+  const a=b.dataset.mk,id=b.dataset.id;
+  if(b.classList.contains("mk-day")&&e.target.closest(".mk-post"))return;
+  switch(a){
+    case"go":if(b.dataset.st!==undefined)U.setTab=+b.dataset.st;if($("#modal-root").classList.contains("show"))closeModal();go("#/marketing"+(b.dataset.to?"/"+b.dataset.to:""));break;
+    case"mode":{const v=b.dataset.v;if(v===st().mode)break;if(await saveSet({mode:v},`${MDS[v][0]} 모드로 바꿨습니다.`)){route();if(v==="boost"){U.autoAt=0;autoQueue();}}break;}
+    case"cat":U.cat=b.dataset.v;route();break;
+    case"per":U.per=b.dataset.v;U.recN=30;route();break;
+    case"grp":U.grp=b.dataset.v;route();break;
+    case"kst":U.kst=b.dataset.v;route();break;
+    case"rec-more":U.recN+=100;route();break;
+    case"ym":{const k=b.dataset.k||"ym";U[k]=monShift(U[k]||ymOf(),Number(b.dataset.d));route();break;}
+    case"set-tab":U.setTab=+b.dataset.v;route();break;
+    case"set-save":{const v=s=>$(s).value;const ok=await saveSet({set:true,budget:v("#mk-s-budget"),biz:Object.assign({},st().biz,{type:v("#mk-s-type"),goal:v("#mk-s-goal"),region:v("#mk-s-region").trim(),aov:v("#mk-s-aov"),margin:v("#mk-s-margin"),offer:v("#mk-s-offer").trim(),aud:v("#mk-s-aud").trim()}),target:{cpa:v("#mk-s-cpa"),roas:v("#mk-s-roas")}},"저장했습니다.");if(ok){route();U.autoAt=0;autoQueue();}break;}
+    case"guard-save":{const v=s=>$(s).value,ref={};$$("[data-ref]").forEach(el=>{(ref[el.dataset.ref]=ref[el.dataset.ref]||{})[el.dataset.k]=el.value;});if(await saveSet({guard:{days:v("#mk-g-days"),step:v("#mk-g-step"),minClk:v("#mk-g-clk"),minImp:v("#mk-g-imp"),minConv:v("#mk-g-conv")},ref},"저장했습니다."))route();break;}
+    case"chan-new":chanModal(null);break;
+    case"chan-edit":{const c=chanById(id);if(c)chanModal(c);break;}
+    case"chan-save":chanSave(id);break;
+    case"chan-del":{if(!confirm("이 채널을 지울까요?"))break;try{await call("chan/del",{id});S.chans=S.chans.filter(c=>c.id!==id);closeModal();route();}catch(err){failToast(err);}break;}
+    case"camp-new":campModal(null);break;
+    case"camp-open":campView(id);break;
+    case"camp-edit":{const c=campById(id);if(c)campModal(c);break;}
+    case"camp-save":campSave(id);break;
+    case"camp-st":{try{const r=await call("camp/save",{id,status:b.dataset.v});upd(S.camps,r.camp);closeModal();route();toast(`‘${CST[r.camp.status][0]}’${ro(CST[r.camp.status][0]).slice(CST[r.camp.status][0].length)} 바꿨습니다.`);}catch(err){failToast(err);}break;}
+    case"camp-del":{const n=campRows(campById(id)||{id}).length;if(!confirm(`이 캠페인을 지울까요?${n?`\n성과 기록 ${n}줄도 함께 지워집니다. 기록을 남기려면 지우지 말고 상태를 ‘끝남’으로 바꾸세요.`:""}`))break;try{await call("camp/del",{id});closeModal();await reload("지웠습니다.");}catch(err){failToast(err);}break;}
+    case"stat-new":statModal({camp:b.dataset.camp,date:b.dataset.date});break;
+    case"stat-save":statSave(false);break;
+    case"stat-del":{if(!confirm("이 기록을 지울까요?"))break;try{await call("stat/del",{id});S.stats=S.stats.filter(r=>r.id!==id);reindex();route();}catch(err){failToast(err);}break;}
+    case"up-open":upModal();break;
+    case"up-go":upGo();break;
+    case"perf-csv":perfCsv();break;
+    case"fin-send":finSend();break;
+    case"sync":sync(b.dataset.src,30);break;
+    case"sync-all":autoSync(true);break;
+    case"conn-open":connModal(b.dataset.src);break;
+    case"conn-save":connSave(b.dataset.src);break;
+    case"conn-test":{b.disabled=true;try{const r=await call("conn/test",{src:b.dataset.src});toast(b.dataset.src==="naver"?`연결돼 있습니다. 캠페인 ${r.campaigns}개가 보입니다.`:`연결돼 있습니다. ${r.name||"광고 계정"}`);}catch(err){failToast(err);}b.disabled=false;break;}
+    case"conn-del":{if(!confirm("연결을 끊을까요? 이미 가져온 성과 기록은 남습니다."))break;try{const r=await call("conn/del",{src:b.dataset.src});S.conn=r.conn;route();toast("연결을 끊었습니다.");}catch(err){failToast(err);}break;}
+    case"post-new":postModal(null,b.dataset.date?{date:b.dataset.date,status:"draft"}:null);break;
+    case"post-open":{e.stopPropagation();const p=S.posts.find(x=>x.id===id);if(p)postModal(p);break;}
+    case"post-save":postSave(id);break;
+    case"post-del":{if(!confirm("이 콘텐츠를 지울까요?"))break;try{await call("post/del",{id});S.posts=S.posts.filter(p=>p.id!==id);closeModal();route();}catch(err){failToast(err);}break;}
+    case"post-prompt":postPrompt();break;
+    case"idea-open":ideaModal();break;
+    case"idea-add":{const ch=$("#mk-i-chan").value,L=IDEAS[arch()],pick=$$(".mk-idea:checked").map(x=>L[+x.value]);if(!pick.length){toast("담을 주제를 골라 주세요.");break;}b.disabled=true;try{const r=await call("plan/apply",{posts:pick.map(t=>({chan_id:ch,title:t,status:"idea"}))});closeModal();await reload(`${r.made.posts}개를 담았습니다.`);}catch(err){b.disabled=false;failToast(err);}break;}
+    case"kw-new":kwAddModal();break;
+    case"kw-add":kwImport(splitWords($("#mk-a-words").value).map(w=>({word:w,grp:$("#mk-a-grp").value.trim(),state:$("#mk-a-state").value})));break;
+    case"kw-mix":mixModal();break;
+    case"mix-add":{const A=splitWords($("#mk-x-a").value),B=splitWords($("#mk-x-b").value),rows=[];for(const x of A)for(const y of B)if(rows.length<200)rows.push({word:x+" "+y,grp:"조합"});kwImport(rows);break;}
+    case"kw-edit":{const k=S.kws.find(x=>x.id===id);if(k)kwModal(k);break;}
+    case"kw-save":{const v=s=>$(s).value;try{const r=await call("kw/save",{id,word:v("#mk-w-word").trim(),grp:v("#mk-w-grp").trim(),state:v("#mk-w-state"),vol_pc:v("#mk-w-pc"),vol_mo:v("#mk-w-mo"),bid:v("#mk-w-bid"),rank:v("#mk-w-rank").trim(),memo:v("#mk-w-memo").trim()});upd(S.kws,r.kw);closeModal();route();toast("저장했습니다.");}catch(err){failToast(err);}break;}
+    case"kw-del":{if(!confirm("이 키워드를 지울까요?"))break;try{await call("kw/del",{ids:[id]});S.kws=S.kws.filter(k=>k.id!==id);closeModal();route();}catch(err){failToast(err);}break;}
+    case"kw-csv":dlCsv("마이마케팅_키워드.csv",["키워드","묶음","상태","PC 검색","모바일 검색","경쟁","입찰가","순위","메모"],S.kws.map(k=>[k.word,k.grp,KST[k.state][0],k.vol_pc??"",k.vol_mo??"",k.comp,k.bid??"",k.rank,k.memo]));break;
+    case"tool-go":{const seed=$("#mk-seed").value.trim(),words=splitWords(seed).slice(0,5);if(!words.length){toast("낱말을 적어 주세요.");break;}b.disabled=true;try{const r=await call("kwtool",{words});U.tool={seed,items:r.items||[]};route();if(!U.tool.items.length)toast("결과가 없습니다.");}catch(err){b.disabled=false;failToast(err);}break;}
+    case"tool-add":{const pick=$$(".mk-tk:checked:not(:disabled)").map(x=>U.tool.items[+x.value]).filter(Boolean);if(!pick.length){toast("담을 키워드를 골라 주세요.");break;}kwImport(pick.map(k=>({word:k.word,vol_pc:k.vol_pc,vol_mo:k.vol_mo,comp:k.comp,grp:"연관"})));break;}
+    case"trend-go":{const q=$("#mk-trq").value.trim(),words=splitWords(q).slice(0,5);if(!words.length){toast("낱말을 적어 주세요.");break;}b.disabled=true;try{const r=await call("trend",{groups:words.map(w=>({name:w,words:[w]})),months:12});U.trend={q,results:r.results||[]};route();}catch(err){b.disabled=false;failToast(err);}break;}
+    case"iss-queue":{const i=issues().find(x=>x.key===b.dataset.key)||S.camps.flatMap(c=>diagnose(c)).find(x=>x.key===b.dataset.key);if(!i)break;b.disabled=true;try{const r=await call("act/bulk",{rows:[{key:i.key,kind:i.kind,mode:"opt",camp_id:i.camp?i.camp.id:"",chan_id:i.camp?i.camp.chan_id:i.chan.id,title:`${i.camp?i.camp.name:i.chan.name} — ${i.title}`,detail:(i.why?i.why+"\n":"")+i.fix.map((f,n)=>`${n+1}. ${f}`).join("\n"),base:i.camp?snap(i.camp):null}]});(r.acts||[]).forEach(x=>upd(S.acts,x));if($("#m-box .mk-wide"))campView(i.camp.id);else route();toast("할 일로 담았습니다. 최적화 탭의 ‘담아 둔 할 일’에서 봅니다.");}catch(err){b.disabled=false;failToast(err);}break;}
+    case"act-new":actModal(b.dataset.mode);break;
+    case"act-save":{const t=$("#mk-n-title").value.trim();if(!t){toast("할 일을 적어 주세요.");break;}const c=campById($("#mk-n-camp").value);try{const r=await call("act/save",{title:t,detail:$("#mk-n-detail").value.trim(),kind:$("#mk-n-kind").value,camp_id:c?c.id:"",chan_id:c?c.chan_id:"",mode:U.actMode||"opt",base:c?snap(c):null});upd(S.acts,r.act);closeModal();route();}catch(err){failToast(err);}break;}
+    case"act-st":actStatus(id,b.dataset.v);break;
+    case"act-task":{const x=S.acts.find(v=>v.id===id);if(x)taskModal(x);break;}
+    case"task-go":taskGo(id);break;
+    case"utm-copy":{const u=utm();if(u)copyText(u,"주소를 복사했습니다.");else toast("주소를 먼저 적어 주세요.");break;}
+    case"plan-open":planModal();break;
+    case"plan-next":{const I=planRead();if(!I.type){toast("업종을 골라 주세요.");break;}U.plan={I,P:buildPlan(I)};planStep2();break;}
+    case"plan-back":planModal();break;
+    case"plan-apply":{const P=U.plan&&U.plan.P;if(!P)break;if(P.mix.reduce((s,m)=>s+m.pct,0)!==100){toast("비율의 합계를 100%로 맞춰 주세요.");break;}b.disabled=true;try{const r=await call("plan/apply",{chans:P.chans,camps:P.camps,posts:P.posts,acts:P.acts,kws:P.kws,set:P.set});U.plan=null;closeModal();await load();go("#/marketing/camp");route();toast(`채널 ${r.made.chans} · 캠페인 ${r.made.camps} · 콘텐츠 ${r.made.posts} · 할 일 ${r.made.acts}개를 만들었습니다.`);}catch(err){b.disabled=false;failToast(err);}break;}
+    case"plan-prompt":planPrompt();break;
+    case"pim-open":pimModal();break;
+    case"pim-read":pimRead();break;
+    case"pim-apply":{if(!U.pim)break;b.disabled=true;try{const r=await call("plan/apply",U.pim);U.pim=null;closeModal();await reload(`채널 ${r.made.chans} · 캠페인 ${r.made.camps} · 콘텐츠 ${r.made.posts} · 실행안 ${r.made.acts} · 키워드 ${r.made.kws}개를 만들었습니다.`);}catch(err){b.disabled=false;failToast(err);}break;}
+  }
+});
+document.addEventListener("change",async e=>{
+  const el=e.target;if(!el.dataset)return;
+  if(el.dataset.mkc==="cst"){U.cst=el.value;route();}
+  else if(el.dataset.mkc==="cch"){U.cch=el.value;route();}
+  else if(el.dataset.mkc==="pch"){U.pch=el.value;U.recN=30;route();}
+  else if(el.dataset.mkc==="kg"){U.kg=el.value;route();}
+  else if(el.dataset.mkc==="metaconv"){saveSet({metaConv:el.value},"바꿨습니다. 다음에 가져올 때부터 이 기준으로 셉니다.");}
+  else if(el.dataset.mkc==="chk"){const set=new Set(st().checks);if(el.checked)set.add(el.value);else set.delete(el.value);const lab=el.closest(".mk-ci");if(lab)lab.classList.toggle("done",el.checked);if(await saveSet({checks:[...set]})){const d=el.closest("details"),em=d&&d.querySelector("summary em");if(em){const all=d.querySelectorAll("input[type=checkbox]"),on=d.querySelectorAll("input[type=checkbox]:checked");em.textContent=on.length+"/"+all.length;}const tot=$("#mk-chk-tot");if(tot){const P=chkProg();tot.textContent=P.d+"/"+P.n;}}else el.checked=!el.checked;}
+  else if(el.dataset.mkk){try{const r=await call("kw/save",{id:el.dataset.mkk,state:el.value});upd(S.kws,r.kw);}catch(err){failToast(err);}}
+});
+document.addEventListener("input",e=>{
+  const el=e.target;if(!el.dataset)return;
+  if(el.dataset.mki==="cq"||el.dataset.mki==="kq"){U[el.dataset.mki]=el.value;route();const a=$(`[data-mki="${el.dataset.mki}"]`);if(a){a.focus();const n=a.value.length;a.setSelectionRange(n,n);}}
+  else if(el.dataset.mki==="be"){const o=$("#mk-be");if(o)o.innerHTML=beText($("#mk-s-aov").value,$("#mk-s-margin").value);}
+  else if(el.dataset.mki==="utm")utm();
+});
+
+/* ── 마이웍스 다른 화면과의 연결 ── */
+function view(arg){
+  const sub=String(arg||"").split("/")[0]||"";
+  const head=`<div class="page-head"><div><h1><span class="bars"></span>마이마케팅</h1></div></div>`;
+  if(MODE!=="cloud"||!mgr()){$("#view").innerHTML=`${head}<div class="card"><div class="empty"><b>이 계정에서는 쓸 수 없습니다</b>마이마케팅은 관리자·직원이 클라우드 모드에서 씁니다.</div></div>`;return;}
+  if(!modOn("marketing")){$("#view").innerHTML=`${head}<div class="card"><div class="empty"><b>마이마케팅이 꺼져 있습니다</b>${isAdmin()?`확장판 화면에서 켜면 메뉴에 나타납니다. 지금은 무료로 쓸 수 있습니다.<div style="margin-top:12px"><button class="btn btn-sm" data-nav="ext">확장판 열기</button></div>`:"관리자에게 켜 달라고 요청하세요."}</div></div>`;return;}
+  if(!S.ready){
+    $("#view").innerHTML=`${head}<div class="card"><div class="empty">${S.err?`<b>불러오지 못했습니다</b>${esc(S.err)}<div style="margin-top:12px"><button class="btn btn-sm" id="mk-retry">다시 시도</button></div>`:"불러오는 중…"}</div></div>`;
+    const rb=$("#mk-retry");if(rb)rb.onclick=()=>{S.err="";view(arg);};
+    if(!S.loading&&!S.err)load().then(()=>{if(onPage())route();}).catch(e=>{if(e.code==="unauthorized")return;S.err=errMsg(e)||"잠시 후 다시 시도해 주세요.";if(onPage())route();});
+    return;
+  }
+  refresh(false);
+  ({camp:vCamps,perf:vPerf,content:vContent,kw:vKw,opt:vOpt,boost:vBoost,set:vSet}[sub]||vDash)();
+  if(!U.syncing&&syncDue().length)autoSync(false);
+  autoQueue();
+}
+return{view,fillDash,onVersion,reset,refresh,weekText,_t:{S,U,agg,R,win,roasOf,diagnose,issues,boostPlan,effect,buildPlan,detectCols,parseSheet,toDate,tgt,eff,beCpa,beRoas,reindex}};
 })();
 
 /* ═══════════ 총괄관리 — 운영자 전용 (현황 · 워크스페이스 · 가입·베타 · 결제·매출 · 문의 · 공지 · 기록 · 오픈 준비) ═══════════
