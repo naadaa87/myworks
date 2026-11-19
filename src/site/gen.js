@@ -1265,6 +1265,7 @@ Disallow: /admin
 Disallow: /link/
 Disallow: /join/
 Disallow: /api/
+Disallow: /cdn-cgi/
 
 Sitemap: ${SITE}/sitemap.xml
 `);
