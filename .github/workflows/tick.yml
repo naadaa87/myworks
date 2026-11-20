@@ -1,0 +1,20 @@
+# 15분마다 마이웍스의 /api/tick 을 부릅니다.
+# tick 은 때가 된 예약 알림(아침 요약·마감·세금 일정)과 자동 안내 문자, 홈택스 자동 수집을 처리합니다.
+# 누군가 앱을 쓰고 있을 때는 서버가 스스로 돌리지만, 아무도 쓰지 않는 시간에도 제때 가도록 바깥에서 한 번씩 불러 줍니다.
+# 같은 5분 안에 여러 번 불려도 한 번만 일하고, 데이터는 돌려주지 않습니다.
+name: tick
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+permissions: {}
+concurrency:
+  group: tick
+  cancel-in-progress: true
+jobs:
+  tick:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: /api/tick 부르기
+        run: curl -sS -m 30 -o /dev/null -w "%{http_code}\n" https://myworks.ai.kr/api/tick

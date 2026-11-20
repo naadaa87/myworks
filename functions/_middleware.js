@@ -12,7 +12,7 @@
    · 스페이스: 예약 → 청소 배정 → 체크리스트 → 확인 → 손익. HOSTDB(읽기)는 운영자 워크스페이스에서만, SPACEDB(1회 가져오기)는 운영자만.
    · 무료 요금제 한도(요청당 쿼리 50회)를 넘지 않도록 여러 건의 쓰기는 한 문장으로 묶어 처리합니다. */
 
-const SCHEMA = "13";
+const SCHEMA = "14";
 const PLANS = ["basic", "pro"];
 const MODULES = ["space", "outsourcing", "commerce", "tax", "people", "marketing", "creator"];
 const BASE_MODULES = ["outsourcing"];          // 거래 — 기본 기능이라 등급과 관계없이 늘 켜져 있습니다
@@ -193,7 +193,7 @@ async function ensure(db) {
   try { const r = await db.prepare("SELECT v FROM mw_meta WHERE k='schema'").first(); v = r && r.v; } catch (e) { v = null; }
   if (v !== SCHEMA) {
     // 표 만들기는 묶음(exec)으로 — 무료 플랜의 요청당 쿼리 수 한도를 넘지 않도록
-    for (const group of [DDL, SP_DDL, OS_DDL, CM_DDL, TX_DDL, PP_DDL, MK_DDL, CR_DDL, ADM_DDL, INV_DDL]) await db.exec(group.join("\n"));
+    for (const group of [DDL, SP_DDL, OS_DDL, CM_DDL, TX_DDL, PP_DDL, MK_DDL, CR_DDL, ADM_DDL, INV_DDL, NT_DDL, MSG_DDL, HT_DDL]) await db.exec(group.join("\n"));
     const have = {};
     for (const t of [...new Set(ADD_COLS.map(x => x[0]))]) have[t] = new Set((((await db.prepare(`PRAGMA table_info(${t})`).all()).results) || []).map(c => c.name));
     for (const [t, col] of ADD_COLS) {
@@ -324,13 +324,14 @@ function pick(me, r, vis) {
 }
 const rawJson = (head, extra) => new Response(JSON.stringify(head).slice(0, -1) + extra + "}", { status: 200, headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" } });
 async function badgesFor(db, me) {   // 화면 배지 + 공지 + 문의 답변 — 질의 한 번
-  const r = await db.prepare("SELECT (SELECT v FROM mw_meta WHERE k='ann') AS ann, (SELECT COUNT(*) FROM fb WHERE ws=?1 AND member_id=?2 AND reply_at IS NOT NULL AND (seen_at IS NULL OR seen_at<reply_at)) AS fr"
+  const r = await db.prepare("SELECT (SELECT v FROM mw_meta WHERE k='ann') AS ann, (SELECT COUNT(*) FROM nt_item WHERE ws=?1 AND member_id=?2 AND read_at IS NULL) AS nt, (SELECT COUNT(*) FROM fb WHERE ws=?1 AND member_id=?2 AND reply_at IS NOT NULL AND (seen_at IS NULL OR seen_at<reply_at)) AS fr"
     + (me.op ? ", (SELECT COUNT(*) FROM workspaces WHERE status='pending') AS pw, (SELECT COUNT(*) FROM fb WHERE status='new') AS fn" : "")
     + (me.role === "admin" ? ", (SELECT COUNT(*) FROM accounts WHERE ws=?1 AND status='pending') AS jr" : "")).bind(me.ws, me.id).first() || {};
   const out = {};
   if (me.op) { if (can(me, "ws") || can(me, "signup")) out.pendingWs = Number(r.pw) || 0; if (can(me, "fb")) out.fbNew = Number(r.fn) || 0; }
   if (me.role === "admin") out.joinReq = Number(r.jr) || 0;
   if (Number(r.fr)) out.fbReply = Number(r.fr);
+  if (Number(r.nt)) out.nt = Number(r.nt);   // 읽지 않은 알림
   const ann = annFor(r.ann, me); if (ann.length) out.ann = ann;
   return out;
 }
@@ -467,6 +468,7 @@ const PUBLIC = {
           db.prepare("INSERT INTO workspaces(id,name,status,admin_login,contact,note,invite,created_at,ref_ws) VALUES(?1,?2,'pending',?3,?4,?5,NULL,?6,?7)").bind(ws, wsName, lid, contact, note, now, refWs),
           db.prepare("INSERT INTO accounts(login_id,ws,member_id,pw,status,role,is_owner,name,contact,note,created_at,agreed_at) VALUES(?1,?2,?3,?4,'pending','admin',0,?5,?6,?7,?8,?9)").bind(lid, ws, mid, pw, name, contact, note, now, agreed)
         ]);
+        await notifyOps(db, "ws", { type: "sys", title: "새 워크스페이스 개설 신청이 들어왔습니다", body: `${wsName} · ${name}`, url: "#/admin", tag: "ws-pending" });
         return json({ ok: true, status: "pending", mode, workspace: wsName });
       }
       const code = String(b.code || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
@@ -475,6 +477,7 @@ const PUBLIC = {
       const c = await db.prepare("SELECT COUNT(*) AS n FROM accounts WHERE ws=?1 AND status='pending'").bind(w.id).first();
       if (c && Number(c.n) >= MAX_PENDING_JOIN) return fail("busy", 429);
       await db.prepare("INSERT INTO accounts(login_id,ws,member_id,pw,status,role,is_owner,name,contact,note,created_at,agreed_at) VALUES(?1,?2,?3,?4,'pending','staff',0,?5,?6,?7,?8,?9)").bind(lid, w.id, mid, pw, name, contact, note, now, agreed).run();
+      await notify(db, w.id, await whoIs(db, w.id, ["admin"]), { type: "team", title: "참여 요청이 들어왔습니다", body: `${name} 님이 초대 코드로 참여를 요청했습니다.`, url: "#/members", tag: "join-req" });
       return json({ ok: true, status: "pending", mode, workspace: w.name });
     } catch (e) { if (isUnique(e)) return fail("taken", 409); throw e; }
   },
@@ -631,11 +634,17 @@ const PRIVATE = {
       items.push({ kind: x.kind, id: x.id, data: x.data, deleted: x.deleted, own: x.kind === "act" ? me.id : undefined });
     }
     if (items.length) {
+      // 알림에 쓸 저장 전 상태 — 새로 맡긴 업무·검토 요청·새 의견을 가려냅니다
+      const ntTasks = items.filter(x => x.kind === "task" && !x.deleted && x.data && ((x.data.assigneeId && String(x.data.assigneeId) !== me.id) || x.data.status === "검토"));
+      const ntCmts = items.filter(x => x.kind === "comment" && !x.deleted && x.data && String(x.data.memberId || "") === me.id);
+      const ntPrev = ntTasks.length ? (partner || field ? taskEx : await lookup("task", ntTasks.map(x => x.id))) : new Map();
+      const ntCmtEx = ntCmts.length ? await lookup("comment", ntCmts.map(x => x.id)) : new Map();
       const now = ts();
       const stmts = upserts(db, me.ws, items, now);
       stmts.push(db.prepare("UPDATE workspaces SET last_active=?1" + (metaName ? ", name=?3" : "") + " WHERE id=?2").bind(...(metaName ? [iso(), me.ws, metaName] : [iso(), me.ws])));
       await db.batch(stmts);
       if (items.some(x => x.kind === "project" || x.kind === "store")) for (const k of VIS.keys()) if (k.startsWith(me.ws + "|")) VIS.delete(k);
+      if (ntTasks.length || ntCmts.length) await pushNotes(db, me, ntTasks, ntPrev, ntCmts.filter(c => !ntCmtEx.has(c.id)), lookup);
     }
     return json({ ok: true, now: ts(), saved: items.length, dropped });
   },
@@ -646,7 +655,8 @@ const PRIVATE = {
     if (!pwValid(b.pw)) return fail("bad-pw");
     await db.batch([
       db.prepare("UPDATE accounts SET pw=?1, fails=0, lock_until=0 WHERE ws=?2 AND member_id=?3").bind(await makePw(b.pw), me.ws, me.id),
-      db.prepare("DELETE FROM sess WHERE ws=?1 AND member_id=?2 AND token<>?3").bind(me.ws, me.id, me.token)
+      db.prepare("DELETE FROM sess WHERE ws=?1 AND member_id=?2 AND token<>?3").bind(me.ws, me.id, me.token),
+      ntDrop(db, me.ws, me.id)   // 다른 기기는 로그아웃되므로 푸시 등록도 지웁니다. 지금 기기는 앱이 곧 다시 등록합니다
     ]);
     return json({ ok: true });
   },
@@ -704,7 +714,7 @@ const PRIVATE = {
       if (await loginTaken(db, lid)) return fail("taken", 409);
       stmts.push(db.prepare("INSERT INTO accounts(login_id,ws,member_id,pw,status,role,is_owner,name,contact,note,created_at) VALUES(?1,?2,?3,?4,?5,?6,0,?7,'','',?8)").bind(lid, me.ws, id, pwNew, status, next.role, next.name, iso()));
     }
-    if (next.active === false || pwNew) stmts.push(db.prepare("DELETE FROM sess WHERE ws=?1 AND member_id=?2 AND token<>?3").bind(me.ws, id, me.token));
+    if (next.active === false || pwNew) stmts.push(db.prepare("DELETE FROM sess WHERE ws=?1 AND member_id=?2 AND token<>?3").bind(me.ws, id, me.token), ntDrop(db, me.ws, id));
     if (next.active === false || (next.role !== "admin" && next.role !== "staff")) stmts.push(db.prepare("UPDATE api_tokens SET revoked=1, hash=hash||'~'||?3 WHERE ws=?1 AND member_id=?2 AND revoked=0").bind(me.ws, id, rand(4)));   // 관리자·직원이 아니게 되면 AI 토큰도 회수
     stmts.push(...upserts(db, me.ws, [{ kind: "member", id, data: next }], ts()));
     try { await db.batch(stmts); } catch (e) { if (isUnique(e)) return fail("taken", 409); throw e; }
@@ -721,6 +731,8 @@ const PRIVATE = {
       db.prepare("DELETE FROM accounts WHERE ws=?1 AND member_id=?2").bind(me.ws, id),
       db.prepare("DELETE FROM sess WHERE ws=?1 AND member_id=?2").bind(me.ws, id),
       db.prepare("UPDATE api_tokens SET revoked=1, hash=hash||'~'||?3 WHERE ws=?1 AND member_id=?2 AND revoked=0").bind(me.ws, id, rand(4)),
+      ...NT_TABLES.map(t => db.prepare(`DELETE FROM ${t} WHERE ws=?1 AND member_id=?2`).bind(me.ws, id)),   // 알림함·푸시 기기·예약 알림
+      db.prepare("DELETE FROM ws_set WHERE ws=?1 AND k=?2").bind(me.ws, "nt:" + id),
       ...upserts(db, me.ws, [{ kind: "member", id, deleted: 1 }], ts())
     ]);
     return json({ ok: true });
@@ -975,12 +987,13 @@ const PRIVATE = {
       if (act === "suspend" && w.status !== "active") return fail("bad-state");
       if (act === "activate" && w.status !== "suspended") return fail("bad-state");
       const stmts = [db.prepare("UPDATE workspaces SET status=?1 WHERE id=?2").bind(act === "suspend" ? "suspended" : "active", w.id), admLog(db, act, w, act === "suspend" ? "이용 중지" : "이용 재개")];
-      if (act === "suspend") stmts.push(db.prepare("DELETE FROM sess WHERE ws=?1").bind(w.id));
+      if (act === "suspend") stmts.push(db.prepare("DELETE FROM sess WHERE ws=?1").bind(w.id), db.prepare("DELETE FROM nt_sub WHERE ws=?1").bind(w.id));
       await db.batch(stmts);
       return json({ ok: true });
     }
     if (act === "delete") {
-      await db.exec(SP_TABLES.concat(OS_TABLES, CM_TABLES, TX_TABLES, PP_TABLES, MK_TABLES, CR_TABLES, ["ws_set", "api_tokens", "links", "mod_set", "invites"]).map(t => `DELETE FROM ${t} WHERE ws=${wsLit(w.id)}`).join("\n"));
+      await htForget(db, w.id);   // 수집 서비스에 등록해 둔 홈택스 조회 아이디부터 지웁니다
+      await db.batch(SP_TABLES.concat(OS_TABLES, CM_TABLES, TX_TABLES, PP_TABLES, MK_TABLES, CR_TABLES, NT_TABLES, MSG_TABLES, HT_TABLES, ["ws_set", "api_tokens", "links", "mod_set", "invites"]).map(t => db.prepare(`DELETE FROM ${t} WHERE ws=?1`).bind(w.id)));   // 한 묶음으로 — 중간에 끊겨 반만 지워지는 일이 없습니다
       await db.batch([
         db.prepare("DELETE FROM ent WHERE ws=?1").bind(w.id),
         db.prepare("DELETE FROM sess WHERE ws=?1").bind(w.id),
@@ -997,7 +1010,7 @@ const PRIVATE = {
       if (!a) return fail("not-found", 404);
       await db.batch([
         db.prepare("UPDATE accounts SET pw=?1, fails=0, lock_until=0 WHERE login_id=?2").bind(await makePw(b.pw), a.login_id),
-        db.prepare("DELETE FROM sess WHERE ws=?1 AND member_id=?2").bind(w.id, a.member_id),
+        db.prepare("DELETE FROM sess WHERE ws=?1 AND member_id=?2").bind(w.id, a.member_id), ntDrop(db, w.id, a.member_id),
         db.prepare("UPDATE workspaces SET admin_login=?1 WHERE id=?2").bind(a.login_id, w.id),
         admLog(db, "resetpw", w, `관리자 ${a.login_id} 비밀번호 초기화`)
       ]);
@@ -1521,6 +1534,7 @@ const SPACE = {
     if (!ex) return fail("not-found", 404);
     if (!["done", "redo", "confirmed"].includes(ex.status)) return fail("bad-state");
     const { v } = await spRun(db, me, [db.prepare("UPDATE sp_cln SET status=?3, feedback=?4, review_by=?5, review_name=?6, review_at=?7 WHERE ws=?1 AND id=?2").bind(me.ws, ex.id, status, fb || null, me.id, me.name, iso())]);
+    if (status === "redo") await notify(db, me.ws, [ex.submitted_by || ex.assignee].filter(x => x && x !== me.id), { type: "store", title: "청소를 다시 확인해 주세요", body: clip(fb, 120), url: "#/space", tag: "cln-redo" });
     return json({ ok: true, v, cleaning: await spOne(db, "sp_cln", me.ws, ex.id) });
   },
   async "cln/del"(db, me, b) {
@@ -1645,6 +1659,7 @@ const SPACE = {
       else { const sc = await spScope(db, me); if (!sc.vis.has(bid)) return fail("forbidden", 403); }
       const row = { id: uid("i"), branch_id: bid || null, category: str("category", 30), equip: str("equip", 30), title, detail: str("detail", 2000), priority: SP_PRIO.includes(b.priority) ? b.priority : "보통", status: "접수", reporter: me.id, reporter_name: me.name, assignee: null, cost: null, comments: [], created_at: iso(), resolved_at: null };
       const { v } = await spRun(db, me, spBulk(db, "sp_iss", me.ws, [row]));
+      await notify(db, me.ws, (await whoIs(db, me.ws, ["admin", "facility"])).filter(x => x !== me.id), { type: "store", title: (row.priority === "긴급" ? "[긴급] " : "") + "시설 문제가 접수되었습니다", body: `${title} — ${me.name || ""}`, url: "#/space/fac", tag: "iss" });
       return json({ ok: true, v, issue: row });
     }
     if (!(mgr || me.role === "facility")) return fail("forbidden", 403);
@@ -1752,6 +1767,7 @@ const SPACE = {
     const row = { id: uid("a"), date, region, branch_id: bid, worker, created_by: me.id, created_at: iso() };
     const { v } = await spRun(db, me, spBulk(db, "sp_asg", me.ws, [row], "ON CONFLICT(ws,date,region,branch_id) DO UPDATE SET worker=excluded.worker, created_by=excluded.created_by, created_at=excluded.created_at"));
     const r = await db.prepare(spSel("sp_asg", "ws=?1 AND date=?2 AND region=?3 AND branch_id=?4")).bind(me.ws, date, region, bid).first();
+    if (worker !== me.id && date >= kstToday()) await notify(db, me.ws, [worker], { type: "store", title: "청소가 배정되었습니다", body: `${date.slice(5).replace("-", "/")}${region ? " · " + region : ""}`, url: "#/space", tag: "asg:" + date, once: 30 });
     return json({ ok: true, v, assignment: r ? parse(r.j) : row });
   },
 
@@ -2081,7 +2097,7 @@ async function modBackupRaw(db, ws) {
   const MOD_TABLES = modTables(), pairs = [];
   for (let i = 0; i < MOD_TABLES.length; i += 2) pairs.push(MOD_TABLES.slice(i, i + 2));
   const tagged = t => spSel(t, "ws=?1").replace("SELECT ", `SELECT '${t}' AS t, `);
-  const rs = await db.batch(pairs.map(p => db.prepare(p.map(tagged).join(" UNION ALL ")).bind(ws)).concat([db.prepare("SELECT json_object('mod',mod,'k',k,'v',CASE WHEN json_valid(v) THEN json(v) ELSE json('null') END) AS j FROM mod_set WHERE ws=?1 AND NOT (mod='mk' AND k='conn') AND NOT (mod='cr' AND k='quota')").bind(ws)]));
+  const rs = await db.batch(pairs.map(p => db.prepare(p.map(tagged).join(" UNION ALL ")).bind(ws)).concat([db.prepare("SELECT json_object('mod',mod,'k',k,'v',CASE WHEN json_valid(v) THEN json(v) ELSE json('null') END) AS j FROM mod_set WHERE ws=?1 AND NOT (mod='mk' AND k='conn') AND NOT (mod='cr' AND k='quota') AND NOT (mod='msg' AND k='conn') AND NOT (mod='tx' AND k='ht')").bind(ws)]));
   const by = {}; for (const t of MOD_TABLES) by[t] = [];
   pairs.forEach((p, i) => { for (const r of (rs[i] && rs[i].results) || []) if (by[r.t]) by[r.t].push(r.j); });
   return '{"v":1,' + MOD_TABLES.map(t => JSON.stringify(t) + ":[" + by[t].join(",") + "]").join(",") + ',"mod_set":' + rawArr(rs[pairs.length]) + "}";
@@ -2095,8 +2111,8 @@ function modRestoreStmts(db, ws, m) {
     stmts.push(...spBulk(db, t, ws, m[t].slice(0, 200000), "ignore"));
   }
   if (Array.isArray(m.mod_set)) {
-    dels.push(`DELETE FROM mod_set WHERE ws=${wsLit(ws)} AND NOT (mod='mk' AND k='conn')`);
-    stmts.push(db.prepare("INSERT OR IGNORE INTO mod_set(ws,mod,k,v) SELECT ?1, json_extract(value,'$.mod'), json_extract(value,'$.k'), json_extract(value,'$.v') FROM json_each(?2) WHERE true").bind(ws, JSON.stringify(m.mod_set.filter(r => !(r && r.mod === "mk" && r.k === "conn")).slice(0, 200).map(r => ({ mod: clip(r && r.mod, 10), k: clip(r && r.k, 40), v: JSON.stringify(r && r.v !== undefined ? r.v : null) })))));
+    dels.push(`DELETE FROM mod_set WHERE ws=${wsLit(ws)} AND NOT (mod='mk' AND k='conn') AND NOT (mod='msg' AND k='conn') AND NOT (mod='tx' AND k='ht')`);   // 연결 정보는 백업에 없으므로 복원해도 그대로 둡니다
+    stmts.push(db.prepare("INSERT OR IGNORE INTO mod_set(ws,mod,k,v) SELECT ?1, json_extract(value,'$.mod'), json_extract(value,'$.k'), json_extract(value,'$.v') FROM json_each(?2) WHERE true").bind(ws, JSON.stringify(m.mod_set.filter(r => !(r && ((r.mod === "mk" && r.k === "conn") || (r.mod === "msg" && r.k === "conn") || (r.mod === "tx" && r.k === "ht")))).slice(0, 200).map(r => ({ mod: clip(r && r.mod, 10), k: clip(r && r.k, 40), v: JSON.stringify(r && r.v !== undefined ? r.v : null) })))));
   }
   return { dels, stmts };
 }
@@ -2935,6 +2951,7 @@ const AIFN = {
       return { ok: true, status: "auto", proposal: prop, applied: ap.applied };
     }
     await db.batch(upserts(db, me.ws, [{ kind: "prop", id: prop.id, data: prop }], ts()));
+    await notify(db, me.ws, [me.id], { type: "ai", title: "클로드가 제안을 올렸습니다", body: "홈의 '오늘 결정할 것'에서 확인하고 승인하세요.", url: "#/dashboard", tag: "ai-prop", once: 15 });   // 여러 건을 잇달아 올려도 15분에 한 번만 알립니다
     return { ok: true, status: "pending", proposal: { id: prop.id, kind, status: "pending" }, hint: "관리자가 홈의 '오늘 결정할 것'에서 승인하면 반영됩니다." };
   }
 };
@@ -3159,7 +3176,7 @@ const TAX = {
     const s0 = rs[0] && rs[0].results && rs[0].results[0];
     const pay = ((rs[8] && rs[8].results) || []).map(r => ({ ym: r.ym, gross: Number(r.gross) || 0, net: Number(r.net) || 0, employer: Number(r.employer) || 0, wh: Number(r.wh) || 0, ins: Number(r.ins) || 0, n: Number(r.n) || 0 }));
     const staffN = Number(((rs[9] && rs[9].results) || [])[0] && rs[9].results[0].n) || 0;
-    return rawJson({ ok: true, v: me.spv, today, from, settings: txNorm(s0 ? parse(s0.v) : null), pay, staffN, keys: { nts: !!(env && env.NTS_API_KEY), bizinfo: !!(env && env.BIZINFO_API_KEY) } }, ',"biz":' + rawArr(rs[1]) + ',"docs":' + rawArr(rs[2]) + ',"kpis":' + rawArr(rs[3]) + ',"kvals":' + rawArr(rs[4]) + ',"grants":' + rawArr(rs[5]) + ',"recv":' + rawArr(rs[6]) + ',"invNeed":' + rawArr(rs[7]));
+    return rawJson({ ok: true, v: me.spv, today, from, settings: txNorm(s0 ? parse(s0.v) : null), pay, staffN, keys: { nts: !!(env && env.NTS_API_KEY), bizinfo: !!(env && env.BIZINFO_API_KEY), ht: pbOn(env) } }, ',"biz":' + rawArr(rs[1]) + ',"docs":' + rawArr(rs[2]) + ',"kpis":' + rawArr(rs[3]) + ',"kvals":' + rawArr(rs[4]) + ',"grants":' + rawArr(rs[5]) + ',"recv":' + rawArr(rs[6]) + ',"invNeed":' + rawArr(rs[7]));
   },
   async settings(db, me, b) {
     if (!isMgr(me)) return fail("forbidden", 403);
@@ -3218,21 +3235,9 @@ const TAX = {
   // 홈택스에서 내려받은 목록(세금계산서·현금영수증·카드) — 승인번호가 같으면 건너뜁니다
   async "doc/import"(db, me, b) {
     if (!isMgr(me)) return fail("forbidden", 403);
-    const rows = (Array.isArray(b.rows) ? b.rows : []).slice(0, 5000).map(r => txDocIn(r || {})).filter(r => r.date && (r.total || r.supply));
-    if (!rows.length) return fail("empty");
-    const dates = rows.map(r => r.date).sort(), now = iso();
-    const ex = (await db.prepare("SELECT approve_no, dir, date, partner_no, total FROM tx_doc WHERE ws=?1 AND date>=?2 AND date<=?3").bind(me.ws, dates[0], dates[dates.length - 1]).all()).results || [];
-    const seenA = new Set(ex.map(x => x.approve_no).filter(Boolean)), seenK = new Set(ex.map(x => [x.dir, x.date, x.partner_no || "", x.total].join("|")));
-    const add = [];
-    let skipped = 0;
-    for (const r of rows) {
-      const k = [r.dir || "sale", r.date, r.partner_no || "", r.total || (r.supply || 0) + (r.vat || 0)].join("|");
-      if ((r.approve_no && seenA.has(r.approve_no)) || (!r.approve_no && seenK.has(k))) { skipped++; continue; }
-      if (r.approve_no) seenA.add(r.approve_no); seenK.add(k);
-      add.push(Object.assign({ id: bulkId("dc"), biz_id: clip(b.biz_id, 60) || null, dir: "sale", kind: "세금계산서", partner: "", partner_no: "", supply: 0, vat: 0, total: 0, item: "", approve_no: null, status: "done", fin_id: null, ref: null, source: "hometax", memo: "", created_at: now, updated_at: now }, r, { total: r.total || (r.supply || 0) + (r.vat || 0) }));
-    }
-    const { v } = add.length ? await spRun(db, me, spBulk(db, "tx_doc", me.ws, add)) : { v: null };
-    return json({ ok: true, v, added: add.length, skipped });
+    const r = await txDocAdd(db, me, Array.isArray(b.rows) ? b.rows : [], b.biz_id, "hometax");
+    if (r.empty) return fail("empty");
+    return json({ ok: true, v: r.v, added: r.added, skipped: r.skipped });
   },
   async "doc/link"(db, me, b) {   // 증빙 ↔ 돈 기록 연결 (여러 건을 한 번에)
     if (!isMgr(me)) return fail("forbidden", 403);
@@ -4937,6 +4942,14 @@ const LINK_KINDS = {
   }
 };
 async function entData(db, ws, kind, id) { const r = await db.prepare("SELECT data FROM ent WHERE ws=?1 AND kind=?2 AND id=?3 AND deleted=0").bind(ws, kind, String(id)).first(); return r ? parse(r.data) : null; }
+const LINK_NT = {   // [확인했을 때, 수정·문의를 남겼을 때, 눌렀을 때 열 화면]
+  quote: ["견적이 승인되었습니다", "견적 수정 요청이 왔습니다", "#/outsourcing/quotes"],
+  delivery: ["납품을 확인했습니다", "납품 수정 요청이 왔습니다", "#/board"],
+  invoice: ["청구서를 확인했습니다", "청구서에 문의가 왔습니다", "#/outsourcing/bills"],
+  po: ["공급처가 발주서를 확인했습니다", "발주서 변경 요청이 왔습니다", "#/commerce/po"],
+  payslip: ["임금명세서를 받았다고 확인했습니다", "임금명세서에 문의가 왔습니다", "#/people/pay"],
+  "cr-deal": ["협찬 조건을 확인했습니다", "협찬 조건 수정 요청이 왔습니다", "#/creator/deal"]
+};
 async function linkRow(db, t) {
   if (!/^[0-9a-f]{32}$/.test(String(t || ""))) return null;
   const l = await db.prepare("SELECT l.*, w.status AS wst FROM links l JOIN workspaces w ON w.id=l.ws WHERE l.token=?1").bind(t).first();
@@ -4963,6 +4976,8 @@ PUBLIC["link/act"] = async function (db, b) {
   const r = await LINK_KINDS[l.kind].act(db, l, action, b.note, b.by);
   if (r.error) return fail(r.error, r.error === "bad-state" ? 409 : 404);
   await db.prepare("UPDATE links SET used_at=?2, result=?3, note=?4 WHERE token=?1").bind(l.token, iso(), r.status, clip(b.note, 500)).run();
+  const NT = LINK_NT[l.kind];   // 보낸 사람에게 알림 — 누가 무엇에 어떻게 답했는지
+  if (NT) await notify(db, l.ws, l.created_by ? [l.created_by] : await whoIs(db, l.ws, ["admin"]), { type: "reply", title: NT[r.status === "approved" ? 0 : 1], body: [clip(b.by, 40), clip(b.note, 120)].filter(Boolean).join(" — "), url: NT[2], tag: "link:" + l.token.slice(0, 12) });
   return json({ ok: true, status: r.status });
 };
 
@@ -5063,6 +5078,7 @@ PUBLIC["link/inquiry"] = async function (db, b) {
     ...upserts(db, l.ws, [{ kind: "act", id: uid("a"), own: l.created_by, data: { id: uid("a"), ts: now.slice(5, 16).replace("T", " ").replace("-", "/"), who: name || company, by: "", createdAt: now, text: `미디어킷으로 협찬 문의가 들어왔습니다 — ${company || name}` } }], ts()),
     db.prepare("UPDATE workspaces SET sp_ver=sp_ver+1 WHERE id=?1").bind(l.ws)
   ]);
+  await notify(db, l.ws, [...new Set([l.created_by].concat(await whoIs(db, l.ws, ["admin"])))], { type: "reply", title: "미디어킷으로 협찬 문의가 들어왔습니다", body: company || name, url: "#/creator/deal", tag: "cr-inq" });
   return json({ ok: true });
 };
 
@@ -5188,6 +5204,7 @@ PUBLIC["invite/accept"] = async function (db, b) {
     ]);
   } catch (e) { if (isUnique(e)) return fail("taken", 409); throw e; }
   for (const k of VIS.keys()) if (k.startsWith(r.ws + "|")) VIS.delete(k);
+  await notify(db, r.ws, r.created_by ? [r.created_by] : await whoIs(db, r.ws, ["admin"]), { type: "team", title: `${name} 님이 초대를 받아 합류했습니다`, body: pn ? pn + " 참여" : "", url: "#/members", tag: "inv-join" });
   return json({ ok: true, token, workspace: r.wname, projects: ps.map(x => x.id) });
 };
 
@@ -5282,6 +5299,832 @@ async function mcp(db, request) {
 const spOneT = spOne;
 
 
+/* ═════════ 알림 — 알림함 · 휴대폰 푸시(웹 푸시) · 예약 알림 ═════════
+   · 일이 생기면 notify()가 받는 사람의 알림함(nt_item)에 한 줄을 넣고, 푸시를 켠 기기가 있으면 함께 보냅니다.
+   · 푸시는 표준 웹 푸시(VAPID · aes128gcm)입니다. 서버 열쇠는 처음 쓸 때 만들어 mw_meta('vapid')에 둡니다.
+   · 운영자가 총괄관리에서 푸시를 열어야(feat.push) 기기를 등록할 수 있습니다. 알림함은 그와 관계없이 씁니다.
+   · 예약 알림(nt_sched): 앱이 앞으로 챙길 것(마감·입금 기한·세금 일정·아침 요약)을 맡겨 두면 tick이 때가 된 것을 보냅니다.
+   · tick은 누군가 앱을 쓰고 있으면 5분에 한 번 돌고, 바깥에서 /api/tick 을 불러도 됩니다(같은 5분 안에는 한 번만 일합니다). */
+const NT_DDL = [
+  "CREATE TABLE IF NOT EXISTS nt_item(ws TEXT NOT NULL, id TEXT NOT NULL, member_id TEXT NOT NULL, type TEXT NOT NULL, title TEXT NOT NULL, body TEXT, url TEXT, at TEXT NOT NULL, read_at TEXT, PRIMARY KEY(ws,id))",
+  "CREATE INDEX IF NOT EXISTS idx_nt_item_m ON nt_item(ws, member_id, at)",
+  "CREATE TABLE IF NOT EXISTS nt_sub(id TEXT PRIMARY KEY, ws TEXT NOT NULL, member_id TEXT NOT NULL, endpoint TEXT NOT NULL, p256dh TEXT NOT NULL, auth TEXT NOT NULL, ua TEXT, created_at TEXT NOT NULL, ok_at TEXT, fails INTEGER NOT NULL DEFAULT 0, seen_at TEXT)",
+  "CREATE UNIQUE INDEX IF NOT EXISTS idx_nt_sub_ep ON nt_sub(endpoint)",
+  "CREATE INDEX IF NOT EXISTS idx_nt_sub_m ON nt_sub(ws, member_id)",
+  "CREATE TABLE IF NOT EXISTS nt_sched(ws TEXT NOT NULL, member_id TEXT NOT NULL, k TEXT NOT NULL, due TEXT NOT NULL, type TEXT NOT NULL, title TEXT NOT NULL, body TEXT, url TEXT, PRIMARY KEY(ws, member_id, k))",
+  "CREATE INDEX IF NOT EXISTS idx_nt_sched_due ON nt_sched(due)"
+];
+const NT_TABLES = ["nt_item", "nt_sub", "nt_sched"];
+const ntDrop = (db, ws, memberId) => db.prepare("DELETE FROM nt_sub WHERE ws=?1 AND member_id=?2").bind(ws, memberId);   // 그 사람의 푸시 기기 등록을 모두 지웁니다
+const NT_TYPES = ["reply", "task", "due", "money", "team", "ai", "store", "sys", "digest"];   // 회신·문의 · 업무 · 마감·일정 · 돈·세금 · 사람 · AI 제안 · 매장·현장 · 운영·공지 · 아침 요약
+const NT_PUSH_HOSTS = [".googleapis.com", ".push.services.mozilla.com", ".push.apple.com", ".notify.windows.com"];   // 브라우저 회사의 푸시 서버만 받습니다
+const NT_MAX_DEVICES = 8, NT_MAX_PLAN = 80, NT_PUSH_BATCH = 40;
+const b64u = bytes => btoa(String.fromCharCode(...bytes)).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+const unb64u = s => { s = String(s || "").replace(/-/g, "+").replace(/_/g, "/"); try { return Uint8Array.from(atob(s + "===".slice((s.length + 3) % 4)), c => c.charCodeAt(0)); } catch (e) { return new Uint8Array(0); } };
+const catBytes = (...a) => { const o = new Uint8Array(a.reduce((n, x) => n + x.length, 0)); let p = 0; for (const x of a) { o.set(x, p); p += x.length; } return o; };
+const hmOk = s => /^([01]\d|2[0-3]):[0-5]\d$/.test(String(s || ""));
+function ntPrefs(p) {   // 사람마다: 끈 종류, 방해 금지 시간(시), 아침 요약 시각
+  p = p && typeof p === "object" ? p : {};
+  const quiet = p.quiet === null || p.quiet === false ? null : (Array.isArray(p.quiet) && p.quiet.length === 2 ? [clampInt(p.quiet[0], 0, 23, 22), clampInt(p.quiet[1], 0, 23, 8)] : [22, 8]);
+  return { off: [...new Set((Array.isArray(p.off) ? p.off : []).filter(t => NT_TYPES.includes(t)))], quiet, digest: hmOk(p.digest) ? p.digest : (p.digest === "" ? "" : "08:30") };
+}
+const ntQuiet = (p, h) => !!p.quiet && p.quiet[0] !== p.quiet[1] && (p.quiet[0] < p.quiet[1] ? h >= p.quiet[0] && h < p.quiet[1] : h >= p.quiet[0] || h < p.quiet[1]);
+const kstHour = (ms = Date.now()) => new Date(ms + 9 * 3600e3).getUTCHours();
+const pushHostOk = u => { try { const x = new URL(u); return x.protocol === "https:" && NT_PUSH_HOSTS.some(h => x.hostname.endsWith(h)); } catch (e) { return false; } };
+
+let VAPID = null;
+const VJWT = new Map();
+async function vapid(db) {   // 서버 열쇠 — 없으면 한 번 만들어 보관합니다
+  if (VAPID) return VAPID;
+  let r = await db.prepare("SELECT v FROM mw_meta WHERE k='vapid'").first(), o = r ? parse(r.v) : null;
+  if (!o || !o.d || !o.x || !o.y) {
+    const kp = await crypto.subtle.generateKey({ name: "ECDSA", namedCurve: "P-256" }, true, ["sign", "verify"]);
+    const j = await crypto.subtle.exportKey("jwk", kp.privateKey);
+    await db.prepare("INSERT OR IGNORE INTO mw_meta(k,v) VALUES('vapid',?1)").bind(JSON.stringify({ d: j.d, x: j.x, y: j.y })).run();
+    r = await db.prepare("SELECT v FROM mw_meta WHERE k='vapid'").first(); o = r ? parse(r.v) : null;   // 동시에 만들어졌으면 먼저 저장된 것을 씁니다
+    if (!o) throw new Error("vapid");
+  }
+  const key = await crypto.subtle.importKey("jwk", { kty: "EC", crv: "P-256", d: o.d, x: o.x, y: o.y, ext: true }, { name: "ECDSA", namedCurve: "P-256" }, false, ["sign"]);
+  return (VAPID = { key, pub: b64u(catBytes(new Uint8Array([4]), unb64u(o.x), unb64u(o.y))) });
+}
+async function vapidAuth(db, endpoint) {   // 푸시 서버마다 12시간짜리 서명 하나를 돌려 씁니다
+  const v = await vapid(db), aud = new URL(endpoint).origin, now = Math.floor(Date.now() / 1000), c = VJWT.get(aud);
+  if (c && c.exp - now > 900) return `vapid t=${c.t}, k=${v.pub}`;
+  const exp = now + 12 * 3600, head = b64u(enc.encode('{"typ":"JWT","alg":"ES256"}')), body = b64u(enc.encode(JSON.stringify({ aud, exp, sub: "https://" + CANON_HOST })));
+  const sig = new Uint8Array(await crypto.subtle.sign({ name: "ECDSA", hash: "SHA-256" }, v.key, enc.encode(head + "." + body)));
+  const t = head + "." + body + "." + b64u(sig);
+  VJWT.set(aud, { t, exp }); if (VJWT.size > 20) VJWT.delete(VJWT.keys().next().value);
+  return `vapid t=${t}, k=${v.pub}`;
+}
+async function pushBody(sub, data) {   // 내용 암호화 — RFC 8291 (aes128gcm). 푸시 서버는 내용을 읽지 못합니다
+  const ua = unb64u(sub.p256dh), auth = unb64u(sub.auth);
+  if (ua.length !== 65 || auth.length < 16) throw new Error("bad-sub");
+  const kp = await crypto.subtle.generateKey({ name: "ECDH", namedCurve: "P-256" }, true, ["deriveBits"]);
+  const as = new Uint8Array(await crypto.subtle.exportKey("raw", kp.publicKey));
+  const uaKey = await crypto.subtle.importKey("raw", ua, { name: "ECDH", namedCurve: "P-256" }, false, []);
+  const ecdh = new Uint8Array(await crypto.subtle.deriveBits({ name: "ECDH", public: uaKey }, kp.privateKey, 256));
+  const hk = async (salt, ikm, info, len) => new Uint8Array(await crypto.subtle.deriveBits({ name: "HKDF", hash: "SHA-256", salt, info }, await crypto.subtle.importKey("raw", ikm, "HKDF", false, ["deriveBits"]), len * 8));
+  const ikm = await hk(auth, ecdh, catBytes(enc.encode("WebPush: info\0"), ua, as), 32);
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+  const cek = await hk(salt, ikm, enc.encode("Content-Encoding: aes128gcm\0"), 16), nonce = await hk(salt, ikm, enc.encode("Content-Encoding: nonce\0"), 12);
+  const ct = new Uint8Array(await crypto.subtle.encrypt({ name: "AES-GCM", iv: nonce }, await crypto.subtle.importKey("raw", cek, "AES-GCM", false, ["encrypt"]), catBytes(data, new Uint8Array([2]))));
+  return catBytes(salt, new Uint8Array([0, 0, 16, 0, 65]), as, ct);
+}
+async function pushSend(db, sub, n) {   // 한 기기로 보내기 → HTTP 상태(0 = 닿지 못함)
+  try {
+    const payload = enc.encode(JSON.stringify({ t: clip(n.title, 80), b: clip(n.body, 200), u: clip(n.url, 200), g: clip(n.tag || n.type || "", 60) }));
+    const r = await fetch(sub.endpoint, { method: "POST", headers: { authorization: await vapidAuth(db, sub.endpoint), "content-encoding": "aes128gcm", "content-type": "application/octet-stream", ttl: "86400", urgency: n.type === "digest" ? "low" : "normal" }, body: await pushBody(sub, payload) });
+    return r.status;
+  } catch (e) { return 0; }
+}
+/* jobs: [{w, m, n}] — 받는 사람마다 보낼 내용. 푸시가 열려 있고, 기기를 등록했고, 그 종류를 끄지 않았고, 방해 금지 시간이 아닐 때만 보냅니다 */
+async function pushMany(db, jobs, force) {
+  if (!jobs.length) return { sent: 0, failed: 0, devices: 0 };
+  const plat = await db.prepare("SELECT v FROM mw_meta WHERE k='platform'").first();
+  if (!platformOf(plat && plat.v).feat.push) return { sent: 0, failed: 0, devices: 0, closed: true };
+  const pairs = [...new Map(jobs.map(j => [j.w + "|" + j.m, { w: j.w, m: j.m }])).values()];
+  const subs = (await db.prepare("SELECT s.id, s.ws, s.member_id, s.endpoint, s.p256dh, s.auth, (SELECT v FROM ws_set WHERE ws=s.ws AND k='nt:'||s.member_id) AS pref FROM nt_sub s JOIN json_each(?1) j ON s.ws=json_extract(j.value,'$.w') AND s.member_id=json_extract(j.value,'$.m') JOIN accounts a ON a.ws=s.ws AND a.member_id=s.member_id AND a.status='active' JOIN workspaces w ON w.id=s.ws AND w.status='active' WHERE s.seen_at>=?2").bind(JSON.stringify(pairs), new Date(Date.now() - SESSION_MS).toISOString()).all()).results || [];   // 꺼진 계정·멈춘 워크스페이스, 로그인한 앱이 30일 넘게 다녀가지 않은 기기로는 보내지 않습니다
+  const by = new Map(); for (const s of subs) { const k = s.ws + "|" + s.member_id; if (!by.has(k)) by.set(k, []); by.get(k).push(s); }
+  const hour = kstHour(), todo = [];
+  for (const j of jobs) for (const s of by.get(j.w + "|" + j.m) || []) {
+    const p = ntPrefs(parse(s.pref));
+    if (!force && (p.off.includes(j.n.type) || ntQuiet(p, hour))) continue;
+    if (todo.length < NT_PUSH_BATCH) todo.push([s, j.n]);
+  }
+  const dead = [], bad = [];
+  let sent = 0;
+  await Promise.all(todo.map(async ([s, n]) => { const st = await pushSend(db, s, n); if (st >= 200 && st < 300) sent++; else if (st === 404 || st === 410) dead.push(s.id); else bad.push(s.id); }));
+  if (dead.length || bad.length) await db.batch([
+    db.prepare("UPDATE nt_sub SET fails=fails+1 WHERE id IN (SELECT value FROM json_each(?1))").bind(JSON.stringify([...new Set(bad)])),
+    db.prepare("DELETE FROM nt_sub WHERE id IN (SELECT value FROM json_each(?1)) OR fails>=10").bind(JSON.stringify([...new Set(dead)]))   // 지워진 구독(404·410)과 열 번 연속 실패한 기기는 정리합니다
+  ]);
+  return { sent, failed: dead.length + bad.length, devices: subs.length };
+}
+/* 알림 한 건 — to: 받는 사람(구성원 id) 여럿. 본 흐름을 막지 않도록 실패해도 조용히 넘어갑니다 */
+async function notify(db, ws, to, n) {
+  try {
+    to = [...new Set((Array.isArray(to) ? to : [to]).filter(Boolean).map(String))].slice(0, 60);
+    if (!ws || !to.length || !n || !n.title) return;
+    const type = NT_TYPES.includes(n.type) ? n.type : "sys", one = Object.assign({}, n, { type });
+    if (n.once && await db.prepare("SELECT 1 AS x FROM nt_item WHERE ws=?1 AND type=?2 AND title=?3 AND read_at IS NULL AND at>?4 AND member_id IN (SELECT value FROM json_each(?5)) LIMIT 1").bind(ws, type, clip(n.title, 80), new Date(Date.now() - n.once * 60e3).toISOString(), JSON.stringify(to)).first()) return;   // 같은 알림이 읽히지 않은 채 있으면 또 보내지 않습니다
+    await db.prepare("INSERT INTO nt_item(ws,id,member_id,type,title,body,url,at) SELECT ?1, ?2||'_'||j.key, j.value, ?3, ?4, ?5, ?6, ?7 FROM json_each(?8) j").bind(ws, uid("n"), type, clip(n.title, 80), clip(n.body, 240), clip(n.url, 200), iso(), JSON.stringify(to)).run();
+    const p = pushMany(db, to.map(m => ({ w: ws, m, n: one }))).catch(() => {});
+    if (db.wait) db.wait(p); else await p;
+  } catch (e) {}
+}
+const whoIs = async (db, ws, roles) => ((await db.prepare("SELECT member_id FROM accounts WHERE ws=?1 AND status='active' AND role IN (SELECT value FROM json_each(?2))").bind(ws, JSON.stringify(roles)).all()).results || []).map(r => r.member_id);
+const opsWho = async (db, perm) => ((await db.prepare("SELECT ws, member_id, is_owner, op_role FROM accounts WHERE status='active' AND (is_owner=1 OR op_role IS NOT NULL)").all()).results || []).filter(r => (OP_ROLES[opOf(r)] || { perms: [] }).perms.includes(perm));   // 운영팀 가운데 그 일을 맡은 사람
+async function notifyOps(db, perm, n) { try { const L = await opsWho(db, perm); if (L.length) await notify(db, L[0].ws, L.map(x => x.member_id), n); } catch (e) {} }
+/* 동기화(push)로 들어온 변경에서 알릴 것 — 다른 사람에게 새로 맡긴 업무, 검토로 넘어온 업무, 프로젝트·매장에 남긴 의견 */
+async function pushNotes(db, me, tasks, prev, cmts, lookup) {
+  try {
+    const give = new Map(), review = [];
+    for (const x of tasks) {
+      const p = prev.get(x.id), pd = p ? parse(p.data) || {} : null, to = String(x.data.assigneeId || "");
+      if (to && to !== me.id && x.data.status !== "완료" && (!p || p.own !== to)) { if (!give.has(to)) give.set(to, []); give.get(to).push(x.data); }
+      if (x.data.status === "검토" && (!pd || pd.status !== "검토")) review.push(x.data);
+    }
+    const pids = [...new Set(review.map(t => t.projectId).concat(cmts.map(c => c.data.projectId)).filter(Boolean).map(String))], sids = [...new Set(cmts.map(c => c.data.storeId).filter(Boolean).map(String))];
+    const P = pids.length ? await lookup("project", pids) : new Map(), S = sids.length ? await lookup("store", sids) : new Map();
+    const dataOf = (m, id) => { const r = m.get(String(id || "")); return r ? parse(r.data) || {} : null; };
+    const names = list => list.slice(0, 3).map(t => clip(t.title, 40)).join(" · ") + (list.length > 3 ? " 외" : "");
+    let n = 0;
+    for (const [to, list] of give) { if (n++ >= 6) break; await notify(db, me.ws, [to], { type: "task", title: list.length > 1 ? `업무 ${list.length}건이 배정되었습니다` : "새 업무가 배정되었습니다", body: names(list), url: "#/board", tag: "task-give" }); }
+    const byOwner = new Map();
+    for (const t of review) { const pj = dataOf(P, t.projectId), owner = String((pj && pj.ownerId) || ""); if (owner && owner !== me.id) { if (!byOwner.has(owner)) byOwner.set(owner, []); byOwner.get(owner).push(t); } }
+    for (const [to, list] of byOwner) { if (n++ >= 9) break; await notify(db, me.ws, [to], { type: "task", title: list.length > 1 ? `검토를 기다리는 업무가 ${list.length}건 있습니다` : "검토를 기다리는 업무가 있습니다", body: names(list), url: "#/dashboard", tag: "task-review" }); }
+    for (const c of cmts.slice(0, 4)) {
+      const pj = c.data.projectId ? dataOf(P, c.data.projectId) : null, st = !pj && c.data.storeId ? dataOf(S, c.data.storeId) : null, d = pj || st; if (!d) continue;
+      const to = [...new Set([pj ? d.ownerId : d.managerId].concat(Array.isArray(d.memberIds) ? d.memberIds : []).filter(x => x && x !== me.id).map(String))];
+      if (to.length) await notify(db, me.ws, to, { type: "task", title: `${me.name || "구성원"} 님이 의견을 남겼습니다`, body: `${clip(d.name, 30)} — ${clip(c.data.text, 80)}`, url: pj ? "#/project/" + c.data.projectId : "#/store/" + c.data.storeId, tag: "cmt" });
+    }
+  } catch (e) {}
+}
+
+Object.assign(PRIVATE, {
+  async "nt/list"(db, me) {
+    const [a, b] = await db.batch([
+      db.prepare("SELECT id,type,title,body,url,at,read_at FROM nt_item WHERE ws=?1 AND member_id=?2 ORDER BY at DESC, id DESC LIMIT 80").bind(me.ws, me.id),
+      db.prepare("SELECT (SELECT v FROM ws_set WHERE ws=?1 AND k=?3) AS pref, (SELECT v FROM mw_meta WHERE k='platform') AS plat, (SELECT COUNT(*) FROM nt_sub WHERE ws=?1 AND member_id=?2) AS subs, (SELECT COUNT(*) FROM nt_item WHERE ws=?1 AND member_id=?2 AND read_at IS NULL) AS unread").bind(me.ws, me.id, "nt:" + me.id)
+    ]);
+    const x = ((b && b.results) || [])[0] || {}, open = platformOf(x.plat).feat.push;
+    return json({ ok: true, items: (a && a.results) || [], unread: Number(x.unread) || 0, prefs: ntPrefs(parse(x.pref)), push: { open, key: open ? (await vapid(db)).pub : "", devices: Number(x.subs) || 0 } });
+  },
+  async "nt/read"(db, me, b) {
+    const ids = (Array.isArray(b.ids) ? b.ids : []).map(x => clip(x, 60)).filter(Boolean).slice(0, 200);
+    if (!b.all && !ids.length) return fail("bad-request");
+    await db.prepare("UPDATE nt_item SET read_at=?3 WHERE ws=?1 AND member_id=?2 AND read_at IS NULL" + (b.all ? "" : " AND id IN (SELECT value FROM json_each(?4))")).bind(...[me.ws, me.id, iso()].concat(b.all ? [] : [JSON.stringify(ids)])).run();
+    const r = await db.prepare("SELECT COUNT(*) AS n FROM nt_item WHERE ws=?1 AND member_id=?2 AND read_at IS NULL").bind(me.ws, me.id).first();
+    return json({ ok: true, unread: r ? Number(r.n) : 0 });
+  },
+  async "nt/prefs"(db, me, b) {
+    const p = ntPrefs(b.prefs);
+    await db.prepare("INSERT INTO ws_set(ws,k,v) VALUES(?1,?2,?3) ON CONFLICT(ws,k) DO UPDATE SET v=excluded.v").bind(me.ws, "nt:" + me.id, JSON.stringify(p)).run();
+    return json({ ok: true, prefs: p });
+  },
+  async "nt/sub"(db, me, b) {   // 이 기기에서 푸시 받기
+    const plat = await platform(db);
+    if (!plat.feat.push) return fail("push-closed", 403);
+    const ep = clip(b.endpoint, 600), k = b.keys && typeof b.keys === "object" ? b.keys : {}, p256dh = clip(k.p256dh, 120), auth = clip(k.auth, 60);
+    if (!pushHostOk(ep) || unb64u(p256dh).length !== 65 || unb64u(auth).length < 16) return fail("bad-sub");
+    const now = iso();
+    await db.batch([
+      db.prepare("INSERT INTO nt_sub(id,ws,member_id,endpoint,p256dh,auth,ua,created_at,fails,seen_at) VALUES(?1,?2,?3,?4,?5,?6,?7,?8,0,?8) ON CONFLICT(endpoint) DO UPDATE SET ws=excluded.ws, member_id=excluded.member_id, p256dh=excluded.p256dh, auth=excluded.auth, ua=excluded.ua, fails=0, seen_at=excluded.seen_at").bind(uid("ps"), me.ws, me.id, ep, p256dh, auth, clip(b.ua, 80), now),
+      db.prepare("DELETE FROM nt_sub WHERE ws=?1 AND member_id=?2 AND id NOT IN (SELECT id FROM nt_sub WHERE ws=?1 AND member_id=?2 ORDER BY created_at DESC LIMIT ?3)").bind(me.ws, me.id, NT_MAX_DEVICES)   // 한 사람에 기기 8대까지
+    ]);
+    const r = await db.prepare("SELECT COUNT(*) AS n FROM nt_sub WHERE ws=?1 AND member_id=?2").bind(me.ws, me.id).first();
+    return json({ ok: true, devices: r ? Number(r.n) : 1 });
+  },
+  async "nt/unsub"(db, me, b) {
+    if (b.all) await db.prepare("DELETE FROM nt_sub WHERE ws=?1 AND member_id=?2").bind(me.ws, me.id).run();
+    else await db.prepare("DELETE FROM nt_sub WHERE ws=?1 AND member_id=?2 AND endpoint=?3").bind(me.ws, me.id, clip(b.endpoint, 600)).run();
+    const r = await db.prepare("SELECT COUNT(*) AS n FROM nt_sub WHERE ws=?1 AND member_id=?2").bind(me.ws, me.id).first();
+    return json({ ok: true, devices: r ? Number(r.n) : 0 });
+  },
+  async "nt/test"(db, me) {   // 내 기기로 시험 알림 — 방해 금지 시간이어도 보냅니다
+    const r = await pushMany(db, [{ w: me.ws, m: me.id, n: { type: "sys", title: "마이웍스 알림이 켜졌습니다", body: "일이 생기면 이렇게 알려 드립니다.", url: "#/dashboard", tag: "test" } }], true);
+    if (r.closed) return fail("push-closed", 403);
+    if (!r.devices) return fail("no-device", 400);
+    return json(Object.assign({ ok: true }, r));
+  },
+  async "nt/plan"(db, me, b) {   // 앞으로 챙길 것 맡기기 — 묶음(ns)마다 보낼 때 통째로 바꿉니다
+    const ns = /^[a-z]{2,8}$/.test(b.ns) ? b.ns : "app";
+    const now = Date.now(), seen = new Set(), rows = [];
+    for (const x of (Array.isArray(b.items) ? b.items : []).slice(0, 300)) {
+      if (!x || typeof x !== "object") continue;
+      const k = clip(x.k, 50), title = clip(x.title, 80), t = Date.parse(x.due);
+      if (!k || !title || seen.has(k) || !Number.isFinite(t) || t < now - 3600e3 || t > now + 31 * 864e5) continue;
+      seen.add(k);
+      rows.push({ k: ns + ":" + k, due: new Date(t).toISOString(), type: NT_TYPES.includes(x.type) ? x.type : "due", title, body: clip(x.body, 240), url: clip(x.url, 200) });
+      if (rows.length >= NT_MAX_PLAN) break;
+    }
+    const stmts = [db.prepare("DELETE FROM nt_sched WHERE ws=?1 AND member_id=?2 AND k LIKE ?3").bind(me.ws, me.id, ns + ":%")];
+    if (rows.length) stmts.push(db.prepare("INSERT INTO nt_sched(ws,member_id,k,due,type,title,body,url) SELECT ?1, ?2, json_extract(value,'$.k'), json_extract(value,'$.due'), json_extract(value,'$.type'), json_extract(value,'$.title'), json_extract(value,'$.body'), json_extract(value,'$.url') FROM json_each(?3)").bind(me.ws, me.id, JSON.stringify(rows)));
+    await db.batch(stmts);
+    return json({ ok: true, planned: rows.length });
+  },
+  async "nt/upcoming"(db, me) {   // 앞으로 2주 안에 날짜가 걸린 일(받을 돈·견적 유효기간·협찬 마감) — 앱이 아침 요약과 전날 알림을 짤 때 씁니다
+    if (!isMgr(me)) return json({ ok: true, items: [], late: [] });
+    const today = kstToday(), to = addDaysS(today, 14);
+    const qs = [
+      db.prepare("SELECT v.id, v.no, v.due_date, j.title, j.client_name FROM os_invoice v LEFT JOIN os_job j ON j.ws=v.ws AND j.id=v.job_id WHERE v.ws=?1 AND v.status='issued' AND v.due_date IS NOT NULL AND v.due_date<>'' AND v.due_date<=?2 ORDER BY v.due_date LIMIT 60").bind(me.ws, to),
+      db.prepare("SELECT q.id, q.no, q.valid_until, j.title, j.client_name FROM os_quote q LEFT JOIN os_job j ON j.ws=q.ws AND j.id=q.job_id WHERE q.ws=?1 AND q.status='sent' AND q.valid_until>=?2 AND q.valid_until<=?3 ORDER BY q.valid_until LIMIT 40").bind(me.ws, today, to)
+    ];
+    if (hasMod(me, "creator")) qs.push(db.prepare("SELECT id, brand, title, stage, draft_due, post_due, pay_due FROM cr_deal WHERE ws=?1 AND stage IN ('contract','making','review','posted','settle') LIMIT 300").bind(me.ws));
+    const rs = await db.batch(qs), rows = i => (rs[i] && rs[i].results) || [], items = [], late = [];
+    const label = (a, b, c) => [a, b].filter(Boolean).join(" · ") || c;
+    for (const v of rows(0)) (v.due_date < today ? late : items).push({ k: "inv:" + v.id, date: v.due_date, type: "money", title: "입금 기한 — " + label(v.client_name, v.title, v.no || "청구서"), url: "#/outsourcing/bills" });
+    for (const q of rows(1)) items.push({ k: "qt:" + q.id, date: q.valid_until, type: "money", title: "견적 유효기간 — " + label(q.client_name, q.title, q.no || "견적"), url: "#/outsourcing/quotes" });
+    for (const d of rows(2)) {
+      const name = label(d.brand, d.title, "협찬");
+      const add = (key, date, t) => { if (!dOk(date) || date > to) return; (date < today ? late : items).push({ k: "cr:" + key + ":" + d.id, date, type: key === "pay" ? "money" : "due", title: t + " — " + name, url: "#/creator/deal" }); };
+      if (["contract", "making"].includes(d.stage)) add("draft", d.draft_due, "초안 마감");
+      if (["contract", "making", "review"].includes(d.stage)) add("post", d.post_due, "게시 마감");
+      if (["posted", "settle"].includes(d.stage)) add("pay", d.pay_due, "입금 예정");
+    }
+    return json({ ok: true, today, items, late });
+  }
+});
+
+/* ── tick — 때가 된 예약 알림을 보내고, 묵은 알림을 정리합니다. 5분 안에 여러 번 불려도 한 번만 일합니다 ── */
+const TICK_GAP = 240e3;
+let TICK_MEM = 0;
+function maybeTick(db) { const now = Date.now(); if (now - TICK_MEM < 300e3) return; TICK_MEM = now; const p = tick(db, true).catch(() => {}); if (db.wait) db.wait(p); }
+/* light: 다른 요청에 얹혀 돌 때 — 그 요청이 쓴 쿼리와 한도를 나눠 쓰므로 자동 작업은 한 번에 하나씩만 번갈아 돌립니다. /api/tick 으로 따로 불릴 때는 모두 돌립니다 */
+async function tick(db, light) {
+  const now = Date.now(), nowIso = new Date(now).toISOString();
+  const got = await db.prepare("UPDATE mw_meta SET v=?1 WHERE k='tick' AND v<?2").bind(ts(now), ts(now - TICK_GAP)).run();
+  if (!(got.meta && got.meta.changes)) {
+    const ins = await db.prepare("INSERT OR IGNORE INTO mw_meta(k,v) VALUES('tick',?1)").bind(ts(now)).run();
+    if (!(ins.meta && ins.meta.changes)) return { ok: true, ran: false };
+  }
+  const out = { ok: true, ran: true, due: 0, sent: 0 };
+  const due = (await db.prepare("SELECT s.rowid AS rid, s.ws, s.member_id, s.due, s.type, s.title, s.body, s.url, a.status AS ast, w.status AS wst FROM nt_sched s LEFT JOIN accounts a ON a.ws=s.ws AND a.member_id=s.member_id LEFT JOIN workspaces w ON w.id=s.ws WHERE s.due<=?1 ORDER BY s.due LIMIT 60").bind(nowIso).all()).results || [];
+  if (due.length) {
+    const live = due.filter(d => d.ast === "active" && d.wst === "active" && Date.parse(d.due) > now - 36 * 3600e3);   // 하루 반 넘게 늦은 것은 보내지 않고 지웁니다
+    const stmts = [db.prepare("DELETE FROM nt_sched WHERE rowid IN (SELECT value FROM json_each(?1))").bind(JSON.stringify(due.map(d => d.rid)))];
+    if (live.length) stmts.unshift(db.prepare("INSERT INTO nt_item(ws,id,member_id,type,title,body,url,at) SELECT json_extract(value,'$.ws'), ?2||'_'||key, json_extract(value,'$.member_id'), json_extract(value,'$.type'), json_extract(value,'$.title'), json_extract(value,'$.body'), json_extract(value,'$.url'), ?3 FROM json_each(?1)").bind(JSON.stringify(live), uid("n"), nowIso));
+    await db.batch(stmts);
+    out.due = live.length;
+    if (live.length) out.sent = (await pushMany(db, live.map(d => ({ w: d.ws, m: d.member_id, n: { type: d.type, title: d.title, body: d.body, url: d.url, tag: d.type } })))).sent;
+  }
+  const jobs = light && TICK_JOBS.length > 1 ? [TICK_JOBS[Math.floor(now / TICK_GAP) % TICK_JOBS.length]] : TICK_JOBS;
+  for (const job of jobs) { try { Object.assign(out, await job(db, now)); } catch (e) { out.err = String((e && e.message) || e).slice(0, 120); } }
+  if (new Date(now).getUTCMinutes() < 5) await db.batch([   // 한 시간에 한 번쯤 — 45일 지난 알림, 때를 놓친 예약, 1년 지난 문자 기록, 90일 지난 수집 기록을 치웁니다
+    db.prepare("DELETE FROM nt_item WHERE at<?1").bind(new Date(now - 45 * 864e5).toISOString()),
+    db.prepare("DELETE FROM nt_sched WHERE due<?1").bind(new Date(now - 2 * 864e5).toISOString()),
+    db.prepare("DELETE FROM msg_log WHERE at<?1").bind(new Date(now - MSG_KEEP_DAYS * 864e5).toISOString()),
+    db.prepare("DELETE FROM ht_job WHERE at<?1").bind(new Date(now - 90 * 864e5).toISOString())
+  ]);
+  return out;
+}
+const TICK_JOBS = [];   // 문자 자동 안내 · 홈택스 자동 수집이 여기에 일을 겁니다
+PUBLIC.tick = async function (db) { return json(await tick(db)); };
+
+/* ═════════ 문자·알림톡 — 내 발송 계정(솔라피)으로 고객·거래처에게 거래 안내를 보냅니다 ═════════
+   · 워크스페이스마다 자기 솔라피 계정의 API 키를 연결합니다. 키는 금고(MW_VAULT_KEY)로 암호화해 두고 화면으로 다시 보내지 않습니다.
+   · 보내는 것은 거래와 관련된 안내(견적·청구·납품·발주·명세서·예약 안내)뿐입니다. 광고 문자는 받지 않습니다.
+   · 알림톡은 솔라피에서 심사받은 템플릿을 용도에 이어 두면 그 템플릿으로 나가고, 실패하면 문자로 대신 갑니다(솔라피의 대체 발송).
+   · 자동 안내(입금 기한·견적 회신·예약 전날)는 켠 워크스페이스만, 오전 9시~오후 8시 사이에, 보내기 직전에 상태를 다시 확인하고 보냅니다. */
+const MSG_DDL = [
+  "CREATE TABLE IF NOT EXISTS msg_log(ws TEXT NOT NULL, id TEXT NOT NULL, at TEXT NOT NULL, by_id TEXT, by_name TEXT, kind TEXT NOT NULL, to_no TEXT NOT NULL, to_name TEXT, text TEXT, tpl TEXT, ref_kind TEXT, ref_id TEXT, status TEXT NOT NULL, pid TEXT, err TEXT, auto INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(ws,id))",
+  "CREATE INDEX IF NOT EXISTS idx_msg_log_at ON msg_log(ws, at)",
+  "CREATE INDEX IF NOT EXISTS idx_msg_log_ref ON msg_log(ws, ref_kind, ref_id, tpl)",
+  "CREATE TABLE IF NOT EXISTS msg_auto(ws TEXT PRIMARY KEY, next_at TEXT NOT NULL)"
+];
+const MSG_TABLES = ["msg_log", "msg_auto"];
+const MSG_AUTO_TRIES = 2;   // 같은 자동 안내는 실패해도 두 번까지만 시도합니다
+const MSG_KEEP_DAYS = 365;   // 보낸 기록은 1년 뒤에 지웁니다
+const MSG_FIELDS = ["상호", "이름", "제목", "금액", "기한", "링크", "코드", "날짜", "시간", "지점", "안내"];
+/* 용도마다 기본 문구 — {이름}처럼 적은 자리는 보낼 때 채웁니다 */
+const MSG_TPL = {
+  "link.quote": ["견적서 보내기", "[{상호}] {이름}님, 요청하신 견적서를 보내드립니다.\n{제목}\n{링크}"],
+  "link.invoice": ["청구서 보내기", "[{상호}] {이름}님, 청구서를 보내드립니다.\n{제목} {금액}\n입금 기한 {기한}\n{링크}"],
+  "link.delivery": ["납품 확인 요청", "[{상호}] {이름}님, 납품물을 확인해 주세요.\n{제목}\n{링크}"],
+  "link.po": ["발주서 보내기", "[{상호}] 발주서를 보내드립니다. 확인 부탁드립니다.\n{제목}\n{링크}"],
+  "link.payslip": ["임금명세서 보내기", "[{상호}] {이름}님, {제목}입니다.\n{링크}"],
+  "link.project": ["진행 상황 공유", "[{상호}] {제목} 진행 상황을 공유드립니다.\n{링크}"],
+  "link.cr-deal": ["협찬 조건 확인 요청", "[{상호}] {이름}님, 협의한 조건을 정리해 보내드립니다. 확인 부탁드립니다.\n{링크}"],
+  "invite": ["초대 링크 보내기", "[{상호}] {이름}님을 마이웍스에 초대합니다. 아래 주소에서 바로 참여할 수 있습니다.\n{링크}"],
+  "auto.invDue": ["입금 기한 전 안내", "[{상호}] {이름}님, {제목} 청구서의 입금 기한이 {기한}입니다.\n{링크}"],
+  "auto.invLate": ["입금 기한 지남 안내", "[{상호}] {이름}님, {제목} 청구서의 입금 기한({기한})이 지났습니다. 확인 부탁드립니다.\n{링크}"],
+  "auto.quoteNudge": ["견적 회신 요청", "[{상호}] {이름}님, 보내드린 견적서를 확인해 주세요.\n{제목}\n{링크}"],
+  "auto.resEve": ["예약 전날 안내", "[{상호}] {이름}님, 내일({날짜}) {시간} {지점} 예약 안내드립니다.\n{안내}"],
+  "free": ["직접 쓰기", ""]
+};
+const MSG_AUTO = { invDue: { on: false, days: 1 }, invLate: { on: false, days: 3 }, quoteNudge: { on: false, days: 3 }, resEve: { on: false, hour: 18, note: "" } };
+const MSG_DAY_MAX = 2000, MSG_SEND_MAX = 50, MSG_AUTO_RUN = 30;
+const phoneKR = s => { let d = String(s || "").replace(/[^0-9]/g, ""); if (d.startsWith("82") && d.length >= 11) d = "0" + d.slice(2); return /^01[016789]\d{7,8}$/.test(d) ? d : ""; };   // 휴대폰 번호만
+const smsBytes = t => { let n = 0; for (const ch of String(t || "")) n += ch.codePointAt(0) <= 0x7f ? 1 : 2; return n; };
+const msgFill = (tpl, f) => String(tpl || "").replace(/\{([^{}\n]{1,10})\}/g, (m, k) => MSG_FIELDS.includes(k) ? String((f && f[k]) ?? "") : m).replace(/[ \t]+\n/g, "\n").replace(/\n{3,}/g, "\n\n").trim();
+function msgNorm(s) {
+  s = s && typeof s === "object" ? s : {};
+  const k = s.kakao && typeof s.kakao === "object" ? s.kakao : {}, a = s.auto && typeof s.auto === "object" ? s.auto : {}, t = s.tpl && typeof s.tpl === "object" ? s.tpl : {};
+  const map = {};
+  for (const key of Object.keys(MSG_TPL)) {
+    const m = k.map && k.map[key];
+    if (!m || typeof m !== "object" || !clip(m.templateId, 60)) continue;
+    const vars = {};
+    for (const [vn, fv] of Object.entries(m.vars && typeof m.vars === "object" ? m.vars : {}).slice(0, 20)) { const name = clip(vn, 30), val = clip(fv, 80); if (name) vars[name] = val; }
+    map[key] = { templateId: clip(m.templateId, 60), name: clip(m.name, 60), vars };
+  }
+  const tpl = {};
+  for (const key of Object.keys(MSG_TPL)) { const v = typeof t[key] === "string" ? t[key].replace(/\r/g, "").trim().slice(0, 600) : ""; if (v && v !== MSG_TPL[key][1]) tpl[key] = v; }
+  const on = x => !!(x && x.on);
+  return {
+    sign: clip(s.sign, 20), from: String(s.from || "").replace(/[^0-9]/g, "").slice(0, 12),
+    kakao: { on: !!k.on, pfId: clip(k.pfId, 60), map },
+    tpl,
+    auto: {
+      invDue: { on: on(a.invDue), days: clampInt(a.invDue && a.invDue.days, 0, 14, 1) },
+      invLate: { on: on(a.invLate), days: clampInt(a.invLate && a.invLate.days, 1, 30, 3) },
+      quoteNudge: { on: on(a.quoteNudge), days: clampInt(a.quoteNudge && a.quoteNudge.days, 1, 30, 3) },
+      resEve: { on: on(a.resEve), hour: clampInt(a.resEve && a.resEve.hour, 9, 19, 18), note: clip(a.resEve && a.resEve.note, 300) }
+    },
+    dayMax: clampInt(s.dayMax, 1, MSG_DAY_MAX, 300)
+  };
+}
+const msgAutoOn = set => Object.values(set.auto).some(x => x.on);
+const msgTextOf = (set, key) => set.tpl[key] || (MSG_TPL[key] ? MSG_TPL[key][1] : "");
+async function msgState(db, ws) {   // 연결 정보(봉인) + 설정 — 질의 한 번
+  const m = await modSettings(db, ws, "msg");
+  const c = m.conn && typeof m.conn === "object" ? m.conn : null;
+  return { conn: c, set: msgNorm(m.settings) };
+}
+const msgConnPublic = c => c ? { on: true, tail: c.tail || "…", at: c.at || "", balance: c.balance ?? null, point: c.point ?? null, checkedAt: c.checkedAt || "", senders: c.senders || [], channels: c.channels || [], templates: c.templates || [] } : { on: false };
+/* 솔라피 API — 서명: HMAC-SHA256(API Secret, 날짜+소금)을 16진수로 */
+async function solapi(sec, method, path, body) {
+  const date = new Date().toISOString(), salt = rand(16);
+  const key = await crypto.subtle.importKey("raw", enc.encode(sec.secret), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
+  const sig = hex(new Uint8Array(await crypto.subtle.sign("HMAC", key, enc.encode(date + salt))));
+  let r;
+  try { r = await fetch("https://api.solapi.com" + path, { method, headers: { authorization: `HMAC-SHA256 apiKey=${sec.key}, date=${date}, salt=${salt}, signature=${sig}`, "content-type": "application/json" }, body: body ? JSON.stringify(body) : undefined }); }
+  catch (e) { return { ok: false, status: 0, j: null }; }
+  const j = await r.json().catch(() => null);
+  return { ok: r.ok, status: r.status, j };
+}
+const solErr = x => x.status === 0 ? "upstream" : (x.status === 401 || x.status === 403) ? "bad-key" : "upstream";
+async function msgSecret(env, c) { const t = c && c.sealed ? await unseal(env, c.sealed) : ""; const o = t ? parse(t) : null; return o && o.key && o.secret ? o : null; }
+/* 한 번에 여러 건 보내기 — items: [{to, name, text, tpl, ref_kind, ref_id, fields}] → 건마다 결과. 기록(msg_log)에 남길 줄도 함께 돌려줍니다 */
+async function msgDispatch(sec, set, items, opt) {
+  const useK = !!opt.kakao && set.kakao.on && !!set.kakao.pfId;
+  const out = [], messages = [], idx = [];
+  for (const it of items) {
+    const row = { to: it.to, name: it.name || "", text: it.text, tpl: it.tpl || "free", ref_kind: it.ref_kind || null, ref_id: it.ref_id || null, kind: "", status: "failed", pid: "", err: "" };
+    out.push(row);
+    const km = useK ? set.kakao.map[row.tpl] : null;
+    let vars = null;
+    if (km) { vars = {}; for (const [vn, fv] of Object.entries(km.vars)) { const val = fv.startsWith("=") ? fv.slice(1) : String((it.fields && it.fields[fv]) ?? ""); if (!val) { vars = null; break; } vars["#{" + vn + "}"] = val; } }   // 빈 칸이 하나라도 있으면 알림톡 대신 문자로 보냅니다
+    if (vars) { row.kind = "ata"; messages.push({ to: it.to, from: set.from, kakaoOptions: { pfId: set.kakao.pfId, templateId: km.templateId, variables: vars } }); }
+    else { const b = smsBytes(it.text); if (b > 2000) { row.err = "too-long"; continue; } row.kind = b <= 90 ? "sms" : "lms"; const m = { to: it.to, from: set.from, text: it.text, type: b <= 90 ? "SMS" : "LMS" }; if (b > 90 && set.sign) m.subject = set.sign.slice(0, 20); messages.push(m); }
+    idx.push(out.length - 1);
+  }
+  if (!messages.length) return { rows: out, balance: null };
+  const x = await solapi(sec, "POST", "/messages/v4/send-many/detail", { messages, showMessageList: true });
+  if (!x.j || (!x.ok && !Array.isArray(x.j.failedMessageList) && !x.j.groupInfo)) { const e = x.j && (x.j.errorMessage || x.j.errorCode) ? clip(x.j.errorMessage || x.j.errorCode, 120) : solErr(x); for (const i of idx) out[i].err = e; return { rows: out, balance: null, fatal: solErr(x), detail: e, unknown: x.status === 0 || x.status >= 500 }; }   // unknown: 응답을 받지 못해 접수됐는지 알 수 없는 경우
+  // 접수에 실패한 건은 failedMessageList에 받는 번호와 함께 옵니다. 나머지는 접수된 것으로 봅니다
+  const digits = v => String(v || "").replace(/[^0-9]/g, ""), g = x.j.groupInfo || {};
+  const failed = new Map(); for (const f of x.j.failedMessageList || []) { const k = digits(f && f.to); if (!failed.has(k)) failed.set(k, []); failed.get(k).push(f); }
+  const ml = new Map(); for (const m of (Array.isArray(x.j.messageList) ? x.j.messageList : Object.values(x.j.messageList || {}))) { const k = digits(m && m.to); if (k) { if (!ml.has(k)) ml.set(k, []); ml.get(k).push(m); } }
+  for (const i of idx) {
+    const row = out[i], f = (failed.get(row.to) || []).shift();
+    if (f) { row.err = clip(f.statusMessage || f.statusCode || "failed", 120); continue; }
+    const m = (ml.get(row.to) || []).shift();
+    row.status = "sent"; row.pid = clip((m && m.messageId) || g.groupId || g._id || "", 60);
+  }
+  return { rows: out, balance: g.balance != null ? Number(g.balance) : null, point: g.point != null ? Number(g.point) : null };
+}
+const msgLogStmt = (db, ws, rows, by, auto) => db.prepare("INSERT INTO msg_log(ws,id,at,by_id,by_name,kind,to_no,to_name,text,tpl,ref_kind,ref_id,status,pid,err,auto) SELECT ?1, ?2||'_'||key, ?3, ?4, ?5, json_extract(value,'$.kind'), json_extract(value,'$.to'), json_extract(value,'$.name'), json_extract(value,'$.text'), json_extract(value,'$.tpl'), json_extract(value,'$.ref_kind'), json_extract(value,'$.ref_id'), json_extract(value,'$.status'), json_extract(value,'$.pid'), json_extract(value,'$.err'), ?6 FROM json_each(?7)").bind(ws, uid("mg"), iso(), by ? by.id : null, by ? by.name : "자동", auto ? 1 : 0, JSON.stringify(rows.map(r => Object.assign({}, r, { kind: r.kind || "sms", text: clip(r.text, 1000) }))));
+const msgCountSql = "SELECT COUNT(*) AS n FROM msg_log WHERE ws=?1 AND status='sent' AND at>=?2";
+const kstDayStart = () => new Date(Date.parse(kstToday() + "T00:00:00Z") - 9 * 3600e3).toISOString();
+
+Object.assign(PRIVATE, {
+  async "msg/data"(db, me, b, req, url, env) {
+    if (!isMgr(me)) return fail("forbidden", 403);
+    const st = await msgState(db, me.ws);
+    const [a, c, l] = await db.batch([
+      db.prepare(msgCountSql).bind(me.ws, kstDayStart()),
+      db.prepare(msgCountSql).bind(me.ws, kstToday().slice(0, 7) + "-01T00:00:00.000Z"),
+      db.prepare("SELECT id,at,by_name,kind,to_no,to_name,text,tpl,ref_kind,ref_id,status,err,auto FROM msg_log WHERE ws=?1 ORDER BY at DESC, id DESC LIMIT 100").bind(me.ws)
+    ]);
+    const n = r => Number((((r && r.results) || [])[0] || {}).n) || 0;
+    return json({ ok: true, open: !!vaultKey(env), conn: msgConnPublic(st.conn), settings: st.set, today: n(a), month: n(c), log: (l && l.results) || [], tpl: Object.fromEntries(Object.entries(MSG_TPL).map(([k, v]) => [k, { name: v[0], text: v[1] }])), fields: MSG_FIELDS });
+  },
+  async "msg/connect"(db, me, b, req, url, env) {   // 내 솔라피 API 키 연결 — 잔액과 발신번호를 읽어 키가 맞는지 확인합니다
+    if (me.role !== "admin") return fail("forbidden", 403);
+    if (!vaultKey(env)) return fail("no-vault", 400, { hint: "운영자가 Cloudflare에 MW_VAULT_KEY(16자 이상)를 넣어야 연결할 수 있습니다." });
+    const key = clip(b.key, 100), secret = clip(b.secret, 100);
+    if (key.length < 8 || secret.length < 8) return fail("bad-request");
+    const sec = { key, secret };
+    const bal = await solapi(sec, "GET", "/cash/v1/balance");
+    if (!bal.ok || !bal.j) return fail(solErr(bal), 400, { detail: bal.j && (bal.j.errorMessage || bal.j.errorCode) ? clip(bal.j.errorMessage || bal.j.errorCode, 160) : "" });
+    const snd = await solapi(sec, "GET", "/senderid/v1/numbers/active");
+    const senders = (Array.isArray(snd.j) ? snd.j : []).map(x => String((x && x.phoneNumber) || "").replace(/[^0-9]/g, "")).filter(Boolean).slice(0, 30);
+    const now = iso(), conn = { sealed: await seal(env, JSON.stringify(sec)), tail: mkTail(key), at: now, by: me.id, balance: Number(bal.j.balance) || 0, point: Number(bal.j.point) || 0, checkedAt: now, senders, channels: [], templates: [] };
+    const st = await msgState(db, me.ws), set = st.set;
+    if (!senders.includes(set.from)) set.from = senders[0] || "";
+    if (!set.sign) set.sign = clip(me.wname, 20);
+    await db.batch([
+      db.prepare("INSERT INTO mod_set(ws,mod,k,v) VALUES(?1,'msg','conn',?2) ON CONFLICT(ws,mod,k) DO UPDATE SET v=excluded.v").bind(me.ws, JSON.stringify(conn)),
+      db.prepare("INSERT INTO mod_set(ws,mod,k,v) VALUES(?1,'msg','settings',?2) ON CONFLICT(ws,mod,k) DO UPDATE SET v=excluded.v").bind(me.ws, JSON.stringify(set))
+    ]);
+    return json({ ok: true, conn: msgConnPublic(conn), settings: set });
+  },
+  async "msg/disconnect"(db, me) {
+    if (me.role !== "admin") return fail("forbidden", 403);
+    await db.batch([db.prepare("DELETE FROM mod_set WHERE ws=?1 AND mod='msg' AND k='conn'").bind(me.ws), db.prepare("DELETE FROM msg_auto WHERE ws=?1").bind(me.ws)]);
+    return json({ ok: true, conn: { on: false } });
+  },
+  async "msg/refresh"(db, me, b, req, url, env) {   // 잔액 · 발신번호 · 카카오 채널 · 알림톡 템플릿 다시 읽기
+    if (!isMgr(me)) return fail("forbidden", 403);
+    const st = await msgState(db, me.ws), sec = await msgSecret(env, st.conn);
+    if (!sec) return fail("not-connected", 400);
+    const [bal, snd, ch, tp] = await Promise.all([solapi(sec, "GET", "/cash/v1/balance"), solapi(sec, "GET", "/senderid/v1/numbers/active"), solapi(sec, "GET", "/kakao/v2/channels?limit=50"), solapi(sec, "GET", "/kakao/v2/templates/sendable")]);
+    if (!bal.ok) return fail(solErr(bal), 400);
+    const conn = Object.assign({}, st.conn, {
+      balance: Number(bal.j && bal.j.balance) || 0, point: Number(bal.j && bal.j.point) || 0, checkedAt: iso(),
+      senders: (Array.isArray(snd.j) ? snd.j : []).map(x => String((x && x.phoneNumber) || "").replace(/[^0-9]/g, "")).filter(Boolean).slice(0, 30),
+      channels: ((ch.j && Array.isArray(ch.j.channelList)) ? ch.j.channelList : []).map(x => ({ id: clip(x.channelId, 60), name: clip(x.channelName || x.searchId, 40) })).filter(x => x.id).slice(0, 20),
+      templates: (Array.isArray(tp.j) ? tp.j : []).map(x => ({ id: clip(x.templateId, 60), name: clip(x.name, 60), channelId: clip(x.channelId, 60), content: clip(x.content, 1000), vars: (Array.isArray(x.variables) ? x.variables : []).map(v => clip(v && v.name, 30)).filter(Boolean).slice(0, 20) })).filter(x => x.id).slice(0, 60)
+    });
+    await db.prepare("INSERT INTO mod_set(ws,mod,k,v) VALUES(?1,'msg','conn',?2) ON CONFLICT(ws,mod,k) DO UPDATE SET v=excluded.v").bind(me.ws, JSON.stringify(conn)).run();
+    return json({ ok: true, conn: msgConnPublic(conn) });
+  },
+  async "msg/settings"(db, me, b) {
+    if (me.role !== "admin") return fail("forbidden", 403);
+    const st = await msgState(db, me.ws), cur = st.set, inp = b.set && typeof b.set === "object" ? b.set : {};
+    const next = msgNorm(Object.assign({}, cur, inp, { kakao: Object.assign({}, cur.kakao, inp.kakao || {}), auto: Object.assign({}, cur.auto, inp.auto || {}), tpl: Object.assign({}, cur.tpl, inp.tpl || {}) }));
+    if (next.from && st.conn && !(st.conn.senders || []).includes(next.from)) return fail("bad-sender", 400);
+    if (msgAutoOn(next) && !st.conn) return fail("not-connected", 400);
+    await db.batch([
+      db.prepare("INSERT INTO mod_set(ws,mod,k,v) VALUES(?1,'msg','settings',?2) ON CONFLICT(ws,mod,k) DO UPDATE SET v=excluded.v").bind(me.ws, JSON.stringify(next)),
+      msgAutoOn(next) ? db.prepare("INSERT INTO msg_auto(ws,next_at) VALUES(?1,?2) ON CONFLICT(ws) DO NOTHING").bind(me.ws, iso()) : db.prepare("DELETE FROM msg_auto WHERE ws=?1").bind(me.ws)
+    ]);
+    return json({ ok: true, settings: next });
+  },
+  async "msg/send"(db, me, b, req, url, env) {
+    if (!isMgr(me)) return fail("forbidden", 403);
+    const st = await msgState(db, me.ws), set = st.set, sec = await msgSecret(env, st.conn);
+    if (!sec) return fail("not-connected", 400);
+    if (!set.from) return fail("no-sender", 400);
+    const seen = new Set(), items = [];
+    for (const x of (Array.isArray(b.items) ? b.items : []).slice(0, MSG_SEND_MAX * 2)) {
+      if (!x || typeof x !== "object") continue;
+      const to = phoneKR(x.to), text = String(x.text || "").replace(/\r/g, "").trim();
+      if (!to) return fail("bad-phone", 400, { to: clip(x.to, 20) });
+      if (!text) return fail("empty", 400);
+      if (/^\s*[\(\[（]\s*광고\s*[\)\]）]/.test(text)) return fail("ad-not-allowed", 400);   // 광고 문자는 수신 동의·수신거부 안내·야간 제한이 따로 있어 여기서는 보내지 않습니다
+      if (smsBytes(text) > 2000) return fail("too-long", 400);
+      const tpl = MSG_TPL[x.tpl] ? x.tpl : "free", k = to + "|" + tpl + "|" + clip(x.ref_id, 60);
+      if (seen.has(k)) continue; seen.add(k);
+      const f = {}; if (x.fields && typeof x.fields === "object") for (const key of MSG_FIELDS) if (x.fields[key] != null) f[key] = clip(x.fields[key], 200);
+      items.push({ to, name: clip(x.name, 40), text, tpl, ref_kind: clip(x.ref_kind, 20) || null, ref_id: clip(x.ref_id, 60) || null, fields: f });
+    }
+    if (!items.length) return fail("empty", 400);
+    if (items.length > MSG_SEND_MAX) return fail("too-many", 400, { limit: MSG_SEND_MAX });
+    const c = await db.prepare(msgCountSql).bind(me.ws, kstDayStart()).first(), used = c ? Number(c.n) : 0;
+    if (used + items.length > set.dayMax) return fail("day-limit", 429, { limit: set.dayMax, used });
+    const r = await msgDispatch(sec, set, items, { kakao: b.kakao !== false });
+    const stmts = [msgLogStmt(db, me.ws, r.rows, me, false)];
+    if (r.balance != null) stmts.push(db.prepare("INSERT INTO mod_set(ws,mod,k,v) VALUES(?1,'msg','conn',?2) ON CONFLICT(ws,mod,k) DO UPDATE SET v=excluded.v").bind(me.ws, JSON.stringify(Object.assign({}, st.conn, { balance: r.balance, point: r.point ?? st.conn.point, checkedAt: iso() }))));
+    await db.batch(stmts);
+    const sent = r.rows.filter(x => x.status === "sent").length;
+    if (!sent && r.fatal) return fail(r.fatal, 502, { detail: r.detail || "" });
+    return json({ ok: true, sent, failed: r.rows.length - sent, results: r.rows.map(x => ({ to: x.to, kind: x.kind, status: x.status, err: x.err })), balance: r.balance, today: used + sent });
+  },
+  async "msg/log"(db, me, b) {
+    if (!isMgr(me)) return fail("forbidden", 403);
+    const before = clip(b.before, 30) || "9999", ref = clip(b.ref_id, 60);
+    const rs = (await (ref ? db.prepare("SELECT id,at,by_name,kind,to_no,to_name,text,tpl,ref_kind,ref_id,status,err,auto FROM msg_log WHERE ws=?1 AND ref_id=?2 ORDER BY at DESC LIMIT 30").bind(me.ws, ref) : db.prepare("SELECT id,at,by_name,kind,to_no,to_name,text,tpl,ref_kind,ref_id,status,err,auto FROM msg_log WHERE ws=?1 AND at<?2 ORDER BY at DESC, id DESC LIMIT 100").bind(me.ws, before)).all()).results || [];
+    return json({ ok: true, log: rs });
+  }
+});
+
+/* ── 자동 안내 — tick에서 한 번에 워크스페이스 둘까지. 보내기 직전에 상태를 다시 읽습니다 ── */
+async function msgAutoRun(db, now) {
+  const env = db.env, nowIso = new Date(now).toISOString();
+  if (!vaultKey(env)) return {};
+  const todo = (await db.prepare("SELECT a.ws, w.status AS wst, w.name AS wname, w.plan, w.modules, w.limits, w.plan_until FROM msg_auto a JOIN workspaces w ON w.id=a.ws WHERE a.next_at<=?1 ORDER BY a.next_at LIMIT 2").bind(nowIso).all()).results || [];
+  let autoSent = 0;
+  for (const w of todo) {
+    const hour = kstHour(now), open = hour >= 9 && hour < 20;
+    const next = open ? new Date(now + 3600e3).toISOString() : new Date(Date.parse(addDaysS(kstToday(), hour >= 20 ? 1 : 0) + "T00:00:00Z")).toISOString();   // 밤에는 쉬고 다음 날 오전 9시(한국 시간)에
+    await db.prepare("UPDATE msg_auto SET next_at=?2 WHERE ws=?1").bind(w.ws, next).run();
+    if (!open || w.wst !== "active") continue;
+    try { autoSent += await msgAutoWs(db, env, w, now); } catch (e) {}
+  }
+  return todo.length ? { autoSent } : {};
+}
+async function msgAutoWs(db, env, w, now) {
+  const st = await msgState(db, w.ws), set = st.set, sec = await msgSecret(env, st.conn);
+  if (!sec || !set.from || !msgAutoOn(set)) { await db.prepare("DELETE FROM msg_auto WHERE ws=?1").bind(w.ws).run(); return 0; }
+  const today = kstToday(), A = set.auto, sign = set.sign || w.wname || "", base = "https://" + CANON_HOST + "/link/", hour = kstHour(now);
+  const cand = [];   // {tpl, ref_kind, ref_id, to, name, fields, link?: {kind, target}}
+  const qs = [], tags = [];
+  if (A.invDue.on || A.invLate.on) {
+    const dates = [A.invDue.on ? addDaysS(today, A.invDue.days) : "", A.invLate.on ? addDaysS(today, -A.invLate.days) : ""];
+    qs.push(db.prepare("SELECT v.id, v.no, v.due_date, v.net, j.title, j.client_name, json_extract(e.data,'$.phone') AS phone, json_extract(e.data,'$.name') AS cname FROM os_invoice v JOIN os_job j ON j.ws=v.ws AND j.id=v.job_id LEFT JOIN ent e ON e.ws=v.ws AND e.kind='contact' AND e.id=j.client_id AND e.deleted=0 WHERE v.ws=?1 AND v.status='issued' AND v.due_date IN (?2,?3) LIMIT 60").bind(w.ws, dates[0], dates[1])); tags.push(["inv", dates]);
+  }
+  if (A.quoteNudge.on) {
+    const d = addDaysS(today, -A.quoteNudge.days);
+    qs.push(db.prepare("SELECT q.id, q.no, j.title, j.client_name, json_extract(e.data,'$.phone') AS phone, json_extract(e.data,'$.name') AS cname, l.token FROM links l JOIN os_quote q ON q.ws=l.ws AND q.id=l.target JOIN os_job j ON j.ws=q.ws AND j.id=q.job_id LEFT JOIN ent e ON e.ws=q.ws AND e.kind='contact' AND e.id=j.client_id AND e.deleted=0 WHERE l.ws=?1 AND l.kind='quote' AND l.used_at IS NULL AND l.expires_at>?2 AND q.status='sent' AND l.created_at>=?3 AND l.created_at<?4 LIMIT 60").bind(w.ws, new Date(now).toISOString(), new Date(Date.parse(d + "T00:00:00Z") - 9 * 3600e3).toISOString(), new Date(Date.parse(d + "T00:00:00Z") + 15 * 3600e3).toISOString())); tags.push(["quote"]);
+  }
+  if (A.resEve.on && hour >= A.resEve.hour && tierOf(w).modules.includes("space")) {
+    qs.push(db.prepare("SELECT r.id, r.customer, r.phone, r.res_date, r.start_t, r.slot, json_extract(e.data,'$.name') AS bname FROM sp_res r LEFT JOIN ent e ON e.ws=r.ws AND e.kind='store' AND e.id=r.branch_id WHERE r.ws=?1 AND r.res_date=?2 AND r.phone IS NOT NULL AND r.phone<>'' AND (r.status IS NULL OR r.status NOT LIKE '%취소%') LIMIT 80").bind(w.ws, addDaysS(today, 1))); tags.push(["res"]);
+  }
+  if (!qs.length) return 0;
+  const rs = await db.batch(qs);
+  const won = n => (Number(n) || 0).toLocaleString("ko-KR") + "원", md = d => String(d || "").slice(5).replace("-", "/");
+  rs.forEach((r, i) => {
+    const rows = (r && r.results) || [], tag = tags[i];
+    if (tag[0] === "inv") for (const v of rows) { const to = phoneKR(v.phone); if (!to) continue; const due = v.due_date === tag[1][0] && A.invDue.on; cand.push({ tpl: due ? "auto.invDue" : "auto.invLate", ref_kind: "invoice", ref_id: v.id, to, name: v.cname || v.client_name || "", fields: { 상호: sign, 이름: v.cname || v.client_name || "고객", 제목: v.title || v.no || "", 금액: won(v.net), 기한: md(v.due_date) }, link: { kind: "invoice", target: v.id } }); }
+    else if (tag[0] === "quote") for (const q of rows) { const to = phoneKR(q.phone); if (!to) continue; cand.push({ tpl: "auto.quoteNudge", ref_kind: "quote", ref_id: q.id, to, name: q.cname || q.client_name || "", fields: { 상호: sign, 이름: q.cname || q.client_name || "고객", 제목: q.title || q.no || "", 링크: base + q.token, 코드: q.token } }); }
+    else for (const x of rows) { const to = phoneKR(x.phone); if (!to) continue; cand.push({ tpl: "auto.resEve", ref_kind: "res", ref_id: x.id, to, name: x.customer || "", fields: { 상호: sign, 이름: x.customer || "고객", 날짜: md(x.res_date), 시간: x.start_t || ({ day: "낮", night: "밤", allday: "종일" })[x.slot] || "", 지점: x.bname || "", 안내: A.resEve.note || "" } }); }
+  });
+  if (!cand.length) return 0;
+  // 이미 보낸 것은 빼고, 오늘 한도 안에서. 보냈거나, 보냈는지 모르거나, 두 번 실패한 안내는 다시 보내지 않습니다
+  const [done, cnt, lk] = await db.batch([
+    db.prepare("SELECT ref_id, tpl, SUM(CASE WHEN status IN ('sent','pending') THEN 1 ELSE 0 END) AS done, COUNT(*) AS n FROM msg_log WHERE ws=?1 AND auto=1 AND ref_id IN (SELECT value FROM json_each(?2)) GROUP BY ref_id, tpl").bind(w.ws, JSON.stringify([...new Set(cand.map(c => c.ref_id))])),
+    db.prepare(msgCountSql).bind(w.ws, kstDayStart()),
+    db.prepare("SELECT kind, target, token FROM links WHERE ws=?1 AND kind='invoice' AND used_at IS NULL AND expires_at>?2 AND target IN (SELECT value FROM json_each(?3))").bind(w.ws, new Date(now + 864e5).toISOString(), JSON.stringify(cand.filter(c => c.link).map(c => c.link.target)))
+  ]);
+  const sentKey = new Set(((done && done.results) || []).filter(x => Number(x.done) > 0 || Number(x.n) >= MSG_AUTO_TRIES).map(x => x.ref_id + "|" + x.tpl)), used = Number(((((cnt && cnt.results) || [])[0]) || {}).n) || 0;
+  const tokens = new Map(((lk && lk.results) || []).map(x => [x.target, x.token]));
+  const room = Math.max(0, Math.min(MSG_AUTO_RUN, set.dayMax - used));
+  const list = cand.filter(c => !sentKey.has(c.ref_id + "|" + c.tpl)).slice(0, room);
+  if (!list.length) return 0;
+  const newLinks = [];
+  for (const c of list) if (c.link) { let t = tokens.get(c.link.target); if (!t) { t = rand(16); tokens.set(c.link.target, t); newLinks.push(db.prepare("INSERT INTO links(token,ws,kind,target,created_by,created_at,expires_at) VALUES(?1,?2,?3,?4,NULL,?5,?6)").bind(t, w.ws, c.link.kind, c.link.target, iso(), new Date(now + 30 * 864e5).toISOString())); } c.fields.링크 = base + t; c.fields.코드 = t; }
+  if (newLinks.length) await db.batch(newLinks);
+  const items = list.map(c => ({ to: c.to, name: c.name, text: msgFill(msgTextOf(set, c.tpl), c.fields), tpl: c.tpl, ref_kind: c.ref_kind, ref_id: c.ref_id, fields: c.fields })).filter(x => x.text);
+  if (!items.length) return 0;
+  /* 보내기 전에 먼저 적어 둡니다. 보낸 뒤 기록을 남기기 전에 끊기면 다음 차례에 같은 안내가 한 번 더 나가기 때문입니다.
+     먼저 적어 두면 끊겨도 ‘확인 필요’로 남을 뿐 고객에게 두 번 가지 않습니다. */
+  const hold = uid("mg"), at = iso();
+  await db.prepare("INSERT INTO msg_log(ws,id,at,by_id,by_name,kind,to_no,to_name,text,tpl,ref_kind,ref_id,status,pid,err,auto) SELECT ?1, ?2||'_'||key, ?3, NULL, '자동', 'sms', json_extract(value,'$.to'), json_extract(value,'$.name'), json_extract(value,'$.text'), json_extract(value,'$.tpl'), json_extract(value,'$.ref_kind'), json_extract(value,'$.ref_id'), 'pending', '', '', 1 FROM json_each(?4)")
+    .bind(w.ws, hold, at, JSON.stringify(items.map(x => ({ to: x.to, name: x.name || "", text: clip(x.text, 1000), tpl: x.tpl, ref_kind: x.ref_kind, ref_id: x.ref_id })))).run();
+  const r = await msgDispatch(sec, set, items, { kakao: true });
+  if (r.unknown) {   // 접수됐는지 알 수 없으면 ‘확인 필요’로 둡니다 — 다시 보내지 않습니다
+    await notify(db, w.ws, await whoIs(db, w.ws, ["admin"]), { type: "money", title: "자동 안내를 보내다 연결이 끊겼습니다", body: `${items.length}건 — 보낸 기록에서 확인해 주세요`, url: "#/msg/log", tag: "msg-auto" });
+    return 0;
+  }
+  await db.prepare("UPDATE msg_log SET kind=json_extract(j.value,'$.kind'), status=json_extract(j.value,'$.status'), pid=json_extract(j.value,'$.pid'), err=json_extract(j.value,'$.err') FROM json_each(?3) AS j WHERE msg_log.ws=?1 AND msg_log.id=?2||'_'||j.key")
+    .bind(w.ws, hold, JSON.stringify(r.rows.map(x => ({ kind: x.kind || "sms", status: x.status, pid: x.pid || "", err: x.err || "" })))).run();
+  const sent = r.rows.filter(x => x.status === "sent").length, failed = r.rows.length - sent;
+  if (sent || failed) await notify(db, w.ws, await whoIs(db, w.ws, ["admin"]), { type: "money", title: `자동 안내 ${sent}건을 보냈습니다${failed ? ` · 실패 ${failed}건` : ""}`, body: [...new Set(r.rows.map(x => MSG_TPL[x.tpl] ? MSG_TPL[x.tpl][0] : ""))].filter(Boolean).join(" · "), url: "#/msg/log", tag: "msg-auto" });
+  return sent;
+}
+TICK_JOBS.push(msgAutoRun);
+
+/* ═════════ 홈택스 자료 자동 수집 — 세금계산서·현금영수증 매출·매입을 증빙 대장으로 ═════════
+   · 홈택스에는 공개 API가 없어, 홈택스 수집 서비스(팝빌)를 거칩니다. 운영자가 팝빌과 연동 계약을 맺고
+     Cloudflare에 POPBILL_LINK_ID · POPBILL_SECRET_KEY 를 넣어야 열립니다. (POPBILL_TEST=1 이면 시험 환경)
+   · 사업자마다: ① 수집 서비스 가입(사업자 정보 전달) → ② 홈택스 ‘부서사용자’(조회 전용) 아이디·비밀번호 등록 → ③ 가져오기.
+     부서사용자 비밀번호는 팝빌에 등록만 하고 마이웍스에는 저장하지 않습니다.
+   · 가져온 자료는 승인번호로 겹치지 않게 증빙 대장(tx_doc)에 넣습니다. 지우거나 고친 것은 건드리지 않습니다.
+   · 수집은 요청 → 잠시 뒤 결과 확인의 두 걸음입니다. 화면이 몇 초마다 확인하고, 자동 수집은 tick이 이어 갑니다. */
+const HT_DDL = [
+  "CREATE TABLE IF NOT EXISTS ht_job(ws TEXT NOT NULL, id TEXT NOT NULL, biz_id TEXT NOT NULL, svc TEXT NOT NULL, qtype TEXT NOT NULL, job_id TEXT NOT NULL, sdate TEXT NOT NULL, edate TEXT NOT NULL, state TEXT NOT NULL, added INTEGER NOT NULL DEFAULT 0, skipped INTEGER NOT NULL DEFAULT 0, err TEXT, auto INTEGER NOT NULL DEFAULT 0, at TEXT NOT NULL, done_at TEXT, PRIMARY KEY(ws,id))",
+  "CREATE INDEX IF NOT EXISTS idx_ht_job_state ON ht_job(ws, state, at)",
+  "CREATE TABLE IF NOT EXISTS ht_auto(ws TEXT NOT NULL, biz_id TEXT NOT NULL, next_at TEXT NOT NULL, PRIMARY KEY(ws,biz_id))",
+  "CREATE INDEX IF NOT EXISTS idx_ht_auto_next ON ht_auto(next_at)"
+];
+const HT_TABLES = ["ht_job", "ht_auto"];
+const HT_SVC = { ti: ["Taxinvoice", "111", "세금계산서"], cb: ["Cashbill", "141", "현금영수증"] };
+const HT_MAX_DAYS = 92, HT_JOB_TTL = 55 * 60e3, HT_GAP = 10 * 60e3;
+const pbOn = env => !!(env && typeof env.POPBILL_LINK_ID === "string" && env.POPBILL_LINK_ID.trim() && typeof env.POPBILL_SECRET_KEY === "string" && env.POPBILL_SECRET_KEY.trim().length >= 16);
+const pbTest = env => !!(env && env.POPBILL_TEST && String(env.POPBILL_TEST) !== "0");
+const PB_TOK = new Map();
+const b64 = bytes => btoa(String.fromCharCode(...bytes));
+const pbFail = (j, status) => Object.assign(new Error("popbill"), { pb: true, code: j && j.code != null ? Number(j.code) : 0, msg: clip((j && j.message) || (status ? "HTTP " + status : "연결하지 못했습니다"), 200) });
+/* 링크허브 토큰 — 사업자번호·서비스마다 하나. 서명: base64(HMAC-SHA256(비밀키, "POST\n본문해시\n시각\n*\n2.0\n/POPBILL/Token")) */
+async function pbToken(env, corp, scope) {
+  const key = (pbTest(env) ? "T" : "P") + corp + ":" + scope, c = PB_TOK.get(key);
+  if (c && c.exp - Date.now() > 120e3) return c.t;
+  const uri = "/" + (pbTest(env) ? "POPBILL_TEST" : "POPBILL") + "/Token", body = JSON.stringify({ access_id: corp, scope: ["member", scope] }), xDate = new Date().toISOString();
+  const digest = b64(new Uint8Array(await crypto.subtle.digest("SHA-256", enc.encode(body))));
+  let raw; try { raw = Uint8Array.from(atob(env.POPBILL_SECRET_KEY.trim()), ch => ch.charCodeAt(0)); } catch (e) { throw pbFail({ message: "POPBILL_SECRET_KEY 값이 올바르지 않습니다." }); }
+  const hk = await crypto.subtle.importKey("raw", raw, { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
+  const sig = b64(new Uint8Array(await crypto.subtle.sign("HMAC", hk, enc.encode("POST\n" + digest + "\n" + xDate + "\n*\n2.0\n" + uri))));
+  let r; try { r = await fetch("https://auth.linkhub.co.kr" + uri, { method: "POST", headers: { "x-lh-date": xDate, "x-lh-version": "2.0", "x-lh-forwarded": "*", "Content-Type": "Application/json", Authorization: "LINKHUB " + env.POPBILL_LINK_ID.trim() + " " + sig }, body }); } catch (e) { throw pbFail(null, 0); }
+  const j = await r.json().catch(() => null);
+  if (!r.ok || !j || !j.session_token) throw pbFail(j, r.status);
+  const exp = Date.parse(j.expiration);
+  PB_TOK.set(key, { t: j.session_token, exp: Number.isFinite(exp) ? exp : Date.now() + 600e3 }); if (PB_TOK.size > 200) PB_TOK.delete(PB_TOK.keys().next().value);
+  return j.session_token;
+}
+/* 팝빌 요청 — scope 가 없으면 토큰 없이(가입 확인·가입). 실패하면 { pb, code, msg } 를 던집니다 */
+async function pb(env, corp, scope, method, path, body) {
+  const h = { "Content-Type": "application/json;charset=utf-8" };
+  if (scope) h.Authorization = "Bearer " + await pbToken(env, corp, scope);
+  let m = method; if (method === "DELETE") { h["X-HTTP-Method-Override"] = "DELETE"; m = "POST"; }
+  let r; try { r = await fetch("https://" + (pbTest(env) ? "popbill-test.linkhub.co.kr" : "popbill.linkhub.co.kr") + path, { method: m, headers: h, body: body ? JSON.stringify(body) : undefined }); } catch (e) { throw pbFail(null, 0); }
+  const j = await r.json().catch(() => null);
+  if (!r.ok || !j) throw pbFail(j, r.status);
+  return j;
+}
+const pbOut = e => e && e.pb ? fail("provider", 502, { detail: e.msg, code: e.code }) : null;
+function htNorm(s) {   // 사업자마다의 연결 상태 — 비밀번호는 들어 있지 않습니다
+  s = s && typeof s === "object" ? s : {}; const out = {};
+  for (const [id, x] of Object.entries(s.biz && typeof s.biz === "object" ? s.biz : {}).slice(0, 30)) {
+    if (!x || typeof x !== "object") continue;
+    out[clip(id, 60)] = { corp: bizNo(x.corp).slice(0, 10), joined: !!x.joined, pbId: clip(x.pbId, 50), dept: { ti: !!(x.dept && x.dept.ti), cb: !!(x.dept && x.dept.cb), id: clip(x.dept && x.dept.id, 40), at: clip(x.dept && x.dept.at, 30) }, auto: !!x.auto, last: dOk(x.last), lastAt: clip(x.lastAt, 30), lastAdded: intOr(x.lastAdded, 0), err: clip(x.err, 200) };
+  }
+  return { biz: out };
+}
+/* 워크스페이스를 지울 때 — 팝빌에 남아 있는 부서사용자 등록을 지웁니다. 실패해도 삭제는 계속합니다 */
+async function htForget(db, ws) {
+  const env = db.env; if (!pbOn(env)) return;
+  let st; try { st = await htState(db, ws); } catch (e) { return; }
+  const jobs = [];
+  for (const x of Object.values(st.biz).filter(x => x.corp.length === 10 && (x.dept.ti || x.dept.cb)).slice(0, 5))
+    for (const svc of ["ti", "cb"]) if (x.dept[svc]) jobs.push(pb(env, x.corp, HT_SVC[svc][1], "DELETE", `/HomeTax/${HT_SVC[svc][0]}/DeptUser`).catch(() => {}));
+  if (jobs.length) db.wait(Promise.allSettled(jobs));
+}
+async function htState(db, ws) { const r = await db.prepare("SELECT v FROM mod_set WHERE ws=?1 AND mod='tx' AND k='ht'").bind(ws).first(); return htNorm(r ? parse(r.v) : null); }
+const htSave = (db, ws, st) => db.prepare("INSERT INTO mod_set(ws,mod,k,v) VALUES(?1,'tx','ht',?2) ON CONFLICT(ws,mod,k) DO UPDATE SET v=excluded.v").bind(ws, JSON.stringify(st));
+const ymd8 = d => String(d || "").replace(/-/g, ""), d10 = s => /^\d{8}$/.test(String(s || "")) ? s.slice(0, 4) + "-" + s.slice(4, 6) + "-" + s.slice(6, 8) : "";
+const htTi = (x, sale) => ({ dir: sale ? "sale" : "buy", kind: x.taxType === "면세" ? "계산서" : "세금계산서", date: d10(x.writeDate), partner: sale ? x.invoiceeCorpName : x.invoicerCorpName, partner_no: sale ? x.invoiceeCorpNum : x.invoicerCorpNum, supply: x.supplyCostTotal, vat: x.taxTotal, total: x.totalAmount, item: x.itemName || "", approve_no: x.ntsconfirmNum, memo: x.modifyYN === true || x.modifyYN === "true" ? "수정세금계산서" : "" });
+const htCb = (x, sale) => { const neg = x.tradeType === "취소거래" ? -1 : 1, n = v => neg * intOr(String(v ?? "").replace(/[^\d.-]/g, ""), 0); return { dir: sale ? "sale" : "buy", kind: "현금영수증", date: d10(x.tradeDate), partner: sale ? (x.customerName || "") : (x.franchiseCorpName || ""), partner_no: sale ? "" : (x.franchiseCorpNum || ""), supply: n(x.supplyCost), vat: n(x.tax), total: n(x.totalAmount), item: x.tradeUsage || "", approve_no: x.ntsconfirmNum, memo: neg < 0 ? "취소거래" : "" }; };
+/* 증빙 대장에 넣기 — 승인번호(없으면 방향·날짜·상대·금액)가 같은 것은 건너뜁니다. 파일 올리기와 자동 수집이 같은 길을 씁니다 */
+async function txDocAdd(db, me, rowsIn, bizId, source) {
+  const rows = rowsIn.slice(0, 5000).map(r => txDocIn(r || {})).filter(r => r.date && (r.total || r.supply));
+  if (!rows.length) return { added: 0, skipped: 0, v: null, empty: true };
+  const dates = rows.map(r => r.date).sort(), now = iso();
+  const ex = (await db.prepare("SELECT approve_no, dir, date, partner_no, total FROM tx_doc WHERE ws=?1 AND date>=?2 AND date<=?3").bind(me.ws, dates[0], dates[dates.length - 1]).all()).results || [];
+  const seenA = new Set(ex.map(x => x.approve_no).filter(Boolean)), seenK = new Set(ex.map(x => [x.dir, x.date, x.partner_no || "", x.total].join("|")));
+  const add = []; let skipped = 0;
+  for (const r of rows) {
+    const k = [r.dir || "sale", r.date, r.partner_no || "", r.total || (r.supply || 0) + (r.vat || 0)].join("|");
+    if ((r.approve_no && seenA.has(r.approve_no)) || (!r.approve_no && seenK.has(k))) { skipped++; continue; }
+    if (r.approve_no) seenA.add(r.approve_no); seenK.add(k);
+    add.push(Object.assign({ id: bulkId("dc"), biz_id: clip(bizId, 60) || null, dir: "sale", kind: "세금계산서", partner: "", partner_no: "", supply: 0, vat: 0, total: 0, item: "", approve_no: null, status: "done", fin_id: null, ref: null, source: source || "hometax", memo: "", created_at: now, updated_at: now }, r, { total: r.total || (r.supply || 0) + (r.vat || 0) }));
+  }
+  const { v } = add.length ? await spRun(db, me, spBulk(db, "tx_doc", me.ws, add)) : { v: null };
+  return { added: add.length, skipped, v };
+}
+async function htBiz(db, me, id) {   // 사업자번호가 있는 사업자 + 연결 상태
+  const b = await spOne(db, "tx_biz", me.ws, clip(id, 60)), corp = b ? bizNo(b.biz_no) : "";
+  if (!b) return { err: fail("not-found", 404) };
+  if (corp.length !== 10) return { err: fail("no-bizno", 400) };
+  const st = await htState(db, me.ws);
+  if (!st.biz[b.id]) st.biz[b.id] = htNorm({ biz: { x: { corp } } }).biz.x;
+  if (st.biz[b.id].corp !== corp) st.biz[b.id] = htNorm({ biz: { x: { corp } } }).biz.x;   // 사업자번호가 바뀌었으면 처음부터
+  return { b, corp, st, s: st.biz[b.id] };
+}
+/* 수집 요청 — 세금계산서·현금영수증 × 매출·매입 네 건 */
+async function htRequest(db, env, me, x, from, to, auto) {
+  const jobs = [], now = iso(), errs = [];
+  for (const svc of ["ti", "cb"]) {
+    if (!x.s.dept[svc]) continue;
+    for (const q of ["SELL", "BUY"]) {
+      try {
+        const j = await pb(env, x.corp, HT_SVC[svc][1], "POST", `/HomeTax/${HT_SVC[svc][0]}/${q}?${svc === "ti" ? "DType=W&" : ""}SDate=${ymd8(from)}&EDate=${ymd8(to)}`);
+        if (j.jobID) jobs.push({ id: bulkId("hj"), biz_id: x.b.id, svc, qtype: q, job_id: clip(j.jobID, 40), sdate: from, edate: to, state: "req", auto: auto ? 1 : 0, at: now });
+      } catch (e) { if (!e.pb) throw e; errs.push(`${HT_SVC[svc][2]} ${q === "SELL" ? "매출" : "매입"}: ${e.msg}`); }
+    }
+  }
+  x.s.err = errs.join(" / "); if (jobs.length) x.s.lastAt = now;
+  const stmts = [htSave(db, me.ws, x.st)];
+  if (jobs.length) stmts.push(db.prepare("INSERT INTO ht_job(ws,id,biz_id,svc,qtype,job_id,sdate,edate,state,auto,at) SELECT ?1, json_extract(value,'$.id'), json_extract(value,'$.biz_id'), json_extract(value,'$.svc'), json_extract(value,'$.qtype'), json_extract(value,'$.job_id'), json_extract(value,'$.sdate'), json_extract(value,'$.edate'), 'req', json_extract(value,'$.auto'), json_extract(value,'$.at') FROM json_each(?2)").bind(me.ws, JSON.stringify(jobs)));
+  await db.batch(stmts);
+  return { jobs, errs };
+}
+/* 결과 확인 — 끝난 작업의 자료를 증빙 대장에 넣습니다 */
+async function htPoll(db, env, me, x) {
+  const pend = (await db.prepare("SELECT id, svc, qtype, job_id, sdate, edate, at, auto FROM ht_job WHERE ws=?1 AND biz_id=?2 AND state='req' ORDER BY at LIMIT 8").bind(me.ws, x.b.id).all()).results || [];
+  let added = 0, skipped = 0, left = 0, v = null; const upd = [], errs = [];
+  for (const j of pend) {
+    const S = HT_SVC[j.svc], sale = j.qtype === "SELL", now = iso();
+    if (Date.now() - Date.parse(j.at) > HT_JOB_TTL) { upd.push({ id: j.id, state: "fail", err: "시간이 지나 다시 요청해야 합니다", added: 0, skipped: 0, at: now }); continue; }
+    try {
+      const st = await pb(env, x.corp, S[1], "GET", `/HomeTax/${S[0]}/${j.job_id}/State`);
+      if (Number(st.jobState) !== 3) { left++; continue; }
+      if (Number(st.errorCode) !== 1) { const m = clip(st.errorReason || "수집하지 못했습니다", 160); upd.push({ id: j.id, state: "fail", err: m, added: 0, skipped: 0, at: now }); errs.push(`${S[2]} ${sale ? "매출" : "매입"}: ${m}`); continue; }
+      const rows = [];
+      for (let page = 1; page <= 5; page++) {
+        const r = await pb(env, x.corp, S[1], "GET", `/HomeTax/${S[0]}/${j.job_id}?${j.svc === "ti" ? "Type=N,M&TaxType=T,N,Z&PurposeType=R,C,N" : "TradeType=N,C&TradeUsage=P,C"}&Page=${page}&PerPage=1000&Order=A`);
+        for (const it of Array.isArray(r.list) ? r.list : []) rows.push(j.svc === "ti" ? htTi(it, sale) : htCb(it, sale));
+        if (!(Number(r.pageCount) > page)) break;
+      }
+      const res = rows.length ? await txDocAdd(db, me, rows, x.b.id, "hometax-auto") : { added: 0, skipped: 0, v: null };
+      added += res.added; skipped += res.skipped; if (res.v != null) v = res.v;
+      upd.push({ id: j.id, state: "done", err: "", added: res.added, skipped: res.skipped, at: now });
+    } catch (e) { if (!e.pb) throw e; upd.push({ id: j.id, state: "fail", err: e.msg, added: 0, skipped: 0, at: iso() }); errs.push(`${S[2]} ${sale ? "매출" : "매입"}: ${e.msg}`); }
+  }
+  if (upd.length) {
+    const doneAll = !left, ok = upd.some(u => u.state === "done");
+    if (doneAll && ok) { x.s.last = pend.map(p => p.edate).sort().pop() || x.s.last; x.s.lastAdded = added; }
+    if (doneAll) x.s.err = errs.join(" / ");
+    await db.batch(upd.map(u => db.prepare("UPDATE ht_job SET state=?3, err=?4, added=?5, skipped=?6, done_at=?7 WHERE ws=?1 AND id=?2").bind(me.ws, u.id, u.state, u.err, u.added, u.skipped, u.at)).concat([htSave(db, me.ws, x.st)]));
+  }
+  return { pending: left, added, skipped, v, errs, finished: upd.length, auto: pend.some(p => Number(p.auto)) };
+}
+const htPublic = (st, jobs) => ({ biz: st.biz, jobs });
+const htJobs = async (db, ws) => ((await db.prepare("SELECT id, biz_id, svc, qtype, sdate, edate, state, added, skipped, err, auto, at, done_at FROM ht_job WHERE ws=?1 ORDER BY at DESC LIMIT 24").bind(ws).all()).results || []);
+
+Object.assign(TAX, {
+  async "ht/state"(db, me, b, req, url, env) {
+    if (!isMgr(me)) return fail("forbidden", 403);
+    const st = await htState(db, me.ws);
+    return json(Object.assign({ ok: true, open: pbOn(env), test: pbTest(env) }, htPublic(st, await htJobs(db, me.ws))));
+  },
+  async "ht/join"(db, me, b, req, url, env) {   // 수집 서비스(팝빌) 가입 — 이미 가입돼 있으면 확인만
+    if (me.role !== "admin") return fail("forbidden", 403);
+    if (!pbOn(env)) return fail("ht-closed", 400);
+    const x = await htBiz(db, me, b.biz_id); if (x.err) return x.err;
+    try {
+      const chk = await pb(env, x.corp, "", "GET", `/Join?CorpNum=${x.corp}&LID=${encodeURIComponent(env.POPBILL_LINK_ID.trim())}`);
+      let account = null;
+      if (Number(chk.code) !== 1) {
+        const f = b.form && typeof b.form === "object" ? b.form : {}, v = (k, n) => clip(f[k], n);
+        const form = { CEOName: v("ceo", 100), CorpName: v("name", 200) || clip(x.b.name, 200), Addr: v("addr", 300), BizType: v("bizType", 100), BizClass: v("bizClass", 100), ContactName: v("contactName", 100), ContactEmail: v("contactEmail", 100), ContactTEL: v("contactTel", 20) };
+        if (!b.agree) return fail("need-agree", 400);
+        if (Object.values(form).some(s => !s) || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.ContactEmail)) return fail("bad-request", 400);
+        const id = "mw" + x.corp + rand(2), pw = "Mw" + rand(5) + "!7";
+        const j = await pb(env, x.corp, "", "POST", "/Join", Object.assign({ ID: id, Password: pw, LinkID: env.POPBILL_LINK_ID.trim(), CorpNum: x.corp }, form));
+        if (Number(j.code) !== 1) throw pbFail(j, 400);
+        account = { id, pw }; x.s.pbId = id;   // 비밀번호는 지금 한 번만 보여 주고 저장하지 않습니다
+      }
+      x.s.joined = true; x.s.err = "";
+      await htSave(db, me.ws, x.st).run();
+      return json({ ok: true, biz: x.st.biz, account, already: !account });
+    } catch (e) { return pbOut(e) || (() => { throw e; })(); }
+  },
+  async "ht/dept"(db, me, b, req, url, env) {   // 홈택스 부서사용자(조회 전용) 등록 — 비밀번호는 팝빌에만 전달합니다
+    if (me.role !== "admin") return fail("forbidden", 403);
+    if (!pbOn(env)) return fail("ht-closed", 400);
+    const x = await htBiz(db, me, b.biz_id); if (x.err) return x.err;
+    if (!x.s.joined) return fail("not-joined", 400);
+    const id = clip(b.id, 40), pwd = String(b.pwd || "").slice(0, 60);
+    if (!id || !pwd) return fail("bad-request", 400);
+    const out = {}, errs = [];
+    for (const svc of ["ti", "cb"]) {
+      const S = HT_SVC[svc];
+      try { await pb(env, x.corp, S[1], "POST", `/HomeTax/${S[0]}/DeptUser`, { id, pwd }); const c = await pb(env, x.corp, S[1], "GET", `/HomeTax/${S[0]}/DeptUser/Check`); out[svc] = Number(c.code) === 1; if (!out[svc]) errs.push(`${S[2]}: ${clip(c.message, 120)}`); }
+      catch (e) { if (!e.pb) throw e; out[svc] = false; errs.push(`${S[2]}: ${e.msg}`); }
+    }
+    x.s.dept = { ti: !!out.ti, cb: !!out.cb, id: out.ti || out.cb ? id : "", at: iso() }; x.s.err = errs.join(" / ");
+    await htSave(db, me.ws, x.st).run();
+    if (!out.ti && !out.cb) return fail("provider", 502, { detail: errs.join(" / "), biz: x.st.biz });
+    return json({ ok: true, biz: x.st.biz, warn: errs.join(" / ") });
+  },
+  async "ht/disconnect"(db, me, b, req, url, env) {   // 부서사용자 등록을 지우고 자동 수집을 끕니다 (팝빌 가입은 남습니다)
+    if (me.role !== "admin") return fail("forbidden", 403);
+    const x = await htBiz(db, me, b.biz_id); if (x.err) return x.err;
+    if (pbOn(env)) for (const svc of ["ti", "cb"]) { if (!x.s.dept[svc]) continue; try { await pb(env, x.corp, HT_SVC[svc][1], "DELETE", `/HomeTax/${HT_SVC[svc][0]}/DeptUser`); } catch (e) { if (!e.pb) throw e; } }
+    x.s.dept = { ti: false, cb: false, id: "", at: iso() }; x.s.auto = false;
+    await db.batch([htSave(db, me.ws, x.st), db.prepare("DELETE FROM ht_auto WHERE ws=?1 AND biz_id=?2").bind(me.ws, x.b.id)]);
+    return json({ ok: true, biz: x.st.biz });
+  },
+  async "ht/auto"(db, me, b, req, url, env) {   // 날마다 자동으로 가져오기
+    if (me.role !== "admin") return fail("forbidden", 403);
+    const x = await htBiz(db, me, b.biz_id); if (x.err) return x.err;
+    const on = !!b.on;
+    if (on && (!pbOn(env) || !(x.s.dept.ti || x.s.dept.cb))) return fail("not-ready", 400);
+    x.s.auto = on;
+    await db.batch([htSave(db, me.ws, x.st), on ? db.prepare("INSERT INTO ht_auto(ws,biz_id,next_at) VALUES(?1,?2,?3) ON CONFLICT(ws,biz_id) DO NOTHING").bind(me.ws, x.b.id, iso()) : db.prepare("DELETE FROM ht_auto WHERE ws=?1 AND biz_id=?2").bind(me.ws, x.b.id)]);
+    return json({ ok: true, biz: x.st.biz });
+  },
+  async "ht/collect"(db, me, b, req, url, env) {   // 지금 가져오기 — 기간은 한 번에 석 달까지
+    if (!isMgr(me)) return fail("forbidden", 403);
+    if (!pbOn(env)) return fail("ht-closed", 400);
+    const x = await htBiz(db, me, b.biz_id); if (x.err) return x.err;
+    if (!(x.s.dept.ti || x.s.dept.cb)) return fail("not-ready", 400);
+    const today = kstToday();
+    let to = dOk(b.to) || today; if (to > today) to = today;
+    let from = dOk(b.from) || (x.s.last ? addDaysS(x.s.last, -7) : addDaysS(today, -90));   // 다시 가져올 때는 지난번보다 이레 앞에서부터 — 늦게 올라온 것을 놓치지 않게
+    if (from > to) from = to;
+    if (from < addDaysS(to, -HT_MAX_DAYS)) from = addDaysS(to, -HT_MAX_DAYS);
+    const busy = await db.prepare("SELECT COUNT(*) AS n FROM ht_job WHERE ws=?1 AND biz_id=?2 AND state='req' AND at>?3").bind(me.ws, x.b.id, new Date(Date.now() - HT_JOB_TTL).toISOString()).first();
+    if (busy && Number(busy.n)) return fail("busy", 409);
+    try {
+      const r = await htRequest(db, env, me, x, from, to, false);
+      if (!r.jobs.length) return fail("provider", 502, { detail: r.errs.join(" / ") });
+      return json(Object.assign({ ok: true, from, to, requested: r.jobs.length, warn: r.errs.join(" / ") }, htPublic(x.st, await htJobs(db, me.ws))));
+    } catch (e) { return pbOut(e) || (() => { throw e; })(); }
+  },
+  async "ht/poll"(db, me, b, req, url, env) {
+    if (!isMgr(me)) return fail("forbidden", 403);
+    if (!pbOn(env)) return fail("ht-closed", 400);
+    const x = await htBiz(db, me, b.biz_id); if (x.err) return x.err;
+    const r = await htPoll(db, env, me, x);
+    return json(Object.assign({ ok: true, pending: r.pending, added: r.added, skipped: r.skipped, v: r.v, warn: r.errs.join(" / ") }, htPublic(x.st, await htJobs(db, me.ws))));
+  }
+});
+
+/* ── 자동 수집 — tick 한 번에 사업자 하나씩(요청당 쿼리 한도 안에서). 요청해 둔 것이 있으면 결과부터 확인합니다 ── */
+async function htAutoRun(db, now) {
+  const env = db.env; if (!pbOn(env)) return {};
+  const todo = (await db.prepare("SELECT a.ws, a.biz_id, w.status AS wst, w.plan, w.modules, w.limits, w.plan_until FROM ht_auto a JOIN workspaces w ON w.id=a.ws WHERE a.next_at<=?1 ORDER BY a.next_at LIMIT 1").bind(new Date(now).toISOString()).all()).results || [];
+  let htAdded = 0;
+  for (const w of todo) {
+    const me = { ws: w.ws, id: null, name: "자동", role: "admin" };
+    let next = new Date(now + 6 * 60e3).toISOString();
+    try {
+      if (w.wst !== "active" || !tierOf(w).modules.includes("tax")) { next = new Date(now + 864e5).toISOString(); }
+      else {
+        const x = await htBiz(db, me, w.biz_id);
+        if (x.err || !x.s.auto || !(x.s.dept.ti || x.s.dept.cb)) { await db.prepare("DELETE FROM ht_auto WHERE ws=?1 AND biz_id=?2").bind(w.ws, w.biz_id).run(); continue; }
+        const r = await htPoll(db, env, me, x);
+        if (r.finished && !r.pending) {
+          htAdded += r.added;
+          if (r.added) await notify(db, w.ws, await whoIs(db, w.ws, ["admin"]), { type: "money", title: `홈택스에서 새 증빙 ${r.added}건을 가져왔습니다`, body: clip(x.b.name, 40) + " · 세금계산서·현금영수증", url: "#/tax/docs", tag: "ht:" + w.biz_id });
+          next = htNextDay(now);
+        } else if (!r.pending && !r.finished) {
+          const today = kstToday();
+          if (x.s.last === today && x.s.lastAt && now - Date.parse(x.s.lastAt) < 20 * 3600e3) next = htNextDay(now);   // 오늘 이미 가져왔으면 내일
+          else { const q = await htRequest(db, env, me, x, x.s.last ? addDaysS(x.s.last, -7) : addDaysS(today, -90), today, true); if (!q.jobs.length) next = htNextDay(now); }
+        }
+      }
+    } catch (e) { next = new Date(now + 3600e3).toISOString(); }
+    await db.prepare("UPDATE ht_auto SET next_at=?3 WHERE ws=?1 AND biz_id=?2").bind(w.ws, w.biz_id, next).run();
+  }
+  return todo.length ? { htAdded } : {};
+}
+const htNextDay = now => new Date(Date.parse(addDaysS(kstToday(), 1) + "T00:00:00Z") - 9 * 3600e3 + 6.5 * 3600e3 + Math.floor(Math.random() * 40) * 60e3).toISOString();   // 다음 날 아침 6시 반~7시 10분(한국 시간) 사이
+TICK_JOBS.push(htAutoRun);
+
 /* ═════════ 총괄관리 — 운영자 전용 ═════════
    플랫폼 설정(가입 방식·시작 등급·가격표), 결제 기록, 베타 코드, 문의, 공지, 운영 기록·오류, 오픈 준비, 전체 백업.
    · 워크스페이스의 업무 내용은 다루지 않습니다. 계정 목록과 기록 '개수'까지만 봅니다.
@@ -5304,7 +6147,7 @@ const FB_KINDS = ["error", "inconvenient", "idea", "billing", "etc"];
 const FB_ST = ["new", "doing", "done"];
 const ANN_LV = ["info", "important", "maint"];
 const PAY_METHODS = ["계좌이체", "카드", "현금", "기타"];
-const PLAT_DEF = () => ({ signup: "approve", newPlan: { plan: "basic", days: 0, modules: [] }, contact: "", prices: { pro: 12000, space: 19000, outsourcing: 0, commerce: 19000, seat: 4900 }, refDays: 0, saved: false });
+const PLAT_DEF = () => ({ signup: "approve", newPlan: { plan: "basic", days: 0, modules: [] }, contact: "", prices: { pro: 12000, space: 19000, outsourcing: 0, commerce: 19000, seat: 4900 }, refDays: 0, feat: { push: false }, saved: false });
 function platNorm(p) {
   const d = PLAT_DEF(); p = p && typeof p === "object" ? p : {};
   const np = p.newPlan && typeof p.newPlan === "object" ? p.newPlan : {};
@@ -5316,6 +6159,7 @@ function platNorm(p) {
     contact: clip(p.contact, 80),
     prices: Object.fromEntries(PRICE_KEYS.map(k => [k, clampInt(pr[k], 0, 10000000, d.prices[k])])),
     refDays: clampInt(p.refDays, 0, 365, 0),   // 소개로 열린 워크스페이스와 소개한 워크스페이스에 더해 주는 프로 일수 (0 = 보상 없음)
+    feat: { push: !!(p.feat && typeof p.feat === "object" && p.feat.push) },   // 운영자가 여는 기능 — 휴대폰 푸시 알림(기기 등록). 꺼 두면 알림함만 씁니다
     saved: !!p.saved
   };
 }
@@ -5342,7 +6186,7 @@ const codeOut = c => ({ code: c.code, label: c.label || "", plan: planOk(c.plan)
 const payOut = p => ({ id: p.id, ws: p.ws || "", wsName: p.ws_name || "", paidAt: p.paid_at, amount: Number(p.amount) || 0, method: p.method || "", item: p.item || "", from: p.period_from || "", to: p.period_to || "", invoice: !!Number(p.invoice), memo: p.memo || "", createdAt: p.created_at });
 const fbOut = f => ({ id: f.id, ws: f.ws, wsName: f.ws_name || "", loginId: f.login_id || "", name: f.name || "", role: f.role || "", kind: f.kind, body: f.body, page: f.page || "", ua: f.ua || "", contact: f.contact || "", status: f.status, reply: f.reply || "", replyAt: f.reply_at || "", memo: f.memo || "", createdAt: f.created_at, updatedAt: f.updated_at || "" });
 // 전체 백업에 넣는 표 — 로그인 세션(sess)과 오류 기록은 빼고, AI 토큰은 해시를 지웁니다
-const EXPORT_TABLES = () => ["mw_meta", "workspaces", "accounts", "ent", "ws_set", "api_tokens", "links", "invites", "mod_set", ...SP_TABLES, ...OS_TABLES, ...CM_TABLES, ...TX_TABLES, ...PP_TABLES, ...MK_TABLES, ...CR_TABLES, "adm_pay", "adm_code", "fb", "adm_log"];
+const EXPORT_TABLES = () => ["mw_meta", "workspaces", "accounts", "ent", "ws_set", "api_tokens", "links", "invites", "mod_set", ...SP_TABLES, ...OS_TABLES, ...CM_TABLES, ...TX_TABLES, ...PP_TABLES, ...MK_TABLES, ...CR_TABLES, "nt_sub", "msg_log", "msg_auto", "ht_job", "ht_auto", "adm_pay", "adm_code", "fb", "adm_log"];
 const EXPORT_PAGE = 800;
 /* ───────── 본사 운영팀 — 역할별 권한 ─────────
    총괄(운영자 계정)이 운영자 워크스페이스의 구성원에게 역할을 줍니다. 모든 역할은 워크스페이스의 업무 내용은 보지 못합니다. */
@@ -5506,6 +6350,7 @@ const ADMIN_API = {
         admLog(db, "fb", { id: f.ws, name: f.ws_name }, `문의 ${{ new: "새 문의", doing: "처리 중", done: "완료" }[status]}${reply !== (f.reply || "") ? " · 답변 등록" : ""}`)
       ]);
       const row = await db.prepare("SELECT * FROM fb WHERE id=?1").bind(f.id).first();
+      if (reply && reply !== (f.reply || "")) await notify(db, f.ws, [f.member_id], { type: "sys", title: "문의에 답변이 달렸습니다", body: clip(reply, 120), url: "#/dashboard", tag: "fb-reply" });
       return json({ ok: true, item: fbOut(row) });
     }
     const st = FB_ST.includes(b.status) ? b.status : "";
@@ -5550,6 +6395,7 @@ const ADMIN_API = {
       if (JSON.stringify(next.prices) !== JSON.stringify(cur.prices)) changes.push("가격표");
       if (next.contact !== cur.contact) changes.push("문의 연락처");
       if (next.refDays !== cur.refDays) changes.push("소개 보상 " + (next.refDays ? `프로 ${next.refDays}일` : "없음"));
+      if (next.feat.push !== cur.feat.push) changes.push("휴대폰 푸시 알림 " + (next.feat.push ? "열기" : "닫기"));
       await db.batch([db.prepare("INSERT OR REPLACE INTO mw_meta(k,v) VALUES('platform',?1)").bind(JSON.stringify(next)), admLog(db, "settings", null, changes.join(" · ") || "변경 없음")]);
       return json({ ok: true, platform: next });
     }
@@ -5620,6 +6466,7 @@ const ADMIN_API = {
     if (c && Number(c.n) >= 20) return fail("busy", 429);
     const id = uid("fb"), now = iso();
     await db.prepare("INSERT INTO fb(id,ws,ws_name,member_id,login_id,name,role,kind,body,page,ua,contact,status,created_at,updated_at) VALUES(?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,?11,?12,'new',?13,?13)").bind(id, me.ws, me.wname || "", me.id, me.lid || "", me.name || "", me.role, FB_KINDS.includes(b.kind) ? b.kind : "etc", body, clip(b.page, 120), clip(b.ua, 200), clip(b.contact, 80), now).run();
+    await notifyOps(db, "fb", { type: "sys", title: "새 문의가 들어왔습니다", body: `${me.wname || ""} · ${clip(body, 80)}`, url: "#/admin/fb", tag: "fb-new", once: 5 });
     return json({ ok: true, id });
   },
   async "fb/mine"(db, me) {
@@ -5649,7 +6496,7 @@ Object.assign(PRIVATE, {
     }
     const n = me.admFail + 1;
     if (n >= 5) {   // 다섯 번 틀리면 이 로그인을 끝냅니다
-      await db.batch([db.prepare("DELETE FROM sess WHERE token=?1").bind(me.token), admLog(db, "key-fail", null, "보안 키 5회 틀림 — 로그아웃")]);
+      await db.batch([db.prepare("DELETE FROM sess WHERE token=?1").bind(me.token), ntDrop(db, me.ws, me.id), admLog(db, "key-fail", null, "보안 키 5회 틀림 — 로그아웃")]);
       return fail("locked", 429);
     }
     await db.prepare("UPDATE sess SET adm_fail=?2 WHERE token=?1").bind(me.token, n).run();
@@ -5701,14 +6548,14 @@ Object.assign(PRIVATE, {
       return json({ ok: true });
     }
     if (op === "logout") {
-      await db.batch([db.prepare("DELETE FROM sess WHERE ws=?1 AND member_id=?2").bind(a.ws, a.member_id), admLog(db, "acct-logout", w, `${lid} 모든 기기 로그아웃`)]);
+      await db.batch([db.prepare("DELETE FROM sess WHERE ws=?1 AND member_id=?2").bind(a.ws, a.member_id), ntDrop(db, a.ws, a.member_id), admLog(db, "acct-logout", w, `${lid} 모든 기기 로그아웃`)]);
       return json({ ok: true });
     }
     if (op === "resetpw") {
       const pw = tmpPw();
       await db.batch([
         db.prepare("UPDATE accounts SET pw=?1, fails=0, lock_until=0 WHERE login_id=?2").bind(await makePw(pw), lid),
-        db.prepare("DELETE FROM sess WHERE ws=?1 AND member_id=?2").bind(a.ws, a.member_id),
+        db.prepare("DELETE FROM sess WHERE ws=?1 AND member_id=?2").bind(a.ws, a.member_id), ntDrop(db, a.ws, a.member_id),
         admLog(db, "acct-resetpw", w, `${lid} 임시 비밀번호 발급`)
       ]);
       return json({ ok: true, pw });
@@ -5767,7 +6614,7 @@ PUBLIC["owner-recover"] = async function (db, b, req, url, env) {
   if (!a) return fail("not-found", 404);
   await db.batch([
     db.prepare("UPDATE accounts SET pw=?1, fails=0, lock_until=0, status='active' WHERE login_id=?2").bind(await makePw(b.pw), a.login_id),
-    db.prepare("DELETE FROM sess WHERE ws=?1 AND member_id=?2").bind(a.ws, a.member_id),
+    db.prepare("DELETE FROM sess WHERE ws=?1 AND member_id=?2").bind(a.ws, a.member_id), ntDrop(db, a.ws, a.member_id),
     db.prepare("INSERT OR REPLACE INTO mw_meta(k,v) VALUES('recover_fail',?1)").bind(JSON.stringify({ n: 0, until: 0 })),
     admLog(db, "recover", null, `운영자 ${a.login_id} 비밀번호를 보안 키로 다시 정함`)
   ]);
@@ -5777,6 +6624,12 @@ PUBLIC["owner-recover"] = async function (db, b, req, url, env) {
 /* ───────── 진입점 ───────── */
 const CANON_HOST = "myworks.ai.kr", MOVE_HOSTS = new Set(["myworkspro.pages.dev", "www.myworks.ai.kr"]);
 export async function onRequest(context) {
+  const pend = [];   // 응답 뒤에 마저 할 일(푸시 보내기 등). Cloudflare에서는 waitUntil에 맡기고, 없는 곳(로컬 시험)에서는 끝날 때까지 기다립니다
+  const res = await route(context, p => { p = Promise.resolve(p).catch(() => {}); if (typeof context.waitUntil === "function") context.waitUntil(p); else pend.push(p); });
+  if (pend.length) await Promise.allSettled(pend);
+  return res;
+}
+async function route(context, wait) {
   const { request, env, next } = context;
   const url = new URL(request.url);
   const isMcp = url.pathname === "/mcp" || url.pathname === "/mcp/";
@@ -5785,7 +6638,7 @@ export async function onRequest(context) {
     return new Response(null, { status: 301, headers: { location: "https://" + CANON_HOST + url.pathname + url.search, "cache-control": "max-age=86400" } });
   if (!url.pathname.startsWith("/api/") && !isMcp) return next();
   if (!env.DB) return fail("db-not-bound", 503, { hint: "Pages 설정 → Bindings에서 D1 데이터베이스를 변수 이름 DB로 연결하세요." });
-  const db = env.DB;
+  const D = env.DB, db = { prepare: q => D.prepare(q), batch: l => D.batch(l), exec: q => D.exec(q), env, wait };   // 요청마다 하나 — 뒤에서 env와 wait를 꺼내 씁니다
   if (isMcp) { try { await ensure(db); return await mcp(db, request); } catch (e) { return fail("server-error", 500, { detail: String((e && e.message) || e).slice(0, 300) }); } }
   const path = url.pathname.slice(5).replace(/\/+$/, "");
   let body = {};
@@ -5820,13 +6673,14 @@ export async function onRequest(context) {
     const me = await auth(db, request);
     if (!me) return fail("unauthorized", 401);
     if (me.err) return fail(me.err, 403);
+    if (path === "sync" || path === "state") maybeTick(db);   // 누군가 쓰고 있으면 5분에 한 번 예약 알림을 챙깁니다
     if (path.startsWith("admin/")) {   // 총괄관리 — 운영팀만, 보안 키가 설정돼 있으면 이 로그인에서 한 번 확인한 뒤에만
       if (!me.op) return fail("forbidden", 403);
       if (adminKey(env) && !me.admOk && path !== "admin/gate" && path !== "admin/unlock") return fail("need-key", 403);
-      const dbA = { prepare: q => db.prepare(q), batch: l => db.batch(l), exec: q => db.exec(q), actor: `${me.name || ""} (${me.lid || ""})` };
+      const dbA = { prepare: q => db.prepare(q), batch: l => db.batch(l), exec: q => db.exec(q), env, wait, actor: `${me.name || ""} (${me.lid || ""})` };
       return await PRIVATE[path](dbA, me, body, request, url, env);
     }
-    return await PRIVATE[path](db, me, body, request, url);
+    return await PRIVATE[path](db, me, body, request, url, env);
   } catch (e) {
     const msg = String((e && e.message) || e).slice(0, 500);
     try { await db.prepare("INSERT INTO err_log(id,at,path,msg,ws) VALUES(?1,?2,?3,?4,'')").bind(uid("e"), iso(), path.slice(0, 80), msg).run(); } catch (e2) {}

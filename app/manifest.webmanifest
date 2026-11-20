@@ -1,0 +1,22 @@
+{
+  "name": "마이웍스",
+  "short_name": "마이웍스",
+  "description": "혼자 하는 일을 끝까지 처리하는 일터",
+  "id": "/app/",
+  "start_url": "/app/",
+  "scope": "/app/",
+  "display": "standalone",
+  "lang": "ko",
+  "background_color": "#F8F7F4",
+  "theme_color": "#F8F7F4",
+  "icons": [
+    { "src": "/site/img/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/site/img/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/site/img/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "업무보드", "url": "/app/#/board" },
+    { "name": "돈", "url": "/app/#/money" },
+    { "name": "거래", "url": "/app/#/outsourcing" }
+  ]
+}

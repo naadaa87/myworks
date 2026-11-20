@@ -363,7 +363,9 @@ await ctx.close();
   await p.evaluate(() => { location.hash = "#/marketing/content"; }); await p.waitForTimeout(300);
   ok(await p.evaluate(() => getComputedStyle(document.querySelector(".mk-cal")).gridTemplateColumns.split(" ").length === 1 && [...document.querySelectorAll(".mk-day.blank")].every(e => getComputedStyle(e).display === "none")), "폰: 달력이 목록으로");
   await p.evaluate(() => { location.hash = "#/dashboard"; }); await p.waitForSelector("#mk-dash-slot .card"); await over("home");
-  ok((await p.evaluate(() => document.querySelector("#tabbar").textContent)).includes("마케팅"), "폰: 아래 탭에 마케팅");
+  await p.click('#tabbar [data-g="menu"]'); await p.waitForSelector(".menu-grid");
+  ok((await p.evaluate(() => document.querySelector(".menu-grid").textContent)).includes("마이마케팅"), "폰: 아래 탭의 ‘전체’ 메뉴에 마이마케팅");
+  await p.click('#m-box [data-g="modal-close"], .m-dim', { force: true }).catch(() => {}); await p.evaluate(() => { if (document.querySelector("#modal-root").classList.contains("show")) closeModal(); });
   await o.ctx.close(); }
 
 ok(errors.length === 0, "콘솔·스크립트 오류 없음" + (errors.length ? " — " + [...new Set(errors)].slice(0, 6).join(" | ") : ""));

@@ -139,6 +139,8 @@ td.num{white-space:nowrap;font-weight:600}td .sub{display:block;font-weight:400;
 .steps li::before{content:counter(s);width:36px;height:36px;border-radius:50%;background:var(--point);color:#fff;font-weight:700;display:flex;align-items:center;justify-content:center}
 .steps b{display:block;font-size:17px;margin:5px 0 4px}.steps p{margin:0;color:var(--ink-2)}
 .legal h2{font-size:18px;margin:28px 0 8px;border-top:0;padding-top:0}
+.pv-next{display:inline-block;font-size:12px;font-weight:700;line-height:1.5;color:var(--point);background:var(--point-soft);border-radius:5px;padding:0 6px;margin:0 2px;white-space:nowrap;vertical-align:1px}
+.doc blockquote.pv-change ul{margin:8px 0}.doc blockquote.pv-change p+p,.doc blockquote.pv-change ul+p{margin-top:8px}
 
 /* 바닥글 */
 .foot{border-top:1px solid var(--line);padding:48px 0 28px;background:var(--bg)}
