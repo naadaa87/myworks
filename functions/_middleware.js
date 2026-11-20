@@ -6,17 +6,17 @@
    · 처음 설정한 계정이 운영자가 되어 새 워크스페이스 가입을 승인합니다.
      운영자도 각 워크스페이스의 업무 내용은 볼 수 없고, 가입·이용 상태와 등급만 관리합니다.
    · 등급: 베이직(나 혼자 + 구성원 2명, 브랜드 2개, 읽기 토큰 1개) / 프로(구성원 10명 포함, 업종 모듈, 쓰기 토큰).
-     업종 모듈: space(마이스토어) · outsourcing(거래) · commerce(마이셀러) · tax(마이택스) · people(마이피플) · marketing(마이마케팅) · creator(마이크리에이터) — 프로 워크스페이스에서 켜고 끕니다.
+     업종 모듈: space(마이스토어) · outsourcing(거래) · commerce(마이셀러) · tax(마이택스) · people(마이피플) · marketing(마이마케팅) · creator(마이크리에이터) · edu(마이에듀) — 프로 워크스페이스에서 켜고 끕니다.
    · AI 접속: 개인 API 토큰(Bearer)으로 외부 AI가 /api/ai/* 를 읽고, 쓰기 토큰은 "제안"을 올립니다. /mcp 는 같은 기능의 MCP 서버입니다.
    · 확인 링크: 계정 없는 고객·거래처가 /#/link/<token> 에서 견적 승인·납품 확인만 합니다.
    · 스페이스: 예약 → 청소 배정 → 체크리스트 → 확인 → 손익. HOSTDB(읽기)는 운영자 워크스페이스에서만, SPACEDB(1회 가져오기)는 운영자만.
    · 무료 요금제 한도(요청당 쿼리 50회)를 넘지 않도록 여러 건의 쓰기는 한 문장으로 묶어 처리합니다. */
 
-const SCHEMA = "14";
+const SCHEMA = "15";
 const PLANS = ["basic", "pro"];
-const MODULES = ["space", "outsourcing", "commerce", "tax", "people", "marketing", "creator"];
+const MODULES = ["space", "outsourcing", "commerce", "tax", "people", "marketing", "creator", "edu"];
 const BASE_MODULES = ["outsourcing"];          // 거래 — 기본 기능이라 등급과 관계없이 늘 켜져 있습니다
-const EXT_MODULES = ["space", "commerce", "tax", "people", "marketing", "creator"];     // 확장판 — 마이스토어 · 마이셀러 · 마이택스 · 마이피플 · 마이마케팅 · 마이크리에이터 (워크스페이스 관리자가 켜고 끕니다)
+const EXT_MODULES = ["space", "commerce", "tax", "people", "marketing", "creator", "edu"];     // 확장판 — 마이스토어 · 마이셀러 · 마이택스 · 마이피플 · 마이마케팅 · 마이크리에이터 · 마이에듀 (워크스페이스 관리자가 켜고 끕니다)
 const PLAN_LIMITS = { basic: { brands: 2, members: 2, tokens: 1 }, pro: { brands: 1000, members: 10, tokens: 20 }, beta: { brands: 1000, members: 30, tokens: 20 } };   // members = 관리자 외 구성원 수
 /* 무료 공개 기간 — 결제를 붙이기 전까지 모든 워크스페이스가 프로 기능과 확장판을 무료로 씁니다.
    유료로 바꿀 때 false로 바꾸면 워크스페이스마다 저장된 등급(베이직·프로·기한)이 다시 적용됩니다. 데이터는 그대로입니다. */
@@ -193,7 +193,7 @@ async function ensure(db) {
   try { const r = await db.prepare("SELECT v FROM mw_meta WHERE k='schema'").first(); v = r && r.v; } catch (e) { v = null; }
   if (v !== SCHEMA) {
     // 표 만들기는 묶음(exec)으로 — 무료 플랜의 요청당 쿼리 수 한도를 넘지 않도록
-    for (const group of [DDL, SP_DDL, OS_DDL, CM_DDL, TX_DDL, PP_DDL, MK_DDL, CR_DDL, ADM_DDL, INV_DDL, NT_DDL, MSG_DDL, HT_DDL]) await db.exec(group.join("\n"));
+    for (const group of [DDL, SP_DDL, OS_DDL, CM_DDL, TX_DDL, PP_DDL, MK_DDL, CR_DDL, ED_DDL, ADM_DDL, INV_DDL, NT_DDL, MSG_DDL, HT_DDL]) await db.exec(group.join("\n"));
     const have = {};
     for (const t of [...new Set(ADD_COLS.map(x => x[0]))]) have[t] = new Set((((await db.prepare(`PRAGMA table_info(${t})`).all()).results) || []).map(c => c.name));
     for (const [t, col] of ADD_COLS) {
@@ -821,7 +821,7 @@ const PRIVATE = {
     if (!LINK_KINDS[kind]) return fail("bad-request");
     const target = clip(b.target, 60);
     if (!target || !await LINK_KINDS[kind].exists(db, me, target)) return fail("not-found", 404);
-    const days = clampInt(b.days, 1, kind === "cr-kit" ? 365 : 180, 30), token = rand(16), now = Date.now();   // 미디어킷은 오래 걸어 두는 주소라 1년까지
+    const days = clampInt(b.days, 1, kind === "cr-kit" || kind === "ed-guard" ? 365 : 180, 30), token = rand(16), now = Date.now();   // 미디어킷·보호자 페이지는 오래 걸어 두는 주소라 1년까지
     await db.batch([
       db.prepare("UPDATE links SET expires_at=?3 WHERE ws=?1 AND kind=?2 AND target=?4 AND used_at IS NULL").bind(me.ws, kind, new Date(now - 1000).toISOString(), target),   // 같은 대상의 이전 링크는 닫습니다
       db.prepare("INSERT INTO links(token,ws,kind,target,created_by,created_at,expires_at,opts) VALUES(?1,?2,?3,?4,?5,?6,?7,?8)").bind(token, me.ws, kind, target, me.id, iso(), new Date(now + days * 864e5).toISOString(), kind === "project" ? JSON.stringify({ tasks: b.tasks !== false }) : null)
@@ -993,7 +993,7 @@ const PRIVATE = {
     }
     if (act === "delete") {
       await htForget(db, w.id);   // 수집 서비스에 등록해 둔 홈택스 조회 아이디부터 지웁니다
-      await db.batch(SP_TABLES.concat(OS_TABLES, CM_TABLES, TX_TABLES, PP_TABLES, MK_TABLES, CR_TABLES, NT_TABLES, MSG_TABLES, HT_TABLES, ["ws_set", "api_tokens", "links", "mod_set", "invites"]).map(t => db.prepare(`DELETE FROM ${t} WHERE ws=?1`).bind(w.id)));   // 한 묶음으로 — 중간에 끊겨 반만 지워지는 일이 없습니다
+      await db.batch(SP_TABLES.concat(OS_TABLES, CM_TABLES, TX_TABLES, PP_TABLES, MK_TABLES, CR_TABLES, ED_TABLES, NT_TABLES, MSG_TABLES, HT_TABLES, ["ws_set", "api_tokens", "links", "mod_set", "invites"]).map(t => db.prepare(`DELETE FROM ${t} WHERE ws=?1`).bind(w.id)));   // 한 묶음으로 — 중간에 끊겨 반만 지워지는 일이 없습니다
       await db.batch([
         db.prepare("DELETE FROM ent WHERE ws=?1").bind(w.id),
         db.prepare("DELETE FROM sess WHERE ws=?1").bind(w.id),
@@ -1173,9 +1173,16 @@ async function spAiToday(db, me) {
 }
 
 /* 한 행 = JSON 한 줄로 받아 그대로 이어 붙입니다 (서버 계산을 줄이기 위해) */
+/* 한 줄을 JSON으로 — D1은 SQL 함수 하나에 인수를 32개까지만 받습니다(developers.cloudflare.com/d1/platform/limits).
+   그래서 칸이 16개를 넘는 표는 json_object(앞 16칸)에 json_insert로 15칸씩 덧붙입니다. 결과는 한 번에 만든 것과 같습니다 */
+function spObj(pairs) {
+  let sql = `json_object(${pairs.slice(0, 16).map(x => `'${x[0]}',${x[1]}`).join(",")})`;
+  for (let i = 16; i < pairs.length; i += 15) sql = `json_insert(${sql},${pairs.slice(i, i + 15).map(x => `'$.${x[0]}',${x[1]}`).join(",")})`;
+  return sql;
+}
 function spSel(t, where, tail) {
-  const pairs = SPC[t].map(c => SPJ[t] && SPJ[t][c] !== undefined ? `'${c}',CASE WHEN json_valid(${c}) THEN json(${c}) ELSE json('${SPJ[t][c]}') END` : `'${c}',${c}`);
-  return `SELECT json_object(${pairs.join(",")}) AS j FROM ${t} WHERE ${where}${tail ? " " + tail : ""}`;
+  const pairs = SPC[t].map(c => [c, SPJ[t] && SPJ[t][c] !== undefined ? `CASE WHEN json_valid(${c}) THEN json(${c}) ELSE json('${SPJ[t][c]}') END` : c]);
+  return `SELECT ${spObj(pairs)} AS j FROM ${t} WHERE ${where}${tail ? " " + tail : ""}`;
 }
 const rawArr = r => "[" + ((r && r.results) || []).map(x => x.j).join(",") + "]";
 const rowsOf = r => ((r && r.results) || []).map(x => parse(x.j)).filter(Boolean);
@@ -2091,7 +2098,7 @@ function spRestoreStmts(db, ws, sp) {
   }
   return { dels, stmts };
 }
-const modTables = () => OS_TABLES.concat(CM_TABLES, TX_TABLES, PP_TABLES, MK_TABLES, CR_TABLES);
+const modTables = () => OS_TABLES.concat(CM_TABLES, TX_TABLES, PP_TABLES, MK_TABLES, CR_TABLES, ED_TABLES);
 // 표를 둘씩 묶어 한 문장(UNION ALL)으로 읽습니다 — 확장판이 늘어도 요청당 쿼리 수 한도(무료 플랜 50)를 넘지 않게
 async function modBackupRaw(db, ws) {
   const MOD_TABLES = modTables(), pairs = [];
@@ -2939,6 +2946,7 @@ const AIFN = {
     if (kind === "create-job" && !hasMod(me, "outsourcing")) return { error: "module-off" };
     if (kind.startsWith("mk-") && !hasMod(me, "marketing")) return { error: "module-off" };
     if (kind.startsWith("cr-") && !hasMod(me, "creator")) return { error: "module-off" };
+    if (kind.startsWith("ed-") && !hasMod(me, "edu")) return { error: "module-off" };
     const chk = propCheck(kind, payload);
     if (chk.error) return chk;
     const set = await wsSettings(db, me.ws);
@@ -2988,17 +2996,31 @@ function propCheck(kind, p) {
   } else if (kind === "cr-deal") {   // 마이크리에이터 협찬 건
     out.brand = clip(p.brand, 60); if (!out.brand) return { error: "bad-request", hint: "brand가 필요합니다." };
     out.title = clip(p.title, 100); out.type = clip(p.type, 20); out.channel = clip(p.channel, 60); out.amount = Math.max(0, intOr(p.amount, 0)); out.due = dOk(p.due); out.memo = clip(p.memo, 2000);
+  } else if (kind === "ed-report") {   // 마이에듀 월간 학습 리포트 초안
+    out.student = clip(p.student, 60); out.body = clip(p.body, 4000); if (!out.student || !out.body) return { error: "bad-request", hint: "student와 body가 필요합니다." };
+    out.month = ymOk(p.month); out.title = clip(p.title, 80);
+  } else if (kind === "ed-lead") {   // 마이에듀 상담 문의
+    out.name = clip(p.name, 30); if (!out.name) return { error: "bad-request", hint: "name이 필요합니다." };
+    out.phone = clip(p.phone, 20); out.grade = clip(p.grade, 20); out.subject = clip(p.subject, 40); out.src = clip(p.src, 20); out.next = dOk(p.next); out.memo = clip(p.memo, 2000);
   }
   return { payload: out };
 }
+/* D1은 LIKE 패턴을 50바이트까지만 받습니다(한글은 한 글자에 3바이트, developers.cloudflare.com/d1/platform/limits).
+   넘으면 앞부분으로 찾고, 찾은 줄은 likeHas로 전체 이름이 들어 있는지 다시 확인합니다 */
+function likeArg(s) {
+  let b = 2, out = "";
+  for (const ch of String(s == null ? "" : s)) { const c = ch.codePointAt(0), n = c < 0x80 ? 1 : c < 0x800 ? 2 : c < 0x10000 ? 3 : 4; if (b + n > 50) break; b += n; out += ch; }
+  return "%" + out + "%";
+}
+const likeHas = (name, key) => String(name == null ? "" : name).toLowerCase().includes(String(key == null ? "" : key).toLowerCase());
 async function findEnt(db, ws, kind, key) {   // id 또는 이름으로 찾기
   if (!key) return null;
   let r = await db.prepare("SELECT id, data FROM ent WHERE ws=?1 AND kind=?2 AND id=?3 AND deleted=0").bind(ws, kind, key).first();
   if (r) return { id: r.id, d: parse(r.data) || {} };
   const f = kind === "task" ? "title" : "name";
-  const rs = (await db.prepare(`SELECT id, data FROM ent WHERE ws=?1 AND kind=?2 AND deleted=0 AND json_extract(data,'$.${f}') LIKE ?3 LIMIT 5`).bind(ws, kind, "%" + key + "%").all()).results || [];
+  const rs = (await db.prepare(`SELECT id, data FROM ent WHERE ws=?1 AND kind=?2 AND deleted=0 AND json_extract(data,'$.${f}') LIKE ?3 LIMIT 20`).bind(ws, kind, likeArg(key)).all()).results || [];
   const nk = normNm(key);
-  const hit = rs.map(x => ({ id: x.id, d: parse(x.data) || {} })).sort((a, b) => (normNm(a.d[f]) === nk ? 0 : 1) - (normNm(b.d[f]) === nk ? 0 : 1))[0];
+  const hit = rs.map(x => ({ id: x.id, d: parse(x.data) || {} })).filter(x => likeHas(x.d[f], key)).sort((a, b) => (normNm(a.d[f]) === nk ? 0 : 1) - (normNm(b.d[f]) === nk ? 0 : 1))[0];
   return hit || null;
 }
 /* 조사 고르기 — "모노가구을(를)" → "모노가구를", "‘프로’(으)로" → "‘프로’로". 바로 앞 글자의 받침을 보고 고릅니다 */
@@ -3061,6 +3083,10 @@ async function propApply(db, me, prop) {   // 제안을 실제 데이터로 — 
   if (prop.kind === "cr-idea" || prop.kind === "cr-deal") {
     if (!hasMod(me, "creator")) return { error: "module-off" };
     return await crPropItems(db, me, prop);
+  }
+  if (prop.kind === "ed-report" || prop.kind === "ed-lead") {
+    if (!hasMod(me, "edu")) return { error: "module-off" };
+    return await edPropItems(db, me, prop);
   }
   return { error: "bad-request" };
 }
@@ -3125,7 +3151,7 @@ function txBizIn(b) {
   if ("links" in b) {
     const l = b.links && typeof b.links === "object" ? b.links : {};
     const arr = (a, n) => (Array.isArray(a) ? a : []).map(x => clip(x, 60)).filter(Boolean).slice(0, n);
-    o.links = JSON.stringify({ brands: arr(l.brands, 40), stores: arr(l.stores, 200), mods: arr(l.mods, 6).filter(x => ["space", "commerce", "outsourcing", "people", "marketing", "creator"].includes(x)), main: !!l.main });
+    o.links = JSON.stringify({ brands: arr(l.brands, 40), stores: arr(l.stores, 200), mods: arr(l.mods, 8).filter(x => ["space", "commerce", "outsourcing", "people", "marketing", "creator", "edu"].includes(x)), main: !!l.main });
   }
   return o;
 }
@@ -3920,7 +3946,7 @@ async function mkAiSummary(db, me) {
 }
 async function mkPropItems(db, me, prop) {   // AI 제안 → 실행안·콘텐츠 초안
   const p = prop.payload, now = iso(), bump = db.prepare("UPDATE workspaces SET sp_ver=sp_ver+1 WHERE id=?1").bind(me.ws);
-  const findRow = async (t, key) => { if (!key) return null; return await db.prepare(`SELECT id, name${t === "mk_camp" ? ", chan_id" : ""} FROM ${t} WHERE ws=?1 AND (id=?2 OR name=?2 OR name LIKE ?3) ORDER BY (id=?2) DESC, (name=?2) DESC, LENGTH(name) LIMIT 1`).bind(me.ws, key, "%" + key + "%").first(); };
+  const findRow = async (t, key) => { if (!key) return null; const r = await db.prepare(`SELECT id, name${t === "mk_camp" ? ", chan_id" : ""} FROM ${t} WHERE ws=?1 AND (id=?2 OR name=?2 OR name LIKE ?3) ORDER BY (id=?2) DESC, (name=?2) DESC, LENGTH(name) LIMIT 1`).bind(me.ws, key, likeArg(key)).first(); return r && (r.id === key || likeHas(r.name, key)) ? r : null; };
   if (prop.kind === "mk-action") {
     const cp = await findRow("mk_camp", p.campaign);
     const row = { id: bulkId("ma"), key: null, kind: p.kind, mode: "boost", camp_id: cp ? cp.id : "", chan_id: cp ? cp.chan_id : "", title: p.title, detail: p.detail, from_v: p.from, to_v: p.to, status: "todo", base: null, task_id: null, by: "ai", created_at: now, done_at: null, updated_at: now };
@@ -4594,7 +4620,7 @@ async function crAiSummary(db, me) {
 }
 async function crPropItems(db, me, prop) {   // AI 제안 → 콘텐츠 아이디어 · 협찬 건
   const p = prop.payload, now = iso(), bump = db.prepare("UPDATE workspaces SET sp_ver=sp_ver+1 WHERE id=?1").bind(me.ws);
-  const ch = p.channel ? await db.prepare("SELECT id, name FROM cr_chan WHERE ws=?1 AND (id=?2 OR name=?2 OR name LIKE ?3) ORDER BY (id=?2) DESC, (name=?2) DESC, LENGTH(name) LIMIT 1").bind(me.ws, p.channel, "%" + p.channel + "%").first() : null;
+  const ch0 = p.channel ? await db.prepare("SELECT id, name FROM cr_chan WHERE ws=?1 AND (id=?2 OR name=?2 OR name LIKE ?3) ORDER BY (id=?2) DESC, (name=?2) DESC, LENGTH(name) LIMIT 1").bind(me.ws, p.channel, likeArg(p.channel)).first() : null, ch = ch0 && (ch0.id === p.channel || likeHas(ch0.name, p.channel)) ? ch0 : null;
   if (prop.kind === "cr-idea") {
     const row = crContRow({ chan_id: ch ? ch.id : "", title: p.title, format: CR_FMT.includes(p.format) ? p.format : "etc", stage: "idea", post_date: p.date || null }, { memo: p.memo || "", by: me.id }, now);
     return { items: [actRow(me, `AI 제안으로 콘텐츠 아이디어 "${row.title}"을(를) 더했습니다.`)], stmts: spBulk(db, "cr_cont", me.ws, [row]).concat([bump]), applied: { contentId: row.id, title: row.title, channel: ch ? ch.name : "" } };
@@ -5276,7 +5302,7 @@ const MCP_TOOLS = [
   { name: "myworks_commerce", description: "마이셀러: 발송할 주문, 답할 문의, 재고 부족, 발주·입고, 이달 매출", input: {} },
   { name: "myworks_marketing", description: "마이마케팅: 최근 30일·7일 광고비·노출·클릭·전환·매출과 채널·캠페인별 성과, 목표(CPA·ROAS), 남은 실행안, 예정된 콘텐츠", input: {} },
   { name: "myworks_creator", description: "마이크리에이터: 채널별 구독자·월 조회수, 진행 중인 협찬(단계·금액·마감·입금 예정), 챙길 것(새 문의·마감 지남·입금 지연·수정 요청), 독점 조건, 예정 콘텐츠, 최근 게시물 성과, 이달·지난달 수익", input: {} },
-  { name: "myworks_propose", description: "변경 제안 올리기(쓰기 토큰). kind: create-task(title, project|store, detail, due, priority, assignee) · update-status(task, status|due) · add-note(text, project|store|task) · create-contact(name, company, phone, email, kind) · create-job(title, client, detail, due, amount) · mk-action(title, detail, campaign, kind, from, to — 마케팅 실행안) · mk-post(title, body, channel, date, format, tags — 콘텐츠 초안) · cr-idea(title, channel, format, date, memo — 크리에이터 콘텐츠 아이디어) · cr-deal(brand, title, type, channel, amount, due, memo — 협찬 건). 관리자가 승인하면 반영됩니다", input: { kind: "string", payload: "object", reason: "string" }, required: ["kind", "payload"] }
+  { name: "myworks_propose", description: "변경 제안 올리기(쓰기 토큰). kind: create-task(title, project|store, detail, due, priority, assignee) · update-status(task, status|due) · add-note(text, project|store|task) · create-contact(name, company, phone, email, kind) · create-job(title, client, detail, due, amount) · mk-action(title, detail, campaign, kind, from, to — 마케팅 실행안) · mk-post(title, body, channel, date, format, tags — 콘텐츠 초안) · cr-idea(title, channel, format, date, memo — 크리에이터 콘텐츠 아이디어) · cr-deal(brand, title, type, channel, amount, due, memo — 협찬 건) · ed-report(student, month, title, body — 마이에듀 월간 학습 리포트 초안) · ed-lead(name, phone, grade, subject, src, next, memo — 마이에듀 상담 문의). 관리자가 승인하면 반영됩니다", input: { kind: "string", payload: "object", reason: "string" }, required: ["kind", "payload"] }
 ];
 const mcpSchema = t => ({ type: "object", properties: Object.fromEntries(Object.entries(t.input).map(([k, v]) => [k, v === "object" ? { type: "object" } : { type: "string" }])), required: t.required || [] });
 const mcpFn = { myworks_me: "me", myworks_today: "today", myworks_projects: "projects", myworks_project: "project", myworks_stores: "stores", myworks_tasks: "tasks", myworks_search: "search", myworks_contacts: "contacts", myworks_space: "space", myworks_outsourcing: "outsourcing", myworks_commerce: "commerce", myworks_marketing: "marketing", myworks_creator: "creator", myworks_propose: "propose" };
@@ -5536,6 +5562,7 @@ Object.assign(PRIVATE, {
       if (["contract", "making", "review"].includes(d.stage)) add("post", d.post_due, "게시 마감");
       if (["posted", "settle"].includes(d.stage)) add("pay", d.pay_due, "입금 예정");
     }
+    if (hasMod(me, "edu")) { const ex = await edUpcoming(db, me, today, to); items.push(...ex.items); late.push(...ex.late); }
     return json({ ok: true, today, items, late });
   }
 });
@@ -5604,9 +5631,16 @@ const MSG_TPL = {
   "auto.invLate": ["입금 기한 지남 안내", "[{상호}] {이름}님, {제목} 청구서의 입금 기한({기한})이 지났습니다. 확인 부탁드립니다.\n{링크}"],
   "auto.quoteNudge": ["견적 회신 요청", "[{상호}] {이름}님, 보내드린 견적서를 확인해 주세요.\n{제목}\n{링크}"],
   "auto.resEve": ["예약 전날 안내", "[{상호}] {이름}님, 내일({날짜}) {시간} {지점} 예약 안내드립니다.\n{안내}"],
+  "link.ed-guard": ["보호자 페이지 보내기", "[{상호}] {이름} 학생의 시간표·출결·수강료를 한곳에서 보실 수 있는 페이지입니다.\n{링크}"],
+  "ed.bill": ["수강료 안내", "[{상호}] {이름} 학생 {제목} 안내드립니다.\n{금액} · 납부 기한 {기한}\n{안내}\n{링크}"],
+  "ed.att": ["출결 안내", "[{상호}] {이름} 학생이 {날짜} {제목} 수업에 {안내}"],
+  "ed.report": ["학습 리포트 안내", "[{상호}] {이름} 학생의 {제목}를 보내드립니다.\n{링크}"],
+  "auto.edDue": ["수강료 납부 기한 전 안내", "[{상호}] {이름} 학생 {제목} 납부 기한이 {기한}입니다. ({금액})\n{링크}"],
+  "auto.edLate": ["수강료 미납 안내", "[{상호}] {이름} 학생 {제목} 납부 기한({기한})이 지났습니다. 이미 보내셨다면 이 문자는 넘겨 주세요.\n{링크}"],
   "free": ["직접 쓰기", ""]
 };
-const MSG_AUTO = { invDue: { on: false, days: 1 }, invLate: { on: false, days: 3 }, quoteNudge: { on: false, days: 3 }, resEve: { on: false, hour: 18, note: "" } };
+const MSG_AUTO = { invDue: { on: false, days: 1 }, invLate: { on: false, days: 3 }, quoteNudge: { on: false, days: 3 }, resEve: { on: false, hour: 18, note: "" }, edDue: { on: false, days: 1 }, edLate: { on: false, days: 3 } };
+const MSG_AUTO_HOOKS = [];   // 확장판이 자동 안내 후보를 더합니다 — async (db, w, set, A, today, sign) => [후보]
 const MSG_DAY_MAX = 2000, MSG_SEND_MAX = 50, MSG_AUTO_RUN = 30;
 const phoneKR = s => { let d = String(s || "").replace(/[^0-9]/g, ""); if (d.startsWith("82") && d.length >= 11) d = "0" + d.slice(2); return /^01[016789]\d{7,8}$/.test(d) ? d : ""; };   // 휴대폰 번호만
 const smsBytes = t => { let n = 0; for (const ch of String(t || "")) n += ch.codePointAt(0) <= 0x7f ? 1 : 2; return n; };
@@ -5633,7 +5667,9 @@ function msgNorm(s) {
       invDue: { on: on(a.invDue), days: clampInt(a.invDue && a.invDue.days, 0, 14, 1) },
       invLate: { on: on(a.invLate), days: clampInt(a.invLate && a.invLate.days, 1, 30, 3) },
       quoteNudge: { on: on(a.quoteNudge), days: clampInt(a.quoteNudge && a.quoteNudge.days, 1, 30, 3) },
-      resEve: { on: on(a.resEve), hour: clampInt(a.resEve && a.resEve.hour, 9, 19, 18), note: clip(a.resEve && a.resEve.note, 300) }
+      resEve: { on: on(a.resEve), hour: clampInt(a.resEve && a.resEve.hour, 9, 19, 18), note: clip(a.resEve && a.resEve.note, 300) },
+      edDue: { on: on(a.edDue), days: clampInt(a.edDue && a.edDue.days, 0, 14, 1) },
+      edLate: { on: on(a.edLate), days: clampInt(a.edLate && a.edLate.days, 1, 30, 3) }
     },
     dayMax: clampInt(s.dayMax, 1, MSG_DAY_MAX, 300)
   };
@@ -5826,8 +5862,10 @@ async function msgAutoWs(db, env, w, now) {
   if (A.resEve.on && hour >= A.resEve.hour && tierOf(w).modules.includes("space")) {
     qs.push(db.prepare("SELECT r.id, r.customer, r.phone, r.res_date, r.start_t, r.slot, json_extract(e.data,'$.name') AS bname FROM sp_res r LEFT JOIN ent e ON e.ws=r.ws AND e.kind='store' AND e.id=r.branch_id WHERE r.ws=?1 AND r.res_date=?2 AND r.phone IS NOT NULL AND r.phone<>'' AND (r.status IS NULL OR r.status NOT LIKE '%취소%') LIMIT 80").bind(w.ws, addDaysS(today, 1))); tags.push(["res"]);
   }
-  if (!qs.length) return 0;
-  const rs = await db.batch(qs);
+  const hk = [];
+  for (const h of MSG_AUTO_HOOKS) { try { hk.push(...await h(db, w, set, A, today, sign)); } catch (e) {} }
+  if (!qs.length && !hk.length) return 0;
+  const rs = qs.length ? await db.batch(qs) : [];
   const won = n => (Number(n) || 0).toLocaleString("ko-KR") + "원", md = d => String(d || "").slice(5).replace("-", "/");
   rs.forEach((r, i) => {
     const rows = (r && r.results) || [], tag = tags[i];
@@ -5835,12 +5873,13 @@ async function msgAutoWs(db, env, w, now) {
     else if (tag[0] === "quote") for (const q of rows) { const to = phoneKR(q.phone); if (!to) continue; cand.push({ tpl: "auto.quoteNudge", ref_kind: "quote", ref_id: q.id, to, name: q.cname || q.client_name || "", fields: { 상호: sign, 이름: q.cname || q.client_name || "고객", 제목: q.title || q.no || "", 링크: base + q.token, 코드: q.token } }); }
     else for (const x of rows) { const to = phoneKR(x.phone); if (!to) continue; cand.push({ tpl: "auto.resEve", ref_kind: "res", ref_id: x.id, to, name: x.customer || "", fields: { 상호: sign, 이름: x.customer || "고객", 날짜: md(x.res_date), 시간: x.start_t || ({ day: "낮", night: "밤", allday: "종일" })[x.slot] || "", 지점: x.bname || "", 안내: A.resEve.note || "" } }); }
   });
+  cand.push(...hk);
   if (!cand.length) return 0;
   // 이미 보낸 것은 빼고, 오늘 한도 안에서. 보냈거나, 보냈는지 모르거나, 두 번 실패한 안내는 다시 보내지 않습니다
   const [done, cnt, lk] = await db.batch([
     db.prepare("SELECT ref_id, tpl, SUM(CASE WHEN status IN ('sent','pending') THEN 1 ELSE 0 END) AS done, COUNT(*) AS n FROM msg_log WHERE ws=?1 AND auto=1 AND ref_id IN (SELECT value FROM json_each(?2)) GROUP BY ref_id, tpl").bind(w.ws, JSON.stringify([...new Set(cand.map(c => c.ref_id))])),
     db.prepare(msgCountSql).bind(w.ws, kstDayStart()),
-    db.prepare("SELECT kind, target, token FROM links WHERE ws=?1 AND kind='invoice' AND used_at IS NULL AND expires_at>?2 AND target IN (SELECT value FROM json_each(?3))").bind(w.ws, new Date(now + 864e5).toISOString(), JSON.stringify(cand.filter(c => c.link).map(c => c.link.target)))
+    db.prepare("SELECT kind, target, token FROM links WHERE ws=?1 AND kind IN ('invoice','ed-guard') AND used_at IS NULL AND expires_at>?2 AND target IN (SELECT value FROM json_each(?3))").bind(w.ws, new Date(now + 864e5).toISOString(), JSON.stringify(cand.filter(c => c.link).map(c => c.link.target)))
   ]);
   const sentKey = new Set(((done && done.results) || []).filter(x => Number(x.done) > 0 || Number(x.n) >= MSG_AUTO_TRIES).map(x => x.ref_id + "|" + x.tpl)), used = Number(((((cnt && cnt.results) || [])[0]) || {}).n) || 0;
   const tokens = new Map(((lk && lk.results) || []).map(x => [x.target, x.token]));
@@ -5848,7 +5887,7 @@ async function msgAutoWs(db, env, w, now) {
   const list = cand.filter(c => !sentKey.has(c.ref_id + "|" + c.tpl)).slice(0, room);
   if (!list.length) return 0;
   const newLinks = [];
-  for (const c of list) if (c.link) { let t = tokens.get(c.link.target); if (!t) { t = rand(16); tokens.set(c.link.target, t); newLinks.push(db.prepare("INSERT INTO links(token,ws,kind,target,created_by,created_at,expires_at) VALUES(?1,?2,?3,?4,NULL,?5,?6)").bind(t, w.ws, c.link.kind, c.link.target, iso(), new Date(now + 30 * 864e5).toISOString())); } c.fields.링크 = base + t; c.fields.코드 = t; }
+  for (const c of list) if (c.link) { let t = tokens.get(c.link.target); if (!t) { t = rand(16); tokens.set(c.link.target, t); newLinks.push(db.prepare("INSERT INTO links(token,ws,kind,target,created_by,created_at,expires_at) VALUES(?1,?2,?3,?4,NULL,?5,?6)").bind(t, w.ws, c.link.kind, c.link.target, iso(), new Date(now + (c.link.kind === "ed-guard" ? 365 : 30) * 864e5).toISOString())); } c.fields.링크 = base + t; c.fields.코드 = t; }
   if (newLinks.length) await db.batch(newLinks);
   const items = list.map(c => ({ to: c.to, name: c.name, text: msgFill(msgTextOf(set, c.tpl), c.fields), tpl: c.tpl, ref_kind: c.ref_kind, ref_id: c.ref_id, fields: c.fields })).filter(x => x.text);
   if (!items.length) return 0;
@@ -6200,7 +6239,7 @@ const codeOut = c => ({ code: c.code, label: c.label || "", plan: planOk(c.plan)
 const payOut = p => ({ id: p.id, ws: p.ws || "", wsName: p.ws_name || "", paidAt: p.paid_at, amount: Number(p.amount) || 0, method: p.method || "", item: p.item || "", from: p.period_from || "", to: p.period_to || "", invoice: !!Number(p.invoice), memo: p.memo || "", createdAt: p.created_at });
 const fbOut = f => ({ id: f.id, ws: f.ws, wsName: f.ws_name || "", loginId: f.login_id || "", name: f.name || "", role: f.role || "", kind: f.kind, body: f.body, page: f.page || "", ua: f.ua || "", contact: f.contact || "", status: f.status, reply: f.reply || "", replyAt: f.reply_at || "", memo: f.memo || "", createdAt: f.created_at, updatedAt: f.updated_at || "" });
 // 전체 백업에 넣는 표 — 로그인 세션(sess)과 오류 기록은 빼고, AI 토큰은 해시를 지웁니다
-const EXPORT_TABLES = () => ["mw_meta", "workspaces", "accounts", "ent", "ws_set", "api_tokens", "links", "invites", "mod_set", ...SP_TABLES, ...OS_TABLES, ...CM_TABLES, ...TX_TABLES, ...PP_TABLES, ...MK_TABLES, ...CR_TABLES, "nt_sub", "msg_log", "msg_auto", "ht_job", "ht_auto", "adm_pay", "adm_code", "fb", "adm_log"];
+const EXPORT_TABLES = () => ["mw_meta", "workspaces", "accounts", "ent", "ws_set", "api_tokens", "links", "invites", "mod_set", ...SP_TABLES, ...OS_TABLES, ...CM_TABLES, ...TX_TABLES, ...PP_TABLES, ...MK_TABLES, ...CR_TABLES, ...ED_TABLES, "nt_sub", "msg_log", "msg_auto", "ht_job", "ht_auto", "adm_pay", "adm_code", "fb", "adm_log"];
 const EXPORT_PAGE = 800;
 /* ───────── 본사 운영팀 — 역할별 권한 ─────────
    총괄(운영자 계정)이 운영자 워크스페이스의 구성원에게 역할을 줍니다. 모든 역할은 워크스페이스의 업무 내용은 보지 못합니다. */
@@ -6542,7 +6581,7 @@ Object.assign(PRIVATE, {
     if (op === "search") {
       const q = clip(b.q, 60).toLowerCase(), f = String(b.f || "all"), now = Date.now();
       const where = ["1=1"], args = [];
-      if (q) { args.push("%" + q.replace(/[%_]/g, "") + "%"); where.push(`(lower(a.login_id) LIKE ?${args.length} OR lower(a.name) LIKE ?${args.length} OR lower(a.contact) LIKE ?${args.length} OR lower(w.name) LIKE ?${args.length})`); }
+      if (q) { args.push(likeArg(q.replace(/[%_]/g, ""))); where.push(`(lower(a.login_id) LIKE ?${args.length} OR lower(a.name) LIKE ?${args.length} OR lower(a.contact) LIKE ?${args.length} OR lower(w.name) LIKE ?${args.length})`); }
       if (f === "locked") { args.push(now); where.push(`(a.lock_until>?${args.length} OR a.fails>=5)`); }
       else if (f === "pending") where.push("a.status='pending'");
       else if (f === "disabled") where.push("a.status IN ('disabled','rejected')");
@@ -6635,6 +6674,811 @@ PUBLIC["owner-recover"] = async function (db, b, req, url, env) {
   return json({ ok: true, loginId: a.login_id });
 };
 
+/* ═══════════════ 마이에듀 — 학원 · 교습소 · 과외 · 레슨 ═══════════════
+   · 반(수업)·수강생·수강 등록·출결·수업 기록·학생 기록·수강료·상담 문의를 여덟 표에 나눠 둡니다.
+   · 월 수강료는 청구일에 '초안'으로 만들어 둡니다. 원장이 확인하고 확정하기 전에는 보호자에게 아무것도 가지 않습니다.
+   · 회차권은 결제한 회차에서 출석·지각·보강(설정에 따라 무단 결석까지)을 뺀 만큼이 남습니다.
+   · 보호자 페이지(ed-guard)는 수강생마다 하나입니다. 가입 없이 시간표·출결·진도·수강료·영수증을 봅니다.
+     연락처·상담 기록·내부 메모는 보내지 않습니다.
+   · 강사를 '현장 근무자'로 초대하면 자기가 맡은 반의 출결과 수업 기록만 씁니다. 수강료와 연락처는 받지 않습니다. */
+const ED_DDL = [
+  "CREATE TABLE IF NOT EXISTS ed_class(ws TEXT NOT NULL, id TEXT NOT NULL, name TEXT NOT NULL, subject TEXT, kind TEXT NOT NULL DEFAULT 'group', teacher_id TEXT NOT NULL DEFAULT '', room TEXT, cap INTEGER NOT NULL DEFAULT 0, sched TEXT NOT NULL DEFAULT '[]', fee INTEGER NOT NULL DEFAULT 0, fee_mode TEXT NOT NULL DEFAULT 'month', pack_n INTEGER NOT NULL DEFAULT 0, active INTEGER NOT NULL DEFAULT 1, sort INTEGER NOT NULL DEFAULT 0, d TEXT NOT NULL DEFAULT '{}', created_at TEXT, updated_at TEXT, PRIMARY KEY(ws,id))",
+  "CREATE TABLE IF NOT EXISTS ed_stu(ws TEXT NOT NULL, id TEXT NOT NULL, name TEXT NOT NULL, status TEXT NOT NULL DEFAULT 'on', grade TEXT, school TEXT, phone TEXT, g_name TEXT, g_phone TEXT, minor INTEGER NOT NULL DEFAULT 0, start_date TEXT, end_date TEXT, d TEXT NOT NULL DEFAULT '{}', created_at TEXT, updated_at TEXT, PRIMARY KEY(ws,id))",
+  "CREATE TABLE IF NOT EXISTS ed_enr(ws TEXT NOT NULL, id TEXT NOT NULL, stu_id TEXT NOT NULL, class_id TEXT NOT NULL, status TEXT NOT NULL DEFAULT 'on', mode TEXT NOT NULL DEFAULT 'month', fee INTEGER, start_date TEXT, end_date TEXT, d TEXT NOT NULL DEFAULT '{}', created_at TEXT, updated_at TEXT, PRIMARY KEY(ws,id))",
+  "CREATE INDEX IF NOT EXISTS idx_ed_enr_stu ON ed_enr(ws,stu_id)",
+  "CREATE TABLE IF NOT EXISTS ed_att(ws TEXT NOT NULL, id TEXT NOT NULL, date TEXT NOT NULL, class_id TEXT NOT NULL, stu_id TEXT NOT NULL, status TEXT NOT NULL, deduct INTEGER NOT NULL DEFAULT 0, note TEXT, who TEXT, at TEXT, updated_at TEXT, PRIMARY KEY(ws,id))",
+  "CREATE UNIQUE INDEX IF NOT EXISTS idx_ed_att_key ON ed_att(ws,date,class_id,stu_id)",
+  "CREATE INDEX IF NOT EXISTS idx_ed_att_stu ON ed_att(ws,stu_id,date)",
+  "CREATE TABLE IF NOT EXISTS ed_les(ws TEXT NOT NULL, id TEXT NOT NULL, date TEXT NOT NULL, class_id TEXT NOT NULL, status TEXT NOT NULL DEFAULT 'done', topic TEXT, hw TEXT, note TEXT, who TEXT, updated_at TEXT, PRIMARY KEY(ws,id))",
+  "CREATE UNIQUE INDEX IF NOT EXISTS idx_ed_les_key ON ed_les(ws,date,class_id)",
+  "CREATE TABLE IF NOT EXISTS ed_note(ws TEXT NOT NULL, id TEXT NOT NULL, stu_id TEXT NOT NULL, kind TEXT NOT NULL DEFAULT 'memo', date TEXT NOT NULL, ym TEXT, title TEXT, body TEXT, share INTEGER NOT NULL DEFAULT 0, who TEXT, created_at TEXT, updated_at TEXT, PRIMARY KEY(ws,id))",
+  "CREATE INDEX IF NOT EXISTS idx_ed_note_stu ON ed_note(ws,stu_id,date)",
+  "CREATE TABLE IF NOT EXISTS ed_bill(ws TEXT NOT NULL, id TEXT NOT NULL, stu_id TEXT NOT NULL, kind TEXT NOT NULL DEFAULT 'month', ym TEXT NOT NULL, title TEXT, items TEXT NOT NULL DEFAULT '[]', total INTEGER NOT NULL DEFAULT 0, due TEXT, status TEXT NOT NULL DEFAULT 'draft', paid_at TEXT, method TEXT, d TEXT NOT NULL DEFAULT '{}', created_at TEXT, updated_at TEXT, PRIMARY KEY(ws,id))",
+  "CREATE INDEX IF NOT EXISTS idx_ed_bill_ym ON ed_bill(ws,ym)",
+  "CREATE INDEX IF NOT EXISTS idx_ed_bill_stu ON ed_bill(ws,stu_id)",
+  "CREATE UNIQUE INDEX IF NOT EXISTS idx_ed_bill_month ON ed_bill(ws,stu_id,ym) WHERE kind='month' AND status<>'void'",
+  "CREATE TABLE IF NOT EXISTS ed_lead(ws TEXT NOT NULL, id TEXT NOT NULL, name TEXT NOT NULL, phone TEXT, grade TEXT, subject TEXT, src TEXT NOT NULL DEFAULT 'etc', status TEXT NOT NULL DEFAULT 'new', next_date TEXT, stu_id TEXT NOT NULL DEFAULT '', d TEXT NOT NULL DEFAULT '{}', created_at TEXT, updated_at TEXT, PRIMARY KEY(ws,id))"
+];
+const ED_TABLES = ["ed_class", "ed_stu", "ed_enr", "ed_att", "ed_les", "ed_note", "ed_bill", "ed_lead"];
+Object.assign(SPC, {
+  ed_class: ["id", "name", "subject", "kind", "teacher_id", "room", "cap", "sched", "fee", "fee_mode", "pack_n", "active", "sort", "d", "created_at", "updated_at"],
+  ed_stu: ["id", "name", "status", "grade", "school", "phone", "g_name", "g_phone", "minor", "start_date", "end_date", "d", "created_at", "updated_at"],
+  ed_enr: ["id", "stu_id", "class_id", "status", "mode", "fee", "start_date", "end_date", "d", "created_at", "updated_at"],
+  ed_att: ["id", "date", "class_id", "stu_id", "status", "deduct", "note", "who", "at", "updated_at"],
+  ed_les: ["id", "date", "class_id", "status", "topic", "hw", "note", "who", "updated_at"],
+  ed_note: ["id", "stu_id", "kind", "date", "ym", "title", "body", "share", "who", "created_at", "updated_at"],
+  ed_bill: ["id", "stu_id", "kind", "ym", "title", "items", "total", "due", "status", "paid_at", "method", "d", "created_at", "updated_at"],
+  ed_lead: ["id", "name", "phone", "grade", "subject", "src", "status", "next_date", "stu_id", "d", "created_at", "updated_at"]
+});
+Object.assign(SPJ, { ed_class: { sched: "[]", d: "{}" }, ed_stu: { d: "{}" }, ed_enr: { d: "{}" }, ed_bill: { items: "[]", d: "{}" }, ed_lead: { d: "{}" } });
+const ED_BIZ = ["academy", "tutoring", "private", "class"];   // 학원 · 교습소·공부방 · 과외·개인 레슨 · 클래스·강좌(성인 취미·자격 등)
+const ED_CKIND = ["group", "one"];   // 반 수업 · 1:1
+const ED_FEE = ["month", "pack", "free"];   // 월 수강료 · 회차권 · 받지 않음
+const ED_SST = ["on", "pause", "wait", "left"];   // 다니는 중 · 쉬는 중 · 대기 · 그만둠
+const ED_EST = ["on", "pause", "end"];
+const ED_ATT = ["in", "late", "abs", "exc", "make"];   // 출석 · 지각 · 결석 · 미리 알린 결석(회차를 빼지 않음) · 보강
+const ED_NOTE = ["memo", "consult", "report", "guard"];   // 학습 메모 · 상담 · 월간 리포트 · 보호자가 남긴 글
+const ED_BK = ["month", "pack", "etc"];   // 월 수강료 · 회차권 · 교재비 등
+const ED_BST = ["draft", "issued", "paid", "void"];
+const ED_PAY = ["card", "transfer", "cash", "local", "etc"];   // 카드 · 계좌이체 · 현금 · 지역화폐·바우처 · 기타
+const ED_LST = ["new", "talk", "trial", "won", "lost"];   // 새 문의 · 상담 · 체험 수업 · 등록 · 보류
+const ED_SRC = ["referral", "naver", "sns", "flyer", "walk", "web", "etc"];   // 소개 · 네이버(지도·블로그) · SNS · 전단·현수막 · 지나가다 · 홈페이지 · 기타
+const ED_LIMIT = { classes: 300, stus: 3000, enrs: 8000, notes: 30000, bills: 60000, leads: 5000, import: 500 };
+const ED_FIELD = new Set(["mine", "att/save", "les/save"]);   // 강사(현장 근무자)도 쓰는 것 — 자기가 맡은 반만
+const ED_GUARD_DAY = 10;   // 보호자 페이지 하나에서 하루에 남길 수 있는 알림(입금·결석·메모) 수
+
+function edNorm(s) {   // 설정 — 운영 형태·상호, 수강료 청구 규칙, 회차권 규칙, 보호자 페이지에 보일 것, 운영 점검
+  s = s && typeof s === "object" ? s : {};
+  const o = k => (s[k] && typeof s[k] === "object" ? s[k] : {});
+  const b = o("biz"), bl = o("bill"), pk = o("pack"), g = o("guard"), ins = o("ins"), st = o("staff");
+  const bool = (v, d) => (v === undefined || v === null ? d : !!v);
+  const staff = {};
+  for (const [k, v] of Object.entries(st).slice(0, 200)) { const id = clip(k, 60); if (id && v && typeof v === "object" && dOk(v.crime)) staff[id] = { crime: dOk(v.crime) }; }
+  return {
+    set: !!s.set,
+    biz: { type: ED_BIZ.includes(b.type) ? b.type : "academy", name: clip(b.name, 40), owner: clip(b.owner, 30), no: clip(b.no, 20), phone: clip(b.phone, 30), addr: clip(b.addr, 120), bank: clip(b.bank, 120), pay: mkUrl(b.pay) },
+    bill: { day: clampInt(bl.day, 1, 28, 1), next: bool(bl.next, false), due: clampInt(bl.due, 0, 28, 7), auto: bool(bl.auto, true), fin: bool(bl.fin, true), prorate: bool(bl.prorate, true), round: [1, 10, 100, 1000].includes(Number(bl.round)) ? Number(bl.round) : 10, note: clip(bl.note, 300) },
+    pack: { abs: bool(pk.abs, true), warn: clampInt(pk.warn, 0, 10, 2) },
+    guard: { att: bool(g.att, true), les: bool(g.les, true), bill: bool(g.bill, true), report: bool(g.report, true), absent: bool(g.absent, true), msg: bool(g.msg, true) },
+    refund: clip(s.refund, 1500),
+    checks: (Array.isArray(s.checks) ? s.checks : []).map(x => clip(x, 30)).filter(Boolean).slice(0, 60),
+    staff, ins: { until: dOk(ins.until), name: clip(ins.name, 60) },
+    gen: ymOk(s.gen)
+  };
+}
+async function edSettings(db, ws) { const m = await modSettings(db, ws, "ed"); return edNorm(m.settings); }
+const edModOn = async (db, ws) => { const w = await db.prepare("SELECT modules FROM workspaces WHERE id=?1").bind(ws).first(); return !!w && (parse(w.modules) || []).includes("edu"); };
+const edHas = async (db, ws, t, id) => !!(id && await db.prepare(`SELECT 1 AS x FROM ${t} WHERE ws=?1 AND id=?2`).bind(ws, id).first());
+const edCount = async (db, ws, t, where) => Number(((await db.prepare(`SELECT COUNT(*) AS n FROM ${t} WHERE ws=?1${where ? " AND " + where : ""}`).bind(ws).first()) || {}).n) || 0;
+const edD = x => (x && x.d && typeof x.d === "object" ? x.d : {});
+const edPhone = s => clip(String(s || "").replace(/[^\d+\-\s()]/g, ""), 20);
+const edLast = ym => { const [y, m] = ym.split("-").map(Number); return new Date(Date.UTC(y, m, 0)).toISOString().slice(0, 10); };   // 그 달 마지막 날
+const edMon = (ym, n) => { const [y, m] = ym.split("-").map(Number); const d = new Date(Date.UTC(y, m - 1 + n, 1)); return d.toISOString().slice(0, 7); };
+const edDow = ds => { const w = new Date(ds + "T00:00:00Z").getUTCDay(); return w === 0 ? 7 : w; };   // 월=1 … 일=7
+const edRound = (n, u) => Math.max(0, Math.floor((Number(n) || 0) / (u || 1)) * (u || 1));   // 원 단위 절사
+const edMinorGuess = g => /^(미취학|유치|유아|어린이집|초|[5-7]세)/.test(String(g || "").replace(/\s/g, "")) ? 1 : 0;   // 학년으로 만 14세 미만을 짐작 — 화면에서 고칠 수 있습니다
+function edSessions(sched, from, to) {   // from~to(포함) 사이에 시간표상 수업이 몇 번 있는지
+  const per = new Map(); for (const x of sched || []) per.set(x.w, (per.get(x.w) || 0) + 1);
+  if (!per.size || !from || !to || from > to) return 0;
+  let n = 0; for (let d = from, i = 0; d <= to && i < 400; d = addDaysS(d, 1), i++) n += per.get(edDow(d)) || 0;
+  return n;
+}
+const edSched = v => (Array.isArray(v) ? v : []).map(x => (x && typeof x === "object" && Number.isInteger(Number(x.w)) && Number(x.w) >= 1 && Number(x.w) <= 7 ? { w: Number(x.w), s: tOk(x.s), e: tOk(x.e) } : null)).filter(x => x && x.s).slice(0, 21).sort((a, b) => a.w - b.w || a.s.localeCompare(b.s));   // 요일(월=1…일=7)과 시작 시각이 있는 줄만
+/* 청구 대상 달 — '다음 달 분을 미리'로 두면 청구일에 다음 달 수강료를 만듭니다 */
+const edTarget = (set, today) => (set.bill.next ? edMon(today.slice(0, 7), 1) : today.slice(0, 7));
+
+function edClassIn(b) {
+  const o = {}, d = {};
+  if ("name" in b) o.name = clip(b.name, 40);
+  if ("subject" in b) o.subject = clip(b.subject, 30);
+  if ("kind" in b) o.kind = ED_CKIND.includes(b.kind) ? b.kind : "group";
+  if ("teacher_id" in b) o.teacher_id = clip(b.teacher_id, 60);
+  if ("room" in b) o.room = clip(b.room, 30);
+  if ("cap" in b) o.cap = clampInt(b.cap, 0, 500, 0);
+  if ("sched" in b) o.sched = JSON.stringify(edSched(b.sched));
+  if ("fee" in b) o.fee = mkInt(b.fee, 1e9);   // 월 수강료, 회차권이면 회차권 한 묶음 값
+  if ("fee_mode" in b) o.fee_mode = ED_FEE.includes(b.fee_mode) ? b.fee_mode : "month";
+  if ("pack_n" in b) o.pack_n = clampInt(b.pack_n, 0, 200, 0);
+  if ("active" in b) o.active = b.active === false || b.active === 0 ? 0 : 1;
+  if ("memo" in b) d.memo = clip(b.memo, 1000);
+  if ("color" in b) d.color = /^#[0-9a-f]{6}$/i.test(String(b.color || "")) ? b.color : "";
+  if ("pack_days" in b) d.pack_days = clampInt(b.pack_days, 0, 730, 0);   // 회차권 유효기간(일, 0은 없음)
+  if ("young" in b) d.young = !!b.young;   // 초·중·고 학생 반 — 교습 시간 제한(조례) 점검에 씁니다
+  return { o, d };
+}
+const ED_CLASS_D0 = () => ({ memo: "", color: "", pack_days: 0, young: true });
+function edStuIn(b) {
+  const o = {}, d = {};
+  if ("name" in b) o.name = clip(b.name, 30);
+  if ("status" in b) o.status = ED_SST.includes(b.status) ? b.status : "on";
+  if ("grade" in b) o.grade = clip(b.grade, 20);
+  if ("school" in b) o.school = clip(b.school, 40);
+  if ("phone" in b) o.phone = edPhone(b.phone);
+  if ("g_name" in b) o.g_name = clip(b.g_name, 30);
+  if ("g_phone" in b) o.g_phone = edPhone(b.g_phone);
+  if ("minor" in b) o.minor = b.minor ? 1 : 0;
+  for (const k of ["start_date", "end_date"]) if (k in b) o[k] = dOk(b[k]) || null;
+  if ("g_rel" in b) d.g_rel = clip(b.g_rel, 10);
+  if ("memo" in b) d.memo = clip(b.memo, 2000);
+  if ("disc" in b) { const x = b.disc && typeof b.disc === "object" ? b.disc : {}; const pct = x.type === "pct"; d.disc = { type: pct ? "pct" : "amt", v: pct ? clampInt(x.v, 0, 100, 0) : mkInt(x.v, 1e8), note: clip(x.note, 30) }; }
+  if ("consent" in b) { const x = b.consent && typeof b.consent === "object" ? b.consent : {}; d.consent = { at: dOk(x.at), how: clip(x.how, 40) }; }
+  if ("tags" in b) d.tags = (Array.isArray(b.tags) ? b.tags : String(b.tags || "").split(/[,\n]/)).map(x => clip(x, 16)).filter(Boolean).slice(0, 8);
+  if ("leave_reason" in b) d.leave_reason = clip(b.leave_reason, 200);
+  return { o, d };
+}
+const ED_STU_D0 = () => ({ g_rel: "", memo: "", disc: { type: "amt", v: 0, note: "" }, consent: { at: "", how: "" }, tags: [], leave_reason: "" });
+const edStuRow = (o, d, now) => Object.assign({ id: bulkId("es"), name: "", status: "on", grade: "", school: "", phone: "", g_name: "", g_phone: "", minor: 0, start_date: kstToday(), end_date: null, created_at: now, updated_at: now }, o, { d: Object.assign(ED_STU_D0(), d) });
+function edEnrIn(b) {
+  const o = {}, d = {};
+  if ("status" in b) o.status = ED_EST.includes(b.status) ? b.status : "on";
+  if ("mode" in b) o.mode = ED_FEE.includes(b.mode) ? b.mode : "month";
+  if ("fee" in b) o.fee = b.fee === "" || b.fee === null || b.fee === undefined ? null : mkInt(b.fee, 1e9);   // 비우면 반의 수강료를 씁니다
+  for (const k of ["start_date", "end_date"]) if (k in b) o[k] = dOk(b[k]) || null;
+  if ("memo" in b) d.memo = clip(b.memo, 300);
+  if ("base" in b) d.base = clampInt(b.base, -500, 500, 0);   // 회차권 — 마이에듀를 쓰기 전부터 남아 있던 회차
+  return { o, d };
+}
+const edEnrRow = (o, d, now) => Object.assign({ id: bulkId("en"), stu_id: "", class_id: "", status: "on", mode: "month", fee: null, start_date: kstToday(), end_date: null, created_at: now, updated_at: now }, o, { d: Object.assign({ memo: "", base: 0 }, d) });
+function edItems(v) {
+  const out = []; let sum = 0;
+  for (const it of (Array.isArray(v) ? v : []).slice(0, 20)) {
+    if (!it || typeof it !== "object") continue;
+    const label = clip(it.label, 60); if (!label) continue;
+    const amount = Math.max(-1e9, Math.min(1e9, intOr(String(it.amount ?? "").replace(/[^\d-]/g, ""), 0)));   // 할인은 음수 줄로
+    const x = { label, amount, class_id: clip(it.class_id, 60), qty: clampInt(it.qty, 0, 500, 0) };
+    if (it.note) x.note = clip(it.note, 80);
+    out.push(x); sum += amount;
+  }
+  return { items: out, sum };
+}
+const ED_BILL_D0 = () => ({ paid_amt: 0, receipt: "", memo: "", refund: null, reported_at: "", reported_by: "", sent_at: "" });
+const edBillRow = (o, d, now) => Object.assign({ id: bulkId("eb"), stu_id: "", kind: "month", ym: kstToday().slice(0, 7), title: "", items: "[]", total: 0, due: null, status: "draft", paid_at: null, method: null, created_at: now, updated_at: now }, o, { d: Object.assign(ED_BILL_D0(), d) });
+function edLeadIn(b) {
+  const o = {}, d = {};
+  if ("name" in b) o.name = clip(b.name, 30);
+  if ("phone" in b) o.phone = edPhone(b.phone);
+  if ("grade" in b) o.grade = clip(b.grade, 20);
+  if ("subject" in b) o.subject = clip(b.subject, 40);
+  if ("src" in b) o.src = ED_SRC.includes(b.src) ? b.src : "etc";
+  if ("status" in b) o.status = ED_LST.includes(b.status) ? b.status : "new";
+  if ("next_date" in b) o.next_date = dOk(b.next_date) || null;
+  if ("g_name" in b) d.g_name = clip(b.g_name, 30);
+  if ("memo" in b) d.memo = clip(b.memo, 2000);
+  if ("trial_class" in b) d.trial_class = clip(b.trial_class, 60);
+  if ("lost_reason" in b) d.lost_reason = clip(b.lost_reason, 200);
+  return { o, d };
+}
+const ED_LEAD_D0 = () => ({ g_name: "", memo: "", trial_class: "", lost_reason: "", by: "" });
+
+/* 월 수강료 초안 — 다니는 중인 수강생마다 한 장. 반 여러 개면 한 장에 줄로, 그 달 중간에 시작했으면 수업 횟수만큼 */
+async function edGen(db, ws, ym, set, only) {
+  const first = ym + "-01", last = edLast(ym), today = kstToday();
+  const rs = await db.batch([
+    db.prepare("SELECT id, name, sched, fee FROM ed_class WHERE ws=?1").bind(ws),
+    db.prepare("SELECT id, stu_id, class_id, fee, start_date, end_date FROM ed_enr WHERE ws=?1 AND status='on' AND mode='month' AND (start_date IS NULL OR start_date<=?2) AND (end_date IS NULL OR end_date>=?3)").bind(ws, last, first),
+    db.prepare("SELECT id, name, d FROM ed_stu WHERE ws=?1 AND status='on'").bind(ws),
+    db.prepare("SELECT stu_id FROM ed_bill WHERE ws=?1 AND ym=?2 AND kind='month' AND status<>'void'").bind(ws, ym)
+  ]);
+  const R = i => (rs[i] && rs[i].results) || [];
+  const cls = new Map(R(0).map(c => [c.id, Object.assign(c, { sched: parse(c.sched) || [] })])), has = new Set(R(3).map(x => x.stu_id)), byStu = new Map();
+  for (const e of R(1)) { if (!cls.has(e.class_id)) continue; if (!byStu.has(e.stu_id)) byStu.set(e.stu_id, []); byStu.get(e.stu_id).push(e); }
+  const bday = ym + "-" + String(set.bill.day).padStart(2, "0"), due = addDaysS(bday > today ? bday : today, set.bill.due), now = iso(), out = [];
+  for (const s of R(2)) {
+    if (has.has(s.id) || (only && !only.has(s.id))) continue;
+    const es = byStu.get(s.id); if (!es) continue;
+    const items = [];
+    for (const e of es) {
+      const c = cls.get(e.class_id), fee = e.fee != null ? Number(e.fee) : Number(c.fee) || 0;
+      if (!fee) continue;
+      const it = { label: c.name, amount: fee, class_id: c.id, qty: 0 };
+      const st0 = e.start_date && e.start_date > first ? e.start_date : null;
+      if (set.bill.prorate && st0) {
+        const all = edSessions(c.sched, first, last), part = edSessions(c.sched, st0, last);
+        if (all > 0 && part < all) { it.amount = edRound(fee * part / all, set.bill.round); it.note = `${+st0.slice(5, 7)}/${+st0.slice(8)} 시작 · 수업 ${part}/${all}회`; }
+      }
+      items.push(it);
+    }
+    if (!items.length) continue;
+    const disc = (parse(s.d) || {}).disc || {}, sub = items.reduce((a, x) => a + x.amount, 0);
+    const dv = disc.type === "pct" ? edRound(sub * (Number(disc.v) || 0) / 100, set.bill.round) : Math.min(sub, Number(disc.v) || 0);
+    if (dv > 0) items.push({ label: disc.note || "할인", amount: -dv, class_id: "", qty: 0 });
+    out.push(edBillRow({ stu_id: s.id, kind: "month", ym, title: `${+ym.slice(5)}월 수강료`, items: JSON.stringify(items), total: Math.max(0, sub - dv), due }, {}, now));
+  }
+  return out;
+}
+/* 회차권 — 수강생·반마다 [산 회차, 쓴 회차, 처음부터 있던 회차] */
+async function edPacks(db, ws, stuId) {
+  const rs = await db.batch([
+    db.prepare("SELECT b.stu_id AS s, json_extract(i.value,'$.class_id') AS c, SUM(json_extract(i.value,'$.qty')) AS q FROM ed_bill b, json_each(b.items) i WHERE b.ws=?1 AND b.kind='pack' AND b.status IN ('issued','paid')" + (stuId ? " AND b.stu_id=?2" : "") + " GROUP BY s, c").bind(...(stuId ? [ws, stuId] : [ws])),
+    db.prepare("SELECT stu_id AS s, class_id AS c, SUM(deduct) AS u FROM ed_att WHERE ws=?1" + (stuId ? " AND stu_id=?2" : "") + " GROUP BY s, c").bind(...(stuId ? [ws, stuId] : [ws])),
+    db.prepare("SELECT id, stu_id AS s, class_id AS c, json_extract(d,'$.base') AS base FROM ed_enr WHERE ws=?1 AND mode='pack' AND status<>'end'" + (stuId ? " AND stu_id=?2" : "")).bind(...(stuId ? [ws, stuId] : [ws]))
+  ]);
+  const R = i => (rs[i] && rs[i].results) || [], k = (s, c) => s + "|" + c, buy = new Map(), used = new Map();
+  for (const x of R(0)) buy.set(k(x.s, x.c), Number(x.q) || 0);
+  for (const x of R(1)) used.set(k(x.s, x.c), Number(x.u) || 0);
+  return R(2).map(e => { const b = buy.get(k(e.s, e.c)) || 0, u = used.get(k(e.s, e.c)) || 0, base = Number(e.base) || 0; return { enr_id: e.id, stu_id: e.s, class_id: e.c, bought: b, used: u, base, left: base + b - u }; });
+}
+
+async function edAiSummary(db, me) {   // 클로드가 읽는 요약 — 연락처·보호자 이름은 넣지 않습니다
+  const today = kstToday(), ym = today.slice(0, 7), w = edDow(today), since = addDaysS(today, -30), week = addDaysS(today, -7);
+  const rs = await db.batch([
+    db.prepare("SELECT v FROM mod_set WHERE ws=?1 AND mod='ed' AND k='settings'").bind(me.ws),
+    db.prepare("SELECT id, name, subject, kind, teacher_id, cap, sched, fee, fee_mode, active FROM ed_class WHERE ws=?1 ORDER BY sort, created_at LIMIT 300").bind(me.ws),
+    db.prepare("SELECT id, name, status, grade FROM ed_stu WHERE ws=?1 AND status<>'left' LIMIT 3000").bind(me.ws),
+    db.prepare("SELECT stu_id, class_id, status, mode FROM ed_enr WHERE ws=?1 AND status<>'end' LIMIT 8000").bind(me.ws),
+    db.prepare("SELECT date, class_id, stu_id, status FROM ed_att WHERE ws=?1 AND date>=?2 LIMIT 20000").bind(me.ws, since),
+    db.prepare("SELECT date, class_id, status, topic, hw FROM ed_les WHERE ws=?1 AND date>=?2 ORDER BY date DESC LIMIT 60").bind(me.ws, week),
+    db.prepare("SELECT stu_id, kind, ym, title, total, due, status, json_extract(d,'$.reported_at') AS rep FROM ed_bill WHERE ws=?1 AND (status IN ('issued','draft') OR ym=?2) LIMIT 5000").bind(me.ws, ym),
+    db.prepare("SELECT name, grade, subject, src, status, next_date FROM ed_lead WHERE ws=?1 AND status IN ('new','talk','trial') ORDER BY COALESCE(next_date,'9999') LIMIT 60").bind(me.ws)
+  ]);
+  const R = i => (rs[i] && rs[i].results) || [], s0 = R(0)[0], set = edNorm(s0 ? parse(s0.v) : null);
+  const cls = R(1).map(c => Object.assign(c, { sched: parse(c.sched) || [] })), cN = new Map(cls.map(c => [c.id, c.name])), sN = new Map(R(2).map(s => [s.id, s]));
+  const att = R(4), packs = (await edPacks(db, me.ws)).filter(p => sN.has(p.stu_id));
+  const todayCls = cls.filter(c => c.active && c.sched.some(x => x.w === w)).map(c => {
+    const on = R(3).filter(e => e.class_id === c.id && e.status === "on").length, done = att.filter(a => a.date === today && a.class_id === c.id).length;
+    return { id: c.id, name: c.name, time: c.sched.filter(x => x.w === w).map(x => x.s + (x.e ? "~" + x.e : "")).join(", "), students: on, checked: done };
+  });
+  const absent = new Map(); for (const a of att) if (a.status === "abs" && a.date >= week) absent.set(a.stu_id, (absent.get(a.stu_id) || 0) + 1);
+  const bills = R(6), late = bills.filter(b => b.status === "issued" && b.due && b.due < today);
+  const mon = bills.filter(b => b.ym === ym && b.status !== "void" && b.status !== "draft");
+  return {
+    today, business: { type: set.biz.type, name: set.biz.name },
+    counts: { students: R(2).filter(s => s.status === "on").length, paused: R(2).filter(s => s.status === "pause").length, waiting: R(2).filter(s => s.status === "wait").length, classes: cls.filter(c => c.active).length },
+    classes: cls.filter(c => c.active).map(c => ({ id: c.id, name: c.name, subject: c.subject || "", kind: c.kind, feeMode: c.fee_mode, fee: c.fee, capacity: c.cap || null, students: R(3).filter(e => e.class_id === c.id && e.status === "on").length, schedule: c.sched.map(x => ["", "월", "화", "수", "목", "금", "토", "일"][x.w] + " " + x.s + (x.e ? "~" + x.e : "")).join(", ") })),
+    todayClasses: todayCls,
+    attendance30d: { records: att.length, present: att.filter(a => ["in", "late", "make"].includes(a.status)).length, absent: att.filter(a => a.status === "abs").length, excused: att.filter(a => a.status === "exc").length },
+    absentTwiceThisWeek: [...absent].filter(([, n]) => n >= 2).map(([id, n]) => ({ student: (sN.get(id) || {}).name || "", grade: (sN.get(id) || {}).grade || "", absences: n })),
+    fees: {
+      month: ym, billed: mon.reduce((a, b) => a + (Number(b.total) || 0), 0), paid: mon.filter(b => b.status === "paid").reduce((a, b) => a + (Number(b.total) || 0), 0),
+      drafts: bills.filter(b => b.status === "draft").length,
+      overdue: late.slice(0, 40).map(b => ({ student: (sN.get(b.stu_id) || {}).name || "", title: b.title || "", amount: b.total, due: b.due, guardianSaidPaid: !!b.rep }))
+    },
+    lowPacks: packs.filter(p => p.left <= set.pack.warn).slice(0, 40).map(p => ({ student: (sN.get(p.stu_id) || {}).name || "", class: cN.get(p.class_id) || "", left: p.left })),
+    recentLessons: R(5).filter(l => l.status === "done" && (l.topic || l.hw)).map(l => ({ date: l.date, class: cN.get(l.class_id) || "", topic: l.topic || "", homework: l.hw || "" })),
+    leads: R(7).map(l => ({ name: l.name, grade: l.grade || "", subject: l.subject || "", source: l.src, status: l.status, next: l.next_date || "" })),
+    hint: "금액은 원입니다. 수강생 연락처와 보호자 정보는 넣지 않았습니다. 쓰기 토큰은 propose의 ed-report(월간 학습 리포트 초안 — student, month, body)·ed-lead(상담 문의 — name, phone, grade, subject, memo)로 제안할 수 있습니다. 리포트는 초안으로만 들어가고, 원장이 확인해 보호자에게 공개합니다."
+  };
+}
+async function edPropItems(db, me, prop) {   // AI 제안 → 학습 리포트 초안 · 상담 문의
+  const p = prop.payload, now = iso(), bump = db.prepare("UPDATE workspaces SET sp_ver=sp_ver+1 WHERE id=?1").bind(me.ws);
+  if (prop.kind === "ed-report") {
+    const s = await db.prepare("SELECT id, name FROM ed_stu WHERE ws=?1 AND (id=?2 OR name=?2) AND status<>'left' ORDER BY (id=?2) DESC LIMIT 1").bind(me.ws, p.student).first();
+    if (!s) return { error: "not-found", hint: "수강생을 찾지 못했습니다." };
+    const ym = p.month || kstToday().slice(0, 7), row = { id: bulkId("eo"), stu_id: s.id, kind: "report", date: kstToday(), ym, title: p.title || `${+ym.slice(5)}월 학습 리포트`, body: p.body, share: 0, who: "ai", created_at: now, updated_at: now };
+    return { items: [actRow(me, `AI 제안으로 ${s.name} 학생의 ${+ym.slice(5)}월 학습 리포트 초안을 더했습니다.`)], stmts: spBulk(db, "ed_note", me.ws, [row]).concat([bump]), applied: { noteId: row.id, student: s.name } };
+  }
+  const row = Object.assign({ id: bulkId("el"), name: p.name, phone: edPhone(p.phone), grade: p.grade, subject: p.subject, src: ED_SRC.includes(p.src) ? p.src : "etc", status: "new", next_date: p.next || null, stu_id: "", created_at: now, updated_at: now }, { d: Object.assign(ED_LEAD_D0(), { memo: p.memo || "", by: "ai" }) });
+  return { items: [actRow(me, `AI 제안으로 상담 문의 "${row.name}"을(를) 더했습니다.`)], stmts: spBulk(db, "ed_lead", me.ws, [row]).concat([bump]), applied: { leadId: row.id, name: row.name } };
+}
+/* 앞으로 2주 안에 챙길 날 — 아침 요약과 전날 알림에 씁니다. 수강생이 많아도 날짜마다 한 줄로 묶습니다 */
+async function edUpcoming(db, me, today, to) {
+  const set = await edSettings(db, me.ws), tgt = edTarget(set, today), items = [], late = [];
+  const rs = await db.batch([
+    db.prepare("SELECT due, COUNT(*) AS n, SUM(total) AS t FROM ed_bill WHERE ws=?1 AND status='issued' AND due IS NOT NULL AND due<=?2 GROUP BY due").bind(me.ws, to),
+    db.prepare("SELECT id, name, status, next_date FROM ed_lead WHERE ws=?1 AND status IN ('new','talk','trial') AND next_date IS NOT NULL AND next_date<=?2 LIMIT 40").bind(me.ws, to),
+    db.prepare("SELECT COUNT(*) AS n FROM ed_bill WHERE ws=?1 AND ym=?2 AND kind='month'").bind(me.ws, tgt)
+  ]);
+  const R = i => (rs[i] && rs[i].results) || [];
+  let ln = 0, lt = 0, l0 = "";
+  for (const x of R(0)) { if (x.due < today) { ln += Number(x.n) || 0; lt += Number(x.t) || 0; if (!l0 || x.due < l0) l0 = x.due; } else items.push({ k: "ed:due:" + x.due, date: x.due, type: "money", title: `수강료 납부 기한 — ${x.n}명`, url: "#/edu/bill" }); }
+  if (ln) late.push({ k: "ed:late", date: l0, type: "money", title: `수강료 미납 — ${ln}명 · ${(lt || 0).toLocaleString("ko-KR")}원`, url: "#/edu/bill" });
+  for (const l of R(1)) (l.next_date < today ? late : items).push({ k: "ed:lead:" + l.id, date: l.next_date, type: "due", title: `${l.status === "trial" ? "체험 수업" : "상담 연락"} — ${l.name}`, url: "#/edu/lead" });
+  const bday = today.slice(0, 8) + String(set.bill.day).padStart(2, "0");   // 이번 달 청구일
+  if (set.set && !(Number(((R(2)[0]) || {}).n) > 0) && bday <= to) items.push({ k: "ed:gen:" + tgt, date: bday < today ? today : bday, type: "money", title: `${+tgt.slice(5)}월 수강료 청구서 만들기`, url: "#/edu/bill" });
+  return { items, late };
+}
+/* 자동 안내 문자 — 납부 기한 전·지남. 보내기 직전에 상태를 다시 읽는 것은 msgAutoWs가 합니다 */
+async function edMsgAuto(db, w, set, A, today, sign) {
+  if (!(A.edDue && A.edDue.on) && !(A.edLate && A.edLate.on)) return [];
+  if (!tierOf(w).modules.includes("edu")) return [];
+  const d1 = A.edDue.on ? addDaysS(today, A.edDue.days) : "", d2 = A.edLate.on ? addDaysS(today, -A.edLate.days) : "";
+  const rows = (await db.prepare("SELECT b.id, b.title, b.total, b.due, json_extract(b.d,'$.reported_at') AS rep, s.id AS sid, s.name, s.phone, s.g_name, s.g_phone FROM ed_bill b JOIN ed_stu s ON s.ws=b.ws AND s.id=b.stu_id WHERE b.ws=?1 AND b.status='issued' AND b.total>0 AND b.due IN (?2,?3) AND s.status<>'left' LIMIT 80").bind(w.ws, d1 || "-", d2 || "-").all()).results || [];
+  const won = n => (Number(n) || 0).toLocaleString("ko-KR") + "원", md = d => String(d || "").slice(5).replace("-", "/"), out = [];
+  for (const b of rows) {
+    const to = phoneKR(b.g_phone) || phoneKR(b.phone); if (!to) continue;
+    const isDue = A.edDue.on && b.due === d1;
+    if (!isDue && b.rep) continue;   // 보호자가 이미 보냈다고 알려 온 건에는 미납 안내를 보내지 않습니다
+    out.push({ tpl: isDue ? "auto.edDue" : "auto.edLate", ref_kind: "ed-bill", ref_id: b.id, to, name: b.g_name || b.name, fields: { 상호: sign, 이름: b.name, 제목: b.title || "수강료", 금액: won(b.total), 기한: md(b.due) }, link: { kind: "ed-guard", target: b.sid } });
+  }
+  return out;
+}
+
+const EDU = {
+  async data(db, me) {
+    if (!isMgr(me)) return fail("forbidden", 403);
+    const today = kstToday(), now = iso();
+    let set = await edSettings(db, me.ws), gen = null;
+    const tgt = edTarget(set, today);
+    if (set.set && set.bill.auto && +today.slice(8) >= set.bill.day && set.gen !== tgt) {   // 청구일이 지났으면 그 달 초안을 한 번 만들어 둡니다(보내지는 않습니다)
+      const rows = await edGen(db, me.ws, tgt, set);
+      set = Object.assign({}, set, { gen: tgt });
+      const r = await spRun(db, me, spBulk(db, "ed_bill", me.ws, rows, "ignore").concat([db.prepare("INSERT INTO mod_set(ws,mod,k,v) VALUES(?1,'ed','settings',?2) ON CONFLICT(ws,mod,k) DO UPDATE SET v=excluded.v").bind(me.ws, JSON.stringify(set))]));
+      gen = { ym: tgt, n: rows.length };
+      if (r.v != null) me.spv = r.v;
+    }
+    const since = addDaysS(today, -400), ym0 = edMon(today.slice(0, 7), -24);
+    const rs = await db.batch([
+      db.prepare(spSel("ed_class", "ws=?1", "ORDER BY sort, created_at LIMIT 300")).bind(me.ws),
+      db.prepare(spSel("ed_stu", "ws=?1", "ORDER BY name LIMIT 3000")).bind(me.ws),
+      db.prepare(spSel("ed_enr", "ws=?1", "ORDER BY created_at LIMIT 8000")).bind(me.ws),
+      db.prepare(spSel("ed_att", "ws=?1 AND date>=?2", "ORDER BY date DESC LIMIT 40000")).bind(me.ws, since),
+      db.prepare(spSel("ed_les", "ws=?1 AND date>=?2", "ORDER BY date DESC LIMIT 20000")).bind(me.ws, since),
+      db.prepare(spSel("ed_note", "ws=?1", "ORDER BY date DESC, created_at DESC LIMIT 10000")).bind(me.ws),
+      db.prepare(spSel("ed_bill", "ws=?1 AND (ym>=?2 OR status IN ('draft','issued'))", "ORDER BY ym DESC, created_at DESC LIMIT 30000")).bind(me.ws, ym0),
+      db.prepare(spSel("ed_lead", "ws=?1", "ORDER BY created_at DESC LIMIT 3000")).bind(me.ws),
+      db.prepare("SELECT target, token, created_at, expires_at, views, last_view FROM links WHERE ws=?1 AND kind='ed-guard' AND expires_at>?2 ORDER BY created_at").bind(me.ws, now),
+      db.prepare("SELECT b.stu_id AS s, json_extract(i.value,'$.class_id') AS c, SUM(json_extract(i.value,'$.qty')) AS q FROM ed_bill b, json_each(b.items) i WHERE b.ws=?1 AND b.kind='pack' AND b.status IN ('issued','paid') GROUP BY s, c").bind(me.ws),
+      db.prepare("SELECT stu_id AS s, class_id AS c, SUM(deduct) AS u FROM ed_att WHERE ws=?1 GROUP BY s, c").bind(me.ws)
+    ]);
+    const R = i => (rs[i] && rs[i].results) || [];
+    const links = {}; for (const l of R(8)) links[l.target] = { token: l.token, createdAt: l.created_at, expiresAt: l.expires_at, views: Number(l.views) || 0, lastView: l.last_view || "" };
+    const packs = { buy: R(9).map(x => [x.s, x.c, Number(x.q) || 0]), used: R(10).map(x => [x.s, x.c, Number(x.u) || 0]) };   // 회차권 — 400일보다 오래된 출석까지 셉니다
+    return rawJson({ ok: true, v: me.spv, today, settings: set, gen, links, packs },
+      ',"classes":' + rawArr(rs[0]) + ',"stus":' + rawArr(rs[1]) + ',"enrs":' + rawArr(rs[2]) + ',"atts":' + rawArr(rs[3]) + ',"less":' + rawArr(rs[4]) + ',"notes":' + rawArr(rs[5]) + ',"bills":' + rawArr(rs[6]) + ',"leads":' + rawArr(rs[7]));
+  },
+  async settings(db, me, b) {
+    if (!isMgr(me)) return fail("forbidden", 403);
+    const cur = await edSettings(db, me.ws), p = b && b.set && typeof b.set === "object" ? b.set : {};
+    const merged = Object.assign({}, cur, p);
+    for (const k of ["biz", "bill", "pack", "guard", "ins", "staff"]) if (p[k] && typeof p[k] === "object") merged[k] = Object.assign({}, cur[k], p[k]);
+    if (p.staff && typeof p.staff === "object") for (const [k, v] of Object.entries(p.staff)) if (!v || !v.crime) delete merged.staff[k];
+    delete merged.gen; merged.gen = cur.gen;   // 자동으로 만든 달은 서버만 적습니다
+    if (p.bill && (("day" in p.bill && p.bill.day !== cur.bill.day) || ("next" in p.bill && !!p.bill.next !== cur.bill.next))) merged.gen = "";   // 청구일을 바꾸면 다시 셉니다
+    const s = edNorm(merged);
+    if (JSON.stringify(s).length > 20000) return fail("too-large", 413);
+    const { v } = await spRun(db, me, [db.prepare("INSERT INTO mod_set(ws,mod,k,v) VALUES(?1,'ed','settings',?2) ON CONFLICT(ws,mod,k) DO UPDATE SET v=excluded.v").bind(me.ws, JSON.stringify(s))]);
+    return json({ ok: true, v, settings: s });
+  },
+  async "class/save"(db, me, b) {
+    if (!isMgr(me)) return fail("forbidden", 403);
+    const id = clip(b.id, 60), { o, d } = edClassIn(b || {}), now = iso();
+    if (o.teacher_id && !await db.prepare("SELECT 1 AS x FROM accounts WHERE ws=?1 AND member_id=?2 AND status='active'").bind(me.ws, o.teacher_id).first()) return fail("bad-teacher");
+    if (!id) {
+      if (!o.name) return fail("bad-request");
+      const n = await edCount(db, me.ws, "ed_class");
+      if (n >= ED_LIMIT.classes) return fail("limit", 409);
+      const row = Object.assign({ id: bulkId("ec"), name: "", subject: "", kind: "group", teacher_id: "", room: "", cap: 0, sched: "[]", fee: 0, fee_mode: "month", pack_n: 0, active: 1, sort: n + 1, created_at: now, updated_at: now }, o, { d: Object.assign(ED_CLASS_D0(), d) });
+      const { v } = await spRun(db, me, spBulk(db, "ed_class", me.ws, [row]));
+      return json({ ok: true, v, cls: await spOne(db, "ed_class", me.ws, row.id) });
+    }
+    const cur = await spOne(db, "ed_class", me.ws, id);
+    if (!cur) return fail("not-found", 404);
+    if ("name" in o && !o.name) return fail("bad-request");
+    o.d = JSON.stringify(Object.assign(ED_CLASS_D0(), edD(cur), d)); o.updated_at = now;
+    const { v } = await spRun(db, me, [db.prepare(`UPDATE ed_class SET ${setCols(o, 3)} WHERE ws=?1 AND id=?2`).bind(me.ws, id, ...Object.values(o))]);
+    return json({ ok: true, v, cls: await spOne(db, "ed_class", me.ws, id) });
+  },
+  async "class/del"(db, me, b) {   // 수강 등록이나 출결이 붙어 있으면 지우지 않습니다 (대신 '쉬는 반'으로)
+    if (!isMgr(me)) return fail("forbidden", 403);
+    const id = clip(b.id, 60);
+    if (!id) return fail("bad-request");
+    const u = await db.prepare("SELECT (SELECT COUNT(*) FROM ed_enr WHERE ws=?1 AND class_id=?2) + (SELECT COUNT(*) FROM ed_att WHERE ws=?1 AND class_id=?2) AS n").bind(me.ws, id).first();
+    if (Number(u && u.n) > 0) return fail("in-use", 409, { n: Number(u.n) });
+    const { v } = await spRun(db, me, [db.prepare("DELETE FROM ed_class WHERE ws=?1 AND id=?2").bind(me.ws, id), db.prepare("DELETE FROM ed_les WHERE ws=?1 AND class_id=?2").bind(me.ws, id)]);
+    return json({ ok: true, v });
+  },
+  async "stu/save"(db, me, b) {
+    if (!isMgr(me)) return fail("forbidden", 403);
+    const id = clip(b.id, 60), { o, d } = edStuIn(b || {}), now = iso();
+    if (!id) {
+      if (!o.name) return fail("bad-request");
+      if (await edCount(db, me.ws, "ed_stu") >= ED_LIMIT.stus) return fail("limit", 409);
+      if (!("minor" in o)) o.minor = edMinorGuess(o.grade);
+      const row = edStuRow(o, d, now), enr = [];
+      for (const x of (Array.isArray(b.enroll) ? b.enroll : []).slice(0, 12)) {   // 등록하면서 반을 함께 고를 수 있습니다
+        const c = await db.prepare("SELECT id, fee_mode FROM ed_class WHERE ws=?1 AND id=?2").bind(me.ws, clip(x && x.class_id, 60)).first();
+        if (!c || enr.some(e => e.class_id === c.id)) continue;
+        const e = edEnrIn(Object.assign({ mode: c.fee_mode }, x));
+        enr.push(edEnrRow(Object.assign({ stu_id: row.id, class_id: c.id, start_date: row.start_date }, e.o), e.d, now));
+      }
+      const { v } = await spRun(db, me, spBulk(db, "ed_stu", me.ws, [row]).concat(enr.length ? spBulk(db, "ed_enr", me.ws, enr) : []));
+      return json({ ok: true, v, stu: await spOne(db, "ed_stu", me.ws, row.id), enrs: enr.length ? (await db.prepare(spSel("ed_enr", "ws=?1 AND stu_id=?2")).bind(me.ws, row.id).all()).results.map(r => parse(r.j)) : [] });
+    }
+    const cur = await spOne(db, "ed_stu", me.ws, id);
+    if (!cur) return fail("not-found", 404);
+    if ("name" in o && !o.name) return fail("bad-request");
+    const stmts = [];
+    if (o.status === "left" && cur.status !== "left") {   // 그만두면 수강을 끝내고, 보호자 페이지를 닫습니다
+      const end = o.end_date || kstToday(); o.end_date = end;
+      stmts.push(db.prepare("UPDATE ed_enr SET status='end', end_date=COALESCE(end_date,?3), updated_at=?4 WHERE ws=?1 AND stu_id=?2 AND status<>'end'").bind(me.ws, id, end, now));
+      stmts.push(db.prepare("UPDATE links SET expires_at=?3 WHERE ws=?1 AND kind='ed-guard' AND target=?2 AND expires_at>?3").bind(me.ws, id, new Date(Date.now() - 1000).toISOString()));
+    }
+    if (o.status && o.status !== "left" && cur.status === "left" && !("end_date" in o)) o.end_date = null;
+    o.d = JSON.stringify(Object.assign(ED_STU_D0(), edD(cur), d)); o.updated_at = now;
+    stmts.unshift(db.prepare(`UPDATE ed_stu SET ${setCols(o, 3)} WHERE ws=?1 AND id=?2`).bind(me.ws, id, ...Object.values(o)));
+    const { v } = await spRun(db, me, stmts);
+    return json({ ok: true, v, stu: await spOne(db, "ed_stu", me.ws, id), enrs: (await db.prepare(spSel("ed_enr", "ws=?1 AND stu_id=?2")).bind(me.ws, id).all()).results.map(r => parse(r.j)) });
+  },
+  /* 지우기 — 그 수강생의 출결·기록·청구서까지 함께 지웁니다(개인정보를 남기지 않으려면). 돈 메뉴에 적힌 줄은 앱이 따로 정리합니다 */
+  async "stu/del"(db, me, b) {
+    if (!isMgr(me)) return fail("forbidden", 403);
+    const id = clip(b.id, 60);
+    if (!id || !await edHas(db, me.ws, "ed_stu", id)) return fail("not-found", 404);
+    const bills = ((await db.prepare("SELECT id FROM ed_bill WHERE ws=?1 AND stu_id=?2").bind(me.ws, id).all()).results || []).map(x => x.id);
+    const { v } = await spRun(db, me, [
+      ...["ed_enr", "ed_att", "ed_note", "ed_bill"].map(t => db.prepare(`DELETE FROM ${t} WHERE ws=?1 AND stu_id=?2`).bind(me.ws, id)),
+      db.prepare("DELETE FROM ed_stu WHERE ws=?1 AND id=?2").bind(me.ws, id),
+      db.prepare("UPDATE ed_lead SET stu_id='' WHERE ws=?1 AND stu_id=?2").bind(me.ws, id),
+      db.prepare("UPDATE links SET expires_at=?3 WHERE ws=?1 AND kind='ed-guard' AND target=?2 AND expires_at>?3").bind(me.ws, id, new Date(Date.now() - 1000).toISOString())
+    ]);
+    return json({ ok: true, v, bills });
+  },
+  /* 엑셀·명단에서 붙여 넣은 줄을 한 번에 — 이름과 보호자 연락처가 같은 사람은 건너뜁니다 */
+  async "stu/import"(db, me, b) {
+    if (!isMgr(me)) return fail("forbidden", 403);
+    const list = (Array.isArray(b.rows) ? b.rows : []).slice(0, ED_LIMIT.import), now = iso();
+    if (!list.length) return fail("bad-request");
+    const [sr, cr, nr] = await db.batch([
+      db.prepare("SELECT name, g_phone, phone FROM ed_stu WHERE ws=?1").bind(me.ws),
+      db.prepare("SELECT id, name, fee_mode FROM ed_class WHERE ws=?1").bind(me.ws),
+      db.prepare("SELECT COUNT(*) AS n FROM ed_stu WHERE ws=?1").bind(me.ws)
+    ]);
+    const key = (n, p) => String(n || "").replace(/\s/g, "") + "|" + String(p || "").replace(/[^\d]/g, "");
+    const seen = new Set(((sr && sr.results) || []).map(s => key(s.name, s.g_phone || s.phone))), cls = (cr && cr.results) || [];
+    const room = ED_LIMIT.stus - (Number((((nr && nr.results) || [])[0] || {}).n) || 0);
+    const stus = [], enrs = []; let skip = 0;
+    for (const x of list) {
+      const { o, d } = edStuIn(x && typeof x === "object" ? x : {});
+      if (!o.name) { skip++; continue; }
+      const k = key(o.name, o.g_phone || o.phone); if (seen.has(k)) { skip++; continue; } seen.add(k);
+      if (stus.length >= room) { skip++; continue; }
+      if (!("minor" in o)) o.minor = edMinorGuess(o.grade);
+      const row = edStuRow(o, d, now); stus.push(row);
+      for (const nm of String(x.classes || x.class || "").split(/[,/·]/).map(s => s.trim()).filter(Boolean).slice(0, 6)) {
+        const c = cls.find(c => c.name === nm) || cls.find(c => c.name.replace(/\s/g, "") === nm.replace(/\s/g, ""));
+        if (c && !enrs.some(e => e.stu_id === row.id && e.class_id === c.id)) enrs.push(edEnrRow({ stu_id: row.id, class_id: c.id, mode: c.fee_mode, start_date: row.start_date }, {}, now));
+      }
+    }
+    if (!stus.length) return json({ ok: true, added: 0, skipped: skip, enrolled: 0 });
+    const { v } = await spRun(db, me, spBulk(db, "ed_stu", me.ws, stus).concat(enrs.length ? spBulk(db, "ed_enr", me.ws, enrs) : []));
+    return json({ ok: true, v, added: stus.length, skipped: skip, enrolled: enrs.length });
+  },
+  async "enr/save"(db, me, b) {
+    if (!isMgr(me)) return fail("forbidden", 403);
+    const id = clip(b.id, 60), { o, d } = edEnrIn(b || {}), now = iso();
+    if (!id) {
+      const sid = clip(b.stu_id, 60), cid = clip(b.class_id, 60);
+      if (!await edHas(db, me.ws, "ed_stu", sid)) return fail("not-found", 404);
+      const c = await db.prepare("SELECT id, fee_mode FROM ed_class WHERE ws=?1 AND id=?2").bind(me.ws, cid).first();
+      if (!c) return fail("bad-class");
+      if (await db.prepare("SELECT 1 AS x FROM ed_enr WHERE ws=?1 AND stu_id=?2 AND class_id=?3 AND status<>'end'").bind(me.ws, sid, cid).first()) return fail("dup", 409);
+      if (await edCount(db, me.ws, "ed_enr") >= ED_LIMIT.enrs) return fail("limit", 409);
+      const row = edEnrRow(Object.assign({ stu_id: sid, class_id: cid, mode: c.fee_mode }, o), d, now);
+      const { v } = await spRun(db, me, spBulk(db, "ed_enr", me.ws, [row]));
+      return json({ ok: true, v, enr: await spOne(db, "ed_enr", me.ws, row.id) });
+    }
+    const cur = await spOne(db, "ed_enr", me.ws, id);
+    if (!cur) return fail("not-found", 404);
+    if (o.status && o.status !== "end" && cur.status === "end" && await db.prepare("SELECT 1 AS x FROM ed_enr WHERE ws=?1 AND stu_id=?2 AND class_id=?3 AND status<>'end' AND id<>?4").bind(me.ws, cur.stu_id, cur.class_id, id).first()) return fail("dup", 409);
+    if (o.status === "end" && !("end_date" in o)) o.end_date = kstToday();
+    o.d = JSON.stringify(Object.assign({ memo: "", base: 0 }, edD(cur), d)); o.updated_at = now;
+    const { v } = await spRun(db, me, [db.prepare(`UPDATE ed_enr SET ${setCols(o, 3)} WHERE ws=?1 AND id=?2`).bind(me.ws, id, ...Object.values(o))]);
+    return json({ ok: true, v, enr: await spOne(db, "ed_enr", me.ws, id) });
+  },
+  async "enr/del"(db, me, b) {   // 잘못 넣은 수강 등록 — 출결은 남깁니다
+    if (!isMgr(me)) return fail("forbidden", 403);
+    const { v } = await spRun(db, me, [db.prepare("DELETE FROM ed_enr WHERE ws=?1 AND id=?2").bind(me.ws, clip(b.id, 60))]);
+    return json({ ok: true, v });
+  },
+  /* 출결 — 한 반·한 날짜를 통째로. 상태를 비우면 그 줄을 지웁니다. 휴강으로 적으면 그날 출결은 없앱니다 */
+  async "att/save"(db, me, b) {
+    const date = dOk(b.date), cid = clip(b.class_id, 60), today = kstToday();
+    if (!date || date > addDaysS(today, 60) || date < addDaysS(today, -400)) return fail("bad-date");
+    const c = await db.prepare("SELECT id, teacher_id FROM ed_class WHERE ws=?1 AND id=?2").bind(me.ws, cid).first();
+    if (!c) return fail("not-found", 404);
+    if (!isMgr(me) && c.teacher_id !== me.id) return fail("forbidden", 403);
+    const list = (Array.isArray(b.rows) ? b.rows : []).slice(0, 300), ids = [...new Set(list.map(x => clip(x && x.stu_id, 60)).filter(Boolean))];
+    const [sr, er] = await db.batch([
+      db.prepare("SELECT id FROM ed_stu WHERE ws=?1 AND id IN (SELECT value FROM json_each(?2))").bind(me.ws, JSON.stringify(ids)),
+      db.prepare("SELECT stu_id FROM ed_enr WHERE ws=?1 AND class_id=?2").bind(me.ws, cid)
+    ]);
+    const okStu = new Set(((sr && sr.results) || []).map(x => x.id)), inCls = new Set(((er && er.results) || []).map(x => x.stu_id));
+    const set = await edSettings(db, me.ws), now = iso(), L = b.les && typeof b.les === "object" ? b.les : null, off = !!(L && L.status === "off"), rows = [], dels = [];
+    for (const x of list) {
+      const sid = clip(x && x.stu_id, 60); if (!okStu.has(sid)) continue;
+      const s = String(x.status || "");
+      if (!isMgr(me) && !inCls.has(sid) && s !== "make") continue;   // 강사는 자기 반 수강생(과 보강 온 학생)만
+      if (!s || off) { dels.push(sid); continue; }
+      if (!ED_ATT.includes(s)) continue;
+      rows.push({ id: bulkId("ea"), date, class_id: cid, stu_id: sid, status: s, deduct: s === "exc" ? 0 : s === "abs" ? (set.pack.abs ? 1 : 0) : 1, note: clip(x.note, 200), who: me.id, at: tOk(x.at) || null, updated_at: now });
+    }
+    const stmts = [];
+    if (off) stmts.push(db.prepare("DELETE FROM ed_att WHERE ws=?1 AND date=?2 AND class_id=?3").bind(me.ws, date, cid));
+    else if (dels.length) stmts.push(db.prepare("DELETE FROM ed_att WHERE ws=?1 AND date=?2 AND class_id=?3 AND stu_id IN (SELECT value FROM json_each(?4))").bind(me.ws, date, cid, JSON.stringify(dels)));
+    if (rows.length && !off) stmts.push(...spBulk(db, "ed_att", me.ws, rows, "ON CONFLICT(ws,date,class_id,stu_id) DO UPDATE SET status=excluded.status, deduct=excluded.deduct, note=excluded.note, who=excluded.who, at=COALESCE(excluded.at, ed_att.at), updated_at=excluded.updated_at"));
+    if (L) stmts.push(...edLesStmts(db, me, date, cid, L, now));
+    if (!stmts.length) return json({ ok: true, v: null, atts: [], les: null });
+    const { v } = await spRun(db, me, stmts);
+    const [ar, lr] = await db.batch([db.prepare(spSel("ed_att", "ws=?1 AND date=?2 AND class_id=?3")).bind(me.ws, date, cid), db.prepare(spSel("ed_les", "ws=?1 AND date=?2 AND class_id=?3")).bind(me.ws, date, cid)]);
+    return json({ ok: true, v, atts: ((ar && ar.results) || []).map(r => parse(r.j)), les: (((lr && lr.results) || [])[0] && parse(lr.results[0].j)) || null });
+  },
+  async "les/save"(db, me, b) {   // 수업 기록 — 진도·과제·반 메모, 휴강
+    const date = dOk(b.date), cid = clip(b.class_id, 60), today = kstToday();
+    if (!date || date > addDaysS(today, 60) || date < addDaysS(today, -400)) return fail("bad-date");
+    const c = await db.prepare("SELECT id, teacher_id FROM ed_class WHERE ws=?1 AND id=?2").bind(me.ws, cid).first();
+    if (!c) return fail("not-found", 404);
+    if (!isMgr(me) && c.teacher_id !== me.id) return fail("forbidden", 403);
+    const now = iso(), stmts = edLesStmts(db, me, date, cid, b, now);
+    if (b.status === "off") stmts.push(db.prepare("DELETE FROM ed_att WHERE ws=?1 AND date=?2 AND class_id=?3").bind(me.ws, date, cid));
+    const { v } = await spRun(db, me, stmts);
+    const r = await db.prepare(spSel("ed_les", "ws=?1 AND date=?2 AND class_id=?3")).bind(me.ws, date, cid).first();
+    return json({ ok: true, v, les: r ? parse(r.j) : null });
+  },
+  /* 강사 화면 — 내가 맡은 반의 앞뒤 2주. 수강료·연락처는 보내지 않습니다 */
+  async mine(db, me) {
+    const today = kstToday(), from = addDaysS(today, -14), to = addDaysS(today, 14), all = isMgr(me);
+    const cw = all ? "ws=?1 AND active=1" : "ws=?1 AND active=1 AND teacher_id=?2", cb = all ? [me.ws] : [me.ws, me.id];
+    const cls = ((await db.prepare(`SELECT id, name, subject, kind, room, cap, sched, teacher_id FROM ed_class WHERE ${cw} ORDER BY sort, created_at LIMIT 100`).bind(...cb).all()).results || []).map(c => Object.assign(c, { sched: parse(c.sched) || [] }));
+    if (!cls.length) return json({ ok: true, today, classes: [], stus: [], enrs: [], atts: [], less: [], biz: { name: (await edSettings(db, me.ws)).biz.name } });
+    const ids = JSON.stringify(cls.map(c => c.id));
+    const rs = await db.batch([
+      db.prepare("SELECT e.id, e.stu_id, e.class_id, e.status, e.mode, e.start_date, e.end_date FROM ed_enr e WHERE e.ws=?1 AND e.status<>'end' AND e.class_id IN (SELECT value FROM json_each(?2))").bind(me.ws, ids),
+      db.prepare("SELECT s.id, s.name, s.grade, s.status FROM ed_stu s WHERE s.ws=?1 AND s.status IN ('on','pause') AND s.id IN (SELECT stu_id FROM ed_enr WHERE ws=?1 AND status<>'end' AND class_id IN (SELECT value FROM json_each(?2)))").bind(me.ws, ids),
+      db.prepare(spSel("ed_att", "ws=?1 AND date>=?2 AND date<=?3 AND class_id IN (SELECT value FROM json_each(?4))")).bind(me.ws, from, to, ids),
+      db.prepare(spSel("ed_les", "ws=?1 AND date>=?2 AND date<=?3 AND class_id IN (SELECT value FROM json_each(?4))")).bind(me.ws, from, to, ids),
+      db.prepare("SELECT v FROM mod_set WHERE ws=?1 AND mod='ed' AND k='settings'").bind(me.ws)
+    ]);
+    const R = i => (rs[i] && rs[i].results) || [], s0 = R(4)[0], set = edNorm(s0 ? parse(s0.v) : null);
+    return json({ ok: true, today, classes: cls, enrs: R(0), stus: R(1), atts: R(2).map(r => parse(r.j)), less: R(3).map(r => parse(r.j)), biz: { name: set.biz.name, type: set.biz.type }, pack: set.pack });
+  },
+  async "note/save"(db, me, b) {
+    if (!isMgr(me)) return fail("forbidden", 403);
+    const id = clip(b.id, 60), now = iso(), o = {};
+    if ("kind" in b) o.kind = ED_NOTE.includes(b.kind) && b.kind !== "guard" ? b.kind : "memo";
+    if ("date" in b) o.date = dOk(b.date) || kstToday();
+    if ("ym" in b) o.ym = ymOk(b.ym) || null;
+    if ("title" in b) o.title = clip(b.title, 80);
+    if ("body" in b) o.body = clip(b.body, 6000);
+    if ("share" in b) o.share = b.share ? 1 : 0;
+    if (!id) {
+      const sid = clip(b.stu_id, 60);
+      if (!await edHas(db, me.ws, "ed_stu", sid)) return fail("not-found", 404);
+      if (!o.body && !o.title) return fail("bad-request");
+      if (await edCount(db, me.ws, "ed_note") >= ED_LIMIT.notes) return fail("limit", 409);
+      const row = Object.assign({ id: bulkId("eo"), stu_id: sid, kind: "memo", date: kstToday(), ym: null, title: "", body: "", share: 0, who: me.id, created_at: now, updated_at: now }, o);
+      const { v } = await spRun(db, me, spBulk(db, "ed_note", me.ws, [row]));
+      return json({ ok: true, v, note: await spOne(db, "ed_note", me.ws, row.id) });
+    }
+    const cur = await spOne(db, "ed_note", me.ws, id);
+    if (!cur) return fail("not-found", 404);
+    if (cur.kind === "guard") { for (const k of Object.keys(o)) if (k !== "share") delete o[k]; o.share = 0; }   // 보호자가 남긴 글은 고치지 않습니다(읽음 표시만)
+    o.updated_at = now;
+    const { v } = await spRun(db, me, [db.prepare(`UPDATE ed_note SET ${setCols(o, 3)} WHERE ws=?1 AND id=?2`).bind(me.ws, id, ...Object.values(o))]);
+    return json({ ok: true, v, note: await spOne(db, "ed_note", me.ws, id) });
+  },
+  async "note/del"(db, me, b) {
+    if (!isMgr(me)) return fail("forbidden", 403);
+    const { v } = await spRun(db, me, [db.prepare("DELETE FROM ed_note WHERE ws=?1 AND id=?2").bind(me.ws, clip(b.id, 60))]);
+    return json({ ok: true, v });
+  },
+  /* 월 수강료 초안 만들기 — dry면 만들 목록만 돌려줍니다 */
+  async "bill/gen"(db, me, b) {
+    if (!isMgr(me)) return fail("forbidden", 403);
+    const ym = ymOk(b.ym) || kstToday().slice(0, 7), set = await edSettings(db, me.ws);
+    const only = Array.isArray(b.ids) ? new Set(b.ids.map(x => clip(x, 60))) : null;
+    const rows = await edGen(db, me.ws, ym, set, only);
+    if (b.dry) return json({ ok: true, preview: rows });
+    if (!rows.length) return json({ ok: true, v: null, bills: [] });
+    if (await edCount(db, me.ws, "ed_bill") + rows.length > ED_LIMIT.bills) return fail("limit", 409);
+    const { v } = await spRun(db, me, spBulk(db, "ed_bill", me.ws, rows, "ignore"));
+    return json({ ok: true, v, bills: ((await db.prepare(spSel("ed_bill", "ws=?1 AND id IN (SELECT value FROM json_each(?2))")).bind(me.ws, JSON.stringify(rows.map(r => r.id))).all()).results || []).map(r => parse(r.j)) });
+  },
+  async "bill/save"(db, me, b) {   // 직접 만드는 청구서(회차권·교재비 등)와 초안·청구 중인 것 고치기
+    if (!isMgr(me)) return fail("forbidden", 403);
+    const id = clip(b.id, 60), now = iso(), o = {}, d = {};
+    if ("title" in b) o.title = clip(b.title, 60);
+    if ("ym" in b) o.ym = ymOk(b.ym) || kstToday().slice(0, 7);
+    if ("due" in b) o.due = dOk(b.due) || null;
+    if ("items" in b) { const it = edItems(b.items); o.items = JSON.stringify(it.items); o.total = Math.max(0, it.sum); }
+    if ("memo" in b) d.memo = clip(b.memo, 500);
+    if (!id) {
+      const sid = clip(b.stu_id, 60), kind = ED_BK.includes(b.kind) ? b.kind : "etc";
+      if (!await edHas(db, me.ws, "ed_stu", sid)) return fail("not-found", 404);
+      if (!o.items || o.items === "[]") return fail("bad-request");
+      if (kind === "month" && await db.prepare("SELECT 1 AS x FROM ed_bill WHERE ws=?1 AND stu_id=?2 AND ym=?3 AND kind='month' AND status<>'void'").bind(me.ws, sid, o.ym || kstToday().slice(0, 7)).first()) return fail("dup", 409);
+      if (await edCount(db, me.ws, "ed_bill") >= ED_LIMIT.bills) return fail("limit", 409);
+      const set = await edSettings(db, me.ws), st = b.status === "issued" ? "issued" : "draft";
+      const row = edBillRow(Object.assign({ stu_id: sid, kind, status: st, due: st === "issued" ? addDaysS(kstToday(), set.bill.due) : null }, o), d, now);
+      if (!row.title) row.title = kind === "pack" ? "회차권" : kind === "month" ? `${+row.ym.slice(5)}월 수강료` : "교재비·기타";
+      const { v } = await spRun(db, me, spBulk(db, "ed_bill", me.ws, [row]));
+      return json({ ok: true, v, bill: await spOne(db, "ed_bill", me.ws, row.id) });
+    }
+    const cur = await spOne(db, "ed_bill", me.ws, id);
+    if (!cur) return fail("not-found", 404);
+    if (cur.status === "paid" || cur.status === "void") return fail("bad-state", 409);
+    o.d = JSON.stringify(Object.assign(ED_BILL_D0(), edD(cur), d)); o.updated_at = now;
+    const { v } = await spRun(db, me, [db.prepare(`UPDATE ed_bill SET ${setCols(o, 3)} WHERE ws=?1 AND id=?2`).bind(me.ws, id, ...Object.values(o))]);
+    return json({ ok: true, v, bill: await spOne(db, "ed_bill", me.ws, id) });
+  },
+  async "bill/issue"(db, me, b) {   // 초안 → 청구. 기한이 없으면 오늘부터 설정한 날 수만큼
+    if (!isMgr(me)) return fail("forbidden", 403);
+    const ids = (Array.isArray(b.ids) ? b.ids : [b.id]).map(x => clip(x, 60)).filter(Boolean).slice(0, 3000);
+    if (!ids.length) return fail("bad-request");
+    const set = await edSettings(db, me.ws), due = dOk(b.due) || addDaysS(kstToday(), set.bill.due), now = iso();
+    const { v } = await spRun(db, me, [db.prepare("UPDATE ed_bill SET status='issued', due=COALESCE(CASE WHEN ?3<>'' THEN ?3 END, due, ?4), updated_at=?5 WHERE ws=?1 AND status='draft' AND id IN (SELECT value FROM json_each(?2))").bind(me.ws, JSON.stringify(ids), dOk(b.due) || "", due, now)]);
+    return json({ ok: true, v, bills: ((await db.prepare(spSel("ed_bill", "ws=?1 AND id IN (SELECT value FROM json_each(?2))")).bind(me.ws, JSON.stringify(ids)).all()).results || []).map(r => parse(r.j)) });
+  },
+  async "bill/paid"(db, me, b) {   // 납부 확인
+    if (!isMgr(me)) return fail("forbidden", 403);
+    const id = clip(b.id, 60), cur = await spOne(db, "ed_bill", me.ws, id);
+    if (!cur) return fail("not-found", 404);
+    if (cur.status === "void") return fail("bad-state", 409);
+    const date = dOk(b.date) || kstToday(), amt = b.amount === undefined || b.amount === "" ? cur.total : mkInt(b.amount, 1e10), method = ED_PAY.includes(b.method) ? b.method : "transfer";
+    const receipt = ["done", "none", "na", ""].includes(b.receipt) ? b.receipt : "";
+    const d = JSON.stringify(Object.assign(ED_BILL_D0(), edD(cur), { paid_amt: amt, receipt }));
+    const { v } = await spRun(db, me, [db.prepare("UPDATE ed_bill SET status='paid', paid_at=?3, method=?4, d=?5, due=COALESCE(due,?3), updated_at=?6 WHERE ws=?1 AND id=?2").bind(me.ws, id, date, method, d, iso())]);
+    return json({ ok: true, v, bill: await spOne(db, "ed_bill", me.ws, id) });
+  },
+  async "bill/unpaid"(db, me, b) {   // 납부 확인 취소
+    if (!isMgr(me)) return fail("forbidden", 403);
+    const id = clip(b.id, 60), cur = await spOne(db, "ed_bill", me.ws, id);
+    if (!cur || cur.status !== "paid") return fail("bad-state", 409);
+    const d = JSON.stringify(Object.assign(ED_BILL_D0(), edD(cur), { paid_amt: 0, receipt: "", refund: null }));
+    const { v } = await spRun(db, me, [db.prepare("UPDATE ed_bill SET status='issued', paid_at=NULL, method=NULL, d=?3, updated_at=?4 WHERE ws=?1 AND id=?2").bind(me.ws, id, d, iso())]);
+    return json({ ok: true, v, bill: await spOne(db, "ed_bill", me.ws, id) });
+  },
+  async "bill/void"(db, me, b) {   // 청구 취소 — 기록은 남깁니다. 초안은 그냥 지웁니다
+    if (!isMgr(me)) return fail("forbidden", 403);
+    const id = clip(b.id, 60), cur = await spOne(db, "ed_bill", me.ws, id);
+    if (!cur) return fail("not-found", 404);
+    if (cur.status === "paid") return fail("bad-state", 409);
+    const { v } = await spRun(db, me, [cur.status === "draft" ? db.prepare("DELETE FROM ed_bill WHERE ws=?1 AND id=?2").bind(me.ws, id) : db.prepare("UPDATE ed_bill SET status='void', updated_at=?3 WHERE ws=?1 AND id=?2").bind(me.ws, id, iso())]);
+    return json({ ok: true, v, removed: cur.status === "draft" });
+  },
+  async "bill/refund"(db, me, b) {   // 교습비 반환 기록 — 납부한 청구서에만
+    if (!isMgr(me)) return fail("forbidden", 403);
+    const id = clip(b.id, 60), cur = await spOne(db, "ed_bill", me.ws, id);
+    if (!cur || cur.status !== "paid") return fail("bad-state", 409);
+    const x = edD(cur), amt = mkInt(b.amount, 1e10);
+    if (amt > (Number(x.paid_amt) || cur.total)) return fail("too-much");
+    const refund = amt > 0 ? { amt, at: dOk(b.date) || kstToday(), reason: clip(b.reason, 200), calc: clip(b.calc, 300) } : null;
+    const { v } = await spRun(db, me, [db.prepare("UPDATE ed_bill SET d=?3, updated_at=?4 WHERE ws=?1 AND id=?2").bind(me.ws, id, JSON.stringify(Object.assign(ED_BILL_D0(), x, { refund })), iso())]);
+    return json({ ok: true, v, bill: await spOne(db, "ed_bill", me.ws, id) });
+  },
+  async "bill/sent"(db, me, b) {   // 문자·링크로 보냈다는 표시
+    if (!isMgr(me)) return fail("forbidden", 403);
+    const ids = (Array.isArray(b.ids) ? b.ids : [b.id]).map(x => clip(x, 60)).filter(Boolean).slice(0, 3000);
+    const { v } = await spRun(db, me, [db.prepare("UPDATE ed_bill SET d=json_set(CASE WHEN json_valid(d) THEN d ELSE '{}' END,'$.sent_at',?3) WHERE ws=?1 AND id IN (SELECT value FROM json_each(?2))").bind(me.ws, JSON.stringify(ids), iso())]);
+    return json({ ok: true, v });
+  },
+  async "lead/save"(db, me, b) {
+    if (!isMgr(me)) return fail("forbidden", 403);
+    const id = clip(b.id, 60), { o, d } = edLeadIn(b || {}), now = iso();
+    if (!id) {
+      if (!o.name) return fail("bad-request");
+      if (await edCount(db, me.ws, "ed_lead") >= ED_LIMIT.leads) return fail("limit", 409);
+      const row = Object.assign({ id: bulkId("el"), name: "", phone: "", grade: "", subject: "", src: "etc", status: "new", next_date: null, stu_id: "", created_at: now, updated_at: now }, o, { d: Object.assign(ED_LEAD_D0(), d, { by: me.id }) });
+      const { v } = await spRun(db, me, spBulk(db, "ed_lead", me.ws, [row]));
+      return json({ ok: true, v, lead: await spOne(db, "ed_lead", me.ws, row.id) });
+    }
+    const cur = await spOne(db, "ed_lead", me.ws, id);
+    if (!cur) return fail("not-found", 404);
+    if ("name" in o && !o.name) return fail("bad-request");
+    o.d = JSON.stringify(Object.assign(ED_LEAD_D0(), edD(cur), d)); o.updated_at = now;
+    const { v } = await spRun(db, me, [db.prepare(`UPDATE ed_lead SET ${setCols(o, 3)} WHERE ws=?1 AND id=?2`).bind(me.ws, id, ...Object.values(o))]);
+    return json({ ok: true, v, lead: await spOne(db, "ed_lead", me.ws, id) });
+  },
+  async "lead/del"(db, me, b) {
+    if (!isMgr(me)) return fail("forbidden", 403);
+    const { v } = await spRun(db, me, [db.prepare("DELETE FROM ed_lead WHERE ws=?1 AND id=?2").bind(me.ws, clip(b.id, 60))]);
+    return json({ ok: true, v });
+  },
+  /* 등록으로 넘기기 — 상담 문의로 수강생을 만들고 반에 넣습니다 */
+  async "lead/convert"(db, me, b) {
+    if (!isMgr(me)) return fail("forbidden", 403);
+    const id = clip(b.id, 60), l = await spOne(db, "ed_lead", me.ws, id);
+    if (!l) return fail("not-found", 404);
+    if (l.stu_id && await edHas(db, me.ws, "ed_stu", l.stu_id)) return fail("bad-state", 409);
+    if (await edCount(db, me.ws, "ed_stu") >= ED_LIMIT.stus) return fail("limit", 409);
+    const now = iso(), x = edD(l), adult = b.adult === true;
+    const s = edStuIn(Object.assign({ name: l.name, grade: l.grade, start_date: dOk(b.start_date) || kstToday() }, adult ? { phone: l.phone } : { g_phone: l.phone, g_name: x.g_name }, b.stu && typeof b.stu === "object" ? b.stu : {}));
+    if (!("minor" in s.o)) s.o.minor = edMinorGuess(s.o.grade);
+    const row = edStuRow(s.o, Object.assign(s.d, { memo: [x.memo, l.subject ? "상담 과목: " + l.subject : ""].filter(Boolean).join("\n") }), now), enr = [];
+    for (const cid of (Array.isArray(b.class_ids) ? b.class_ids : []).slice(0, 12)) {
+      const c = await db.prepare("SELECT id, fee_mode FROM ed_class WHERE ws=?1 AND id=?2").bind(me.ws, clip(cid, 60)).first();
+      if (c && !enr.some(e => e.class_id === c.id)) enr.push(edEnrRow({ stu_id: row.id, class_id: c.id, mode: c.fee_mode, start_date: row.start_date }, {}, now));
+    }
+    const { v } = await spRun(db, me, spBulk(db, "ed_stu", me.ws, [row]).concat(enr.length ? spBulk(db, "ed_enr", me.ws, enr) : [], [db.prepare("UPDATE ed_lead SET status='won', stu_id=?3, updated_at=?4 WHERE ws=?1 AND id=?2").bind(me.ws, id, row.id, now)]));
+    return json({ ok: true, v, stu: await spOne(db, "ed_stu", me.ws, row.id), enrs: enr.length ? ((await db.prepare(spSel("ed_enr", "ws=?1 AND stu_id=?2")).bind(me.ws, row.id).all()).results || []).map(r => parse(r.j)) : [], lead: await spOne(db, "ed_lead", me.ws, id) });
+  }
+};
+function edLesStmts(db, me, date, cid, L, now) {
+  const row = { id: bulkId("ls"), date, class_id: cid, status: L.status === "off" ? "off" : "done", topic: clip(L.topic, 300), hw: clip(L.hw, 300), note: clip(L.note, 1000), who: me.id, updated_at: now };
+  if (row.status === "done" && !row.topic && !row.hw && !row.note) return [db.prepare("DELETE FROM ed_les WHERE ws=?1 AND date=?2 AND class_id=?3").bind(me.ws, date, cid)];   // 빈 기록은 남기지 않습니다
+  return spBulk(db, "ed_les", me.ws, [row], "ON CONFLICT(ws,date,class_id) DO UPDATE SET status=excluded.status, topic=excluded.topic, hw=excluded.hw, note=excluded.note, who=excluded.who, updated_at=excluded.updated_at");
+}
+
+/* ───────── 보호자 페이지 (ed-guard) ─────────
+   수강생마다 하나, 1년. 시간표·이번 달 출결·최근 진도와 과제·수강료·영수증·남은 회차·공개한 리포트를 보여 줍니다.
+   연락처·상담 기록·학습 메모·내부 메모는 보내지 않습니다. 설정에서 고른 것만 나갑니다. */
+Object.assign(LINK_KINDS, {
+  "ed-guard": {
+    exists: async (db, me, id) => isMgr(me) && hasMod(me, "edu") && !!(await db.prepare("SELECT 1 AS x FROM ed_stu WHERE ws=?1 AND id=?2 AND status<>'left'").bind(me.ws, id).first()),
+    view: async (db, l) => {
+      if (!await edModOn(db, l.ws)) return null;
+      const s = await db.prepare("SELECT id, name, grade, status FROM ed_stu WHERE ws=?1 AND id=?2").bind(l.ws, l.target).first();
+      if (!s || s.status === "left") return null;
+      const set = await edSettings(db, l.ws), G = set.guard, today = kstToday(), ym = today.slice(0, 7), since = addDaysS(today, -62), y0 = today.slice(0, 4) + "-01";
+      const rs = await db.batch([
+        db.prepare("SELECT e.class_id, e.status, e.mode, c.name, c.subject, c.room, c.sched, c.kind FROM ed_enr e JOIN ed_class c ON c.ws=e.ws AND c.id=e.class_id WHERE e.ws=?1 AND e.stu_id=?2 AND e.status<>'end' ORDER BY c.sort").bind(l.ws, s.id),
+        db.prepare("SELECT date, class_id, status, at FROM ed_att WHERE ws=?1 AND stu_id=?2 AND date>=?3 ORDER BY date DESC LIMIT 120").bind(l.ws, s.id, since),
+        db.prepare("SELECT date, class_id, status, topic, hw FROM ed_les WHERE ws=?1 AND date>=?3 AND date<=?4 AND class_id IN (SELECT class_id FROM ed_enr WHERE ws=?1 AND stu_id=?2 AND status<>'end') ORDER BY date DESC LIMIT 40").bind(l.ws, s.id, since, today),
+        db.prepare("SELECT id, kind, ym, title, items, total, due, status, paid_at, method, d FROM ed_bill WHERE ws=?1 AND stu_id=?2 AND status IN ('issued','paid') AND (ym>=?3 OR status='issued' OR paid_at>=?4) ORDER BY ym DESC, created_at DESC LIMIT 40").bind(l.ws, s.id, edMon(ym, -12), y0),
+        db.prepare("SELECT id, ym, title, body, date FROM ed_note WHERE ws=?1 AND stu_id=?2 AND kind='report' AND share=1 ORDER BY date DESC LIMIT 12").bind(l.ws, s.id),
+        db.prepare("SELECT name FROM workspaces WHERE id=?1").bind(l.ws)
+      ]);
+      const R = i => (rs[i] && rs[i].results) || [], cN = new Map(R(0).map(c => [c.class_id, c.name]));
+      const packs = (await edPacks(db, l.ws, s.id)).map(p => ({ class: cN.get(p.class_id) || "", left: p.left })).filter(p => p.class);
+      const bills = R(3).map(b => { const x = parse(b.d) || {}; return { id: b.id, kind: b.kind, ym: b.ym, title: b.title || "", items: (parse(b.items) || []).map(i => ({ label: i.label, amount: i.amount, qty: i.qty || 0, note: i.note || "" })), total: b.total, due: b.due || "", status: b.status, paidAt: b.paid_at || "", method: b.method || "", paidAmt: Number(x.paid_amt) || 0, reported: !!x.reported_at, refund: x.refund ? { amt: x.refund.amt, at: x.refund.at } : null }; });
+      const w = ((R(5)[0]) || {}).name || "";
+      return {
+        kind: "ed-guard", title: set.biz.name || w, student: { name: s.name, grade: s.grade || "", status: s.status }, today,
+        classes: R(0).map(c => ({ name: c.name, subject: c.subject || "", room: c.room || "", kind: c.kind, mode: c.mode, paused: c.status === "pause", sched: parse(c.sched) || [] })),
+        att: G.att ? R(1).map(a => ({ date: a.date, class: cN.get(a.class_id) || "", status: a.status, at: a.at || "" })) : null,
+        les: G.les ? R(2).filter(x => x.status === "done" && (x.topic || x.hw)).map(x => ({ date: x.date, class: cN.get(x.class_id) || "", topic: x.topic || "", hw: x.hw || "" })).slice(0, 16) : null,
+        offs: R(2).filter(x => x.status === "off" && x.date >= today).map(x => ({ date: x.date, class: cN.get(x.class_id) || "" })),
+        bills: G.bill ? bills.filter(b => b.status === "issued" || b.ym >= edMon(ym, -12) || (b.paidAt || "") >= y0) : null,
+        year: G.bill ? { y: today.slice(0, 4), paid: bills.filter(b => b.status === "paid" && (b.paidAt || "").startsWith(today.slice(0, 4))).reduce((a, b) => a + (b.paidAmt || b.total) - (b.refund ? b.refund.amt : 0), 0) } : null,
+        packs: G.bill ? packs : null,
+        reports: G.report ? R(4).map(n => ({ id: n.id, ym: n.ym || "", title: n.title || "", body: n.body || "", date: n.date })) : null,
+        can: { absent: G.absent, msg: G.msg, paid: G.bill },
+        biz: { name: set.biz.name || w, owner: set.biz.owner, no: set.biz.no, phone: set.biz.phone, addr: set.biz.addr, bank: G.bill ? set.biz.bank : "", pay: G.bill ? set.biz.pay : "", type: set.biz.type, note: G.bill ? set.bill.note : "", refund: set.refund }
+      };
+    },
+    act: async () => ({ error: "bad-state" })
+  }
+});
+/* 보호자가 남기는 것 — 수강료를 보냈다고 알리기 · 결석을 미리 알리기 · 선생님께 한마디. 링크 하나에 하루 열 번까지 */
+PUBLIC["ed/guard"] = async function (db, b) {
+  const l = await linkRow(db, b.t);
+  if (!l || l.kind !== "ed-guard") return fail("not-found", 404);
+  if (l.expires_at < iso()) return fail("expired", 410);
+  if (!await edModOn(db, l.ws)) return fail("closed", 403);
+  const s = await db.prepare("SELECT id, name, status FROM ed_stu WHERE ws=?1 AND id=?2").bind(l.ws, l.target).first();
+  if (!s || s.status === "left") return fail("not-found", 404);
+  const set = await edSettings(db, l.ws), action = String(b.action || ""), today = kstToday(), now = iso(), who = clip(b.name, 30);
+  if (!["paid", "absent", "late", "msg"].includes(action)) return fail("bad-request");
+  if ((action === "paid" && !set.guard.bill) || ((action === "absent" || action === "late") && !set.guard.absent) || (action === "msg" && !set.guard.msg)) return fail("closed", 403);
+  const op = parse(l.opts) || {}, used = op.d === today ? Number(op.n) || 0 : 0;
+  if (used >= ED_GUARD_DAY) return fail("busy", 429);
+  const stmts = [db.prepare("UPDATE links SET opts=?2 WHERE token=?1").bind(l.token, JSON.stringify(Object.assign({}, op, { d: today, n: used + 1 })))];
+  let title = "", body = "", to = await whoIs(db, l.ws, ["admin"]);
+  if (action === "paid") {
+    const bl = await spOne(db, "ed_bill", l.ws, clip(b.bill_id, 60));
+    if (!bl || bl.stu_id !== s.id || bl.status !== "issued") return fail("bad-state", 409);
+    stmts.push(db.prepare("UPDATE ed_bill SET d=?3, updated_at=?4 WHERE ws=?1 AND id=?2").bind(l.ws, bl.id, JSON.stringify(Object.assign(ED_BILL_D0(), edD(bl), { reported_at: now, reported_by: who })), now));
+    title = "보호자가 수강료를 보냈다고 알려 왔습니다"; body = `${s.name} · ${bl.title || "수강료"} ${(Number(bl.total) || 0).toLocaleString("ko-KR")}원 — 통장에서 확인해 주세요`;
+  } else {
+    const note = clip(b.note, 500);
+    if (!note) return fail("note-required");
+    if (action === "absent" || action === "late") {   // 늦음은 출결을 미리 적지 않고, 원장님과 그 반 강사에게 알리기만 합니다
+      const date = dOk(b.date);
+      if (!date || date < today || date > addDaysS(today, 30)) return fail("bad-date");
+      const w = edDow(date), cls = ((await db.prepare("SELECT c.id, c.name, c.sched, c.teacher_id FROM ed_enr e JOIN ed_class c ON c.ws=e.ws AND c.id=e.class_id WHERE e.ws=?1 AND e.stu_id=?2 AND e.status='on'").bind(l.ws, s.id).all()).results || []).filter(c => (parse(c.sched) || []).some(x => x.w === w));
+      if (action === "absent") {
+        const rows = cls.map(c => ({ id: bulkId("ea"), date, class_id: c.id, stu_id: s.id, status: "exc", deduct: 0, note: clip("보호자 알림: " + note, 200), who: "guard", at: null, updated_at: now }));
+        if (rows.length) stmts.push(...spBulk(db, "ed_att", l.ws, rows, "ignore"));   // 이미 출결을 적었으면 그대로 둡니다
+      }
+      const md = `${+date.slice(5, 7)}/${+date.slice(8)}`, what = action === "absent" ? "결석" : "늦음";
+      to = to.concat(cls.map(c => c.teacher_id).filter(Boolean));
+      stmts.push(...spBulk(db, "ed_note", l.ws, [{ id: bulkId("eo"), stu_id: s.id, kind: "guard", date: today, ym: null, title: `${md} ${what} 예정`, body: note, share: 0, who: "guard:" + who, created_at: now, updated_at: now }]));
+      title = action === "absent" ? "보호자가 결석을 미리 알려 왔습니다" : "보호자가 늦는다고 알려 왔습니다"; body = `${s.name} · ${md}${cls.length ? " " + cls.map(c => c.name).join(", ") : ""} — ${note}`;
+    } else {
+      stmts.push(...spBulk(db, "ed_note", l.ws, [{ id: bulkId("eo"), stu_id: s.id, kind: "guard", date: today, ym: null, title: "보호자 메시지", body: note, share: 0, who: "guard:" + who, created_at: now, updated_at: now }]));
+      title = "보호자가 글을 남겼습니다"; body = `${s.name} — ${note}`;
+    }
+  }
+  stmts.push(db.prepare("UPDATE workspaces SET sp_ver=sp_ver+1 WHERE id=?1").bind(l.ws));
+  await db.batch(stmts);
+  await notify(db, l.ws, [...new Set(to)], { type: "reply", title, body, url: action === "paid" ? "#/edu/bill" : "#/edu", tag: "ed-guard:" + s.id });
+  return json({ ok: true });
+};
+AIFN.edu = async (db, me) => { if (!aiMod(me, "edu")) return { error: "module-off" }; return await edAiSummary(db, me); };
+AI_KINDS.push("ed-report", "ed-lead");
+MCP_TOOLS.splice(MCP_TOOLS.findIndex(t => t.name === "myworks_propose"), 0, { name: "myworks_edu", description: "마이에듀: 반·시간표와 수강생 수, 오늘 수업과 출석 체크 상황, 최근 30일 출결, 이번 주 두 번 이상 결석한 수강생, 이달 수강료 청구·납부와 미납, 남은 회차가 적은 회차권, 최근 수업 진도·과제, 진행 중인 상담 문의 (연락처는 넣지 않음)", input: {} });
+mcpFn.myworks_edu = "edu";
+MSG_AUTO_HOOKS.push(edMsgAuto);
+
 /* ───────── 진입점 ───────── */
 const CANON_HOST = "myworks.ai.kr", MOVE_HOSTS = new Set(["myworkspro.pages.dev", "www.myworks.ai.kr"]);
 export async function onRequest(context) {
@@ -6670,7 +7514,7 @@ async function route(context, wait) {
       const r = await AIFN[fn](db, me, p);
       return json(r, r && r.error ? ({ "not-found": 404, forbidden: 403, "module-off": 403 }[r.error] || 400) : 200);
     }
-    const MODS = { "sp/": ["space", SPACE], "os/": ["outsourcing", OUTS], "cm/": ["commerce", COMM], "tx/": ["tax", TAX], "pp/": ["people", PEOP], "mk/": ["marketing", MKT], "cr/": ["creator", CREA] };
+    const MODS = { "sp/": ["space", SPACE], "os/": ["outsourcing", OUTS], "cm/": ["commerce", COMM], "tx/": ["tax", TAX], "pp/": ["people", PEOP], "mk/": ["marketing", MKT], "cr/": ["creator", CREA], "ed/": ["edu", EDU] };
     const mk = Object.keys(MODS).find(k => path.startsWith(k));
     if (mk) {   // 업종 모듈 — 프로 워크스페이스에서 켠 모듈만, 협력사 역할은 쓰지 않습니다
       const [mod, H] = MODS[mk], fn = path.slice(3);
@@ -6680,7 +7524,7 @@ async function route(context, wait) {
       if (me.err) return fail(me.err, 403);
       if (me.role === "partner") return fail("forbidden", 403);
       if (!hasMod(me, mod)) return fail("module-off", 403, { module: mod });
-      if (isField(me) && !(mod === "space" || (mod === "commerce" && me.role === "worker") || (mod === "people" && PP_SELF.has(fn)))) return fail("forbidden", 403);   // 현장 근무자는 마이스토어·마이셀러 발송·내 근무, 시설 담당은 마이스토어·내 근무만
+      if (isField(me) && !(mod === "space" || (mod === "commerce" && me.role === "worker") || (mod === "people" && PP_SELF.has(fn)) || (mod === "edu" && ED_FIELD.has(fn)))) return fail("forbidden", 403);   // 현장 근무자는 마이스토어·마이셀러 발송·내 근무, 시설 담당은 마이스토어·내 근무만
       return await H[fn](db, me, body, request, url, env);
     }
     if (!Object.prototype.hasOwnProperty.call(PRIVATE, path)) return fail("not-found", 404);

@@ -1671,6 +1671,161 @@ a.linkbtn{display:inline-block;margin-top:6px}
 #tabbar .tb-plus{color:var(--accent-deep)}
 #tabbar button{position:relative}
 @media (max-width:560px){.start-step{flex-wrap:wrap}.start-step .btn{margin-left:38px}.m-box.m-cmd{margin-top:3vh}}
+/* ═══ 마이에듀 ═══ */
+.ed-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.ed-bar select,.ed-bar input{padding:6px 9px;font-size:13px}
+.ed-pick{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
+.ed-pick label{display:flex;flex-direction:column;gap:2px;border:1px solid var(--line);border-radius:10px;padding:11px 13px;cursor:pointer;background:var(--card);margin:0}
+.ed-pick label.on{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent) inset;background:var(--accent-soft)}
+.ed-pick input{display:none}
+.ed-pick b{font-size:14px}.ed-pick span{font-size:12.5px;color:var(--sub);line-height:1.45}
+.ed-gen{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:14px}
+.ed-gen b{flex-basis:100%;color:var(--ink)}.ed-gen span{flex:1;min-width:220px;font-size:13px}
+.ed-steps{display:grid;gap:2px}
+.ed-step{display:flex;align-items:center;gap:12px;padding:9px 2px;border-bottom:1px solid var(--line-soft)}
+.ed-step:last-child{border-bottom:0}
+.ed-step .n{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:var(--wait-soft);color:var(--sub);font-size:12.5px;font-weight:700;flex:none}
+.ed-step.done .n{background:var(--ok-soft);color:var(--ok)}
+.ed-step>div{flex:1;min-width:0;display:flex;flex-direction:column}
+.ed-step>div span{font-size:12.5px;color:var(--sub)}
+.ed-step.done b{color:var(--faint);text-decoration:line-through;font-weight:600}
+.ed-cls{display:flex;align-items:center;gap:12px;padding:11px 12px;border:1px solid var(--line);border-radius:10px;margin-bottom:8px;cursor:pointer;background:var(--card)}
+.ed-cls:hover{border-color:var(--accent)}
+.ed-cls.off{opacity:.6}
+.ed-cls-t{display:flex;flex-direction:column;min-width:86px;flex:none}
+.ed-cls-t b{font-family:var(--mono);font-size:13.5px}.ed-cls-t span{font-size:12px;color:var(--faint)}
+.ed-cls-m{flex:1;min-width:0;display:flex;flex-direction:column}
+.ed-cls-m b{font-size:14.5px;overflow-wrap:anywhere}
+.ed-topic{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ed-cls-r{flex:none}
+.ed-wk{display:flex;gap:10px;padding:7px 0;border-bottom:1px solid var(--line-soft);align-items:baseline}
+.ed-wk:last-child{border-bottom:0}
+.ed-wk .d{width:58px;flex:none;font-size:13px;font-weight:700}
+.ed-wk .c{display:flex;flex-wrap:wrap;gap:5px}
+.ed-chip{font-size:12.5px;border:1px solid var(--line);border-radius:7px;padding:3px 9px;background:var(--paper)}
+.ed-chip:hover{border-color:var(--accent)}.ed-chip.off{text-decoration:line-through;opacity:.6}
+.ed-act b{font-size:14px;font-weight:600}
+.m-box:has(.ed-wide){width:min(760px,calc(100% - 24px));margin-top:5vh}
+.ed-wide h2{flex-wrap:wrap}
+.ed-att-nav{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}
+.ed-att-top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px}
+#ed-a-body.dim{opacity:.45;pointer-events:none}
+.ed-att-row{display:grid;grid-template-columns:minmax(110px,1fr) auto;gap:6px 12px;align-items:center;padding:9px 2px;border-bottom:1px solid var(--line-soft)}
+.ed-att-row .nm{display:flex;flex-direction:column;min-width:0}
+.ed-att-row .nm b{font-size:14.5px}
+.ed-att-row .ex{grid-column:1/-1;display:flex;gap:6px;flex-wrap:wrap}
+.ed-att-row .ex:empty{display:none}
+.ed-att-row .ex input{padding:6px 9px;font-size:13px;width:auto;flex:1;min-width:90px}
+.ed-att-row .ex .ed-a-at{flex:0 0 96px}
+.ed-att-row.paused .nm b{color:var(--faint)}
+.ed-att-seg button{padding:7px 11px}
+.ed-att-seg button.on.in,.ed-att-seg button.on.make{background:var(--ok);color:#fff}
+.ed-att-seg button.on.late{background:#B7791F;color:#fff}
+.ed-att-seg button.on.abs{background:var(--late);color:#fff}
+.ed-att-seg button.on.exc{background:var(--sub);color:#fff}
+.ed-att-add{display:flex;gap:6px;margin-top:10px}
+.ed-att-add select{flex:1;padding:7px 9px;font-size:13px}
+.ed-stu-tbl tr.click,.ed-bill-tbl tr.click{cursor:pointer}
+.ed-stu-tbl tr.click:hover td,.ed-bill-tbl tr.click:hover td{background:var(--paper)}
+.ed-stu-tbl .tag{margin:1px 2px 1px 0}
+.ed-acts{display:flex;gap:6px;flex-wrap:wrap;margin:-4px 0 14px}
+.ed-sgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.ed-sec{border:1px solid var(--line);border-radius:10px;padding:12px 14px;min-width:0}
+.ed-sec h3{font-size:13.5px;font-weight:700;margin-bottom:8px;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.ed-sec h3 .linkbtn{margin-left:auto;font-size:12.5px}
+.ed-enr{display:flex;gap:8px;align-items:flex-start;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--line-soft)}
+.ed-enr:last-child{border-bottom:0}.ed-enr.end{opacity:.55}
+.ed-enr>div{min-width:0}
+.ed-enr>.btn{flex:none;white-space:nowrap}
+.ed-pack{margin-top:4px;font-size:13px}
+.ed-pack b{color:var(--accent-deep)}
+.ed-kv{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:13.5px}
+.ed-kv span{color:var(--sub)}.ed-kv b{font-weight:600;overflow-wrap:anywhere}
+.ed-dots{display:flex;flex-wrap:wrap;gap:4px}
+.ed-dot{font-size:11.5px;font-family:var(--mono);border-radius:6px;padding:2px 6px;background:var(--wait-soft);color:var(--sub)}
+.ed-dot.in,.ed-dot.make{background:var(--ok-soft);color:var(--ok)}
+.ed-dot.late{background:var(--amber-soft);color:var(--amber)}
+.ed-dot.abs{background:var(--accent-soft);color:var(--late)}
+.ed-dot.sm{display:inline-block;width:9px;height:9px;padding:0;border-radius:50%;margin-right:3px;vertical-align:middle}
+.ed-checks{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:2px 12px}
+.ed-checks .checkline{margin:2px 0}
+.ed-tt{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
+.ed-tt-d{min-width:0;display:flex;flex-direction:column;gap:5px}
+.ed-tt-d .h{font-size:12.5px;font-weight:700;text-align:center;color:var(--sub);padding-bottom:4px;border-bottom:1px solid var(--line)}
+.ed-tt-d.today .h{color:var(--accent-deep);border-bottom-color:var(--accent)}
+.ed-tt-b{display:flex;flex-direction:column;align-items:flex-start;text-align:left;border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:7px;padding:5px 7px;background:var(--card);font-size:12px;min-width:0}
+.ed-tt-b b{font-family:var(--mono);font-size:11.5px}
+.ed-tt-b span{font-weight:600;overflow-wrap:anywhere;line-height:1.35}
+.ed-tt-b em{font-style:normal;color:var(--faint);font-size:11px;overflow-wrap:anywhere}
+.ed-warn{font-size:11.5px;color:var(--late);margin-top:2px}
+.ed-sc-row{display:flex;gap:6px;align-items:center;margin-bottom:6px}
+.ed-sc-row select{width:76px;flex:none}.ed-sc-row input{width:auto;flex:1;min-width:0}
+.ed-mon{display:flex;align-items:center;gap:4px}
+.ed-mon b{font-size:14.5px;min-width:96px;text-align:center}
+.ed-bulk{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:6px 0 8px}
+.ed-bulk .hint{flex:1;min-width:220px}
+.ed-it{display:flex;gap:6px;margin-bottom:6px}
+.ed-it input{min-width:0}.ed-it .ed-it-l{flex:2}.ed-it .ed-it-a{flex:1.2}.ed-it .ed-it-q{flex:0 0 64px}
+.ed-r-out{margin-top:12px}
+.ed-src{display:flex;flex-wrap:wrap;gap:5px;align-items:center;margin-bottom:12px}
+.ed-board{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
+.ed-col{background:var(--wait-soft);border-radius:10px;padding:8px;min-width:0}
+.ed-col .h{font-size:13px;font-weight:700;padding:2px 4px 8px}
+.ed-lc{display:flex;flex-direction:column;align-items:flex-start;text-align:left;width:100%;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:8px 10px;margin-bottom:6px}
+.ed-lc:hover{border-color:var(--accent)}
+.ed-lc b{font-size:13.5px}.ed-lc span{font-size:12px;color:var(--sub)}
+.ed-lc em{font-style:normal;font-size:11.5px;font-family:var(--mono);color:var(--sub);margin-top:3px}
+.ed-lc em.today{color:var(--accent-deep);font-weight:700}.ed-lc em.late{color:var(--late);font-weight:700}
+.ed-prog{display:flex;align-items:center;gap:10px;margin:12px 0}
+.ed-prog .tx-prog{flex:1;max-width:280px}
+.ed-ck{padding:14px 16px;margin-bottom:10px}
+.ed-ck.ok{border-color:#C4E6D2}.ed-ck.bad{border-color:#F0DCB8}
+.ed-ck-h{display:flex;gap:10px;align-items:flex-start}
+.ed-ck-h b{font-size:14.5px}
+.ed-ck-i{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;flex:none;font-weight:800;font-size:13px;background:var(--wait-soft);color:var(--sub);margin:0}
+.ed-ck.ok .ed-ck-i{background:var(--ok-soft);color:var(--ok)}.ed-ck.bad .ed-ck-i{background:var(--amber-soft);color:var(--amber)}
+.ed-ck-i input{width:16px;height:16px;margin:0}
+.ed-ck-d{font-size:13.5px;color:var(--sub);line-height:1.7;margin:6px 0 0 34px}
+.ed-ck-a{margin:8px 0 0 34px;font-size:13px;font-weight:600}
+.ed-ck-a.ok{color:var(--ok)}.ed-ck-a.bad{color:var(--amber)}
+.ed-ck-t{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end;margin:10px 0 0 34px}
+.ed-ck-t label{display:flex;flex-direction:column;gap:2px;font-size:12.5px;color:var(--sub);margin:0}
+.ed-ck-t input{padding:6px 9px;font-size:13px;width:auto}
+.ed-save{position:sticky;bottom:0;background:linear-gradient(transparent,var(--paper) 30%);padding:14px 0 4px;display:flex;justify-content:flex-end}
+.ed-g-wk{display:grid;gap:6px}
+.ed-g-wk>div{display:flex;gap:10px;align-items:baseline;font-size:14px;border-bottom:1px solid var(--line-soft);padding:6px 0}
+.ed-g-wk>div:last-child{border-bottom:0}
+.ed-g-wk b{width:22px;flex:none}
+.ed-g-wk span{margin-right:12px}
+.ed-g-les{display:flex;gap:12px;padding:8px 0;border-bottom:1px solid var(--line-soft);font-size:14px}
+.ed-g-les:last-child{border-bottom:0}
+.ed-g-les .d{width:110px;flex:none;color:var(--sub);font-size:13px}
+.ed-g-bill{margin-bottom:10px}
+.ed-g-pk{display:flex;flex-wrap:wrap;gap:12px;font-size:14px;margin-top:8px}
+.ed-g-pk b{color:var(--accent-deep)}
+.ed-g-rep{border:1px solid var(--line);border-radius:10px;padding:10px 14px;margin-bottom:8px;background:var(--card)}
+.ed-g-rep summary{cursor:pointer;font-size:14px}
+.ed-dash{cursor:pointer}
+.ed-dash-n{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.ed-dash-n>div{display:flex;flex-direction:column;background:var(--paper);border-radius:8px;padding:8px 10px}
+.ed-dash-n b{font-family:var(--mono);font-size:18px}.ed-dash-n span{font-size:12px;color:var(--sub)}
+.ed-dash-n .warn b{color:var(--late)}
+@media (max-width:820px){
+  .ed-sgrid{grid-template-columns:1fr}
+  .ed-tt{grid-template-columns:1fr;gap:10px}
+  .ed-tt-d{flex-direction:row;flex-wrap:wrap;align-items:flex-start}
+  .ed-tt-d .h{width:100%;text-align:left;border-bottom:0;padding-bottom:0}
+  .ed-tt-b{flex:1 1 140px}
+  .ed-board{grid-template-columns:1fr 1fr}
+  .ed-dash-n{grid-template-columns:1fr 1fr}
+  .ed-cls{flex-wrap:wrap}.ed-cls-t{min-width:0;flex-direction:row;gap:8px}
+  .ed-cls-m{flex-basis:100%;order:3}
+  .ed-cls-r{margin-left:auto}
+  .ed-att-row{grid-template-columns:1fr}
+  .ed-att-seg{width:100%}.ed-att-seg button{flex:1;justify-content:center;padding:8px 6px}
+  .ed-g-les{flex-direction:column;gap:2px}.ed-g-les .d{width:auto}
+  .ed-ck-d,.ed-ck-a,.ed-ck-t{margin-left:0}
+}
 </style>
 </head>
 <body>
@@ -1884,9 +2039,9 @@ const ID_RE=/^[a-z0-9][a-z0-9._-]{3,19}$/;
 const KINDS=[["member","members"],["project","projects"],["store","stores"],["task","tasks"],["comment","comments"],["fin","finance"],["routine","routines"],["template","templates"],["plan","plans"],["act","activity"],["contact","contacts"],["prop","proposals"]];
 /* 등급·모듈 — 서버가 state/sync 로 알려 줍니다. 구버전 서버라면 예전처럼 프로 + 스페이스로 봅니다 */
 const TIER0=()=>({plan:"pro",modules:["space"],limits:{brands:1000,members:1000,tokens:0},planUntil:"",legacy:true});
-const MOD_LABEL={space:"마이스토어",outsourcing:"거래",commerce:"마이셀러",tax:"마이택스",people:"마이피플",marketing:"마이마케팅",creator:"마이크리에이터"};
-const MOD_DESC={space:"매장·공간 운영 — 예약·영업, 일 마감, 근무·점검, 시설, 지점별 손익",outsourcing:"고객·안건, 견적 승인, 납품 확인, 청구·입금·미수금",commerce:"온라인 판매 — 주문·발송, 재고·수발주, 문의, 정산·손익",tax:"매출·비용·이익 구조, 현금흐름, KPI, 부가세·종소세 신고 자료, 증빙, 세금 달력, 절세·지원사업",people:"파트너·레퍼런스·명함, 근무표·출퇴근, 급여 계산과 임금명세서",marketing:"광고·홍보 채널과 캠페인, 광고비·클릭·전환 성과, 콘텐츠 달력, 키워드, 남은 실행안",creator:"채널 구독자·조회수, 협찬 건(조건·마감·입금), 콘텐츠 제작 일정, 수익, 단가표"};
-const EXT_ROUTES=["space","commerce","tax","people","marketing","creator"];   // 확장판 (켜고 끄는 것). 거래(outsourcing)는 기본 기능입니다
+const MOD_LABEL={space:"마이스토어",outsourcing:"거래",commerce:"마이셀러",tax:"마이택스",people:"마이피플",marketing:"마이마케팅",creator:"마이크리에이터",edu:"마이에듀"};
+const MOD_DESC={space:"매장·공간 운영 — 예약·영업, 일 마감, 근무·점검, 시설, 지점별 손익",outsourcing:"고객·안건, 견적 승인, 납품 확인, 청구·입금·미수금",commerce:"온라인 판매 — 주문·발송, 재고·수발주, 문의, 정산·손익",tax:"매출·비용·이익 구조, 현금흐름, KPI, 부가세·종소세 신고 자료, 증빙, 세금 달력, 절세·지원사업",people:"파트너·레퍼런스·명함, 근무표·출퇴근, 급여 계산과 임금명세서",marketing:"광고·홍보 채널과 캠페인, 광고비·클릭·전환 성과, 콘텐츠 달력, 키워드, 남은 실행안",creator:"채널 구독자·조회수, 협찬 건(조건·마감·입금), 콘텐츠 제작 일정, 수익, 단가표",edu:"반·시간표, 출결과 수업 기록, 수강료 청구·납부, 회차권, 상담 문의 (연락처 제외)"};
+const EXT_ROUTES=["space","commerce","tax","people","marketing","creator","edu"];   // 확장판 (켜고 끄는 것). 거래(outsourcing)는 기본 기능입니다
 const tier=()=>MODE==="cloud"?(CLOUD.tier||TIER0()):{plan:"local",modules:[],limits:{brands:1000,members:1000,tokens:0},planUntil:""};
 const modOn=m=>MODE==="cloud"&&tier().modules.includes(m);
 const isPro=()=>MODE!=="cloud"||tier().plan==="pro";
@@ -1977,7 +2132,7 @@ async function pollSync(force){
     SYNC_AT=res.now;OFFLINE=false;
     const prevRole=ME.role;
     const a=applyRemote(res.rows||[]);
-    if(res.spv!=null){SPACE.onVersion(res.spv);OUTS.onVersion(res.spv);COMM.onVersion(res.spv);TX.onVersion(res.spv);MP.onVersion(res.spv);MK.onVersion(res.spv);CR.onVersion(res.spv);}
+    if(res.spv!=null){SPACE.onVersion(res.spv);OUTS.onVersion(res.spv);COMM.onVersion(res.spv);TX.onVersion(res.spv);MP.onVersion(res.spv);MK.onVersion(res.spv);CR.onVersion(res.spv);ED.onVersion(res.spv);}
     let n=a.changed;
     if(res.badges){const strip=o=>{const x=Object.assign({},o);delete x.nt;return JSON.stringify(x);},same=strip(res.badges)===strip(CLOUD.badges);CLOUD.badges=res.badges;if(!same){renderNav();ADM.onBadges();n++;}NT.onBadges(res.badges.nt||0);}
     if(res.tier&&setTier(res.tier)){renderNav();n++;}
@@ -2005,7 +2160,7 @@ function applyState(st){
   hydrate(st);
   CLOUD.owner=!!st.owner;CLOUD.op=st.op||(st.owner?"owner":"");CLOUD.perms=Array.isArray(st.perms)?st.perms:[];CLOUD.ws=st.ws||null;CLOUD.badges=st.badges||{};
   setTier(st.tier);
-  if(st.spv!=null){SPACE.onVersion(st.spv);OUTS.onVersion(st.spv);COMM.onVersion(st.spv);TX.onVersion(st.spv);MP.onVersion(st.spv);MK.onVersion(st.spv);CR.onVersion(st.spv);}
+  if(st.spv!=null){SPACE.onVersion(st.spv);OUTS.onVersion(st.spv);COMM.onVersion(st.spv);TX.onVersion(st.spv);MP.onVersion(st.spv);MK.onVersion(st.spv);CR.onVersion(st.spv);ED.onVersion(st.spv);}
   ME=DB.members.find(x=>x.id===st.me)||null;
   buildSnap();PENDING={};SYNC_AT=st.now;
   persistPending();persistMeta();
@@ -2049,7 +2204,7 @@ async function cloudRefresh(){
 function cloudSignOut(reason){
   stopPoll();clearTimeout(pushTimer);TOKEN="";ME=null;PENDING={};
   [TKEY,CKEY,CMETA,CPEND].forEach(k=>{try{localStorage.removeItem(k);}catch(e){}});
-  CLOUD={owner:false,op:"",perms:[],ws:null,badges:{},tier:null};ADMIN=null;REQS=null;ADMIN_AT=0;REQS_AT=0;TOKENS=null;SPACE.reset();OUTS.reset();COMM.reset();TX.reset();MP.reset();MK.reset();CR.reset();ADM.reset();PPL.reset();NT.reset();MSG.reset();
+  CLOUD={owner:false,op:"",perms:[],ws:null,badges:{},tier:null};ADMIN=null;REQS=null;ADMIN_AT=0;REQS_AT=0;TOKENS=null;SPACE.reset();OUTS.reset();COMM.reset();TX.reset();MP.reset();MK.reset();CR.reset();ED.reset();ADM.reset();PPL.reset();NT.reset();MSG.reset();
   if($("#modal-root").classList.contains("show"))closeModal();
   location.hash="";showGate("login");
   if(reason==="expired")toast("로그인이 만료되었습니다. 다시 로그인하세요.");
@@ -2288,7 +2443,7 @@ async function doLogout(){if(MODE==="cloud"){try{await flushPush();}catch(e){}tr
 
 /* ═══════════ 앱 셸·라우터 ═══════════ */
 const NAV=[["dashboard","홈","⌂"],["plan","플랜","▥"],["projects","프로젝트","▤"],["stores","매장","▣"],["board","업무보드","☰","보드"],["members","사람","◉"],["data","연동·데이터","⇅","연동"]];
-const MOD_ROUTES=["space","outsourcing","commerce","tax","people","marketing","creator"];
+const MOD_ROUTES=["space","outsourcing","commerce","tax","people","marketing","creator","edu"];
 function enterApp(){
   showGate("app");
   runRoutines();
@@ -2305,6 +2460,7 @@ function navList(){
     const L=[];
     if(modOn("space"))L.push(["space","오늘 할 일","▦","오늘"],["space/fac","시설·소모품","⚒","시설"]);
     if(modOn("commerce"))L.push(["commerce","오늘 발송","▧","발송"]);
+    if(modOn("edu"))L.push(["edu","내 수업","✎","수업"]);
     if(modOn("people"))L.push(["people/me","내 근무","◷","근무"]);
     return L.length?L:[["space","오늘 할 일","▦","오늘"],["space/fac","시설·소모품","⚒","시설"]];
   }
@@ -2315,6 +2471,7 @@ function navList(){
   if(MODE==="cloud"&&mgr&&modOn("tax"))ins.push(["tax","마이택스","§","택스"]);
   if(MODE==="cloud"&&mgr&&modOn("marketing"))ins.push(["marketing","마이마케팅","◈","마케팅"]);
   if(MODE==="cloud"&&mgr&&modOn("creator"))ins.push(["creator","마이크리에이터","✦","크리에이터"]);
+  if(MODE==="cloud"&&mgr&&modOn("edu"))ins.push(["edu","마이에듀","✎","에듀"]);
   if(MODE==="cloud"&&mgr&&modOn("people")){const i=L.findIndex(n=>n[0]==="members");if(i>-1)L[i]=["members","마이피플","◉","피플"];}
   if(MODE==="cloud"&&ME&&ME.role!=="partner"){
     if(modOn("space"))ins.push(["space","마이스토어","▦","스토어"]);
@@ -2376,6 +2533,13 @@ function route(){
     MK.view(arg);
     return;
   }
+  if(page==="edu"){
+    if(ME.role==="partner"||ME.role==="facility"){location.hash="#/"+(isField()?navList()[0][0]:"dashboard");return;}
+    setNav("edu");
+    const sw=$("#side-ws");if(sw)sw.textContent=DB.meta.workspace;
+    ED.view(arg);
+    return;
+  }
   if(page==="creator"){
     if(!canFinance()){location.hash="#/"+(isField()?navList()[0][0]:"dashboard");return;}
     setNav("creator");
@@ -2415,7 +2579,7 @@ function route(){
   const sw=$("#side-ws");if(sw)sw.textContent=DB.meta.workspace;
   v.innerHTML=VIEWS[pg]();
   if(pg==="data"){wireDropzone();if(MODE==="cloud"&&canFinance()){if(modOn("space"))SPACE.prefetch(weekRange(1)[0],weekRange(0)[1]);loadTokens();loadWsSet();}}
-  if(pg==="dashboard"){if(modOn("space"))SPACE.fillDash();if(modOn("outsourcing"))OUTS.fillDash();if(modOn("commerce"))COMM.fillDash();if(modOn("tax"))TX.fillDash();if(modOn("people"))MP.fillDash();if(modOn("marketing"))MK.fillDash();if(modOn("creator"))CR.fillDash();}
+  if(pg==="dashboard"){if(modOn("space"))SPACE.fillDash();if(modOn("outsourcing"))OUTS.fillDash();if(modOn("commerce"))COMM.fillDash();if(modOn("tax"))TX.fillDash();if(modOn("people"))MP.fillDash();if(modOn("marketing"))MK.fillDash();if(modOn("creator"))CR.fillDash();if(modOn("edu"))ED.fillDash();}
   if(pg==="admin")ADM.view(arg);
   if(pg==="members"&&MODE==="cloud"&&isAdmin())loadReqs();
   if(pg==="members"&&MODE==="cloud"&&canFinance()&&F.peopleTab!=="contacts"){PPL.loadInvites(true).then(()=>{const c=$("#iv-card");if(c)c.outerHTML=PPL.invitesCard();});PPL.fillRef();}
@@ -2490,7 +2654,7 @@ function setReview(t,review,note,by){
   else if(review==="redo")t.status="진행중";
   t.updatedAt=new Date().toISOString();
 }
-const PROP_KIND={"create-task":"업무 추가","update-status":"상태 변경","add-note":"메모 추가","create-contact":"연락처 추가","create-job":"안건 추가","mk-action":"마케팅 실행안","mk-post":"콘텐츠 초안","cr-idea":"콘텐츠 아이디어","cr-deal":"협찬 건"};
+const PROP_KIND={"create-task":"업무 추가","update-status":"상태 변경","add-note":"메모 추가","create-contact":"연락처 추가","create-job":"안건 추가","mk-action":"마케팅 실행안","mk-post":"콘텐츠 초안","cr-idea":"콘텐츠 아이디어","cr-deal":"협찬 건","ed-report":"학습 리포트 초안","ed-lead":"상담 문의"};
 function propText(p){
   const d=p.payload||{};
   switch(p.kind){
@@ -2503,6 +2667,8 @@ function propText(p){
     case"mk-post":return`"${esc(d.title)}"${d.channel?` · ${esc(d.channel)}`:""}${d.date?` · ${fmtD(d.date)}`:""}`;
     case"cr-idea":return`"${esc(d.title)}"${d.channel?` · ${esc(d.channel)}`:""}${d.date?` · ${fmtD(d.date)}`:""}`;
     case"cr-deal":return`${esc(d.brand)}${d.title?` — ${esc(d.title)}`:""}${d.amount?` · ${fmtWon(d.amount)}`:""}${d.due?` · 게시 ${fmtD(d.due)}`:""}`;
+    case"ed-report":return`${esc(d.student)}${d.month?` · ${esc(monLabel(d.month))}`:""} — "${esc(String(d.body||"").slice(0,60))}${String(d.body||"").length>60?"…":""}"`;
+    case"ed-lead":return`${esc(d.name)}${d.grade?` (${esc(d.grade)})`:""}${d.subject?` · ${esc(d.subject)}`:""}`;
   }
   return esc(JSON.stringify(d)).slice(0,120);
 }
@@ -2536,6 +2702,7 @@ async function decideProp(id,approve){
     if(approve&&p.kind==="create-job")OUTS.refresh(true);
     if(approve&&String(p.kind).startsWith("mk-"))MK.refresh(true);
     if(approve&&String(p.kind).startsWith("cr-"))CR.refresh(true);
+    if(approve&&String(p.kind).startsWith("ed-"))ED.refresh(true);
   }catch(e){
     btns.forEach(b=>b.disabled=false);
     if(e.code==="unauthorized")return;
@@ -2657,6 +2824,7 @@ function vDashboard(){
   ${modOn("people")&&canFinance()?`<div id="pp-dash-slot" style="margin-bottom:14px"></div>`:""}
   ${modOn("marketing")&&canFinance()?`<div id="mk-dash-slot" style="margin-bottom:14px"></div>`:""}
   ${modOn("creator")&&canFinance()?`<div id="cr-dash-slot" style="margin-bottom:14px"></div>`:""}
+  ${modOn("edu")&&canFinance()?`<div id="ed-dash-slot" style="margin-bottom:14px"></div>`:""}
   <div class="two-col">
     <div>
       <div class="card">
@@ -2922,6 +3090,7 @@ function finWhere(f){
   if(f.source==="commerce"||/^커머스 |^마이셀러 /.test(f.memo||""))return["마이셀러",""];
   if(f.source==="marketing")return["마이마케팅",""];
   if(f.source==="creator")return["마이크리에이터",""];
+  if(f.source==="edu")return["마이에듀",""];
   if(f.source==="outsourcing"||/^외주 입금|^거래 입금/.test(f.memo||""))return["거래",""];
   return["직접 기록",""];
 }
@@ -2981,7 +3150,7 @@ const EXT_CAT=[
   {id:"people",name:"마이피플",color:"#C2410C",ico:"◉",who:"파트너와 일하는 프리랜서 · 아르바이트·직원·건당 근무자를 쓰는 사업자",one:"함께 일하는 사람과 근무·급여를 한곳에서 관리합니다",pts:["파트너 평가·레퍼런스 체크·협업 이력, 명함 사진과 글자 붙여넣기","근무표·출퇴근(휴대폰으로, 매장 위치 확인)","시급·일급·주급·월급·건당 급여 자동 계산 — 주휴수당, 4대보험·3.3%·일용직 공제","임금명세서 링크, 근로계약서 인쇄, 지급하면 인건비가 돈 메뉴로"]},
   {id:"marketing",name:"마이마케팅",color:"#D6336C",ico:"◈",who:"광고·홍보를 직접 챙기는 1인 사업자 · 자영업자 · 온라인 판매자",one:"광고비가 어디로 가고 무엇이 돌아오는지 한 화면에서 봅니다",pts:["검색광고·타겟광고·콘텐츠·영상·체험단·메시지를 채널이 달라도 같은 눈금으로","보고서 파일을 올리면 열을 알아서 맞추고, 네이버 검색광고·메타 광고는 연결해 두면 가져옵니다","최적화 모드 — 무엇을 고칠지 짚고 채널별 설정 점검표로 안내","부스터 모드 — 목표에 맞춰 예산·입찰·소재를 얼마나 바꿀지 숫자로, 바꾼 뒤 효과까지","콘텐츠 달력, 키워드 조합기, 기획 마법사와 클로드 연동"]},
   {id:"creator",name:"마이크리에이터",color:"#65A30D",ico:"✦",who:"유튜버 · 인스타그래머 · 블로거 · 스트리머 · 부업으로 콘텐츠를 만드는 분",one:"협찬 문의부터 입금까지, 만드는 일과 버는 돈을 한곳에서 챙깁니다",pts:["협찬 건마다 조건·마감·입금을 한 줄로 — 문의 → 계약 → 제작 → 게시 → 정산","브랜드에게 보내는 조건 확인서와 결과 보고서 링크 (가입 없이 확인)","미디어킷 주소 하나로 채널 숫자를 보여 주고 협찬 문의를 받습니다","콘텐츠 제작 보드와 달력, 올리기 전 점검, 광고 표기 점검","수익을 출처별로 — 해외 플랫폼 수익은 환율까지, 3.3%·부가세 계산","내 기록으로 내는 조회당 단가와 견적 계산, 클로드 연동"]},
-  {id:"edu",name:"마이에듀",color:"#B45309",ico:"✎",who:"학원 · 교습소 · 공방 · 강사",one:"수강생과 수업, 수강료를 한 장부로",pts:["반·시간표·출결, 수강료 청구·수납"],soon:"준비 예정"},
+  {id:"edu",name:"마이에듀",color:"#B45309",ico:"✎",who:"학원 · 교습소 · 공부방 · 과외 · 레슨 · 클래스를 운영하는 분",one:"수업과 출결, 수강료를 한 장부로 — 보호자에게는 링크 하나로",pts:["반·시간표, 오늘 수업과 출석 체크 — 강사는 휴대폰에서 자기 반만","월 수강료는 청구일에 초안을 만들어 두고, 확인한 뒤 확정·문자 안내","회차권은 출석할 때마다 한 회씩 줄고, 남은 회차가 적으면 알려 드립니다","보호자 페이지 — 시간표·출결·진도·수강료·영수증, 결석 미리 알리기","교습비 반환 계산, 월간 학습 리포트, 상담 문의, 운영 점검(학원법·현금영수증·개인정보)"]},
   {id:"building",name:"마이빌딩",color:"#2B4FD6",ico:"▥",who:"소규모 건물주 · 임대인",one:"임대차와 건물 관리를 혼자서 챙깁니다",pts:["호실·계약·수납·공실·법정 점검"],soon:"준비 예정"}
 ];
 function vExt(){
@@ -3811,7 +3980,7 @@ function weekRange(off){
 }
 function reportCopy(off){
   let text=buildWeekReport(off);
-  if(MODE==="cloud"&&canFinance()){const r=weekRange(off);if(modOn("space"))text+=SPACE.weekText(...r);if(modOn("outsourcing"))text+=OUTS.weekText(...r);if(modOn("commerce"))text+=COMM.weekText(...r);if(modOn("tax"))text+=TX.weekText(...r);if(modOn("people"))text+=MP.weekText(...r);if(modOn("marketing"))text+=MK.weekText(...r);if(modOn("creator"))text+=CR.weekText(...r);}
+  if(MODE==="cloud"&&canFinance()){const r=weekRange(off);if(modOn("space"))text+=SPACE.weekText(...r);if(modOn("outsourcing"))text+=OUTS.weekText(...r);if(modOn("commerce"))text+=COMM.weekText(...r);if(modOn("tax"))text+=TX.weekText(...r);if(modOn("people"))text+=MP.weekText(...r);if(modOn("marketing"))text+=MK.weekText(...r);if(modOn("creator"))text+=CR.weekText(...r);if(modOn("edu"))text+=ED.weekText(...r);}
   copyText(text,"주간 리포트를 복사했습니다. 클로드에 붙여넣어 회고를 요청해 보세요.");
 }
 function copyText(text,okMsg){
@@ -3967,7 +4136,7 @@ async function planSave(id){
 }
 
 /* ═══════════ AI 접속 (토큰·MCP·자동 반영) ═══════════ */
-const AI_KIND_LABEL={"create-task":"업무 추가","update-status":"업무 상태·마감 변경","add-note":"메모·의견 추가","create-contact":"연락처 추가","create-job":"외주 안건 추가","mk-action":"마케팅 실행안 추가","mk-post":"콘텐츠 초안 추가","cr-idea":"콘텐츠 아이디어 추가","cr-deal":"협찬 건 추가"};
+const AI_KIND_LABEL={"create-task":"업무 추가","update-status":"업무 상태·마감 변경","add-note":"메모·의견 추가","create-contact":"연락처 추가","create-job":"외주 안건 추가","mk-action":"마케팅 실행안 추가","mk-post":"콘텐츠 초안 추가","cr-idea":"콘텐츠 아이디어 추가","cr-deal":"협찬 건 추가","ed-report":"학습 리포트 초안 추가","ed-lead":"상담 문의 추가"};
 function loadTokens(force){
   if(!canFinance())return;
   if(!force&&TOKENS)return renderTokens();
@@ -4074,6 +4243,7 @@ function renderLink(){
   const box=$("#lk-box"),L=LINK,v=L.view||{};
   if(v.kind==="project")return renderShare();
   if(v.kind==="cr-kit"||v.kind==="cr-report")return CR.linkPage();
+  if(v.kind==="ed-guard")return ED.linkPage();
   $("#lk-label").textContent="확인 요청";
   $("#lk-foot").innerHTML=`이 페이지는 보낸 분이 마이웍스에서 만든 확인 링크입니다. 로그인 없이 내용 확인과 승인·수정 요청만 할 수 있습니다. <a href="./" style="margin-left:6px">마이웍스 열기</a>`;
   const kindT={quote:"견적서",delivery:"납품 확인",invoice:"청구서",po:"발주서",payslip:"임금명세서","cr-deal":"협찬 조건 확인서"}[v.kind]||"확인";
@@ -7575,7 +7745,7 @@ function bizOf(f){
   if(f.storeId){const b=act.find(b=>(L(b).stores||[]).includes(f.storeId));if(b)return b.id;}
   const brand=f.projectId?((projectById(f.projectId)||{}).brand||""):f.storeId?((storeById(f.storeId)||{}).brand||""):"";
   if(brand){const b=act.find(b=>(L(b).brands||[]).includes(brand));if(b)return b.id;}
-  const mod={space:"space",commerce:"commerce",outsourcing:"outsourcing",people:"people",marketing:"marketing",creator:"creator"}[f.source]||(/^마이스토어|^스페이스/.test(f.memo||"")?"space":/^마이셀러|^커머스/.test(f.memo||"")?"commerce":/^거래 입금|^외주 입금/.test(f.memo||"")?"outsourcing":"");
+  const mod={space:"space",commerce:"commerce",outsourcing:"outsourcing",people:"people",marketing:"marketing",creator:"creator",edu:"edu"}[f.source]||(/^마이스토어|^스페이스/.test(f.memo||"")?"space":/^마이셀러|^커머스/.test(f.memo||"")?"commerce":/^거래 입금|^외주 입금/.test(f.memo||"")?"outsourcing":"");
   if(mod){const b=act.find(b=>(L(b).mods||[]).includes(mod));if(b)return b.id;}
   return(act.find(b=>L(b).main)||act[0]).id;
 }
@@ -8384,7 +8554,7 @@ const fixRow=(f,i)=>`<div class="tx-fx" data-fx="${i}"><input data-fxf="name" va
 function bizModal(b){
   const isNew=!b;b=b||{name:"",kind:"indiv",vat:"general",biz_no:"",industry:"",open_date:"",region:"other",young:0,incl_vat:1,card_credit:0,active:1,memo:"",links:{brands:[],stores:[],mods:[],main:!S.biz.length}};
   const l=b.links||{},stores=DB.stores||[],brands=DB.brands||[];
-  const MODS=[["space","마이스토어"],["commerce","마이셀러"],["outsourcing","거래"],["people","마이피플 급여"],["marketing","마이마케팅 광고비"],["creator","마이크리에이터 수익"]];
+  const MODS=[["space","마이스토어"],["commerce","마이셀러"],["outsourcing","거래"],["people","마이피플 급여"],["marketing","마이마케팅 광고비"],["creator","마이크리에이터 수익"],["edu","마이에듀 수강료"]];
   openModal(`<h2><span class="bars"></span>${isNew?"사업자 등록":"사업자 수정"}</h2>
   <div class="m-grid2">
     <div><label>이름</label><input id="bz-name" value="${esc(b.name)}" maxlength="60" placeholder="예: 하루상회 (개인)"></div>
@@ -13371,6 +13541,1181 @@ document.addEventListener("keydown",e=>{
 return{open,SEARCH,flush(){if(BEHIND){BEHIND=false;return true;}return false;},_t:{parseMoney,parseDate,parsePhone,suggest,search}};
 })();
 
+/* ═══════════ 마이에듀 — 학원 · 교습소 · 과외 · 레슨 ═══════════
+   오늘 수업과 출석 체크, 수강생·반·시간표, 수강료(월 수강료·회차권), 수업 기록과 리포트, 상담 문의, 운영 점검.
+   보호자에게는 수강생마다 링크 하나(보호자 페이지)로 시간표·출결·진도·수강료·영수증을 보여 줍니다. */
+const ED=(()=>{
+const S={ready:false,loading:null,err:"",at:0,stale:false,v:-1,today:"",settings:null,classes:[],stus:[],enrs:[],atts:[],less:[],notes:[],bills:[],leads:[],links:{},pk:{buy:new Map(),used:new Map()},gen:null};
+const M={ready:false,loading:null,at:0,err:"",today:"",classes:[],stus:[],enrs:[],atts:[],less:[],biz:{},pack:{abs:true}};   // 강사 화면 (ed/mine)
+const U0=()=>({sq:"",sst:"on",scl:"",spack:false,sids:null,bym:"",bst:"",bsel:new Set(),nsub:"les",ncl:"",nkind:"",rym:"",att:null,genSeen:"",gmode:"absent"});
+const U=U0();
+const BIZ={academy:["학원","강사와 반이 여럿인 학원"],tutoring:["교습소·공부방","혼자 가르치는 교습소·공부방"],private:["과외·개인 레슨","방문·자택 과외, 1:1 레슨"],class:["클래스·강좌","성인 취미·자격증·원데이 클래스"]};
+const WHO={academy:"학생",tutoring:"학생",private:"학생",class:"수강생"};
+const ATT={in:["출석","p-green"],late:["지각","p-amber"],abs:["결석","p-red"],exc:["미리 알린 결석","p-gray"],make:["보강","p-blue"]};
+const SST={on:["다니는 중","p-green"],pause:["쉬는 중","p-amber"],wait:["대기","p-gray"],left:["그만둠","p-line"]};
+const EST={on:"다니는 중",pause:"쉬는 중",end:"끝남"};
+const BST={draft:["초안","p-gray"],issued:["청구","p-blue"],paid:["납부","p-green"],void:["취소","p-line"]};
+const BK={month:"월 수강료",pack:"회차권",etc:"교재비·기타"};
+const FEE={month:"월 수강료",pack:"회차권",free:"받지 않음"};
+const PAY={card:"카드",transfer:"계좌이체",cash:"현금",local:"지역화폐·바우처",etc:"기타"};
+const LST={new:["새 문의","p-gray"],talk:["상담","p-amber"],trial:["체험 수업","p-blue"],won:["등록","p-green"],lost:["보류","p-line"]};
+const SRC={referral:"소개",naver:"네이버(지도·블로그)",sns:"SNS",flyer:"전단·현수막",walk:"지나가다",web:"홈페이지",etc:"기타"};
+const NKIND={memo:["학습 메모","p-gray"],consult:["상담","p-amber"],report:["월간 리포트","p-blue"],guard:["보호자가 남긴 글","p-red"]};
+const DOW=["","월","화","수","목","금","토","일"];
+const TABS=[["","오늘"],["stu","수강생"],["class","반·시간표"],["bill","수강료"],["note","기록·리포트"],["lead","상담"],["check","운영 점검"],["set","설정"]];
+const ERR={forbidden:"권한이 없습니다.","not-found":"대상을 찾을 수 없습니다.","bad-request":"입력 내용을 확인해 주세요.","bad-date":"날짜를 확인해 주세요.","bad-class":"반을 다시 골라 주세요.","bad-teacher":"담당 강사를 다시 골라 주세요.","bad-state":"지금 상태에서는 할 수 없습니다. 화면을 새로 고쳐 보세요.",dup:"이미 같은 내용이 있습니다.","in-use":"수강 등록이나 출결이 있어 지울 수 없습니다. 대신 쉬는 반으로 바꿔 두세요.",limit:"더 넣을 수 없습니다. 쓰지 않는 항목을 정리해 주세요.","too-much":"낸 금액보다 많이 돌려줄 수 없습니다.","too-large":"설정 내용이 너무 깁니다.","module-off":"마이에듀가 꺼져 있습니다.","plan-limit":"지금 등급에서는 쓸 수 없습니다."};
+const errMsg=e=>e&&e.code==="unauthorized"?"":(e&&ERR[e.code])||"처리하지 못했습니다. 잠시 후 다시 시도하세요.";
+const failToast=e=>{const m=errMsg(e);if(m)toast(m);};
+const fmt=n=>Math.round(Number(n)||0).toLocaleString("ko-KR");
+const won=n=>fmt(n)+"원";
+const man=n=>{n=Math.round(Number(n)||0);const a=Math.abs(n);return(n<0?"−":"")+(a>=1e8?(Math.round(a/1e6)/100).toLocaleString("ko-KR")+"억":a>=1e4?(Math.round(a/1e3)/10).toLocaleString("ko-KR")+"만":a.toLocaleString("ko-KR"))+"원";};
+const pad2=n=>String(n).padStart(2,"0");
+const T=()=>todayStr();
+const ymOf=d=>(d||T()).slice(0,7);
+const md=d=>d?`${+d.slice(5,7)}/${+d.slice(8,10)}`:"";
+const mL=ym=>`${+String(ym).slice(5,7)}월`;
+const dowOf=ds=>{const w=new Date(ds+"T00:00:00").getDay();return w===0?7:w;};
+const daysOf=ym=>new Date(+ym.slice(0,4),+ym.slice(5,7),0).getDate();
+const lastOf=ym=>ym+"-"+pad2(daysOf(ym));
+const pct=(a,b)=>b?Math.round(a/b*100):null;
+const mgr=()=>!!ME&&(ME.role==="admin"||ME.role==="staff");
+const onPage=()=>/^#\/edu(\/|$)/.test(location.hash);
+const SET0={set:false,biz:{type:"academy",name:"",owner:"",no:"",phone:"",addr:"",bank:"",pay:""},bill:{day:1,next:false,due:7,auto:true,fin:true,prorate:true,round:10,note:""},pack:{abs:true,warn:2},guard:{att:true,les:true,bill:true,report:true,absent:true,msg:true},refund:"",checks:[],staff:{},ins:{until:"",name:""},gen:""};
+const st=()=>S.settings||SET0;
+const D=x=>(x&&x.d&&typeof x.d==="object"?x.d:{});
+const consentAt=s=>((D(s).consent)||{}).at||"";
+const lkUrl=t=>location.origin.replace(/\/$/,"")+"/link/"+t;
+const num=s=>String(s??"").replace(/[^\d]/g,"");
+const sumOf=(rows,f)=>rows.reduce((a,r)=>a+(Number(f(r))||0),0);
+function dlCsv(name,H,rows){const csv="﻿"+[H].concat(rows).map(r=>r.map(c=>`"${String(c??"").replace(/"/g,'""')}"`).join(",")).join("\n");const b=new Blob([csv],{type:"text/csv;charset=utf-8"});const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},400);}
+function ask(msg,okLabel){return new Promise(res=>{openModal(`<div class="ed-ask"><h2><span class="bars"></span>확인</h2><div style="white-space:pre-wrap;line-height:1.7">${esc(msg)}</div><div class="m-foot"><button class="btn btn-ghost" data-edq="no">취소</button><button class="btn btn-pri" data-edq="yes">${esc(okLabel||"확인")}</button></div></div>`);const box=$("#m-box .ed-ask");box.addEventListener("click",e=>{const b=e.target.closest("[data-edq]");if(!b)return;const y=b.dataset.edq==="yes";closeModal();res(y);});});}   // 창 안쪽에만 붙여, 창이 바뀌면 함께 사라집니다
+/* 시간표상 수업이 from~to(포함) 사이에 몇 번 있는지 — 서버 edSessions와 같은 셈 */
+function sessions(sched,from,to){const per={};for(const x of sched||[])per[x.w]=(per[x.w]||0)+1;if(!from||!to||from>to||!Object.keys(per).length)return 0;let n=0;for(let d=from,i=0;d<=to&&i<400;d=addDaysStr(d,1),i++)n+=per[dowOf(d)]||0;return n;}
+const schedTxt=sc=>(sc||[]).map(x=>`${DOW[x.w]} ${x.s}${x.e?"~"+x.e:""}`).join(", ");
+const timeOn=(c,d)=>(c.sched||[]).filter(x=>x.w===dowOf(d)).map(x=>x.s+(x.e?"~"+x.e:"")).join(", ");
+
+/* ── 서버 ── */
+let IX={cls:new Map(),stu:new Map(),enrS:new Map(),enrC:new Map(),att:new Map(),attS:new Map(),les:new Map(),billS:new Map(),noteS:new Map()};
+const push=(m,k,v)=>{if(!m.has(k))m.set(k,[]);m.get(k).push(v);};
+function idx(){
+  const I={cls:new Map(S.classes.map(c=>[c.id,c])),stu:new Map(S.stus.map(s=>[s.id,s])),enrS:new Map(),enrC:new Map(),att:new Map(),attS:new Map(),les:new Map(),billS:new Map(),noteS:new Map()};
+  for(const e of S.enrs){push(I.enrS,e.stu_id,e);push(I.enrC,e.class_id,e);}
+  for(const a of S.atts){I.att.set(a.date+"|"+a.class_id+"|"+a.stu_id,a);push(I.attS,a.stu_id,a);}
+  for(const l of S.less)I.les.set(l.date+"|"+l.class_id,l);
+  for(const b of S.bills)push(I.billS,b.stu_id,b);
+  for(const n of S.notes)push(I.noteS,n.stu_id,n);
+  IX=I;
+}
+async function load(){
+  if(S.loading){try{await S.loading;}catch(e){}return;}
+  const p=api("ed/data").then(d=>{
+    Object.assign(S,{ready:true,err:"",at:Date.now(),stale:false,v:d.v,today:d.today,settings:d.settings,classes:d.classes||[],stus:d.stus||[],enrs:d.enrs||[],atts:d.atts||[],less:d.less||[],notes:d.notes||[],bills:d.bills||[],leads:d.leads||[],links:d.links||{}});
+    if(d.gen)S.gen=d.gen;
+    const P=d.packs||{};S.pk={buy:new Map((P.buy||[]).map(x=>[x[0]+"|"+x[1],x[2]])),used:new Map((P.used||[]).map(x=>[x[0]+"|"+x[1],x[2]]))};
+    idx();
+  });
+  S.loading=p;try{await p;}catch(e){S.err=e.code||"error";throw e;}finally{if(S.loading===p)S.loading=null;}
+}
+async function loadMine(){
+  if(M.loading){try{await M.loading;}catch(e){}return;}
+  const p=api("ed/mine").then(d=>{Object.assign(M,{ready:true,err:"",at:Date.now(),today:d.today,classes:d.classes||[],stus:d.stus||[],enrs:d.enrs||[],atts:d.atts||[],less:d.less||[],biz:d.biz||{},pack:d.pack||{abs:true}});});
+  M.loading=p;try{await p;}catch(e){M.err=e.code||"error";throw e;}finally{if(M.loading===p)M.loading=null;}
+}
+async function call(path,body){const r=await api("ed/"+path,body||{});if(r&&r.v!=null){if(r.v===S.v+1)S.v=r.v;else S.stale=true;}return r;}
+const upd=(arr,row)=>{if(!row)return;const i=arr.findIndex(x=>x.id===row.id);if(i>-1)arr[i]=row;else arr.unshift(row);};
+function refresh(force){if(MODE!=="cloud")return;if(ME&&!mgr()){if(onPage()&&M.ready&&!M.loading&&(force||Date.now()-M.at>90000))loadMine().then(()=>{if(onPage()&&uiSafe())route();}).catch(()=>{});return;}if(!S.ready||S.loading)return;if(!force&&!S.stale&&Date.now()-S.at<90000)return;load().then(()=>{if(onPage()&&uiSafe())route();else fillDash();}).catch(()=>{});}
+function onVersion(v){if(v==null||!S.ready||v===S.v)return;S.stale=true;if(onPage()||$("#ed-dash-slot"))refresh(true);}
+function reset(){Object.assign(S,{ready:false,loading:null,err:"",at:0,stale:false,v:-1,settings:null,classes:[],stus:[],enrs:[],atts:[],less:[],notes:[],bills:[],leads:[],links:{},pk:{buy:new Map(),used:new Map()},gen:null});Object.assign(M,{ready:false,loading:null,at:0,err:"",classes:[],stus:[],enrs:[],atts:[],less:[]});Object.assign(U,U0());}
+async function saveSet(patch,msg){try{const r=await call("settings",{set:patch});S.settings=r.settings;if(msg)toast(msg);return true;}catch(e){failToast(e);return false;}}
+async function reload(msg){try{await load();if(onPage())route();if(msg)toast(msg);}catch(e){failToast(e);}}
+
+/* ── 찾기 · 셈 ── */
+const clsOf=id=>IX.cls.get(id)||null;
+const stuOf=id=>IX.stu.get(id)||null;
+const enrsOf=sid=>IX.enrS.get(sid)||[];
+const liveEnr=e=>e.status!=="end";
+const stuClasses=sid=>enrsOf(sid).filter(liveEnr).map(e=>clsOf(e.class_id)).filter(Boolean);
+const actClasses=()=>S.classes.filter(c=>c.active!==0);
+const who=()=>WHO[st().biz.type]||"학생";
+/* 그날 그 반의 명단 — 그날 다니던 사람(시작·끝 날짜 안), 그리고 그날 출결이 적힌 사람(보강 포함) */
+function roster(cid,date,src){
+  const E=src?src.enrs:S.enrs,A=src?src.atts:S.atts,stu=src?new Map(src.stus.map(s=>[s.id,s])):IX.stu;
+  const out=[],seen=new Set();
+  for(const e of E){if(e.class_id!==cid)continue;if(e.start_date&&e.start_date>date)continue;if(e.end_date&&e.end_date<date)continue;if(e.status==="end"&&!e.end_date)continue;const s=stu.get(e.stu_id);if(!s||seen.has(s.id))continue;if(!src&&(s.status==="wait"))continue;seen.add(s.id);out.push({s,e,paused:e.status==="pause"||s.status==="pause"});}
+  for(const a of A){if(a.class_id!==cid||a.date!==date||seen.has(a.stu_id))continue;const s=stu.get(a.stu_id);if(!s)continue;seen.add(s.id);out.push({s,e:null,extra:true});}
+  return out.sort((a,b)=>(a.extra?1:0)-(b.extra?1:0)||String(a.s.name).localeCompare(String(b.s.name),"ko"));
+}
+const attOf=(date,cid,sid,src)=>src?(src.atts.find(a=>a.date===date&&a.class_id===cid&&a.stu_id===sid)||null):(IX.att.get(date+"|"+cid+"|"+sid)||null);
+const lesOf=(date,cid,src)=>src?(src.less.find(l=>l.date===date&&l.class_id===cid)||null):(IX.les.get(date+"|"+cid)||null);
+/* 그날 수업이 있는 반 — 시간표 요일, 그날 출결·기록이 있는 반 */
+function classesOn(date,src){
+  const C=src?src.classes:actClasses(),w=dowOf(date);
+  const has=new Set((src?src.atts:S.atts).filter(a=>a.date===date).map(a=>a.class_id).concat((src?src.less:S.less).filter(l=>l.date===date).map(l=>l.class_id)));
+  return C.filter(c=>(c.sched||[]).some(x=>x.w===w)||has.has(c.id)).sort((a,b)=>(timeOn(a,date)||"99").localeCompare(timeOn(b,date)||"99"));
+}
+const PRESENT=new Set(["in","late","make"]);
+function attRate(rows){const p=rows.filter(a=>PRESENT.has(a.status)).length,ab=rows.filter(a=>a.status==="abs").length;return p+ab?Math.round(p/(p+ab)*100):null;}
+/* 회차권 남은 회차 = 처음부터 있던 회차 + 산 회차 − 쓴 회차 (서버가 모든 기간을 세어 주고, 여기서 고친 것은 바로 더합니다) */
+const pkKey=(s,c)=>s+"|"+c;
+function packOf(e){if(!e||e.mode!=="pack")return null;const k=pkKey(e.stu_id,e.class_id),b=S.pk.buy.get(k)||0,u=S.pk.used.get(k)||0,base=Number(D(e).base)||0;return{bought:b,used:u,base,left:base+b-u};}
+const adjMap=(m,k,dv)=>{if(!dv)return;m.set(k,(m.get(k)||0)+dv);};
+function packAdjBill(b,sign){if(!b||b.kind!=="pack")return;for(const it of (b.items||[]))if(it.class_id)adjMap(S.pk.buy,pkKey(b.stu_id,it.class_id),sign*(Number(it.qty)||0));}
+const billsOf=sid=>(IX.billS.get(sid)||[]).slice().sort((a,b)=>(b.ym||"").localeCompare(a.ym||"")||(b.created_at||"").localeCompare(a.created_at||""));
+const monthBill=(sid,ym)=>(IX.billS.get(sid)||[]).find(b=>b.kind==="month"&&b.ym===ym&&b.status!=="void")||null;
+const isLate=b=>b.status==="issued"&&b.due&&b.due<T();
+const paidAmt=b=>Number(D(b).paid_amt)||Number(b.total)||0;
+function teacherName(id){return id?memberName(id):"";}
+function members(){return(DB.members||[]).filter(m=>m.active!==false);}
+/* 챙길 것 — 오늘 화면과 홈 카드가 같이 씁니다 */
+function attention(){
+  const t=T(),ym=ymOf(t),out=[],s=st(),wk=addDaysStr(t,-6);
+  const drafts=S.bills.filter(b=>b.status==="draft");
+  if(drafts.length)out.push({k:"draft",sev:2,t:`청구서 초안 ${drafts.length}장이 기다립니다`,d:"확인하고 확정하면 보호자 페이지에 보이고, 문자로 보낼 수 있습니다.",go:"bill",bst:"draft"});
+  const rep=S.bills.filter(b=>b.status==="issued"&&D(b).reported_at);
+  if(rep.length)out.push({k:"rep",sev:3,t:`보호자가 보냈다고 알려 온 수강료 ${rep.length}건`,d:"통장에서 확인하고 '납부 확인'을 눌러 주세요.",go:"bill",bst:"rep"});
+  const late=S.bills.filter(b=>isLate(b)&&!D(b).reported_at);
+  if(late.length)out.push({k:"late",sev:3,t:`납부 기한이 지난 수강료 ${late.length}건 · ${man(sumOf(late,b=>b.total))}`,d:late.slice(0,4).map(b=>(stuOf(b.stu_id)||{}).name).filter(Boolean).join(", ")+(late.length>4?" 외":""),go:"bill",bst:"late"});
+  const low=S.enrs.filter(e=>liveEnr(e)&&e.mode==="pack").map(e=>({e,p:packOf(e),s:stuOf(e.stu_id)})).filter(x=>x.s&&x.s.status==="on"&&x.p&&x.p.left<=s.pack.warn);
+  if(low.length)out.push({k:"pack",sev:2,t:`남은 회차가 ${s.pack.warn}회 이하인 회차권 ${low.length}개`,d:low.slice(0,4).map(x=>`${x.s.name} ${x.p.left}회`).join(", "),go:"stu",pack:true});
+  const ab=new Map();for(const a of S.atts)if(a.status==="abs"&&a.date>=wk)ab.set(a.stu_id,(ab.get(a.stu_id)||0)+1);
+  const ab2=[...ab].filter(([,n])=>n>=2).map(([id])=>stuOf(id)).filter(Boolean);
+  if(ab2.length)out.push({k:"abs",sev:2,t:`이번 주 두 번 이상 결석한 ${who()} ${ab2.length}명`,d:ab2.slice(0,4).map(x=>x.name).join(", "),go:"stu",ids:ab2.map(x=>x.id)});
+  const gn=S.notes.filter(n=>n.kind==="guard"&&n.date>=wk&&!n.share);
+  if(gn.length)out.push({k:"guard",sev:2,t:`보호자가 남긴 글 ${gn.length}개`,d:gn.slice(0,3).map(n=>`${(stuOf(n.stu_id)||{}).name||""} — ${n.title||""}`).join(" · "),go:"note",nsub:"stu",nkind:"guard"});
+  const ld=S.leads.filter(l=>["new","talk","trial"].includes(l.status)&&l.next_date&&l.next_date<=t);
+  if(ld.length)out.push({k:"lead",sev:2,t:`연락할 상담 문의 ${ld.length}건`,d:ld.slice(0,4).map(l=>l.name).join(", "),go:"lead"});
+  const nc=S.stus.filter(x=>x.status!=="left"&&Number(x.minor)&&!consentAt(x));
+  if(nc.length)out.push({k:"consent",sev:1,t:`보호자 동의 기록이 없는 만 14세 미만 ${who()} ${nc.length}명`,d:"개인정보 보호법에 따라 보호자 동의를 받고, 받은 날을 적어 둡니다.",go:"check"});
+  const tgt=s.bill.next?monShift(ym,1):ym;
+  if(s.set&&+t.slice(8)>=s.bill.day&&!S.bills.some(b=>b.kind==="month"&&b.ym===tgt)&&S.enrs.some(e=>liveEnr(e)&&e.mode==="month"))out.push({k:"gen",sev:2,t:`${mL(tgt)} 수강료 청구서를 아직 만들지 않았습니다`,d:`청구일(매달 ${s.bill.day}일)이 지났습니다.`,go:"bill",gen:tgt});
+  return out.sort((a,b)=>b.sev-a.sev);
+}
+
+/* ── 화면 뼈대 ── */
+function shell(sub,inner,head){
+  const h=head||{},nA=mgr()?attention().filter(a=>a.sev>=2).length:0;
+  $("#view").innerHTML=`
+  <div class="page-head"><div><h1><span class="bars"></span>${esc(h.title||"마이에듀")}</h1><div class="desc">${h.desc||"오늘 수업과 출석, 수강생, 수강료를 한 장부로 봅니다. 보호자에게는 링크 하나로 알립니다."}</div></div>${h.actions?`<div style="display:flex;gap:6px;flex-wrap:wrap">${h.actions}</div>`:""}</div>
+  ${h.noTabs?"":`<nav class="sp-tabs">${TABS.map(([k,l])=>`<button class="${sub===k?"on":""}" data-ed="go" data-to="${k}">${l}${k===""&&nA?`<b class="nbadge">${nA}</b>`:""}</button>`).join("")}</nav>`}
+  <div class="edx">${inner}</div>`;
+  const tb=$("#view .sp-tabs"),on=tb&&tb.querySelector("button.on");if(on&&tb.scrollWidth>tb.clientWidth)tb.scrollLeft=Math.max(0,on.offsetLeft-(tb.clientWidth-on.offsetWidth)/2);
+}
+const empty=(t,s)=>`<div class="sp-empty"><b>${t}</b>${s||""}</div>`;
+const stPill=(m,k)=>{const x=m[k]||[k,"p-gray"];return`<span class="pill nodot ${x[1]}">${x[0]}</span>`;};
+const clsOpts=(sel,all,list)=>(all!==undefined?`<option value="">${all}</option>`:"")+(list||S.classes).filter(c=>c.active!==0||c.id===sel).map(c=>`<option value="${esc(c.id)}" ${c.id===sel?"selected":""}>${esc(c.name)}</option>`).join("");
+const stuOpts=(sel,all)=>(all!==undefined?`<option value="">${all}</option>`:"")+S.stus.filter(s=>s.status!=="left"||s.id===sel).sort((a,b)=>String(a.name).localeCompare(String(b.name),"ko")).map(s=>`<option value="${esc(s.id)}" ${s.id===sel?"selected":""}>${esc(s.name)}${s.grade?` (${esc(s.grade)})`:""}</option>`).join("");
+
+/* ── 처음 설정 ── */
+function setupCard(){
+  const s=st(),b=s.biz;
+  return`<div class="card ed-setup"><h2><span class="bars"></span>마이에듀 시작하기</h2>
+    <div class="hint" style="margin-bottom:12px">어떻게 가르치는지에 맞춰 화면과 점검 항목을 준비합니다. 나중에 설정에서 언제든 바꿀 수 있습니다.</div>
+    <div class="ed-pick">${Object.entries(BIZ).map(([k,v])=>`<label class="${b.type===k?"on":""}"><input type="radio" name="ed-w-type" value="${k}" ${b.type===k?"checked":""}><b>${v[0]}</b><span>${v[1]}</span></label>`).join("")}</div>
+    <div class="m-grid2" style="margin-top:12px">
+      <div><label>이름 (보호자에게 보이는 상호)</label><input id="ed-w-name" value="${esc(b.name||DB.meta.workspace||"")}" placeholder="예: 하늘수학교습소"></div>
+      <div><label>대표 연락처</label><input id="ed-w-phone" value="${esc(b.phone)}" placeholder="02-000-0000"></div>
+      <div><label>수강료 청구일</label><select id="ed-w-day">${Array.from({length:28},(_,i)=>`<option value="${i+1}" ${s.bill.day===i+1?"selected":""}>매달 ${i+1}일</option>`).join("")}</select></div>
+      <div><label>청구하는 달</label><select id="ed-w-next"><option value="0" ${!s.bill.next?"selected":""}>그달 수강료 (선납)</option><option value="1" ${s.bill.next?"selected":""}>다음 달 수강료를 미리</option></select></div>
+      <div style="grid-column:1/-1"><label>입금 계좌 (보호자 페이지·청구 안내에 보입니다)</label><input id="ed-w-bank" value="${esc(b.bank)}" placeholder="은행 계좌번호 예금주"></div>
+    </div>
+    <div class="m-foot" style="justify-content:flex-start"><button class="btn btn-pri" data-ed="setup-save">이대로 시작</button></div>
+  </div>`;
+}
+async function setupSave(){
+  const type=($('input[name="ed-w-type"]:checked')||{}).value||"academy";
+  const ok=await saveSet({set:true,biz:{type,name:$("#ed-w-name").value.trim(),phone:$("#ed-w-phone").value.trim(),bank:$("#ed-w-bank").value.trim()},bill:{day:Number($("#ed-w-day").value),next:$("#ed-w-next").value==="1"}},"준비했습니다. 이제 반을 만들어 보세요.");
+  if(ok)route();
+}
+
+/* ── 오늘 ── */
+function vToday(){
+  if(!st().set){shell("",setupCard());return;}
+  const t=T(),ym=ymOf(t),s=st(),live=S.stus.filter(x=>x.status==="on"),paused=S.stus.filter(x=>x.status==="pause").length;
+  const mb=S.bills.filter(b=>b.ym===ym&&b.status!=="void"&&b.status!=="draft"),paid=mb.filter(b=>b.status==="paid"),late=S.bills.filter(isLate);
+  const a30=S.atts.filter(a=>a.date>=addDaysStr(t,-29)&&a.date<=t),rate=attRate(a30);
+  const today=classesOn(t),acts=attention();
+  const steps=[[S.classes.length>0,"반 만들기","요일·시간·수강료를 정합니다.","class-new"],[S.stus.length>0,`${who()} 넣기`,"엑셀 명단을 붙여 넣으면 한 번에 들어갑니다.","stu-import"],[S.atts.length>0,"출석 체크 한 번 해 보기","오늘 수업에서 '출석 체크'를 누릅니다.",""],[S.bills.length>0,"수강료 청구서 만들기","다니는 수강생마다 이번 달 초안을 만듭니다.","bill-gen"],[Object.keys(S.links).length>0,"보호자 페이지 보내기",`${who()}을 열고 '보호자 페이지'를 누릅니다.`,""]];
+  const nDone=steps.filter(x=>x[0]).length;
+  shell("",`
+  ${S.gen&&S.gen.n&&U.genSeen!==S.gen.ym?`<div class="sp-box info ed-gen"><b>${mL(S.gen.ym)} 수강료 청구서 초안 ${S.gen.n}장을 만들어 두었습니다</b><span>청구일이 지나 자동으로 만들었습니다. 아직 보호자에게는 아무것도 가지 않았습니다. 확인하고 확정해 주세요.</span><button class="btn btn-sm btn-pri" data-ed="go" data-to="bill" data-bst="draft">초안 확인</button><button class="btn btn-sm btn-ghost" data-ed="gen-ok">닫기</button></div>`:""}
+  ${nDone<steps.length?`<div class="card"><h2><span class="bars"></span>처음 할 일 <span class="cnt">${nDone}/${steps.length}</span></h2><div class="ed-steps">${steps.map(([d,tt,dd,act],i)=>`<div class="ed-step ${d?"done":""}"><span class="n">${d?"✓":i+1}</span><div><b>${tt}</b><span>${dd}</span></div>${!d&&act?`<button class="btn btn-sm" data-ed="${act}">시작</button>`:""}</div>`).join("")}</div></div>`:""}
+  <div class="sp-kpis">
+    <div class="stat"><div class="s-num">${live.length}<em>명</em></div><div class="s-lb">다니는 ${who()}</div><div class="s-sub">${paused?`쉬는 중 ${paused}명 · `:""}반 ${actClasses().length}개</div></div>
+    <div class="stat"><div class="s-num">${pct(sumOf(paid,b=>b.total),sumOf(mb,b=>b.total))??"—"}<em>%</em></div><div class="s-lb">${mL(ym)} 수납률</div><div class="s-sub">${mb.length?`${man(sumOf(paid,paidAmt))} / 청구 ${man(sumOf(mb,b=>b.total))}`:"이달 확정한 청구서가 없습니다"}</div></div>
+    <div class="stat ${late.length?"warn":""}"><div class="s-num">${man(sumOf(late,b=>b.total))}</div><div class="s-lb">기한 지난 미납</div><div class="s-sub">${late.length?`${late.length}건`:"없습니다"}</div></div>
+    <div class="stat"><div class="s-num">${rate??"—"}<em>%</em></div><div class="s-lb">최근 30일 출석률</div><div class="s-sub">${a30.length?`출석 ${a30.filter(a=>PRESENT.has(a.status)).length} · 결석 ${a30.filter(a=>a.status==="abs").length} · 미리 알림 ${a30.filter(a=>a.status==="exc").length}`:"출결을 적으면 보입니다"}</div></div>
+  </div>
+  <div class="sp-grid2">
+    <div>
+      <div class="card"><h2><span class="bars"></span>오늘 수업 <span class="cnt">${fmtD(t)} ${DOW[dowOf(t)]}요일</span><span style="margin-left:auto;display:flex;gap:6px;align-items:center"><input type="date" id="ed-att-d" value="${t}" style="width:auto;padding:5px 8px;font-size:13px" aria-label="다른 날짜"><button class="btn btn-sm btn-ghost" data-ed="att-day">그날 보기</button></span></h2>
+        ${today.length?today.map(c=>classLine(c,t)).join(""):`<div class="empty" style="padding:16px">${S.classes.length?"오늘은 시간표에 수업이 없습니다.":"반을 만들면 시간표에 맞춰 오늘 수업이 여기에 뜹니다."}</div>`}
+      </div>
+      ${weekMini(t)}
+    </div>
+    <div>
+      <div class="card"><h2><span class="bars"></span>챙길 것 <span class="cnt">${acts.length}가지</span></h2>
+        ${acts.length?acts.map(a=>`<div class="pj-line ed-act" data-ed="act" data-k="${a.k}"><span class="pj-nm"><b>${esc(a.t)}</b>${a.d?`<span class="hint" style="display:block">${esc(a.d)}</span>`:""}</span><span class="pill nodot ${a.sev>=3?"p-red":a.sev===2?"p-amber":"p-gray"}">${a.sev>=3?"먼저":a.sev===2?"할 일":"확인"}</span></div>`).join(""):`<div class="empty" style="padding:16px">지금은 따로 챙길 것이 없습니다.</div>`}
+      </div>
+      ${guardRecent()}
+    </div>
+  </div>`);
+}
+function classLine(c,d,src){
+  const R=roster(c.id,d,src),les=lesOf(d,c.id,src),done=R.filter(x=>!x.extra&&attOf(d,c.id,x.s.id,src)).length,off=les&&les.status==="off";
+  const n=R.filter(x=>!x.extra).length;
+  return`<div class="ed-cls ${off?"off":""}" data-ed="att" data-c="${esc(c.id)}" data-d="${d}">
+    <div class="ed-cls-t"><b>${esc(timeOn(c,d)||"시간 미정")}</b><span>${esc(c.room||"")}</span></div>
+    <div class="ed-cls-m"><b>${esc(c.name)}</b><span class="hint">${[c.teacher_id&&!src?teacherName(c.teacher_id)+" 선생님":"",`${n}명`+(c.cap?` / 정원 ${c.cap}`:"")].filter(Boolean).join(" · ")}</span>${les&&les.topic?`<span class="hint ed-topic">진도 ${esc(les.topic)}</span>`:""}</div>
+    <div class="ed-cls-r">${off?`<span class="pill nodot p-line">휴강</span>`:done?`<span class="pill nodot ${done>=n?"p-green":"p-amber"}">${done}/${n} 체크</span>`:`<button class="btn btn-sm btn-pri">출석 체크</button>`}</div>
+  </div>`;
+}
+function weekMini(t){
+  if(!S.classes.length)return"";
+  const days=[];for(let i=1;i<=6;i++){const d=addDaysStr(t,i),cs=classesOn(d);if(cs.length)days.push([d,cs]);}
+  if(!days.length)return"";
+  return`<div class="card"><h2><span class="bars"></span>이번 주 남은 수업</h2>${days.slice(0,5).map(([d,cs])=>`<div class="ed-wk"><span class="d">${md(d)} ${DOW[dowOf(d)]}</span><span class="c">${cs.map(c=>{const l=lesOf(d,c.id);return`<button class="ed-chip ${l&&l.status==="off"?"off":""}" data-ed="att" data-c="${esc(c.id)}" data-d="${d}">${esc(timeOn(c,d).split("~")[0])} ${esc(c.name)}</button>`;}).join("")}</span></div>`).join("")}</div>`;
+}
+function guardRecent(){
+  const rows=S.notes.filter(n=>n.kind==="guard").slice(0,4);
+  if(!rows.length)return"";
+  return`<div class="card"><h2><span class="bars"></span>보호자가 남긴 글</h2>${rows.map(n=>`<div class="pj-line" data-ed="stu-open" data-id="${esc(n.stu_id)}"><span class="pj-nm"><b>${esc((stuOf(n.stu_id)||{}).name||"")}</b> <span class="hint">${md(n.date)} · ${esc(n.title||"")}</span><span style="display:block;font-size:13px;color:var(--sub);overflow-wrap:anywhere">${esc(n.body||"")}</span></span></div>`).join("")}</div>`;
+}
+
+/* ── 출석 체크 — 한 반·한 날짜. 강사 화면도 같은 창을 씁니다 ── */
+function attModal(cid,date,src){
+  const c=src?src.classes.find(x=>x.id===cid):clsOf(cid);if(!c)return;
+  const R=roster(cid,date,src),les=lesOf(date,cid,src)||{},cur={};
+  for(const x of R){const a=attOf(date,cid,x.s.id,src);cur[x.s.id]={status:a?a.status:"",note:a?a.note||"":"",at:a?a.at||"":"",extra:!!x.extra};}
+  U.att={cid,date,cur,src:!!src,off:les.status==="off"};
+  const prev=prevNext(c,date,-1),next=prevNext(c,date,1),me=!src;
+  const others=me?S.stus.filter(s=>s.status==="on"&&!R.some(x=>x.s.id===s.id)).sort((a,b)=>String(a.name).localeCompare(String(b.name),"ko")):(src.stus||[]).filter(s=>!R.some(x=>x.s.id===s.id));
+  openModal(`<div class="ed-wide ed-attm">
+  <h2><span class="bars"></span>${esc(c.name)} <span class="cnt">${fmtD(date)} ${DOW[dowOf(date)]} ${esc(timeOn(c,date)||"")}</span></h2>
+  <div class="ed-att-nav"><button class="btn btn-sm btn-ghost" ${prev?`data-ed="att-go" data-c="${esc(cid)}" data-d="${prev}"`:"disabled"}>← ${prev?md(prev):"이전"}</button><label class="checkline" style="margin:0"><input type="checkbox" id="ed-a-off" ${U.att.off?"checked":""}> 이날 휴강</label><button class="btn btn-sm btn-ghost" ${next?`data-ed="att-go" data-c="${esc(cid)}" data-d="${next}"`:"disabled"}>${next?md(next):"다음"} →</button></div>
+  <div id="ed-a-body" ${U.att.off?'class="dim"':""}>
+    <div class="ed-att-top"><span class="hint">${R.length?`${R.filter(x=>!x.extra).length}명${R.some(x=>x.extra)?` · 보강 ${R.filter(x=>x.extra).length}명`:""}`:"이 반에 등록한 사람이 없습니다."}</span>${R.length?`<button class="btn btn-sm" data-ed="att-all">나머지 모두 출석</button>`:""}</div>
+    <div class="ed-att-list">${R.map(x=>attRow(x,date,src)).join("")}</div>
+    ${others.length?`<div class="ed-att-add"><select id="ed-a-extra"><option value="">보강·체험으로 온 사람 더하기</option>${others.map(s=>`<option value="${esc(s.id)}">${esc(s.name)}${s.grade?` (${esc(s.grade)})`:""}</option>`).join("")}</select><button class="btn btn-sm" data-ed="att-extra">더하기</button></div>`:""}
+    <div class="m-grid2" style="margin-top:14px">
+      <div><label>오늘 진도</label><input id="ed-a-topic" value="${esc(les.topic||"")}" placeholder="예: 일차함수 그래프"></div>
+      <div><label>과제</label><input id="ed-a-hw" value="${esc(les.hw||"")}" placeholder="예: 익힘책 24~27쪽"></div>
+      <div style="grid-column:1/-1"><label>반 메모 <span class="hint">보호자 페이지에는 나가지 않습니다</span></label><input id="ed-a-note" value="${esc(les.note||"")}" placeholder="다음 시간에 챙길 것"></div>
+    </div>
+  </div>
+  ${c.fee_mode==="pack"||R.some(x=>x.e&&x.e.mode==="pack")?`<div class="hint" style="margin-top:10px">${(src?(src.pack||{}).abs!==false:st().pack.abs)?"회차권은 출석·지각·보강과 무단 결석에 한 회씩 빠집니다. 미리 알린 결석은 빠지지 않습니다.":"회차권은 출석·지각·보강에 한 회씩 빠집니다. 결석은 빠지지 않습니다."}</div>`:""}
+  <div class="m-foot"><button class="btn btn-ghost" data-g="modal-close">닫기</button><button class="btn btn-pri" data-ed="att-save">저장</button></div>
+  </div>`);
+}
+function prevNext(c,date,dir){for(let i=1;i<=14;i++){const d=addDaysStr(date,dir*i);if((c.sched||[]).some(x=>x.w===dowOf(d)))return d;}return"";}
+function attRow(x,date,src){
+  const id=x.s.id,c=U.att.cur[id]||{status:""},p=!src&&x.e?packOf(x.e):null,canMsg=!src&&MSG.can()&&(x.s.g_phone||x.s.phone);
+  const opts=x.extra?["make","in","late"]:["in","late","abs","exc"];
+  return`<div class="ed-att-row ${x.paused?"paused":""}" data-sid="${esc(id)}">
+    <div class="nm"><b>${esc(x.s.name)}</b><span class="hint">${[x.s.grade,x.paused?"쉬는 중":"",x.extra?"보강·체험":"",p?`남은 ${p.left}회`:""].filter(Boolean).join(" · ")}</span></div>
+    <div class="seg ed-att-seg" role="group" aria-label="${esc(x.s.name)} 출결">${opts.map(k=>`<button class="${c.status===k?"on "+k:""}" data-ed="as" data-v="${k}">${k==="exc"?"미리 알림":ATT[k][0]}</button>`).join("")}</div>
+    <div class="ex">${c.status==="late"?`<input class="ed-a-at" value="${esc(c.at||"")}" placeholder="도착 시각" inputmode="numeric" maxlength="5">`:""}<input class="ed-a-n" value="${esc(c.note||"")}" placeholder="메모">${canMsg&&(c.status==="abs"||c.status==="late")?`<button class="btn btn-sm btn-ghost" data-ed="att-msg" data-sid="${esc(id)}">보호자에게 알리기</button>`:""}</div>
+  </div>`;
+}
+function attRead(){for(const row of $$("#ed-a-body .ed-att-row")){const c=U.att.cur[row.dataset.sid];if(!c)continue;const n=row.querySelector(".ed-a-n"),a=row.querySelector(".ed-a-at");if(n)c.note=n.value.trim();if(a)c.at=a.value.trim();}}
+function attSet(sid,v){
+  attRead();const c=U.att.cur[sid];if(!c)return;c.status=c.status===v?"":v;
+  const row=$(`#ed-a-body .ed-att-row[data-sid="${CSS.escape(sid)}"]`);if(!row)return;
+  const x=U.att.src?roster(U.att.cid,U.att.date,M).find(r=>r.s.id===sid):roster(U.att.cid,U.att.date).find(r=>r.s.id===sid)||{s:stuOf(sid),e:null,extra:true};
+  row.outerHTML=attRow(x,U.att.date,U.att.src?M:null);
+}
+async function attSave(){
+  attRead();const A=U.att;if(!A)return;
+  const off=$("#ed-a-off").checked,rows=Object.entries(A.cur).map(([stu_id,c])=>({stu_id,status:c.status,note:c.note,at:c.at}));
+  const body={date:A.date,class_id:A.cid,rows,les:{status:off?"off":"done",topic:$("#ed-a-topic").value.trim(),hw:$("#ed-a-hw").value.trim(),note:$("#ed-a-note").value.trim()}};
+  if(off&&rows.some(r=>r.status)&&!await ask("휴강으로 저장하면 이날 적은 출결은 지워집니다. 계속할까요?","휴강으로 저장"))return;
+  try{
+    const r=A.src?await api("ed/att/save",body):await call("att/save",body);
+    if(A.src){M.atts=M.atts.filter(a=>!(a.date===A.date&&a.class_id===A.cid)).concat(r.atts||[]);M.less=M.less.filter(l=>!(l.date===A.date&&l.class_id===A.cid));if(r.les)M.less.push(r.les);}
+    else{
+      const old=S.atts.filter(a=>a.date===A.date&&a.class_id===A.cid);
+      for(const a of old)adjMap(S.pk.used,pkKey(a.stu_id,a.class_id),-(Number(a.deduct)||0));
+      for(const a of (r.atts||[]))adjMap(S.pk.used,pkKey(a.stu_id,a.class_id),Number(a.deduct)||0);
+      S.atts=S.atts.filter(a=>!(a.date===A.date&&a.class_id===A.cid)).concat(r.atts||[]);S.less=S.less.filter(l=>!(l.date===A.date&&l.class_id===A.cid));if(r.les)S.less.push(r.les);idx();
+    }
+    closeModal();route();toast(off?"휴강으로 적었습니다.":`출결 ${(r.atts||[]).length}명을 저장했습니다.`);
+  }catch(e){failToast(e);}
+}
+function attMsg(sid){
+  attRead();const A=U.att,s=stuOf(sid),c=clsOf(A.cid),x=A.cur[sid]||{};if(!s||!c)return;
+  MSG.compose({to:s.g_phone||s.phone,name:s.g_name||s.name,tpl:"ed.att",fields:{이름:s.name,날짜:md(A.date),제목:c.name,안내:x.status==="abs"?"출석하지 않았습니다. 사정이 있으셨는지 확인 부탁드립니다.":`늦게 도착했습니다${x.at?` (${x.at} 도착)`:""}.`},ref_kind:"ed-att",ref_id:sid+":"+A.date});
+}
+
+/* ── 강사 화면 — 내가 맡은 반 ── */
+function vMine(){
+  if(!M.ready){shell("mine",`<div class="empty">불러오는 중…</div>`,{noTabs:true,title:"내 수업"});loadMine().then(()=>{if(onPage())vMine();}).catch(e=>{shell("mine",empty("불러오지 못했습니다",errMsg(e)),{noTabs:true,title:"내 수업"});});return;}
+  const t=M.today||T(),days=[];for(let i=0;i<7;i++){const d=addDaysStr(t,i),cs=classesOn(d,M);if(cs.length)days.push([d,cs]);}
+  const past=[];for(let i=1;i<=14;i++){const d=addDaysStr(t,-i);for(const c of classesOn(d,M)){const R=roster(c.id,d,M),l=lesOf(d,c.id,M);if(R.length&&!(l&&l.status==="off")&&R.some(x=>!attOf(d,c.id,x.s.id,M)))past.push([d,c]);}}
+  shell("mine",`
+  ${M.classes.length?"":empty("맡은 반이 없습니다","원장님이 반을 만들 때 담당 강사로 정하면 여기에 보입니다.")}
+  ${days.map(([d,cs])=>`<div class="card"><h2><span class="bars"></span>${d===t?"오늘":md(d)+" "+DOW[dowOf(d)]+"요일"}</h2>${cs.map(c=>classLine(c,d,M)).join("")}</div>`).join("")}
+  ${past.length?`<div class="card"><h2><span class="bars"></span>출결을 다 적지 않은 수업 <span class="cnt">최근 2주</span></h2>${past.slice(0,10).map(([d,c])=>`<div class="pj-line" data-ed="att" data-c="${esc(c.id)}" data-d="${d}"><span class="pj-nm">${md(d)} ${DOW[dowOf(d)]} · ${esc(c.name)}</span><span class="pill nodot p-amber">적기</span></div>`).join("")}</div>`:""}
+  <div class="hint" style="margin-top:6px">출결과 수업 기록만 적습니다. 수강료와 연락처는 원장님 화면에서만 보입니다.</div>`,{noTabs:true,title:"내 수업",desc:`${esc(M.biz.name||DB.meta.workspace||"")} — 맡은 반의 출석 체크와 진도·과제를 적습니다.`});
+}
+/* ── 수강생 ── */
+function vStu(){
+  const q=U.sq.trim().toLowerCase(),ym=ymOf(),t=T(),a30=addDaysStr(t,-29);
+  let rows=S.stus.filter(s=>(U.sst==="all"||s.status===U.sst));
+  if(U.scl)rows=rows.filter(s=>enrsOf(s.id).some(e=>e.class_id===U.scl&&liveEnr(e)));
+  if(U.spack)rows=rows.filter(s=>enrsOf(s.id).some(e=>liveEnr(e)&&e.mode==="pack"&&(packOf(e)||{left:99}).left<=st().pack.warn));
+  if(U.sids)rows=rows.filter(s=>U.sids.includes(s.id));
+  if(q)rows=rows.filter(s=>[s.name,s.grade,s.school,s.g_name,s.phone,s.g_phone].join(" ").toLowerCase().includes(q));
+  rows.sort((a,b)=>String(a.name).localeCompare(String(b.name),"ko"));
+  const cnt=k=>S.stus.filter(s=>s.status===k).length;
+  shell("stu",`
+  <div class="ed-bar">
+    <div class="seg">${[["on","다니는 중"],["pause","쉬는 중"],["wait","대기"],["left","그만둠"],["all","전체"]].map(([k,l])=>`<button class="${U.sst===k?"on":""}" data-ed="sst" data-v="${k}">${l}${k!=="all"?` <span class="hint">${cnt(k)}</span>`:""}</button>`).join("")}</div>
+    <select id="ed-s-cls" style="width:auto">${clsOpts(U.scl,"모든 반")}</select>
+    <input id="ed-s-q" value="${esc(U.sq)}" placeholder="이름·학교·연락처 찾기" style="max-width:220px">
+    <span style="margin-left:auto;display:flex;gap:6px;flex-wrap:wrap"><button class="btn btn-sm btn-ghost" data-ed="stu-csv">CSV</button><button class="btn btn-sm" data-ed="stu-import">명단 붙여넣기</button><button class="btn btn-sm btn-pri" data-ed="stu-new">＋ ${who()}</button></span>
+  </div>
+  ${U.spack||U.sids?`<div class="sp-box info" style="display:flex;gap:10px;align-items:center">${U.spack?"남은 회차가 적은 회차권만 보고 있습니다.":"챙길 사람만 보고 있습니다."}<button class="btn btn-sm btn-ghost" data-ed="stu-clear" style="margin-left:auto">모두 보기</button></div>`:""}
+  ${rows.length?`<div class="tblwrap"><table class="tbl ed-stu-tbl"><thead><tr><th>이름</th><th>반</th><th>보호자</th><th>${mL(ym)} 수강료</th><th class="r">출석률</th><th>보호자 페이지</th></tr></thead><tbody>${rows.map(s=>{
+    const es=enrsOf(s.id).filter(liveEnr),b=monthBill(s.id,ym),pk=es.filter(e=>e.mode==="pack").map(e=>packOf(e)),r30=attRate((IX.attS.get(s.id)||[]).filter(a=>a.date>=a30)),lk=S.links[s.id];
+    return`<tr class="click" data-ed="stu-open" data-id="${esc(s.id)}"><td><b>${esc(s.name)}</b>${Number(s.minor)&&!consentAt(s)?` <span class="pill nodot p-amber" title="만 14세 미만 — 보호자 동의 기록 없음">동의</span>`:""}<div class="hint">${esc([s.grade,s.school].filter(Boolean).join(" · "))}${s.status!=="on"?` · ${SST[s.status][0]}`:""}</div></td>
+      <td>${es.map(e=>{const c=clsOf(e.class_id);return c?`<span class="tag">${esc(c.name)}${e.status==="pause"?" (쉼)":""}</span>`:"";}).join(" ")||`<span class="hint">—</span>`}${pk.length?`<div class="hint">${pk.map(p=>`남은 ${p.left}회`).join(" · ")}</div>`:""}</td>
+      <td>${esc(s.g_name||"")}${s.g_phone?`<div class="hint mono">${esc(s.g_phone)}</div>`:s.phone?`<div class="hint mono">${esc(s.phone)} (본인)</div>`:""}</td>
+      <td>${b?`${stPill(BST,isLate(b)?"late":b.status)} <span class="mono">${fmt(b.total)}</span>`:`<span class="hint">—</span>`}</td>
+      <td class="r num">${r30==null?"—":r30+"%"}</td>
+      <td>${lk?`<span class="pill nodot p-green">열림</span> <span class="hint">${lk.views}회 봄</span>`:`<span class="hint">—</span>`}</td></tr>`;}).join("")}</tbody></table></div>`:empty(S.stus.length?"조건에 맞는 사람이 없습니다":`아직 ${who()}이 없습니다`,S.stus.length?"":"‘명단 붙여넣기’로 엑셀 명단을 한 번에 넣을 수 있습니다.")}`);
+}
+BST.late=["기한 지남","p-red"];
+function stuOpen(id){
+  const s=stuOf(id);if(!s)return;
+  const x=D(s),es=enrsOf(id).slice().sort((a,b)=>(liveEnr(b)?1:0)-(liveEnr(a)?1:0)),t=T(),a60=(IX.attS.get(id)||[]).filter(a=>a.date>=addDaysStr(t,-59)).sort((a,b)=>b.date.localeCompare(a.date));
+  const bills=billsOf(id),yr=t.slice(0,4),paidYr=bills.filter(b=>b.status==="paid"&&(b.paid_at||"").startsWith(yr)),notes=(IX.noteS.get(id)||[]).slice(0,12),lk=S.links[id];
+  openModal(`<div class="ed-wide">
+  <h2><span class="bars"></span>${esc(s.name)} <span class="cnt">${esc([s.grade,s.school].filter(Boolean).join(" · "))}</span>${stPill(SST,s.status)}</h2>
+  <div class="ed-acts">
+    <button class="btn btn-sm" data-ed="stu-edit" data-id="${esc(id)}">정보 고치기</button>
+    ${s.status!=="left"?`<button class="btn btn-sm" data-ed="guard" data-id="${esc(id)}">보호자 페이지${lk?` · ${lk.views}회 봄`:""}</button>`:""}
+    ${s.status!=="left"?`<button class="btn btn-sm" data-ed="bill-new" data-sid="${esc(id)}">청구서 만들기</button>`:""}
+    <button class="btn btn-sm" data-ed="note-new" data-sid="${esc(id)}">기록 남기기</button>
+    ${s.status==="left"?`<button class="btn btn-sm" data-ed="stu-back" data-id="${esc(id)}">다시 다니기</button>`:`<button class="btn btn-sm btn-ghost" data-ed="stu-leave" data-id="${esc(id)}">그만두기</button>`}
+  </div>
+  <div class="ed-sgrid">
+    <div class="ed-sec"><h3>수강 중인 반 <button class="linkbtn" data-ed="enr-new" data-sid="${esc(id)}">＋ 반 추가</button></h3>
+      ${es.length?es.map(e=>{const c=clsOf(e.class_id),p=packOf(e);if(!c)return"";return`<div class="ed-enr ${liveEnr(e)?"":"end"}"><div><b>${esc(c.name)}</b> <span class="hint">${esc(schedTxt(c.sched))}</span><div class="hint">${FEE[e.mode]}${e.mode!=="free"?` · ${won(e.fee!=null?e.fee:c.fee)}${e.fee!=null?" (따로 정함)":""}`:""} · ${e.start_date?md(e.start_date)+" 시작":""}${e.end_date?` · ${md(e.end_date)} 끝`:""} · ${EST[e.status]}</div>${p?`<div class="ed-pack"><b>남은 ${p.left}회</b> <span class="hint">산 ${p.bought}회${p.base?` + 처음 ${p.base}회`:""} · 쓴 ${p.used}회</span>${s.status!=="left"?` <button class="linkbtn" data-ed="pack-buy" data-id="${esc(e.id)}">회차권 결제</button>`:""}</div>`:""}</div><button class="btn btn-sm btn-ghost" data-ed="enr-edit" data-id="${esc(e.id)}">고치기</button></div>`;}).join(""):`<div class="hint">아직 반이 없습니다.</div>`}
+    </div>
+    <div class="ed-sec"><h3>보호자 · 연락처</h3>
+      <div class="ed-kv"><span>보호자</span><b>${esc(s.g_name||"—")}${x.g_rel?` (${esc(x.g_rel)})`:""}</b><span>보호자 연락처</span><b class="mono">${esc(s.g_phone||"—")}</b><span>본인 연락처</span><b class="mono">${esc(s.phone||"—")}</b><span>시작한 날</span><b>${s.start_date?fmtD(s.start_date):"—"}</b>${Number(s.minor)?`<span>보호자 동의</span><b>${consentAt(s)?`${fmtD(consentAt(s))}${(x.consent||{}).how?` · ${esc(x.consent.how)}`:""}`:`<span style="color:var(--late)">기록 없음</span>`}</b>`:""}${x.disc&&x.disc.v?`<span>할인</span><b>${x.disc.type==="pct"?x.disc.v+"%":won(x.disc.v)}${x.disc.note?` (${esc(x.disc.note)})`:""}</b>`:""}</div>
+      ${x.memo?`<div class="notes-view" style="margin-top:8px">${esc(x.memo)}</div>`:""}
+      ${MSG.can()&&(s.g_phone||s.phone)&&s.status!=="left"?`<div style="margin-top:8px"><button class="btn btn-sm btn-ghost" data-ed="msg-free" data-id="${esc(id)}">문자 보내기</button></div>`:""}
+    </div>
+    <div class="ed-sec"><h3>최근 출결 <span class="hint">60일 · 출석률 ${attRate(a60)??"—"}${attRate(a60)==null?"":"%"}</span></h3>
+      ${a60.length?`<div class="ed-dots">${a60.slice(0,40).map(a=>`<span class="ed-dot ${a.status}" title="${md(a.date)} ${esc((clsOf(a.class_id)||{}).name||"")} ${ATT[a.status][0]}${a.note?" — "+esc(a.note):""}">${md(a.date)}</span>`).join("")}</div><div class="hint" style="margin-top:6px">${Object.keys(ATT).filter(k=>a60.some(a=>a.status===k)).map(k=>`<span class="ed-dot ${k} sm"></span>${ATT[k][0]} ${a60.filter(a=>a.status===k).length}`).join(" · ")}</div>`:`<div class="hint">아직 출결이 없습니다.</div>`}
+    </div>
+    <div class="ed-sec"><h3>수강료 <span class="hint">${yr}년 낸 금액 ${won(sumOf(paidYr,b=>paidAmt(b)-(D(b).refund?D(b).refund.amt:0)))}</span>${paidYr.length?` <button class="linkbtn" data-ed="yr-cert" data-id="${esc(id)}">납입 확인서</button>`:""}</h3>
+      ${bills.length?bills.slice(0,8).map(b=>`<div class="pj-line" data-ed="bill-open" data-id="${esc(b.id)}"><span class="pj-nm">${esc(b.title||BK[b.kind])} <span class="hint">${b.ym?mL(b.ym):""}${b.due&&b.status==="issued"?` · 기한 ${md(b.due)}`:""}${b.paid_at?` · ${md(b.paid_at)} 납부`:""}</span></span><span class="mono">${fmt(b.total)}</span>${stPill(BST,isLate(b)?"late":b.status)}</div>`).join(""):`<div class="hint">아직 청구서가 없습니다.</div>`}
+    </div>
+    <div class="ed-sec" style="grid-column:1/-1"><h3>기록 <span class="hint">상담·학습 메모·리포트·보호자 글</span></h3>
+      ${notes.length?notes.map(n=>`<div class="pj-line" data-ed="note-open" data-id="${esc(n.id)}"><span class="pj-nm">${stPill(NKIND,n.kind)} <b>${esc(n.title||"")}</b> <span class="hint">${md(n.date)}${n.share?" · 보호자 페이지에 공개":""}</span><span style="display:block;font-size:13px;color:var(--sub);overflow-wrap:anywhere;white-space:pre-wrap">${esc(String(n.body||"").slice(0,160))}${String(n.body||"").length>160?"…":""}</span></span></div>`).join(""):`<div class="hint">아직 기록이 없습니다.</div>`}
+    </div>
+  </div>
+  <div class="m-foot"><button class="btn btn-ghost left" data-ed="stu-del" data-id="${esc(id)}" style="color:var(--late)">지우기</button><button class="btn btn-ghost" data-g="modal-close">닫기</button></div>
+  </div>`);
+}
+function stuForm(id){
+  const s=id?stuOf(id):null,x=Object.assign({disc:{type:"amt",v:0,note:""},consent:{at:"",how:""}},s?D(s):{}),isNew=!s;
+  const cls=actClasses();
+  openModal(`<div class="ed-wide"><h2><span class="bars"></span>${isNew?who()+" 넣기":"정보 고치기"}</h2>
+  <div class="m-grid2">
+    <div><label>이름 *</label><input id="ed-f-name" value="${esc(s?s.name:"")}" maxlength="30"></div>
+    <div><label>학년·구분</label><input id="ed-f-grade" value="${esc(s?s.grade:"")}" placeholder="예: 초4, 중2, 고1, 성인" list="ed-grades"><datalist id="ed-grades">${["미취학","초1","초2","초3","초4","초5","초6","중1","중2","중3","고1","고2","고3","N수","대학생","성인"].map(g=>`<option value="${g}">`).join("")}</datalist></div>
+    <div><label>학교</label><input id="ed-f-school" value="${esc(s?s.school:"")}"></div>
+    <div><label>본인 연락처</label><input id="ed-f-phone" value="${esc(s?s.phone:"")}" inputmode="tel" placeholder="성인이면 여기에"></div>
+    <div><label>보호자 이름</label><input id="ed-f-gname" value="${esc(s?s.g_name:"")}"></div>
+    <div><label>보호자 관계</label><input id="ed-f-grel" value="${esc(x.g_rel||"")}" placeholder="어머니·아버지 등" maxlength="10"></div>
+    <div><label>보호자 연락처</label><input id="ed-f-gphone" value="${esc(s?s.g_phone:"")}" inputmode="tel" placeholder="문자·자동 안내가 이 번호로 갑니다"></div>
+    <div><label>시작한 날</label><input type="date" id="ed-f-start" value="${esc(s?s.start_date||"":T())}"></div>
+    <div style="grid-column:1/-1"><label class="checkline" style="margin:0"><input type="checkbox" id="ed-f-minor" ${s?(Number(s.minor)?"checked":""):""}> 만 14세 미만 <span class="hint">학년으로 짐작해 체크합니다. 개인정보를 쓰려면 보호자 동의가 필요합니다</span></label></div>
+    <div class="ed-consent" style="grid-column:1/-1;${s&&!Number(s.minor)?"display:none":""}"><div class="m-grid2"><div><label>보호자 동의 받은 날</label><input type="date" id="ed-f-cat" value="${esc(x.consent.at||"")}"></div><div><label>받은 방법</label><input id="ed-f-chow" value="${esc(x.consent.how||"")}" placeholder="예: 등록 신청서 서명, 문자 회신"></div></div></div>
+    <div><label>할인</label><div style="display:flex;gap:6px"><select id="ed-f-dtype" style="width:96px"><option value="amt" ${x.disc.type!=="pct"?"selected":""}>원</option><option value="pct" ${x.disc.type==="pct"?"selected":""}>%</option></select><input id="ed-f-dv" value="${x.disc.v||""}" inputmode="numeric" placeholder="0"></div></div>
+    <div><label>할인 이름</label><input id="ed-f-dnote" value="${esc(x.disc.note||"")}" placeholder="예: 형제 할인" maxlength="30"></div>
+    ${isNew&&cls.length?`<div style="grid-column:1/-1"><label>들을 반</label><div class="ed-checks">${cls.map(c=>`<label class="checkline"><input type="checkbox" class="ed-f-cls" value="${esc(c.id)}"> ${esc(c.name)} <span class="hint">${esc(schedTxt(c.sched))}</span></label>`).join("")}</div></div>`:""}
+    <div style="grid-column:1/-1"><label>메모 <span class="hint">원장님만 봅니다</span></label><textarea id="ed-f-memo" style="min-height:70px">${esc(x.memo||"")}</textarea></div>
+  </div>
+  <div class="m-foot"><button class="btn btn-ghost" data-g="modal-close">취소</button><button class="btn btn-pri" data-ed="stu-save" data-id="${esc(id||"")}">${isNew?"넣기":"저장"}</button></div></div>`);
+  if(isNew){const g=$("#ed-f-grade"),m=$("#ed-f-minor"),cs=$(".ed-consent");const guess=()=>{m.checked=/^(미취학|유치|유아|어린이집|초|[5-7]세)/.test(g.value.replace(/\s/g,""));cs.style.display=m.checked?"":"none";};g.addEventListener("input",guess);}
+  $("#ed-f-minor").addEventListener("change",e=>{$(".ed-consent").style.display=e.target.checked?"":"none";});
+}
+async function stuSave(id){
+  const name=$("#ed-f-name").value.trim();if(!name){toast("이름을 적어 주세요.");return;}
+  const b={name,grade:$("#ed-f-grade").value.trim(),school:$("#ed-f-school").value.trim(),phone:$("#ed-f-phone").value.trim(),g_name:$("#ed-f-gname").value.trim(),g_rel:$("#ed-f-grel").value.trim(),g_phone:$("#ed-f-gphone").value.trim(),start_date:$("#ed-f-start").value,minor:$("#ed-f-minor").checked,consent:{at:$("#ed-f-cat").value,how:$("#ed-f-chow").value.trim()},disc:{type:$("#ed-f-dtype").value,v:num($("#ed-f-dv").value),note:$("#ed-f-dnote").value.trim()},memo:$("#ed-f-memo").value};
+  if(!id)b.enroll=$$(".ed-f-cls:checked").map(x=>({class_id:x.value}));
+  if(id)b.id=id;
+  try{const r=await call("stu/save",b);upd(S.stus,r.stu);S.enrs=S.enrs.filter(e=>e.stu_id!==r.stu.id).concat(r.enrs||[]);idx();toast(id?"저장했습니다.":`${r.stu.name}을(를) 넣었습니다.`);if(onPage())route();stuOpen(r.stu.id);}catch(e){failToast(e);}
+}
+async function stuLeave(id){
+  const s=stuOf(id);if(!s)return;
+  openModal(`<h2><span class="bars"></span>${esc(s.name)} 그만두기</h2>
+  <div class="hint" style="margin-bottom:10px">듣던 반을 모두 끝내고, 보호자 페이지를 닫습니다. 출결·수강료 기록은 남습니다. 그만둔 달에 이미 낸 수강료가 있으면 ‘수강료’에서 반환을 계산할 수 있습니다.</div>
+  <div class="m-grid2"><div><label>그만둔 날</label><input type="date" id="ed-l-date" value="${T()}"></div><div><label>이유 <span class="hint">원장님만 봅니다</span></label><input id="ed-l-why" placeholder="예: 이사, 시간 변경"></div></div>
+  <div class="m-foot"><button class="btn btn-ghost" data-ed="stu-open" data-id="${esc(id)}">취소</button><button class="btn btn-pri" data-ed="stu-leave-go" data-id="${esc(id)}">그만두기</button></div>`);
+}
+async function stuLeaveGo(id){
+  const end=$("#ed-l-date").value||T(),why=$("#ed-l-why").value.trim();
+  try{const r=await call("stu/save",{id,status:"left",end_date:end,leave_reason:why});upd(S.stus,r.stu);S.enrs=S.enrs.filter(e=>e.stu_id!==id).concat(r.enrs||[]);delete S.links[id];idx();
+    const b=monthBill(id,ymOf(end));
+    toast("그만둔 것으로 적었습니다.");if(onPage())route();
+    if(b&&b.status==="paid"&&await ask(`${r.stu.name}의 ${b.title||"수강료"}를 이미 받았습니다. 교습비 반환 금액을 계산해 볼까요?`,"계산해 보기"))refundModal(b.id);else stuOpen(id);
+  }catch(e){failToast(e);}
+}
+async function stuDel(id){
+  const s=stuOf(id);if(!s)return;
+  if(!await ask(`${s.name}의 정보와 출결·기록·청구서를 모두 지웁니다. 되돌릴 수 없습니다.\n돈 메뉴에 적힌 수입은 남고, 메모의 이름만 지웁니다.\n그만둔 것으로만 두려면 ‘그만두기’를 쓰세요.`,"모두 지우기"))return;
+  try{const r=await call("stu/del",{id});
+    for(const bid of (r.bills||[])){for(const k of ["b:","r:"]){const f=finOf(k+bid);if(f){f.memo=String(f.memo||"").replace(s.name,"(지운 수강생)");f.updatedAt=new Date().toISOString();}}}
+    saveDB();
+    for(const b of S.bills.filter(b=>b.stu_id===id))packAdjBill(b,-1);
+    S.stus=S.stus.filter(x=>x.id!==id);S.enrs=S.enrs.filter(e=>e.stu_id!==id);S.atts=S.atts.filter(a=>a.stu_id!==id);S.notes=S.notes.filter(n=>n.stu_id!==id);S.bills=S.bills.filter(b=>b.stu_id!==id);delete S.links[id];
+    for(const k of [...S.pk.used.keys()])if(k.startsWith(id+"|"))S.pk.used.delete(k);
+    idx();closeModal();route();toast("지웠습니다.");
+  }catch(e){failToast(e);}
+}
+/* 명단 붙여넣기 — 엑셀에서 복사한 표(탭으로 나뉜 칸)나 쉼표로 나눈 줄 */
+const IMP_H={name:["이름","성명","학생","학생명","수강생","원생"],grade:["학년","구분","학년반"],school:["학교","학교명"],phone:["연락처","본인연락처","학생연락처","휴대폰","전화"],g_name:["보호자","보호자명","학부모","부모님"],g_phone:["보호자연락처","학부모연락처","부모연락처","보호자전화","학부모전화"],classes:["반","수업","반이름","수강반","과목"],start_date:["등록일","시작일","입학일","입원일"]};
+function impParse(text){
+  const lines=String(text||"").replace(/\r/g,"").split("\n").map(l=>l.trim()).filter(Boolean);
+  if(!lines.length)return{rows:[],cols:[]};
+  const sp=l=>l.includes("\t")?l.split("\t"):l.split(/\s*,\s*/);
+  const head=sp(lines[0]).map(h=>h.replace(/\s/g,""));
+  const map=head.map(h=>Object.keys(IMP_H).find(k=>IMP_H[k].includes(h))||"");
+  const hasHead=map.filter(Boolean).length>=1&&map.includes("name");
+  const cols=hasHead?map:["name","grade","g_phone","classes"].slice(0,sp(lines[0]).length);
+  const rows=(hasHead?lines.slice(1):lines).map(l=>{const v=sp(l),o={};cols.forEach((k,i)=>{if(k&&v[i]!=null&&String(v[i]).trim())o[k]=String(v[i]).trim();});if(o.start_date){const m=o.start_date.match(/(\d{4})[.\-/](\d{1,2})[.\-/](\d{1,2})/);o.start_date=m?`${m[1]}-${pad2(m[2])}-${pad2(m[3])}`:"";}return o;}).filter(o=>o.name);
+  return{rows,cols,hasHead};
+}
+function impModal(){
+  openModal(`<div class="ed-wide"><h2><span class="bars"></span>명단 붙여넣기</h2>
+  <div class="hint" style="margin-bottom:8px">엑셀이나 구글 시트에서 표를 복사해 붙여 넣으세요. 첫 줄에 <b>이름 · 학년 · 학교 · 보호자 · 보호자연락처 · 반</b> 같은 제목이 있으면 알아서 맞춥니다. 제목이 없으면 ‘이름, 학년, 보호자 연락처, 반’ 순서로 읽습니다. 반은 쉼표로 여러 개 적을 수 있고, 이미 만든 반 이름과 같아야 연결됩니다.</div>
+  <textarea id="ed-i-text" style="min-height:150px;font-family:var(--mono);font-size:13px" placeholder="이름\t학년\t보호자연락처\t반&#10;김하늘\t중2\t010-2222-3333\t중등 수학 A"></textarea>
+  <div id="ed-i-prev" style="margin-top:10px"></div>
+  <div class="m-foot"><button class="btn btn-ghost" data-g="modal-close">취소</button><button class="btn btn-pri" data-ed="imp-go" disabled id="ed-i-go">넣기</button></div></div>`);
+  const ta=$("#ed-i-text");ta.addEventListener("input",()=>impPreview());
+}
+const IMP_L={name:"이름",grade:"학년",school:"학교",phone:"본인 연락처",g_name:"보호자",g_phone:"보호자 연락처",classes:"반",start_date:"시작한 날"};
+function impPreview(){
+  const p=impParse($("#ed-i-text").value),box=$("#ed-i-prev"),go=$("#ed-i-go");
+  if(!p.rows.length){box.innerHTML="";go.disabled=true;return;}
+  const cols=[...new Set(p.cols.filter(Boolean))],names=new Set(S.classes.map(c=>c.name.replace(/\s/g,"")));
+  const miss=new Set();for(const r of p.rows)for(const n of String(r.classes||"").split(/[,/·]/).map(s=>s.trim()).filter(Boolean))if(!names.has(n.replace(/\s/g,"")))miss.add(n);
+  box.innerHTML=`<div class="hint" style="margin-bottom:6px">${p.rows.length}명을 읽었습니다${p.rows.length>500?" — 한 번에 500명까지 넣습니다":""}. ${cols.map(c=>IMP_L[c]).join(" · ")}</div>
+  <div class="tblwrap" style="max-height:220px"><table class="tbl"><thead><tr>${cols.map(c=>`<th>${IMP_L[c]}</th>`).join("")}</tr></thead><tbody>${p.rows.slice(0,30).map(r=>`<tr>${cols.map(c=>`<td>${esc(r[c]||"")}</td>`).join("")}</tr>`).join("")}</tbody></table></div>
+  ${miss.size?`<div class="sp-box warn" style="margin-top:8px">아직 없는 반: ${[...miss].map(esc).join(", ")} — 반을 먼저 만들면 함께 연결됩니다. 지금 넣으면 반 없이 들어갑니다.</div>`:""}`;
+  go.disabled=false;
+}
+async function impGo(){
+  const p=impParse($("#ed-i-text").value);if(!p.rows.length)return;
+  try{const r=await call("stu/import",{rows:p.rows.slice(0,500)});await load();closeModal();route();toast(`${r.added}명을 넣었습니다.${r.skipped?` ${r.skipped}명은 이미 있거나 이름이 없어 건너뛰었습니다.`:""}${r.enrolled?` 반 ${r.enrolled}곳에 연결했습니다.`:""}`);}catch(e){failToast(e);}
+}
+function enrModal(o){
+  const e=o.id?S.enrs.find(x=>x.id===o.id):null,sid=e?e.stu_id:o.sid,s=stuOf(sid);if(!s)return;
+  const c=e?clsOf(e.class_id):null,taken=new Set(enrsOf(sid).filter(liveEnr).map(x=>x.class_id));
+  openModal(`<h2><span class="bars"></span>${esc(s.name)} — ${e?esc(c?c.name:"반")+" 수강":"반 추가"}</h2>
+  <div class="m-grid2">
+    ${e?"":`<div style="grid-column:1/-1"><label>반</label><select id="ed-e-cls">${actClasses().filter(c=>!taken.has(c.id)).map(c=>`<option value="${esc(c.id)}" data-mode="${c.fee_mode}" data-fee="${c.fee}">${esc(c.name)} — ${FEE[c.fee_mode]} ${c.fee_mode!=="free"?won(c.fee):""}</option>`).join("")}</select></div>`}
+    <div><label>수강료 방식</label><select id="ed-e-mode">${Object.entries(FEE).map(([k,l])=>`<option value="${k}" ${(e?e.mode:"")===k?"selected":""}>${l}</option>`).join("")}</select></div>
+    <div><label>이 ${who()}만 다른 금액 <span class="hint">비우면 반 금액</span></label><input id="ed-e-fee" value="${e&&e.fee!=null?e.fee:""}" inputmode="numeric" placeholder="${c?fmt(c.fee):""}"></div>
+    <div><label>시작한 날</label><input type="date" id="ed-e-start" value="${esc(e?e.start_date||"":T())}"></div>
+    <div><label>상태</label><select id="ed-e-st">${Object.entries(EST).map(([k,l])=>`<option value="${k}" ${(e?e.status:"on")===k?"selected":""}>${l}</option>`).join("")}</select></div>
+    <div class="ed-e-base"><label>회차권 — 전부터 남아 있던 회차</label><input id="ed-e-base" value="${e?D(e).base||"":""}" inputmode="numeric" placeholder="0"></div>
+    <div style="grid-column:1/-1"><label>메모</label><input id="ed-e-memo" value="${esc(e?D(e).memo||"":"")}"></div>
+  </div>
+  <div class="m-foot">${e?`<button class="btn btn-ghost left" data-ed="enr-del" data-id="${esc(e.id)}" style="color:var(--late)">잘못 넣었어요</button>`:""}<button class="btn btn-ghost" data-ed="stu-open" data-id="${esc(sid)}">취소</button><button class="btn btn-pri" data-ed="enr-save" data-id="${esc(e?e.id:"")}" data-sid="${esc(sid)}">저장</button></div>`);
+  const sel=$("#ed-e-cls"),mode=$("#ed-e-mode"),sync=()=>{$(".ed-e-base").style.display=mode.value==="pack"?"":"none";};
+  if(sel){const f=()=>{const op=sel.selectedOptions[0];if(op){mode.value=op.dataset.mode;$("#ed-e-fee").placeholder=fmt(op.dataset.fee);}sync();};sel.addEventListener("change",f);f();}
+  mode.addEventListener("change",sync);sync();
+}
+async function enrSave(id,sid){
+  const b={mode:$("#ed-e-mode").value,fee:num($("#ed-e-fee").value),start_date:$("#ed-e-start").value,status:$("#ed-e-st").value,base:num($("#ed-e-base").value)||0,memo:$("#ed-e-memo").value.trim()};
+  if(id)b.id=id;else{b.stu_id=sid;b.class_id=($("#ed-e-cls")||{}).value;if(!b.class_id){toast("더할 반이 없습니다. 반을 먼저 만들어 주세요.");return;}}
+  if(b.fee==="")b.fee=null;
+  try{const r=await call("enr/save",b);upd(S.enrs,r.enr);idx();toast("저장했습니다.");if(onPage())route();stuOpen(sid);}catch(e){failToast(e);}
+}
+
+/* ── 반 · 시간표 ── */
+function vClass(){
+  const t=T(),ym=ymOf(t),wk=[1,2,3,4,5,6,7],act=actClasses(),off=S.classes.filter(c=>c.active===0);
+  const blocks=w=>act.flatMap(c=>(c.sched||[]).filter(x=>x.w===w).map(x=>({c,x}))).sort((a,b)=>a.x.s.localeCompare(b.x.s));
+  /* 강사별 이달 수업 — 수업 기록이나 출결이 있는 날을 한 번씩 셉니다(휴강 뺌) */
+  const tch=new Map(),seen=new Set(),toMin=h=>+h.slice(0,2)*60+ +h.slice(3,5);
+  const addS=(d,cid)=>{const k2=d+"|"+cid;if(seen.has(k2))return;seen.add(k2);const c=clsOf(cid);if(!c)return;const l=IX.les.get(k2);if(l&&l.status==="off")return;const k=c.teacher_id||"";if(!tch.has(k))tch.set(k,{n:0,min:0});const o=tch.get(k);o.n++;const sc=(c.sched||[]).find(x=>x.w===dowOf(d));if(sc&&sc.e)o.min+=Math.max(0,toMin(sc.e)-toMin(sc.s));};
+  for(const l of S.less)if(l.date.startsWith(ym))addS(l.date,l.class_id);
+  for(const a of S.atts)if(a.date.startsWith(ym))addS(a.date,a.class_id);
+  shell("class",`
+  <div class="ed-bar"><span class="hint">${act.length}개 반${off.length?` · 쉬는 반 ${off.length}개`:""}</span><span style="margin-left:auto"><button class="btn btn-sm btn-pri" data-ed="class-new">＋ 반 만들기</button></span></div>
+  ${act.length?`<div class="card"><h2><span class="bars"></span>주간 시간표</h2><div class="ed-tt">${wk.map(w=>{const B=blocks(w);return`<div class="ed-tt-d ${w===dowOf(t)?"today":""}"><div class="h">${DOW[w]}</div>${B.length?B.map(({c,x})=>`<button class="ed-tt-b" data-ed="class-edit" data-id="${esc(c.id)}" style="${D(c).color?`border-left-color:${esc(D(c).color)}`:""}"><b>${x.s}${x.e?"~"+x.e:""}</b><span>${esc(c.name)}</span><em>${esc([teacherName(c.teacher_id),c.room].filter(Boolean).join(" · "))}</em></button>`).join(""):`<div class="hint" style="font-size:12px;padding:4px 2px">—</div>`}</div>`;}).join("")}</div></div>`:""}
+  ${S.classes.length?`<div class="tblwrap"><table class="tbl"><thead><tr><th>반</th><th>시간</th><th>담당</th><th class="r">${who()}</th><th>수강료</th><th></th></tr></thead><tbody>${S.classes.slice().sort((a,b)=>(b.active!==0)-(a.active!==0)).map(c=>{const n=(IX.enrC.get(c.id)||[]).filter(e=>e.status==="on").length,warn=capWarn(c,n);return`<tr class="${c.active===0?"dim":""}"><td><b>${esc(c.name)}</b>${c.subject?`<div class="hint">${esc(c.subject)}${c.kind==="one"?" · 1:1":""}</div>`:c.kind==="one"?`<div class="hint">1:1</div>`:""}</td><td>${esc(schedTxt(c.sched))||`<span class="hint">미정</span>`}${hourWarn(c)?`<div class="ed-warn">${hourWarn(c)}</div>`:""}</td><td>${esc(teacherName(c.teacher_id)||"—")}</td><td class="r"><span class="num">${n}</span>${c.cap?`<span class="hint"> / ${c.cap}</span>`:""}${warn?`<div class="ed-warn">${warn}</div>`:""}</td><td>${FEE[c.fee_mode]}${c.fee_mode!=="free"?` <span class="mono">${fmt(c.fee)}</span>${c.fee_mode==="pack"?`<span class="hint"> / ${c.pack_n}회</span>`:""}`:""}</td><td class="r"><button class="btn btn-sm btn-ghost" data-ed="att" data-c="${esc(c.id)}" data-d="${classesOn(t).some(x=>x.id===c.id)?t:prevNext(c,t,-1)||t}">출석</button><button class="btn btn-sm btn-ghost" data-ed="class-edit" data-id="${esc(c.id)}">고치기</button></td></tr>`;}).join("")}</tbody></table></div>`:empty("아직 반이 없습니다","요일·시간·수강료를 정해 반을 만들면, 오늘 수업과 출석 체크, 수강료 청구서가 그 시간표를 따라갑니다.")}
+  ${tch.size?`<div class="card" style="margin-top:14px"><h2><span class="bars"></span>${mL(ym)} 강사별 수업 <span class="cnt">출결·수업 기록이 있는 날 기준</span></h2>${[...tch].map(([k,o])=>`<div class="tx-kline"><span>${esc(k?teacherName(k):"담당 없음")}</span><b>${o.n}회${o.min?` · ${Math.floor(o.min/60)}시간${o.min%60?" "+o.min%60+"분":""}`:""}</b></div>`).join("")}<div class="hint" style="margin-top:6px">시간은 시간표의 시작·끝 시각으로 셉니다. 강사 급여는 마이피플에서 건당 기록으로 정산할 수 있습니다.</div></div>`:""}`);
+}
+/* 법정 한도 — 교습소·개인과외는 같은 시간 9명(피아노 5명), 초·중·고 학생 교습은 서울·경기 조례로 22시까지 */
+function capWarn(c,n){const t=st().biz.type,lim=/피아노/.test(c.name+(c.subject||""))?5:9;if((t==="tutoring"||t==="private")&&Math.max(n,c.cap||0)>lim)return`${t==="tutoring"?"교습소":"개인과외"}는 같은 시간 ${lim}명까지입니다`;if(c.cap&&n>c.cap)return"정원보다 많습니다";return"";}
+function hourWarn(c){if(st().biz.type==="class"||!D(c).young)return"";const late=(c.sched||[]).some(x=>(x.e||x.s)>"22:00");return late?"초·중·고 학생 교습은 22시까지인 지역이 많습니다":"";}
+function classForm(id){
+  const c=id?clsOf(id):null,x=c?D(c):{young:st().biz.type!=="class",color:""},sc=c?c.sched||[]:[];
+  const tch=members().filter(m=>m.role!=="partner");
+  const row=(r,i)=>`<div class="ed-sc-row"><select class="ed-sc-w">${DOW.slice(1).map((d,k)=>`<option value="${k+1}" ${r.w===k+1?"selected":""}>${d}</option>`).join("")}</select><input class="ed-sc-s" type="time" value="${esc(r.s||"16:00")}"><span>~</span><input class="ed-sc-e" type="time" value="${esc(r.e||"")}"><button class="btn btn-sm btn-ghost" data-ed="sc-del" aria-label="이 줄 빼기">×</button></div>`;
+  openModal(`<div class="ed-wide"><h2><span class="bars"></span>${c?"반 고치기":"반 만들기"}</h2>
+  <div class="m-grid2">
+    <div><label>반 이름 *</label><input id="ed-c-name" value="${esc(c?c.name:"")}" placeholder="예: 중등 수학 A, 피아노 1:1" maxlength="40"></div>
+    <div><label>과목</label><input id="ed-c-subj" value="${esc(c?c.subject:"")}" placeholder="수학·영어·피아노 등"></div>
+    <div><label>수업 형태</label><select id="ed-c-kind"><option value="group" ${!c||c.kind==="group"?"selected":""}>반 수업</option><option value="one" ${c&&c.kind==="one"?"selected":""}>1:1</option></select></div>
+    <div><label>담당 강사</label><select id="ed-c-tch"><option value="">정하지 않음</option>${tch.map(m=>`<option value="${esc(m.id)}" ${c&&c.teacher_id===m.id?"selected":""}>${esc(m.name)}</option>`).join("")}</select></div>
+    <div><label>강의실</label><input id="ed-c-room" value="${esc(c?c.room:"")}"></div>
+    <div><label>정원</label><input id="ed-c-cap" value="${c&&c.cap?c.cap:""}" inputmode="numeric" placeholder="비우면 정하지 않음"></div>
+    <div style="grid-column:1/-1"><label>시간표 <button class="linkbtn" data-ed="sc-add">＋ 요일 더하기</button></label><div id="ed-sc">${(sc.length?sc:[{w:1,s:"16:00",e:"17:30"}]).map(row).join("")}</div></div>
+    <div><label>수강료 방식</label><select id="ed-c-mode">${Object.entries(FEE).map(([k,l])=>`<option value="${k}" ${(c?c.fee_mode:"month")===k?"selected":""}>${l}</option>`).join("")}</select></div>
+    <div><label id="ed-c-fee-l">${c&&c.fee_mode==="pack"?"회차권 값":"월 수강료"}</label><input id="ed-c-fee" value="${c?c.fee||"":""}" inputmode="numeric" placeholder="원"></div>
+    <div class="ed-c-pk"><label>회차권 — 몇 회</label><input id="ed-c-pn" value="${c&&c.pack_n?c.pack_n:""}" inputmode="numeric" placeholder="예: 4, 8"></div>
+    <div class="ed-c-pk"><label>회차권 유효기간 (일)</label><input id="ed-c-pd" value="${x.pack_days||""}" inputmode="numeric" placeholder="비우면 없음"></div>
+    <div style="grid-column:1/-1"><label class="checkline" style="margin:0"><input type="checkbox" id="ed-c-young" ${x.young?"checked":""}> 초·중·고 학생이 듣는 반 <span class="hint">교습 시간 제한(지역 조례) 점검에 씁니다</span></label></div>
+    <div style="grid-column:1/-1"><label>메모</label><input id="ed-c-memo" value="${esc(x.memo||"")}"></div>
+  </div>
+  <div class="m-foot">${c?`<button class="btn btn-ghost left" data-ed="class-del" data-id="${esc(c.id)}" style="color:var(--late)">${c.active===0?"지우기":"쉬는 반으로"}</button>`:""}<button class="btn btn-ghost" data-g="modal-close">취소</button><button class="btn btn-pri" data-ed="class-save" data-id="${esc(id||"")}">저장</button></div></div>`);
+  const mode=$("#ed-c-mode"),sync=()=>{$$(".ed-c-pk").forEach(el=>el.style.display=mode.value==="pack"?"":"none");$("#ed-c-fee-l").textContent=mode.value==="pack"?"회차권 값":"월 수강료";$("#ed-c-fee").disabled=mode.value==="free";};
+  mode.addEventListener("change",sync);sync();
+  classForm.row=row;
+}
+async function classSave(id){
+  const name=$("#ed-c-name").value.trim();if(!name){toast("반 이름을 적어 주세요.");return;}
+  const sched=$$("#ed-sc .ed-sc-row").map(r=>({w:Number(r.querySelector(".ed-sc-w").value),s:r.querySelector(".ed-sc-s").value,e:r.querySelector(".ed-sc-e").value})).filter(x=>x.s);
+  const b={name,subject:$("#ed-c-subj").value.trim(),kind:$("#ed-c-kind").value,teacher_id:$("#ed-c-tch").value,room:$("#ed-c-room").value.trim(),cap:num($("#ed-c-cap").value)||0,sched,fee_mode:$("#ed-c-mode").value,fee:num($("#ed-c-fee").value)||0,pack_n:num($("#ed-c-pn").value)||0,pack_days:num($("#ed-c-pd").value)||0,young:$("#ed-c-young").checked,memo:$("#ed-c-memo").value.trim()};
+  if(b.fee_mode==="pack"&&!b.pack_n){toast("회차권이 몇 회인지 적어 주세요.");return;}
+  if(id)b.id=id;
+  try{const r=await call("class/save",b);upd(S.classes,r.cls);idx();closeModal();route();toast(id?"저장했습니다.":`"${r.cls.name}" 반을 만들었습니다.`);}catch(e){failToast(e);}
+}
+async function classDel(id){
+  const c=clsOf(id);if(!c)return;
+  if(c.active!==0){try{const r=await call("class/save",{id,active:false});upd(S.classes,r.cls);idx();closeModal();route();toast("쉬는 반으로 바꿨습니다. 시간표와 오늘 수업에서 빠집니다.");}catch(e){failToast(e);}return;}
+  if(!await ask(`"${c.name}" 반을 지웁니다.`,"지우기"))return;
+  try{await call("class/del",{id});S.classes=S.classes.filter(x=>x.id!==id);idx();closeModal();route();toast("지웠습니다.");}catch(e){failToast(e);}
+}
+/* ── 수강료 ── */
+function vBill(){
+  const ym=U.bym||ymOf(),t=T(),s=st(),tgt=s.bill.next?monShift(ymOf(t),1):ymOf(t);
+  /* 초안·기한 지남·보냈다고 알림은 달을 가리지 않고, 나머지는 고른 달만 */
+  let rows;
+  if(U.bst==="late")rows=S.bills.filter(isLate);
+  else if(U.bst==="rep")rows=S.bills.filter(b=>b.status==="issued"&&D(b).reported_at);
+  else if(U.bst==="draft")rows=S.bills.filter(b=>b.status==="draft");
+  else{rows=S.bills.filter(b=>b.ym===ym);rows=U.bst?rows.filter(b=>b.status===U.bst):rows.filter(b=>b.status!=="void");}
+  rows=rows.slice().sort((a,b)=>String((stuOf(a.stu_id)||{}).name||"").localeCompare(String((stuOf(b.stu_id)||{}).name||""),"ko")||(a.created_at||"").localeCompare(b.created_at||""));
+  const mb=S.bills.filter(b=>b.ym===ym&&b.status!=="void"),iss=mb.filter(b=>b.status!=="draft"),pd=mb.filter(b=>b.status==="paid");
+  const cnt=f=>S.bills.filter(f).length,drafts=rows.filter(b=>b.status==="draft");
+  const noGen=!S.bills.some(b=>b.kind==="month"&&b.ym===ym)&&S.enrs.some(e=>liveEnr(e)&&e.mode==="month");
+  for(const id of [...U.bsel])if(!rows.some(b=>b.id===id))U.bsel.delete(id);
+  shell("bill",`
+  <div class="ed-bar">
+    <div class="ed-mon"><button class="btn btn-sm btn-ghost" data-ed="bym" data-v="${monShift(ym,-1)}" aria-label="이전 달">←</button><b>${monLabel(ym)}</b><button class="btn btn-sm btn-ghost" data-ed="bym" data-v="${monShift(ym,1)}" aria-label="다음 달">→</button></div>
+    <div class="seg">${[["","전체"],["draft","초안"],["issued","청구"],["late","기한 지남"],["rep","보냈다고 알림"],["paid","납부"],["void","취소"]].map(([k,l])=>{const n=k==="late"?cnt(isLate):k==="rep"?cnt(b=>b.status==="issued"&&D(b).reported_at):k==="draft"?cnt(b=>b.status==="draft"):0;return`<button class="${U.bst===k?"on":""}" data-ed="bst" data-v="${k}">${l}${n?` <b class="nbadge">${n}</b>`:""}</button>`;}).join("")}</div>
+    <span style="margin-left:auto;display:flex;gap:6px;flex-wrap:wrap"><button class="btn btn-sm btn-ghost" data-ed="bill-csv">CSV</button><button class="btn btn-sm" data-ed="bill-new">＋ 청구서</button><button class="btn btn-sm btn-pri" data-ed="bill-gen" data-ym="${ym}">${mL(ym)} 수강료 만들기</button></span>
+  </div>
+  <div class="sp-kpis">
+    <div class="stat"><div class="s-num">${man(sumOf(iss,b=>b.total))}</div><div class="s-lb">${mL(ym)} 청구</div><div class="s-sub">${iss.length}장${mb.length-iss.length?` · 초안 ${mb.length-iss.length}장`:""}</div></div>
+    <div class="stat"><div class="s-num">${man(sumOf(pd,paidAmt))}</div><div class="s-lb">납부</div><div class="s-sub">${pd.length}장 · 수납률 ${pct(sumOf(pd,b=>b.total),sumOf(iss,b=>b.total))??"—"}%</div></div>
+    <div class="stat ${iss.some(isLate)?"warn":""}"><div class="s-num">${man(sumOf(iss.filter(b=>b.status==="issued"),b=>b.total))}</div><div class="s-lb">아직 안 낸 금액</div><div class="s-sub">${iss.filter(isLate).length?`기한 지남 ${iss.filter(isLate).length}장`:"기한 지난 것 없음"}</div></div>
+    <div class="stat"><div class="s-num">${man(sumOf(pd.filter(b=>D(b).refund),b=>D(b).refund.amt))}</div><div class="s-lb">반환</div><div class="s-sub">${s.bill.fin?"납부·반환은 돈 메뉴에 자동으로 적습니다":"돈 메뉴 자동 기록이 꺼져 있습니다"}</div></div>
+  </div>
+  ${noGen&&ym>=ymOf(t)?`<div class="sp-box info">${mL(ym)} 수강료 청구서가 아직 없습니다. ‘${mL(ym)} 수강료 만들기’를 누르면 다니는 ${who()}마다 초안이 생깁니다(그달 중간에 시작한 사람은 수업 횟수만큼).${ym===tgt&&s.bill.auto?` 청구일(매달 ${s.bill.day}일)이 지나면 마이에듀를 열 때 저절로 만들어 둡니다.`:""}</div>`:""}
+  ${rows.length?`<div class="ed-bulk">${drafts.length?`<label class="checkline" style="margin:0"><input type="checkbox" data-ed="bsel-all" ${drafts.every(b=>U.bsel.has(b.id))?"checked":""}> 초안 모두 고르기</label><button class="btn btn-sm btn-pri" data-ed="bill-issue" ${U.bsel.size?"":"disabled"}>고른 ${U.bsel.size}장 확정</button><span class="hint">확정하면 보호자 페이지에 보이고 문자로 보낼 수 있습니다. 자동 안내를 켜 두면 기한 전·지난 뒤 한 번씩 알립니다.</span>`:`<span class="hint">${rows.length}장</span>`}</div>
+  <div class="tblwrap"><table class="tbl ed-bill-tbl"><thead><tr><th></th><th>${who()}</th><th>내용</th><th class="r">금액</th><th>기한</th><th>상태</th><th></th></tr></thead><tbody>${rows.map(b=>{const st0=stuOf(b.stu_id),x=D(b);return`<tr class="click" data-ed="bill-open" data-id="${esc(b.id)}">
+    <td data-stop="1">${b.status==="draft"?`<input type="checkbox" data-ed="bsel" data-id="${esc(b.id)}" ${U.bsel.has(b.id)?"checked":""} aria-label="고르기">`:""}</td>
+    <td><b>${esc(st0?st0.name:"(지운 수강생)")}</b>${st0&&st0.grade?`<div class="hint">${esc(st0.grade)}</div>`:""}</td>
+    <td>${esc(b.title||BK[b.kind])}<div class="hint">${esc((b.items||[]).filter(i=>i.amount>0).map(i=>i.label+(i.qty&&!/\d\s*회/.test(i.label)?` ${i.qty}회`:"")).join(", "))}${(b.items||[]).some(i=>i.note)?" · "+esc((b.items||[]).filter(i=>i.note).map(i=>i.note).join(", ")):""}</div></td>
+    <td class="r num">${fmt(b.total)}${b.status==="paid"&&paidAmt(b)!==b.total?`<div class="hint">받은 ${fmt(paidAmt(b))}</div>`:""}${x.refund?`<div class="hint">반환 ${fmt(x.refund.amt)}</div>`:""}</td>
+    <td>${b.status==="paid"?`<span class="hint">${md(b.paid_at)} 납부 · ${PAY[b.method]||""}</span>`:b.due?`${md(b.due)}${isLate(b)?` <span style="color:var(--late);font-size:12px">${-dday(b.due)}일 지남</span>`:""}`:`<span class="hint">—</span>`}${x.sent_at?`<div class="hint">${md(x.sent_at.slice(0,10))} 안내함</div>`:""}</td>
+    <td>${stPill(BST,isLate(b)?"late":b.status)}${x.reported_at?` <span class="pill nodot p-red" title="${esc(x.reported_by||"")}">보냈다고 알림</span>`:""}</td>
+    <td class="r" data-stop="1">${b.status==="issued"?`<button class="btn btn-sm" data-ed="bill-paid" data-id="${esc(b.id)}">납부 확인</button>`:""}${b.status!=="void"&&b.status!=="draft"&&st0&&st0.status!=="left"?`<button class="btn btn-sm btn-ghost" data-ed="bill-send" data-id="${esc(b.id)}">보내기</button>`:""}</td></tr>`;}).join("")}</tbody></table></div>`:empty(U.bst?"조건에 맞는 청구서가 없습니다":`${monLabel(ym)} 청구서가 없습니다`,"")}`);
+}
+async function billGen(ym){
+  try{
+    const r=await call("bill/gen",{ym,dry:true}),rows=r.preview||[];
+    if(!rows.length){toast(`${mL(ym)}에 새로 만들 청구서가 없습니다. 이미 만들었거나, 월 수강료로 다니는 ${who()}이 없습니다.`);return;}
+    openModal(`<div class="ed-wide"><h2><span class="bars"></span>${monLabel(ym)} 수강료 초안 <span class="cnt">${rows.length}장 · ${won(sumOf(rows,b=>b.total))}</span></h2>
+    <div class="hint" style="margin-bottom:8px">다니는 ${who()}마다 한 장씩 만듭니다. 반이 여럿이면 한 장에 줄로 들어가고, 그달 중간에 시작한 사람은 수업 횟수만큼 계산합니다. 초안은 보호자에게 보이지 않습니다.</div>
+    <div class="tblwrap" style="max-height:320px"><table class="tbl"><thead><tr><th><input type="checkbox" id="ed-g-all" checked aria-label="모두"></th><th>${who()}</th><th>내용</th><th class="r">금액</th></tr></thead><tbody>${rows.map(b=>{const its=typeof b.items==="string"?JSON.parse(b.items):b.items;return`<tr><td><input type="checkbox" class="ed-g-ck" value="${esc(b.stu_id)}" checked></td><td><b>${esc((stuOf(b.stu_id)||{}).name||"")}</b></td><td>${its.map(i=>`<div>${esc(i.label)} <span class="mono">${fmt(i.amount)}</span>${i.note?` <span class="hint">${esc(i.note)}</span>`:""}</div>`).join("")}</td><td class="r num">${fmt(b.total)}</td></tr>`;}).join("")}</tbody></table></div>
+    <div class="m-foot"><button class="btn btn-ghost" data-g="modal-close">취소</button><button class="btn btn-pri" data-ed="bill-gen-go" data-ym="${ym}">고른 사람 초안 만들기</button></div></div>`);
+    $("#ed-g-all").addEventListener("change",e=>$$(".ed-g-ck").forEach(c=>c.checked=e.target.checked));
+  }catch(e){failToast(e);}
+}
+async function billGenGo(ym){
+  const ids=$$(".ed-g-ck:checked").map(c=>c.value);if(!ids.length){toast("한 명 이상 골라 주세요.");return;}
+  try{const r=await call("bill/gen",{ym,ids});for(const b of r.bills||[])upd(S.bills,b);idx();closeModal();U.bym=ym;U.bst="draft";U.bsel=new Set((r.bills||[]).map(b=>b.id));route();toast(`초안 ${(r.bills||[]).length}장을 만들었습니다. 확인하고 확정해 주세요.`);}catch(e){failToast(e);}
+}
+async function billIssue(){
+  const ids=[...U.bsel];if(!ids.length)return;
+  const due=addDaysStr(T(),st().bill.due);
+  if(!await ask(`${ids.length}장을 확정합니다.\n기한이 없는 것은 ${fmtD(due)}까지로 정합니다. 확정하면 보호자 페이지에 보이고, 자동 안내를 켜 두었다면 기한에 맞춰 문자가 갑니다.`,"확정"))return;
+  try{const r=await call("bill/issue",{ids});for(const b of r.bills||[]){const o=S.bills.find(x=>x.id===b.id);if(o&&o.kind==="pack"&&o.status==="draft")packAdjBill(b,1);upd(S.bills,b);}idx();U.bsel.clear();if(U.bst==="draft")U.bst="";route();toast(`${(r.bills||[]).length}장을 확정했습니다.`);}catch(e){failToast(e);}
+}
+function billModal(o){
+  const b=o.id?S.bills.find(x=>x.id===o.id):null,sid=b?b.stu_id:o.sid||"",stu=sid?stuOf(sid):null,kind=b?b.kind:o.kind||"etc",x=b?D(b):{};
+  const ro=b&&(b.status==="paid"||b.status==="void");
+  const items=b?b.items:(o.items||[{label:kind==="etc"?"교재비":"",amount:"",qty:0,class_id:""}]);
+  const itemRow=(i)=>`<div class="ed-it"><input class="ed-it-l" value="${esc(i.label||"")}" placeholder="항목" ${ro?"disabled":""}><input class="ed-it-a" value="${i.amount!==""&&i.amount!=null?i.amount:""}" inputmode="numeric" placeholder="금액 (할인은 -)" ${ro?"disabled":""}>${kind==="pack"?`<input class="ed-it-q" value="${i.qty||""}" inputmode="numeric" placeholder="회" ${ro?"disabled":""}>`:""}<input type="hidden" class="ed-it-c" value="${esc(i.class_id||"")}"><input type="hidden" class="ed-it-n" value="${esc(i.note||"")}">${ro?"":`<button class="btn btn-sm btn-ghost" data-ed="it-del" aria-label="빼기">×</button>`}</div>`;
+  billModal.itemRow=itemRow;
+  openModal(`<div class="ed-wide"><h2><span class="bars"></span>${b?esc(b.title||BK[b.kind]):"청구서 만들기"} ${b?stPill(BST,isLate(b)?"late":b.status):""}</h2>
+  <div class="m-grid2">
+    <div><label>${who()}</label>${b?`<div style="padding:8px 0"><b>${esc(stu?stu.name:"(지운 수강생)")}</b></div>`:`<select id="ed-b-stu">${stuOpts(sid,"고르세요")}</select>`}</div>
+    <div><label>종류</label>${b?`<div style="padding:8px 0">${BK[kind]}</div>`:`<select id="ed-b-kind">${Object.entries(BK).map(([k,l])=>`<option value="${k}" ${kind===k?"selected":""}>${l}</option>`).join("")}</select>`}</div>
+    <div><label>제목</label><input id="ed-b-title" value="${esc(b?b.title:o.title||"")}" placeholder="${kind==="pack"?"예: 피아노 4회권":kind==="month"?"예: 12월 수강료":"예: 교재비"}" ${ro?"disabled":""}></div>
+    <div><label>청구 월</label><input type="month" id="ed-b-ym" value="${esc(b?b.ym:o.ym||ymOf())}" ${ro?"disabled":""}></div>
+    <div style="grid-column:1/-1"><label>항목 ${ro?"":`<button class="linkbtn" data-ed="it-add">＋ 줄 더하기</button>`}</label><div id="ed-its">${items.map(itemRow).join("")}</div><div class="hint" id="ed-b-sum" style="margin-top:4px"></div></div>
+    <div><label>납부 기한</label><input type="date" id="ed-b-due" value="${esc(b?b.due||"":"")}" ${ro?"disabled":""}></div>
+    <div><label>메모 <span class="hint">원장님만 봅니다</span></label><input id="ed-b-memo" value="${esc(x.memo||"")}" ${ro?"disabled":""}></div>
+  </div>
+  ${b&&b.status==="paid"?`<div class="sp-box ok">${fmtD(b.paid_at)} ${PAY[b.method]||""}로 ${won(paidAmt(b))} 받았습니다.${x.receipt==="done"?" 현금영수증 발급함.":x.receipt==="na"?"":""}${x.refund?` ${fmtD(x.refund.at)}에 ${won(x.refund.amt)} 돌려줌${x.refund.reason?` (${esc(x.refund.reason)})`:""}.`:""}</div>`:""}
+  ${x.reported_at?`<div class="sp-box warn">${md(x.reported_at.slice(0,10))} ${esc(x.reported_by||"보호자")}님이 보냈다고 알려 왔습니다. 통장에서 확인되면 ‘납부 확인’을 눌러 주세요.</div>`:""}
+  <div class="m-foot">
+    ${b&&b.status!=="paid"?`<button class="btn btn-ghost left" data-ed="bill-void" data-id="${esc(b.id)}" style="color:var(--late)">${b.status==="draft"?"지우기":b.status==="void"?"":"청구 취소"}</button>`:""}
+    ${b&&b.status==="paid"?`<button class="btn btn-ghost left" data-ed="bill-unpaid" data-id="${esc(b.id)}">납부 취소</button><button class="btn btn-ghost" data-ed="refund" data-id="${esc(b.id)}">반환 계산</button><button class="btn btn-ghost" data-ed="receipt" data-id="${esc(b.id)}">영수증</button>`:""}
+    <button class="btn btn-ghost" data-g="modal-close">닫기</button>
+    ${b&&b.status==="issued"?`<button class="btn" data-ed="bill-paid" data-id="${esc(b.id)}">납부 확인</button>`:""}
+    ${!ro?`<button class="btn btn-pri" data-ed="bill-save" data-id="${esc(b?b.id:"")}">${b?"저장":"초안으로 저장"}</button>${b?"":`<button class="btn btn-pri" data-ed="bill-save" data-issue="1">바로 청구</button>`}`:""}
+  </div></div>`);
+  const sum=()=>{const t=$$("#ed-its .ed-it").reduce((a,r)=>a+(Number(String(r.querySelector(".ed-it-a").value).replace(/[^\d-]/g,""))||0),0);$("#ed-b-sum").textContent=`합계 ${won(Math.max(0,t))}`;};
+  $("#ed-its").addEventListener("input",sum);sum();
+  const kSel=$("#ed-b-kind");if(kSel)kSel.addEventListener("change",()=>{const sid2=($("#ed-b-stu")||{}).value;billModal({sid:sid2,kind:kSel.value});});
+}
+function billRead(){
+  return $$("#ed-its .ed-it").map(r=>({label:r.querySelector(".ed-it-l").value.trim(),amount:String(r.querySelector(".ed-it-a").value).replace(/[^\d-]/g,""),qty:r.querySelector(".ed-it-q")?num(r.querySelector(".ed-it-q").value):0,class_id:r.querySelector(".ed-it-c").value,note:r.querySelector(".ed-it-n").value})).filter(i=>i.label&&i.amount!=="");
+}
+async function billSave(id,issue){
+  const items=billRead();if(!items.length){toast("항목과 금액을 적어 주세요.");return;}
+  const b={title:$("#ed-b-title").value.trim(),ym:$("#ed-b-ym").value,due:$("#ed-b-due").value,items,memo:$("#ed-b-memo").value.trim()};
+  if(id)b.id=id;else{b.stu_id=($("#ed-b-stu")||{}).value;b.kind=($("#ed-b-kind")||{}).value||"etc";if(!b.stu_id){toast(`${who()}을 골라 주세요.`);return;}if(issue)b.status="issued";}
+  if(b.kind==="pack"&&!items.some(i=>Number(i.qty)>0)){toast("회차권은 몇 회인지 적어 주세요.");return;}
+  try{
+    const old=id?S.bills.find(x=>x.id===id):null;if(old&&old.status==="issued")packAdjBill(old,-1);
+    const r=await call("bill/save",b);upd(S.bills,r.bill);if(r.bill.status==="issued")packAdjBill(r.bill,1);idx();closeModal();route();toast(id?"저장했습니다.":issue?"청구했습니다.":"초안으로 저장했습니다.");
+  }catch(e){failToast(e);}
+}
+function packBuy(eid){
+  const e=S.enrs.find(x=>x.id===eid),c=e&&clsOf(e.class_id);if(!e||!c)return;
+  billModal({sid:e.stu_id,kind:"pack",title:`${c.name} ${c.pack_n||""}회권`.replace("  "," "),items:[{label:`${c.name} ${c.pack_n||""}회권`,amount:c.fee||"",qty:c.pack_n||"",class_id:c.id}]});
+}
+function paidModal(id){
+  const b=S.bills.find(x=>x.id===id),s=b&&stuOf(b.stu_id);if(!b)return;
+  openModal(`<h2><span class="bars"></span>납부 확인 — ${esc(s?s.name:"")}</h2>
+  <div class="hint" style="margin-bottom:10px">${esc(b.title||"")} ${won(b.total)}</div>
+  <div class="m-grid2">
+    <div><label>받은 날</label><input type="date" id="ed-p-date" value="${T()}"></div>
+    <div><label>받은 금액</label><input id="ed-p-amt" value="${b.total}" inputmode="numeric"></div>
+    <div><label>결제 방법</label><select id="ed-p-m">${Object.entries(PAY).map(([k,l])=>`<option value="${k}" ${k==="transfer"?"selected":""}>${l}</option>`).join("")}</select></div>
+    <div id="ed-p-rc"><label>현금영수증</label><select id="ed-p-r"><option value="">아직</option><option value="done">발급함</option><option value="none">발급 안 함</option></select></div>
+  </div>
+  <div class="sp-box info" id="ed-p-hint" style="margin-top:10px">학원·교습소·과외는 현금영수증 의무발행업종입니다. 한 번에 10만 원 이상을 현금이나 계좌이체로 받으면 보호자가 요청하지 않아도 발급해야 합니다(전화번호를 모르면 국세청 지정 번호로 자진 발급). 자세한 기준은 국세청에 확인하세요.</div>
+  ${st().bill.fin?`<div class="hint" style="margin-top:8px">확인하면 돈 메뉴에 수입으로 적습니다.</div>`:""}
+  <div class="m-foot"><button class="btn btn-ghost" data-g="modal-close">취소</button><button class="btn btn-pri" data-ed="paid-go" data-id="${esc(id)}">납부 확인</button></div>`);
+  const m=$("#ed-p-m"),a=$("#ed-p-amt"),sync=()=>{const cash=["cash","transfer"].includes(m.value),big=(Number(num(a.value))||0)>=100000;$("#ed-p-rc").style.display=cash?"":"none";$("#ed-p-hint").style.display=cash&&big?"":"none";};
+  m.addEventListener("change",sync);a.addEventListener("input",sync);sync();
+}
+async function paidGo(id){
+  const m=$("#ed-p-m").value,b={id,date:$("#ed-p-date").value,amount:num($("#ed-p-amt").value),method:m,receipt:["cash","transfer"].includes(m)?$("#ed-p-r").value:"na"};
+  try{const old=S.bills.find(x=>x.id===id),r=await call("bill/paid",b);if(old&&old.status==="draft")packAdjBill(r.bill,1);upd(S.bills,r.bill);idx();finPaid(r.bill);closeModal();route();toast("납부를 확인했습니다.");}catch(e){failToast(e);}
+}
+/* 돈 메뉴 — 납부는 수입, 반환은 지출로 한 번씩. 다시 확인하면 금액만 고칩니다 */
+const finOf=key=>(DB.finance||[]).find(f=>f.source==="edu"&&f.edKey===key)||null;
+const incCat=()=>{const L=DB.finCats&&DB.finCats.income||[];return L.includes("수강료")?"수강료":L.includes("매출")?"매출":(L[0]||"기타");};
+const expCat=()=>{const L=DB.finCats&&DB.finCats.expense||[];return L.includes("환불")?"환불":L.includes("기타")?"기타":(L[0]||"기타");};
+function finPaid(b){
+  if(!st().bill.fin||!canFinance()||!b||b.status!=="paid")return;
+  const key="b:"+b.id,s=stuOf(b.stu_id),amt=paidAmt(b),now=new Date().toISOString(),memo=`마이에듀 ${s?s.name+" ":""}${b.title||"수강료"}`;
+  const proof=b.method==="card"?"카드":D(b).receipt==="done"?"현금영수증":"";let f=finOf(key);
+  if(f)Object.assign(f,{amount:amt,date:b.paid_at,memo,updatedAt:now},proof?{proof}:{});
+  else{f={id:uid("f"),projectId:"",storeId:"",kind:"수입",amount:amt,category:incCat(),date:b.paid_at,memo,memberId:ME.id,createdAt:now,source:"edu",edKey:key};if(proof)f.proof=proof;DB.finance.push(f);}
+  saveDB();
+}
+function finDrop(key){const i=(DB.finance||[]).findIndex(f=>f.source==="edu"&&f.edKey===key);if(i<0)return false;DB.finance.splice(i,1);saveDB();return true;}
+function finRefund(b){
+  if(!st().bill.fin||!canFinance()||!b)return;const key="r:"+b.id,x=D(b),s=stuOf(b.stu_id);
+  if(!x.refund){finDrop(key);return;}
+  const memo=`마이에듀 수강료 반환 · ${s?s.name+" ":""}${b.title||""}`.trim(),f=finOf(key),now=new Date().toISOString();
+  if(f)Object.assign(f,{amount:x.refund.amt,date:x.refund.at,memo,updatedAt:now});else DB.finance.push({id:uid("f"),projectId:"",storeId:"",kind:"지출",amount:x.refund.amt,category:expCat(),date:x.refund.at,memo,memberId:ME.id,createdAt:now,source:"edu",edKey:key});
+  saveDB();
+}
+async function billUnpaid(id){
+  if(!await ask("납부 확인을 취소합니다. 돈 메뉴에 적힌 수입과 반환 기록도 함께 지웁니다.","취소하기"))return;
+  try{const r=await call("bill/unpaid",{id});upd(S.bills,r.bill);idx();finDrop("b:"+id);finDrop("r:"+id);closeModal();route();toast("납부 확인을 취소했습니다.");}catch(e){failToast(e);}
+}
+async function billVoid(id){
+  const b=S.bills.find(x=>x.id===id);if(!b)return;
+  if(!await ask(b.status==="draft"?"이 초안을 지웁니다.":"이 청구를 취소합니다. 보호자 페이지에서 사라지고, 기록은 ‘취소’로 남습니다.",b.status==="draft"?"지우기":"청구 취소"))return;
+  try{const r=await call("bill/void",{id});if(b.status==="issued")packAdjBill(b,-1);if(r.removed)S.bills=S.bills.filter(x=>x.id!==id);else{b.status="void";}idx();closeModal();route();toast(r.removed?"지웠습니다.":"청구를 취소했습니다.");}catch(e){failToast(e);}
+}
+async function billSend(id){
+  const b=S.bills.find(x=>x.id===id),s=b&&stuOf(b.stu_id);if(!b||!s)return;
+  if(!(s.g_phone||s.phone)){toast("보호자 연락처가 없습니다. 정보 고치기에서 넣어 주세요.");return;}
+  let tok="";try{tok=await ensureLink(s.id);}catch(e){failToast(e);return;}
+  try{await call("bill/sent",{ids:[id]});b.d=Object.assign({},D(b),{sent_at:new Date().toISOString()});}catch(e){}
+  MSG.compose({to:s.g_phone||s.phone,name:s.g_name||s.name,tpl:"ed.bill",fields:{이름:s.name,제목:b.title||"수강료",금액:won(b.total),기한:b.due?md(b.due):"",안내:st().bill.note||(st().biz.bank?"입금 계좌 "+st().biz.bank:""),링크:lkUrl(tok),코드:tok},ref_kind:"ed-bill",ref_id:id});
+  if(onPage())setTimeout(()=>{if(!$("#modal-root").classList.contains("show"))route();},50);
+}
+async function ensureLink(sid){const l=S.links[sid];if(l&&l.expiresAt>new Date().toISOString())return l.token;const r=await api("link/create",{kind:"ed-guard",target:sid,days:365});S.links[sid]={token:r.token,createdAt:new Date().toISOString(),expiresAt:r.expiresAt,views:0,lastView:""};return r.token;}
+/* 교습비 반환 — 「학원의 설립·운영 및 과외교습에 관한 법률 시행령」 별표 4를 간추린 참고 계산 */
+function refundModal(id){
+  const b=S.bills.find(x=>x.id===id),s=b&&stuOf(b.stu_id);if(!b)return;
+  const ym=b.ym||ymOf(),first=ym+"-01",last=lastOf(ym),cls=(b.items||[]).map(i=>clsOf(i.class_id)).filter(Boolean);
+  const quit=s&&s.end_date&&s.end_date.startsWith(ym)?s.end_date:T()<last&&T()>=first?T():first;
+  const all=sumOf(cls,c=>sessions(c.sched,first,last)),done=sumOf(cls,c=>sessions(c.sched,first,addDaysStr(quit,-1)));
+  const pk=b.kind==="pack"?(()=>{const it=(b.items||[]).find(i=>i.qty&&i.class_id),e=it&&enrsOf(b.stu_id).find(e=>e.class_id===it.class_id);return it&&e?{bought:Number(it.qty)||0,p:packOf(e)}:null;})():null;
+  openModal(`<div class="ed-wide"><h2><span class="bars"></span>교습비 반환 계산 <span class="cnt">${esc(s?s.name:"")} · ${esc(b.title||"")}</span></h2>
+  <div class="hint" style="margin-bottom:10px">학원법 시행령 별표 4(교습비 등 반환 기준)를 간추린 참고 계산입니다. 본인 사정으로 그만둔 경우, 교습 기간이 1개월 이내면 시작 전 전액 · 총 교습시간 1/3이 지나기 전 2/3 · 1/2이 지나기 전 1/2 · 1/2이 지난 뒤에는 돌려주지 않습니다. 1개월을 넘으면 그만둔 달은 이 기준으로, 남은 달은 전액 돌려줍니다. 수업 시간이 회마다 다르면 횟수 대신 시간으로 넣으세요.</div>
+  <div class="m-grid2">
+    <div><label>낸 금액</label><input id="ed-r-paid" value="${paidAmt(b)}" inputmode="numeric"></div>
+    <div><label>방식</label><select id="ed-r-mode"><option value="m1" ${b.kind!=="pack"?"selected":""}>1개월 이내 (월 수강료)</option><option value="mn">1개월 넘게 낸 경우</option><option value="pk" ${b.kind==="pack"?"selected":""}>회차권 (남은 회차만큼, 참고)</option></select></div>
+    <div class="ed-r-m"><label>그달 총 수업 (회 또는 시간)</label><input id="ed-r-all" value="${all||""}" inputmode="numeric"></div>
+    <div class="ed-r-m"><label>그만두기 전까지 지난 수업</label><input id="ed-r-done" value="${done}" inputmode="numeric"></div>
+    <div class="ed-r-n"><label>한 달 교습비</label><input id="ed-r-mon" value="${b.total}" inputmode="numeric"></div>
+    <div class="ed-r-n"><label>남은 달 수 (그만둔 달 제외)</label><input id="ed-r-rest" value="0" inputmode="numeric"></div>
+    <div class="ed-r-p"><label>산 회차</label><input id="ed-r-pb" value="${pk?pk.bought:""}" inputmode="numeric"></div>
+    <div class="ed-r-p"><label>남은 회차</label><input id="ed-r-pl" value="${pk&&pk.p?Math.max(0,Math.min(pk.bought,pk.p.left)):""}" inputmode="numeric"></div>
+    <div style="grid-column:1/-1"><label>이유</label><input id="ed-r-why" placeholder="예: 이사로 그만둠" value="${esc(s&&D(s).leave_reason||"")}"></div>
+  </div>
+  <div class="ed-r-out" id="ed-r-out"></div>
+  <div class="m-foot"><button class="btn btn-ghost" data-ed="bill-open" data-id="${esc(id)}">돌아가기</button><button class="btn btn-pri" data-ed="refund-go" data-id="${esc(id)}">이 금액으로 반환 기록</button></div></div>`);
+  const calc=()=>{const r=refundCalc();$("#ed-r-out").innerHTML=`<div class="lk-amt"><div class="l">돌려줄 금액</div><div class="v num">${won(r.amt)}</div><div class="hint">${esc(r.why)}</div></div>`;$$(".ed-r-m").forEach(e=>e.style.display=r.mode==="pk"?"none":"");$$(".ed-r-n").forEach(e=>e.style.display=r.mode==="mn"?"":"none");$$(".ed-r-p").forEach(e=>e.style.display=r.mode==="pk"?"":"none");};
+  const wrap=$("#m-box .ed-wide");wrap.addEventListener("input",calc);$("#ed-r-mode").addEventListener("change",calc);calc();
+}
+function refundCalc(){
+  const n=id=>Number(num(($("#"+id)||{}).value))||0,mode=$("#ed-r-mode").value,paid=n("ed-r-paid"),cut=v=>Math.floor(v/10)*10;
+  if(mode==="pk"){const b=n("ed-r-pb"),l=Math.min(n("ed-r-pl"),b);const amt=b?cut(paid*l/b):0;return{mode,amt,why:`회차권 ${b}회 중 ${l}회가 남아 ${won(paid)} × ${l}/${b}. 회차권은 기준이 정해져 있지 않아 남은 회차로 나눈 참고값입니다.`};}
+  const all=n("ed-r-all"),done=n("ed-r-done"),base=mode==="mn"?n("ed-r-mon"):paid,r=!all||done<=0?1:done/all<1/3?2/3:done/all<1/2?1/2:0;
+  const part=cut(base*r),rest=mode==="mn"?n("ed-r-rest")*n("ed-r-mon"):0,amt=Math.min(paid,part+rest);
+  const step=!all||done<=0?"시작 전이라 전액":r===2/3?`총 ${all} 중 ${done} 지남 (1/3 전) → 2/3`:r===1/2?`총 ${all} 중 ${done} 지남 (1/2 전) → 1/2`:`총 ${all} 중 ${done} 지남 (1/2 넘음) → 반환 없음`;
+  return{mode,amt,why:`${step}${mode==="mn"?` + 남은 ${n("ed-r-rest")}달 전액`:""}. 10원 미만은 버렸습니다.`};
+}
+async function refundGo(id){
+  const r=refundCalc();
+  try{const x=await call("bill/refund",{id,amount:r.amt,reason:$("#ed-r-why").value.trim(),calc:r.why,date:T()});upd(S.bills,x.bill);idx();finRefund(x.bill);closeModal();route();toast(r.amt?`반환 ${won(r.amt)}을 적었습니다.`:"반환 기록을 지웠습니다.");}catch(e){failToast(e);}
+}
+/* 영수증·납입 확인서 — 인쇄용 창 (보호자 페이지에서도 같은 모양) */
+function printDoc(title,body){
+  const w=window.open("","_blank");if(!w){toast("팝업이 막혀 있습니다. 브라우저에서 이 사이트의 팝업을 허용해 주세요.");return;}
+  w.document.write(`<!doctype html><html lang="ko"><head><meta charset="utf-8"><title>${esc(title)}</title><style>body{font-family:-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;color:#1c1b19;max-width:640px;margin:32px auto;padding:0 20px;line-height:1.6}h1{font-size:22px;margin:0 0 4px;letter-spacing:-.02em}table{width:100%;border-collapse:collapse;margin:14px 0}th,td{border-bottom:1px solid #e7e3da;padding:8px 6px;text-align:left;font-size:14px}td.r,th.r{text-align:right}.sum td{font-weight:700;border-top:2px solid #1c1b19}.meta{color:#6e6960;font-size:13px}.box{border:1px solid #e7e3da;border-radius:10px;padding:12px 14px;margin-top:14px;font-size:13px;color:#6e6960}button{margin-top:18px;padding:8px 14px;border:1px solid #ccc;background:#fff;border-radius:8px;font-size:14px;cursor:pointer}@media print{button{display:none}}</style></head><body>${body}<button onclick="print()">인쇄·PDF로 저장</button></body></html>`);
+  w.document.close();
+}
+function bizLines(B){return`<div class="meta">${esc([B.name,B.owner?"대표 "+B.owner:"",B.no?"사업자등록번호 "+B.no:""].filter(Boolean).join(" · "))}${B.addr||B.phone?`<br>${esc([B.addr,B.phone].filter(Boolean).join(" · "))}`:""}</div>`;}
+function receiptHtml(b,stuName,B){
+  return`<h1>영수증</h1>${bizLines(B)}<table><tr><th>받는 분</th><td>${esc(stuName)}</td></tr><tr><th>내용</th><td>${esc(b.title||"")}${b.ym?` (${esc(monLabel(b.ym))})`:""}</td></tr></table>
+  <table><thead><tr><th>항목</th><th class="r">금액</th></tr></thead><tbody>${(b.items||[]).map(i=>`<tr><td>${esc(i.label)}${i.qty?` ${i.qty}회`:""}${i.note?` <span class="meta">${esc(i.note)}</span>`:""}</td><td class="r">${fmt(i.amount)}원</td></tr>`).join("")}<tr class="sum"><td>받은 금액</td><td class="r">${fmt(b.paidAmt||paidAmt(b))}원</td></tr></tbody></table>
+  <div class="meta">받은 날 ${esc(b.paidAt||b.paid_at||"")} · ${esc(PAY[b.method]||"")}${b.refund?` · ${esc(b.refund.at)}에 ${fmt(b.refund.amt)}원 반환`:""}</div>
+  <div class="box">위 금액을 교습비로 받았습니다. 현금영수증·카드 전표는 따로 발급됩니다.</div><div class="meta" style="margin-top:10px">발행 ${esc(todayStr())}</div>`;
+}
+function certHtml(rows,stuName,B,yr){
+  const tot=rows.reduce((a,b)=>a+(b.paidAmt||paidAmt(b))-(b.refund?b.refund.amt:0),0);
+  return`<h1>${esc(yr)}년 교육비 납입 확인서</h1>${bizLines(B)}<table><tr><th>수강생</th><td>${esc(stuName)}</td></tr></table>
+  <table><thead><tr><th>받은 날</th><th>내용</th><th class="r">금액</th></tr></thead><tbody>${rows.map(b=>`<tr><td>${esc(b.paidAt||b.paid_at||"")}</td><td>${esc(b.title||"")}${b.refund?` <span class="meta">(반환 ${fmt(b.refund.amt)}원)</span>`:""}</td><td class="r">${fmt((b.paidAmt||paidAmt(b))-(b.refund?b.refund.amt:0))}원</td></tr>`).join("")}<tr class="sum"><td colspan="2">합계</td><td class="r">${fmt(tot)}원</td></tr></tbody></table>
+  <div class="box">연말정산 등에 필요한 경우 참고용으로 씁니다. 공제 대상인지는 국세청 기준을 확인하세요.</div><div class="meta" style="margin-top:10px">발행 ${esc(todayStr())}</div>`;
+}
+const bizOf=()=>{const B=st().biz;return Object.assign({},B,{name:B.name||DB.meta.workspace||""});};
+
+/* ── 기록 · 리포트 ── */
+function vNote(){
+  const sub=U.nsub||"les";
+  const seg=`<div class="seg">${[["les","수업 기록"],["stu","학생 기록"],["rep","월간 리포트"]].map(([k,l])=>`<button class="${sub===k?"on":""}" data-ed="nsub" data-v="${k}">${l}</button>`).join("")}</div>`;
+  let inner="";
+  if(sub==="les"){
+    const rows=S.less.filter(l=>!U.ncl||l.class_id===U.ncl).sort((a,b)=>b.date.localeCompare(a.date)).slice(0,80);
+    inner=`<div class="ed-bar">${seg}<select id="ed-n-cls" style="width:auto">${clsOpts(U.ncl,"모든 반")}</select></div>
+    ${rows.length?`<div class="tblwrap"><table class="tbl"><thead><tr><th>날짜</th><th>반</th><th>진도</th><th>과제</th><th>메모</th></tr></thead><tbody>${rows.map(l=>`<tr class="click" data-ed="att" data-c="${esc(l.class_id)}" data-d="${l.date}"><td>${md(l.date)} ${DOW[dowOf(l.date)]}</td><td>${esc((clsOf(l.class_id)||{}).name||"")}</td><td>${l.status==="off"?`<span class="pill nodot p-line">휴강</span>`:esc(l.topic||"")}</td><td>${esc(l.hw||"")}</td><td class="hint">${esc(l.note||"")}</td></tr>`).join("")}</tbody></table></div>`:empty("수업 기록이 없습니다","출석 체크 창 아래에 진도와 과제를 적으면 여기에 쌓이고, 보호자 페이지에도 보입니다.")}`;
+  }else if(sub==="stu"){
+    const rows=S.notes.filter(n=>n.kind!=="report"&&(!U.nkind||n.kind===U.nkind)).slice(0,120);
+    inner=`<div class="ed-bar">${seg}<div class="seg">${[["","전체"],["consult","상담"],["memo","학습 메모"],["guard","보호자 글"]].map(([k,l])=>`<button class="${U.nkind===k?"on":""}" data-ed="nkind" data-v="${k}">${l}</button>`).join("")}</div><span style="margin-left:auto"><button class="btn btn-sm btn-pri" data-ed="note-new">＋ 기록</button></span></div>
+    ${rows.length?rows.map(n=>`<div class="pj-line" data-ed="note-open" data-id="${esc(n.id)}"><span class="pj-nm">${stPill(NKIND,n.kind)} <b>${esc((stuOf(n.stu_id)||{}).name||"")}</b> ${esc(n.title||"")} <span class="hint">${md(n.date)}</span><span style="display:block;font-size:13px;color:var(--sub);white-space:pre-wrap;overflow-wrap:anywhere">${esc(String(n.body||"").slice(0,200))}</span></span></div>`).join(""):empty("기록이 없습니다","상담 내용과 학습 메모는 원장님만 봅니다. 보호자가 보호자 페이지에서 남긴 글도 여기에 모입니다.")}`;
+  }else{
+    const ym=U.rym||monShift(ymOf(),T().slice(8)<"20"?-1:0),act=S.stus.filter(s=>s.status==="on"||s.status==="pause");
+    const repOf=sid=>(IX.noteS.get(sid)||[]).find(n=>n.kind==="report"&&n.ym===ym)||null;
+    const made=act.filter(s=>repOf(s.id)).length,shared=act.filter(s=>(repOf(s.id)||{}).share).length;
+    inner=`<div class="ed-bar">${seg}<div class="ed-mon"><button class="btn btn-sm btn-ghost" data-ed="rym" data-v="${monShift(ym,-1)}">←</button><b>${monLabel(ym)}</b><button class="btn btn-sm btn-ghost" data-ed="rym" data-v="${monShift(ym,1)}">→</button></div><span class="hint">초안 ${made}/${act.length} · 공개 ${shared}</span><span style="margin-left:auto;display:flex;gap:6px;flex-wrap:wrap"><button class="btn btn-sm btn-ghost" data-ed="rep-ai" data-ym="${ym}">클로드에게 부탁할 문장 복사</button><button class="btn btn-sm btn-pri" data-ed="rep-all" data-ym="${ym}" ${made>=act.length?"disabled":""}>남은 ${act.length-made}명 초안 만들기</button></span></div>
+    <div class="hint" style="margin-bottom:10px">그달 출결과 수업 진도·과제, 남긴 학습 메모로 초안을 만듭니다. 고친 뒤 ‘보호자 페이지에 공개’를 켜면 보호자가 봅니다.</div>
+    ${act.length?`<div class="tblwrap"><table class="tbl"><thead><tr><th>${who()}</th><th>반</th><th class="r">출석</th><th>리포트</th><th></th></tr></thead><tbody>${act.map(s=>{const r=repOf(s.id),A=(IX.attS.get(s.id)||[]).filter(a=>a.date.startsWith(ym));return`<tr><td><b>${esc(s.name)}</b><div class="hint">${esc(s.grade||"")}</div></td><td>${stuClasses(s.id).map(c=>esc(c.name)).join(", ")}</td><td class="r num">${A.filter(a=>PRESENT.has(a.status)).length}/${A.length}</td><td>${r?(r.share?`<span class="pill nodot p-green">공개</span>`:`<span class="pill nodot p-gray">초안</span>`):`<span class="hint">—</span>`}</td><td class="r">${r?`<button class="btn btn-sm btn-ghost" data-ed="note-open" data-id="${esc(r.id)}">열기</button>`:`<button class="btn btn-sm" data-ed="rep-one" data-sid="${esc(s.id)}" data-ym="${ym}">초안 만들기</button>`}</td></tr>`;}).join("")}</tbody></table></div>`:empty(`다니는 ${who()}이 없습니다`,"")}`;
+  }
+  shell("note",inner);
+}
+function repDraft(sid,ym){
+  const s=stuOf(sid);if(!s)return"";
+  const A=(IX.attS.get(sid)||[]).filter(a=>a.date.startsWith(ym)),cs=stuClasses(sid),L=S.less.filter(l=>l.date.startsWith(ym)&&l.status==="done"&&cs.some(c=>c.id===l.class_id)).sort((a,b)=>a.date.localeCompare(b.date));
+  const memos=(IX.noteS.get(sid)||[]).filter(n=>n.kind==="memo"&&n.date.startsWith(ym)).map(n=>n.body).filter(Boolean);
+  const c=k=>A.filter(a=>a.status===k).length,lines=[];
+  lines.push(`${mL(ym)} ${s.name} 학습 리포트`);
+  lines.push("");
+  lines.push(`■ 출결: 수업 ${A.length}회 중 출석 ${c("in")+c("make")}회${c("late")?` · 지각 ${c("late")}회`:""}${c("abs")?` · 결석 ${c("abs")}회`:""}${c("exc")?` · 미리 알린 결석 ${c("exc")}회`:""}`);
+  if(L.length){lines.push("");lines.push("■ 이번 달 배운 것");for(const l of L.filter(l=>l.topic))lines.push(`- ${md(l.date)} ${l.topic}`);const hw=L.filter(l=>l.hw);if(hw.length){lines.push("");lines.push("■ 과제");for(const l of hw.slice(-6))lines.push(`- ${md(l.date)} ${l.hw}`);}}
+  lines.push("");lines.push("■ 선생님 한마디");lines.push(memos.length?memos.join("\n"):"(이번 달 모습을 한두 줄로 적어 주세요)");
+  return lines.join("\n");
+}
+async function repMake(sid,ym,quiet){
+  const body=repDraft(sid,ym);if(!body)return null;
+  const r=await call("note/save",{stu_id:sid,kind:"report",ym,date:T(),title:`${mL(ym)} 학습 리포트`,body,share:false});upd(S.notes,r.note);idx();if(!quiet){route();noteModal({id:r.note.id});}return r.note;
+}
+async function repAll(ym){
+  const act=S.stus.filter(s=>(s.status==="on"||s.status==="pause")&&!(IX.noteS.get(s.id)||[]).some(n=>n.kind==="report"&&n.ym===ym));
+  if(!act.length)return;
+  if(!await ask(`${act.length}명의 ${mL(ym)} 리포트 초안을 만듭니다. 공개하기 전에는 보호자에게 보이지 않습니다.`,"초안 만들기"))return;
+  let n=0;toast("만드는 중…");
+  for(const s of act.slice(0,200)){try{await repMake(s.id,ym,true);n++;}catch(e){failToast(e);break;}}
+  route();toast(`초안 ${n}장을 만들었습니다. 하나씩 열어 고친 뒤 공개해 주세요.`);
+}
+function repAiPrompt(ym){
+  const act=S.stus.filter(s=>s.status==="on"||s.status==="pause");
+  const data=act.slice(0,60).map(s=>repDraft(s.id,ym)).join("\n\n---\n\n");
+  const txt=`마이웍스 마이에듀에 있는 ${monLabel(ym)} 수업 기록입니다. ${who()}마다 보호자에게 보낼 월간 학습 리포트를 써 주세요.\n- 따뜻하지만 과장 없는 말투, 4~6문장\n- 출결, 배운 것, 잘한 점, 다음 달에 함께 챙길 점 순서\n- 사실만 쓰고, 기록에 없는 내용은 지어내지 마세요\n- 다 쓰면 myworks_propose 도구로 kind "ed-report", payload {student: 이름, month: "${ym}", body: 리포트}를 학생마다 하나씩 올려 주세요\n\n${data}`;
+  copyText(txt,"복사했습니다. 클로드에 붙여 넣으세요.");
+}
+function noteModal(o){
+  const n=o.id?S.notes.find(x=>x.id===o.id):null,sid=n?n.stu_id:o.sid||"",kind=n?n.kind:o.kind||"memo",guard=kind==="guard";
+  openModal(`<div class="ed-wide"><h2><span class="bars"></span>${n?stPill(NKIND,kind)+" "+esc((stuOf(sid)||{}).name||""):"기록 남기기"}</h2>
+  ${guard?`<div class="sp-box info">보호자가 보호자 페이지에서 남긴 글입니다${n&&String(n.who||"").slice(6)?` — ${esc(String(n.who).slice(6))}`:""}. 고칠 수 없습니다.</div><div class="notes-view" style="white-space:pre-wrap">${esc(n.body||"")}</div>
+  <div class="m-foot"><button class="btn btn-ghost left" data-ed="note-del" data-id="${esc(n.id)}" style="color:var(--late)">지우기</button>${MSG.can()?`<button class="btn" data-ed="msg-free" data-id="${esc(sid)}">답장 문자</button>`:""}<button class="btn btn-ghost" data-ed="stu-open" data-id="${esc(sid)}">${esc((stuOf(sid)||{}).name||"")} 열기</button><button class="btn btn-ghost" data-g="modal-close">닫기</button></div>`:`
+  <div class="m-grid2">
+    ${n?"":`<div><label>${who()}</label><select id="ed-n-stu">${stuOpts(sid,"고르세요")}</select></div>`}
+    <div><label>종류</label><select id="ed-n-kind">${["memo","consult","report"].map(k=>`<option value="${k}" ${kind===k?"selected":""}>${NKIND[k][0]}</option>`).join("")}</select></div>
+    <div><label>날짜</label><input type="date" id="ed-n-date" value="${esc(n?n.date:T())}"></div>
+    <div class="ed-n-ym"><label>리포트 월</label><input type="month" id="ed-n-ym" value="${esc(n&&n.ym?n.ym:ymOf())}"></div>
+    <div style="grid-column:1/-1"><label>제목</label><input id="ed-n-title" value="${esc(n?n.title:"")}" placeholder="예: 2학기 상담, 11월 학습 리포트"></div>
+    <div style="grid-column:1/-1"><label>내용</label><textarea id="ed-n-body" style="min-height:200px">${esc(n?n.body:"")}</textarea></div>
+    <div class="ed-n-sh" style="grid-column:1/-1"><label class="checkline" style="margin:0"><input type="checkbox" id="ed-n-share" ${n&&n.share?"checked":""}> 보호자 페이지에 공개 <span class="hint">리포트만 공개할 수 있습니다. 상담·학습 메모는 원장님만 봅니다</span></label></div>
+  </div>
+  <div class="m-foot">${n?`<button class="btn btn-ghost left" data-ed="note-del" data-id="${esc(n.id)}" style="color:var(--late)">지우기</button>`:""}${n&&kind==="report"&&n.share&&MSG.can()?`<button class="btn" data-ed="rep-send" data-id="${esc(n.id)}">보호자에게 알리기</button>`:""}<button class="btn btn-ghost" data-g="modal-close">닫기</button><button class="btn btn-pri" data-ed="note-save" data-id="${esc(n?n.id:"")}">저장</button></div>`}</div>`);
+  const k=$("#ed-n-kind");if(k){const sync=()=>{const rep=k.value==="report";$(".ed-n-ym").style.display=rep?"":"none";$(".ed-n-sh").style.display=rep?"":"none";};k.addEventListener("change",sync);sync();}
+}
+async function noteSave(id){
+  const kind=$("#ed-n-kind").value,b={kind,date:$("#ed-n-date").value,title:$("#ed-n-title").value.trim(),body:$("#ed-n-body").value,share:kind==="report"&&$("#ed-n-share").checked,ym:kind==="report"?$("#ed-n-ym").value:""};
+  if(id)b.id=id;else{b.stu_id=($("#ed-n-stu")||{}).value;if(!b.stu_id){toast(`${who()}을 골라 주세요.`);return;}}
+  if(!b.body.trim()&&!b.title){toast("내용을 적어 주세요.");return;}
+  try{const r=await call("note/save",b);upd(S.notes,r.note);idx();closeModal();route();toast(b.share?"저장했습니다. 보호자 페이지에 보입니다.":"저장했습니다.");}catch(e){failToast(e);}
+}
+async function noteDel(id){if(!await ask("이 기록을 지웁니다.","지우기"))return;try{await call("note/del",{id});S.notes=S.notes.filter(n=>n.id!==id);idx();closeModal();route();toast("지웠습니다.");}catch(e){failToast(e);}}
+async function repSend(id){
+  const n=S.notes.find(x=>x.id===id),s=n&&stuOf(n.stu_id);if(!s)return;
+  if(!(s.g_phone||s.phone)){toast("보호자 연락처가 없습니다.");return;}
+  let tok="";try{tok=await ensureLink(s.id);}catch(e){failToast(e);return;}
+  MSG.compose({to:s.g_phone||s.phone,name:s.g_name||s.name,tpl:"ed.report",fields:{이름:s.name,제목:n.title||"학습 리포트",링크:lkUrl(tok),코드:tok},ref_kind:"ed-note",ref_id:id});
+}
+
+/* ── 상담 문의 ── */
+function vLead(){
+  const t=T(),ym=ymOf(t),cols=["new","talk","trial","won","lost"],m=S.leads.filter(l=>(l.created_at||"").slice(0,7)===ym),won0=m.filter(l=>l.status==="won").length;
+  const bySrc={};for(const l of S.leads.filter(l=>(l.created_at||"")>=addDaysStr(t,-180)))bySrc[l.src]=(bySrc[l.src]||0)+1;
+  shell("lead",`
+  <div class="ed-bar"><span class="hint">이달 문의 ${m.length}건 · 등록 ${won0}건${m.length?` · 등록률 ${pct(won0,m.length)}%`:""}</span><span style="margin-left:auto"><button class="btn btn-sm btn-pri" data-ed="lead-new">＋ 상담 문의</button></span></div>
+  ${Object.keys(bySrc).length?`<div class="ed-src">${Object.entries(bySrc).sort((a,b)=>b[1]-a[1]).map(([k,n])=>`<span class="tag">${esc(SRC[k]||k)} ${n}</span>`).join("")} <span class="hint">최근 6개월 어디서 알고 왔는지</span></div>`:""}
+  <div class="ed-board">${cols.map(k=>{const L=S.leads.filter(l=>l.status===k&&(k!=="won"&&k!=="lost"||(l.updated_at||"")>=addDaysStr(t,-60))).sort((a,b)=>(a.next_date||"9999").localeCompare(b.next_date||"9999"));return`<div class="ed-col"><div class="h">${LST[k][0]} <span class="hint">${L.length}</span></div>${L.map(l=>`<button class="ed-lc" data-ed="lead-open" data-id="${esc(l.id)}"><b>${esc(l.name)}</b><span>${esc([l.grade,l.subject].filter(Boolean).join(" · "))}</span>${l.next_date&&k!=="won"&&k!=="lost"?`<em class="${l.next_date<t?"late":l.next_date===t?"today":""}">${l.next_date===t?"오늘":md(l.next_date)} ${k==="trial"?"체험":"연락"}</em>`:""}</button>`).join("")||`<div class="hint" style="font-size:12px;padding:6px 2px">—</div>`}</div>`;}).join("")}</div>`);
+}
+function leadModal(id){
+  const l=id?S.leads.find(x=>x.id===id):null,x=l?D(l):{};
+  openModal(`<div class="ed-wide"><h2><span class="bars"></span>${l?esc(l.name)+" "+stPill(LST,l.status):"상담 문의 적기"}</h2>
+  <div class="m-grid2">
+    <div><label>이름 *</label><input id="ed-d-name" value="${esc(l?l.name:"")}"></div>
+    <div><label>학년·구분</label><input id="ed-d-grade" value="${esc(l?l.grade:"")}" list="ed-grades2"><datalist id="ed-grades2">${["미취학","초1","초2","초3","초4","초5","초6","중1","중2","중3","고1","고2","고3","성인"].map(g=>`<option value="${g}">`).join("")}</datalist></div>
+    <div><label>연락처</label><input id="ed-d-phone" value="${esc(l?l.phone:"")}" inputmode="tel"></div>
+    <div><label>보호자 이름</label><input id="ed-d-gname" value="${esc(x.g_name||"")}"></div>
+    <div><label>원하는 과목·반</label><input id="ed-d-subj" value="${esc(l?l.subject:"")}"></div>
+    <div><label>어디서 알고 왔나요</label><select id="ed-d-src">${Object.entries(SRC).map(([k,v])=>`<option value="${k}" ${(l?l.src:"etc")===k?"selected":""}>${v}</option>`).join("")}</select></div>
+    <div><label>단계</label><select id="ed-d-st">${Object.entries(LST).map(([k,v])=>`<option value="${k}" ${(l?l.status:"new")===k?"selected":""}>${v[0]}</option>`).join("")}</select></div>
+    <div><label>다음 연락·체험 날</label><input type="date" id="ed-d-next" value="${esc(l?l.next_date||"":"")}"></div>
+    <div style="grid-column:1/-1"><label>메모</label><textarea id="ed-d-memo" style="min-height:90px">${esc(x.memo||"")}</textarea></div>
+  </div>
+  <div class="m-foot">${l?`<button class="btn btn-ghost left" data-ed="lead-del" data-id="${esc(l.id)}" style="color:var(--late)">지우기</button>`:""}${l&&l.status!=="won"?`<button class="btn" data-ed="lead-conv" data-id="${esc(l.id)}">등록으로 넘기기</button>`:""}${l&&l.stu_id&&stuOf(l.stu_id)?`<button class="btn btn-ghost" data-ed="stu-open" data-id="${esc(l.stu_id)}">${who()} 열기</button>`:""}<button class="btn btn-ghost" data-g="modal-close">닫기</button><button class="btn btn-pri" data-ed="lead-save" data-id="${esc(l?l.id:"")}">저장</button></div></div>`);
+}
+async function leadSave(id){
+  const name=$("#ed-d-name").value.trim();if(!name){toast("이름을 적어 주세요.");return;}
+  const b={name,grade:$("#ed-d-grade").value.trim(),phone:$("#ed-d-phone").value.trim(),g_name:$("#ed-d-gname").value.trim(),subject:$("#ed-d-subj").value.trim(),src:$("#ed-d-src").value,status:$("#ed-d-st").value,next_date:$("#ed-d-next").value,memo:$("#ed-d-memo").value};
+  if(id)b.id=id;
+  try{const r=await call("lead/save",b);upd(S.leads,r.lead);closeModal();route();toast("저장했습니다.");}catch(e){failToast(e);}
+}
+function leadConv(id){
+  const l=S.leads.find(x=>x.id===id);if(!l)return;
+  openModal(`<h2><span class="bars"></span>${esc(l.name)} 등록</h2>
+  <div class="hint" style="margin-bottom:10px">상담 문의로 ${who()}을 만들고 반에 넣습니다. 연락처는 ${/성인|대학/.test(l.grade||"")?"본인":"보호자"} 연락처로 들어갑니다.</div>
+  <div class="m-grid2"><div><label>시작하는 날</label><input type="date" id="ed-v-start" value="${T()}"></div><div><label class="checkline" style="margin-top:26px"><input type="checkbox" id="ed-v-adult" ${/성인|대학/.test(l.grade||"")?"checked":""}> 성인 (본인 연락처)</label></div>
+  <div style="grid-column:1/-1"><label>들을 반</label><div class="ed-checks">${actClasses().map(c=>`<label class="checkline"><input type="checkbox" class="ed-v-cls" value="${esc(c.id)}"> ${esc(c.name)} <span class="hint">${esc(schedTxt(c.sched))}</span></label>`).join("")||`<span class="hint">반이 없습니다. 반 없이 등록하고 나중에 넣어도 됩니다.</span>`}</div></div></div>
+  <div class="m-foot"><button class="btn btn-ghost" data-ed="lead-open" data-id="${esc(id)}">취소</button><button class="btn btn-pri" data-ed="lead-conv-go" data-id="${esc(id)}">등록</button></div>`);
+}
+async function leadConvGo(id){
+  try{const r=await call("lead/convert",{id,start_date:$("#ed-v-start").value,adult:$("#ed-v-adult").checked,class_ids:$$(".ed-v-cls:checked").map(x=>x.value)});upd(S.stus,r.stu);S.enrs=S.enrs.concat(r.enrs||[]);upd(S.leads,r.lead);idx();route();toast(`${r.stu.name}을(를) 등록했습니다.`);stuOpen(r.stu.id);}catch(e){failToast(e);}
+}
+async function leadDel(id){if(!await ask("이 상담 문의를 지웁니다.","지우기"))return;try{await call("lead/del",{id});S.leads=S.leads.filter(l=>l.id!==id);closeModal();route();toast("지웠습니다.");}catch(e){failToast(e);}}
+
+/* ── 운영 점검 — 학원법·세법·개인정보 보호법에서 운영자가 챙길 것을 간추린 참고 목록 ── */
+const CHECKS=[
+  {k:"fee_post",t:"교습비 게시·고지",types:["academy","tutoring","private"],d:"학원·교습소는 교습비를 보기 쉬운 곳에 게시하고, 개인과외교습자는 학습자에게 알립니다. 게시·고지한 금액(교육청에 등록·신고한 금액)보다 더 받으면 안 됩니다.",law:"학원법 제15조"},
+  {k:"receipt",t:"영수증 주기",types:["academy","tutoring","private","class"],d:"교습비를 받으면 영수증을 줍니다. 마이에듀는 납부를 확인한 청구서마다 보호자 페이지에서 영수증을 보고 인쇄할 수 있게 합니다.",law:"학원법 제15조"},
+  {k:"cash",t:"현금영수증 (10만 원 이상, 계좌이체 포함)",types:["academy","tutoring","private","class"],auto:"cash",d:"학원·교습소·과외는 현금영수증 의무발행업종입니다. 한 번에 10만 원 이상을 현금이나 계좌이체로 받으면 요청이 없어도 발급해야 하고, 어기면 가산세가 붙습니다.",law:"소득세법 시행령 별표 3의3 · 국세청 안내"},
+  {k:"refund",t:"교습비 반환 기준 안내",types:["academy","tutoring","private","class"],d:"그만두면 반환 기준(시작 전 전액 · 1/3 지나기 전 2/3 · 1/2 지나기 전 1/2)에 따라 돌려줍니다. 등록할 때 기준을 알려 두면 다툼이 줄어듭니다. 설정의 ‘반환 규정 안내’에 적으면 보호자 페이지에 보입니다.",law:"학원법 시행령 별표 4"},
+  {k:"consent",t:"만 14세 미만 — 보호자 동의",types:["academy","tutoring","private","class"],auto:"consent",d:"만 14세 미만 아동의 개인정보를 쓰려면 법정대리인(보호자)의 동의를 받고, 동의했는지 확인해야 합니다. 등록 신청서에 동의란을 두고, 받은 날을 수강생 정보에 적어 두세요.",law:"개인정보 보호법 제22조의2"},
+  {k:"crime",t:"강사 성범죄·아동학대 범죄경력 조회",types:["academy","class"],auto:"crime",d:"아동·청소년을 가르치는 학원·교습소는 강사를 채용할 때와 채용한 뒤 정기적으로 성범죄 경력과 아동학대 관련 범죄 전력을 조회합니다. 경찰서나 범죄경력회보서 발급시스템(crims.police.go.kr)에서 신청합니다.",law:"청소년성보호법 제56조 · 아동복지법 제29조의3"},
+  {k:"staff_post",t:"강사 인적사항 게시",types:["academy"],d:"학원은 강사의 이름·자격 같은 인적사항을 게시합니다.",law:"학원법 제13조"},
+  {k:"insurance",t:"배상책임보험·공제 가입",types:["academy","tutoring"],auto:"ins",d:"학원·교습소는 수강생 안전사고에 대비한 보험이나 공제에 가입해야 합니다. 만기일을 적어 두면 지나기 전에 알려 드립니다.",law:"학원법 제4조 등"},
+  {k:"hours",t:"교습 시간",types:["academy","tutoring","private"],auto:"hours",d:"학교교과교습학원·교습소·개인과외의 초·중·고 재학생 교습 시간은 시·도 조례로 정합니다. 서울·경기는 05시부터 22시까지입니다. 지역마다 다르니 관할 교육청 조례를 확인하세요.",law:"학원법 제16조 · 시·도 조례"},
+  {k:"cap",t:"같은 시간 교습 인원",types:["tutoring","private"],auto:"cap",d:"교습소와 개인과외는 같은 시간에 9명까지(교습소 피아노는 5명) 가르칠 수 있습니다. 넘으면 학원 등록 대상이 될 수 있습니다.",law:"학원법 제2조 · 시행령"},
+  {k:"one_subject",t:"교습소는 한 명이 한 과목",types:["tutoring"],d:"교습소는 교습자 한 명이 한 과목만 가르치고, 강사를 따로 둘 수 없습니다.",law:"학원법 제2조"},
+  {k:"private_report",t:"개인과외교습자 신고와 표지",types:["private"],d:"교습비를 받고 과외를 하면 주소지 관할 교육지원청에 신고하고, 신고증명서를 보여 주며, 교습 장소에 표지를 붙입니다(시·도 조례).",law:"학원법 제14조의2"},
+  {k:"academy_check",t:"학원 등록 대상인지 확인",types:["class"],d:"같은 시간에 10명 이상, 또는 불특정 다수에게 30일 이상 과정으로 가르치면 학원(평생직업교육학원 등) 등록 대상일 수 있습니다. 관할 교육지원청에 확인하세요.",law:"학원법 제2조"}
+];
+function checkAuto(k){
+  const s=st(),t=T();
+  if(k==="cash"){const L=S.bills.filter(b=>b.status==="paid"&&["cash","transfer"].includes(b.method)&&paidAmt(b)>=100000&&D(b).receipt!=="done");return L.length?{bad:true,txt:`발급을 표시하지 않은 납부 ${L.length}건`,list:L.slice(0,6).map(b=>`${(stuOf(b.stu_id)||{}).name||""} ${md(b.paid_at)} ${won(paidAmt(b))}`)}:{ok:true,txt:"표시하지 않은 건이 없습니다"};}
+  if(k==="consent"){const L=S.stus.filter(x=>x.status!=="left"&&Number(x.minor)&&!consentAt(x));return L.length?{bad:true,txt:`동의 기록이 없는 ${L.length}명`,list:L.slice(0,8).map(x=>x.name),ids:L.map(x=>x.id)}:{ok:true,txt:`만 14세 미만 ${S.stus.filter(x=>x.status!=="left"&&Number(x.minor)).length}명 모두 기록이 있습니다`};}
+  if(k==="crime"){const T1=[...new Set(S.classes.filter(c=>c.active!==0&&c.teacher_id).map(c=>c.teacher_id))].filter(id=>!(ME&&id===ME.id&&ME.role==="admin"));if(!T1.length)return{ok:true,txt:"담당 강사가 정해진 반이 없습니다"};const old=addDaysStr(t,-365),L=T1.filter(id=>!(s.staff[id]&&s.staff[id].crime>=old));return{bad:!!L.length,ok:!L.length,txt:L.length?`조회일이 없거나 1년이 지난 강사 ${L.length}명`:"모두 1년 안에 조회했습니다",teachers:T1};}
+  if(k==="ins"){const u=s.ins.until;if(!u)return{bad:true,txt:"만기일을 적어 두세요"};return u<t?{bad:true,txt:`${fmtD(u)}에 만기가 지났습니다`}:u<=addDaysStr(t,30)?{bad:true,txt:`${fmtD(u)} 만기 — 30일 안`}:{ok:true,txt:`${fmtD(u)}까지`};}
+  if(k==="hours"){const L=actClasses().filter(c=>hourWarn(c));return L.length?{bad:true,txt:`22시를 넘기는 반 ${L.length}개`,list:L.map(c=>`${c.name} (${schedTxt(c.sched)})`)}:{ok:true,txt:"22시를 넘기는 초·중·고 반이 없습니다"};}
+  if(k==="cap"){const L=actClasses().filter(c=>capWarn(c,(IX.enrC.get(c.id)||[]).filter(e=>e.status==="on").length));return L.length?{bad:true,txt:`인원을 넘는 반 ${L.length}개`,list:L.map(c=>c.name)}:{ok:true,txt:"넘는 반이 없습니다"};}
+  return null;
+}
+function vCheck(){
+  const s=st(),type=s.biz.type,L=CHECKS.filter(c=>c.types.includes(type)),done=new Set(s.checks||[]);
+  const rows=L.map(c=>{const a=c.auto?checkAuto(c.auto):null,ok=a?a.ok:done.has(c.k);return{c,a,ok};});
+  shell("check",`
+  <div class="sp-box info">${BIZ[type][0]} 운영에서 챙길 것을 간추렸습니다. 법령 이름은 찾아보기 쉽게 적은 것이고, 지역(조례)과 사정에 따라 다를 수 있으니 관할 교육지원청·세무서에 확인하세요. 마이에듀의 기록으로 확인할 수 있는 것은 저절로 표시합니다.</div>
+  <div class="ed-prog"><b>${rows.filter(r=>r.ok).length}/${rows.length}</b><span class="tx-prog"><i style="width:${pct(rows.filter(r=>r.ok).length,rows.length)||0}%"></i></span><span class="hint">운영 형태: ${BIZ[type][0]} <button class="linkbtn" data-ed="go" data-to="set">바꾸기</button></span></div>
+  ${rows.map(({c,a,ok})=>`<div class="card ed-ck ${ok?"ok":a&&a.bad?"bad":""}">
+    <div class="ed-ck-h">${a?`<span class="ed-ck-i">${ok?"✓":"!"}</span>`:`<label class="ed-ck-i"><input type="checkbox" data-ed="ck" data-k="${c.k}" ${ok?"checked":""} aria-label="${esc(c.t)} 확인함"></label>`}<div><b>${esc(c.t)}</b> <span class="hint">${esc(c.law)}</span></div></div>
+    <div class="ed-ck-d">${esc(c.d)}</div>
+    ${a?`<div class="ed-ck-a ${ok?"ok":"bad"}">${esc(a.txt)}${a.list&&a.list.length?`<div class="hint">${a.list.map(esc).join(" · ")}</div>`:""}</div>`:""}
+    ${c.k==="crime"&&a&&a.teachers?`<div class="ed-ck-t">${a.teachers.map(id=>`<label><span>${esc(teacherName(id))}</span><input type="date" class="ed-ck-crime" data-id="${esc(id)}" value="${esc((s.staff[id]||{}).crime||"")}"></label>`).join("")}<button class="btn btn-sm" data-ed="crime-save">조회일 저장</button></div>`:""}
+    ${c.k==="insurance"?`<div class="ed-ck-t"><label><span>보험·공제 이름</span><input id="ed-ck-insn" value="${esc(s.ins.name||"")}" placeholder="예: 학원배상책임보험"></label><label><span>만기일</span><input type="date" id="ed-ck-insu" value="${esc(s.ins.until||"")}"></label><button class="btn btn-sm" data-ed="ins-save">저장</button></div>`:""}
+    ${c.k==="consent"&&a&&a.ids&&a.ids.length?`<div style="margin-top:6px"><button class="btn btn-sm btn-ghost" data-ed="go-ids" data-ids="${esc(a.ids.join(","))}">해당 ${who()} 보기</button></div>`:""}
+  </div>`).join("")}`);
+}
+
+/* ── 설정 ── */
+function vSet(){
+  const s=st(),B=s.biz,bl=s.bill,G=s.guard,ms=MSG.can();
+  const tg=(id,on,label,hint)=>`<label class="checkline"><input type="checkbox" id="${id}" ${on?"checked":""}> ${label}${hint?` <span class="hint">${hint}</span>`:""}</label>`;
+  shell("set",`
+  <div class="sp-grid2">
+    <div>
+      <div class="card"><h2><span class="bars"></span>운영 형태 · 이름</h2>
+        <div class="ed-pick">${Object.entries(BIZ).map(([k,v])=>`<label class="${B.type===k?"on":""}"><input type="radio" name="ed-s-type" value="${k}" ${B.type===k?"checked":""}><b>${v[0]}</b><span>${v[1]}</span></label>`).join("")}</div>
+        <div class="m-grid2" style="margin-top:12px">
+          <div><label>이름 (상호)</label><input id="ed-s-name" value="${esc(B.name)}"></div>
+          <div><label>대표자</label><input id="ed-s-owner" value="${esc(B.owner)}"></div>
+          <div><label>사업자등록번호</label><input id="ed-s-no" value="${esc(B.no)}" placeholder="영수증에 나옵니다"></div>
+          <div><label>대표 연락처</label><input id="ed-s-phone" value="${esc(B.phone)}"></div>
+          <div style="grid-column:1/-1"><label>주소</label><input id="ed-s-addr" value="${esc(B.addr)}"></div>
+          <div style="grid-column:1/-1"><label>입금 계좌</label><input id="ed-s-bank" value="${esc(B.bank)}" placeholder="은행 계좌번호 예금주"></div>
+          <div style="grid-column:1/-1"><label>결제 링크 <span class="hint">카드 결제 페이지가 있으면 (https://로 시작)</span></label><input id="ed-s-pay" value="${esc(B.pay)}"></div>
+        </div>
+      </div>
+      <div class="card"><h2><span class="bars"></span>수강료</h2>
+        <div class="m-grid2">
+          <div><label>청구일</label><select id="ed-s-day">${Array.from({length:28},(_,i)=>`<option value="${i+1}" ${bl.day===i+1?"selected":""}>매달 ${i+1}일</option>`).join("")}</select></div>
+          <div><label>청구하는 달</label><select id="ed-s-next"><option value="0" ${!bl.next?"selected":""}>그달 수강료</option><option value="1" ${bl.next?"selected":""}>다음 달 수강료를 미리</option></select></div>
+          <div><label>납부 기한</label><select id="ed-s-due">${[0,3,5,7,10,14,20,28].map(n=>`<option value="${n}" ${bl.due===n?"selected":""}>${n?`확정하고 ${n}일 뒤`:"확정한 날"}</option>`).join("")}</select></div>
+          <div><label>원 단위</label><select id="ed-s-round">${[[1,"1원까지"],[10,"10원 미만 버림"],[100,"100원 미만 버림"],[1000,"1,000원 미만 버림"]].map(([v,l])=>`<option value="${v}" ${bl.round===v?"selected":""}>${l}</option>`).join("")}</select></div>
+          <div style="grid-column:1/-1">${tg("ed-s-auto",bl.auto,"청구일이 지나면 초안을 저절로 만들어 두기","확정하기 전에는 보호자에게 아무것도 가지 않습니다")}${tg("ed-s-pro",bl.prorate,"그달 중간에 시작하면 수업 횟수만큼 계산")}${tg("ed-s-fin",bl.fin,"납부·반환을 돈 메뉴에 적기")}</div>
+          <div style="grid-column:1/-1"><label>청구 안내에 덧붙일 말</label><input id="ed-s-bnote" value="${esc(bl.note)}" placeholder="예: 형제 할인은 둘째부터 10%입니다"></div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="card"><h2><span class="bars"></span>회차권</h2>
+        ${tg("ed-s-pabs",s.pack.abs,"무단 결석도 한 회 빼기","미리 알린 결석은 빼지 않습니다")}
+        <div style="margin-top:8px"><label>남은 회차 알림</label><select id="ed-s-pwarn" style="max-width:200px">${[0,1,2,3,4,5].map(n=>`<option value="${n}" ${s.pack.warn===n?"selected":""}>${n}회 이하로 남으면</option>`).join("")}</select></div>
+      </div>
+      <div class="card"><h2><span class="bars"></span>보호자 페이지</h2>
+        <div class="hint" style="margin-bottom:8px">${who()}마다 하나씩, 가입 없이 여는 주소입니다. 연락처·상담 기록·메모는 나가지 않습니다.</div>
+        ${tg("ed-s-gatt",G.att,"최근 출결")}${tg("ed-s-gles",G.les,"수업 진도와 과제")}${tg("ed-s-gbill",G.bill,"수강료·입금 계좌·영수증·남은 회차")}${tg("ed-s-grep",G.report,"공개한 월간 리포트")}${tg("ed-s-gabs",G.absent,"보호자가 결석·늦음을 미리 알리기","알리면 그날 출결에 ‘미리 알린 결석’으로 들어갑니다")}${tg("ed-s-gmsg",G.msg,"보호자가 선생님께 글 남기기")}
+        <label style="margin-top:10px">반환 규정 안내 <span class="hint">보호자 페이지 아래에 보입니다</span></label><textarea id="ed-s-refund" style="min-height:96px" placeholder="예: 교습비는 학원법 시행령의 반환 기준에 따라 돌려드립니다. 수업 시작 전 전액, 한 달 수업의 1/3이 지나기 전 2/3, 1/2이 지나기 전 1/2을 돌려드리며, 1/2이 지난 뒤에는 돌려드리지 않습니다.">${esc(s.refund||"")}</textarea>
+      </div>
+      <div class="card"><h2><span class="bars"></span>문자 자동 안내</h2>
+        <div class="hint">납부 기한 전과 기한이 지난 뒤 보호자에게 한 번씩 문자를 보낼 수 있습니다. 보호자가 보냈다고 알린 건에는 미납 안내를 보내지 않습니다.</div>
+        <div style="margin-top:8px">${ms?`<button class="btn btn-sm" data-nav="msg/auto">자동 안내 켜기 →</button>`:`<span class="hint">문자·알림톡은 관리자·직원이 씁니다.</span>`}</div>
+      </div>
+      <div class="card"><h2><span class="bars"></span>강사</h2>
+        <div class="hint">강사를 <b>현장 근무자</b>로 초대하면 휴대폰에서 자기가 맡은 반의 출석 체크와 진도·과제만 적습니다. 수강료와 연락처는 보이지 않습니다. 반을 만들 때 담당 강사로 정해 주세요.</div>
+        <div style="margin-top:8px"><button class="btn btn-sm" data-nav="members">사람 초대하기 →</button></div>
+      </div>
+    </div>
+  </div>
+  <div class="ed-save"><button class="btn btn-pri" data-ed="set-save">설정 저장</button></div>`);
+}
+async function setSave(){
+  const v=id=>$("#"+id).value.trim(),c=id=>$("#"+id).checked;
+  const ok=await saveSet({set:true,biz:{type:($('input[name="ed-s-type"]:checked')||{}).value||"academy",name:v("ed-s-name"),owner:v("ed-s-owner"),no:v("ed-s-no"),phone:v("ed-s-phone"),addr:v("ed-s-addr"),bank:v("ed-s-bank"),pay:v("ed-s-pay")},bill:{day:Number(v("ed-s-day")),next:v("ed-s-next")==="1",due:Number(v("ed-s-due")),round:Number(v("ed-s-round")),auto:c("ed-s-auto"),prorate:c("ed-s-pro"),fin:c("ed-s-fin"),note:v("ed-s-bnote")},pack:{abs:c("ed-s-pabs"),warn:Number(v("ed-s-pwarn"))},guard:{att:c("ed-s-gatt"),les:c("ed-s-gles"),bill:c("ed-s-gbill"),report:c("ed-s-grep"),absent:c("ed-s-gabs"),msg:c("ed-s-gmsg")},refund:$("#ed-s-refund").value},"설정을 저장했습니다.");
+  if(ok)route();
+}
+
+/* ── 보호자 페이지 (공개) ── */
+function linkPage(){
+  const box=$("#lk-box"),v=LINK.view||{},B=v.biz||{},S2=v.student||{},t=v.today||todayStr();
+  $("#lk-label").textContent="보호자 페이지";
+  $("#lk-foot").innerHTML=`${esc(B.name||"")}에서 마이웍스로 보내 드린 페이지입니다. 로그인 없이 볼 수 있고, 학생과 보호자의 연락처는 담겨 있지 않습니다.`;
+  const issued=(v.bills||[]).filter(b=>b.status==="issued"),paid=(v.bills||[]).filter(b=>b.status==="paid");
+  const wk=[1,2,3,4,5,6,7].map(w=>({w,c:(v.classes||[]).flatMap(c=>(c.sched||[]).filter(x=>x.w===w).map(x=>({c,x})))})).filter(d=>d.c.length);
+  const att=v.att||[],ym=t.slice(0,7),mA=att.filter(a=>a.date.startsWith(ym));
+  box.innerHTML=`<div class="lk-head"><span class="pill p-line">보호자 페이지</span><h1>${esc(S2.name||"")}</h1><div class="hint">${esc(B.name||"")}${S2.grade?` · ${esc(S2.grade)}`:""}${B.phone?` · ${esc(B.phone)}`:""}</div></div>
+  ${(v.classes||[]).length?`<div class="lk-sec"><h3>수업 시간</h3><div class="ed-g-wk">${wk.map(d=>`<div><b>${DOW[d.w]}</b>${d.c.map(({c,x})=>`<span>${x.s}${x.e?"~"+x.e:""} ${esc(c.name)}${c.room?` · ${esc(c.room)}`:""}${c.paused?" (쉬는 중)":""}</span>`).join("")}</div>`).join("")}</div>${(v.offs||[]).length?`<div class="sp-box warn" style="margin-top:8px">휴강: ${v.offs.map(o=>`${md(o.date)} ${esc(o.class)}`).join(", ")}</div>`:""}</div>`:""}
+  ${v.att?`<div class="lk-sec"><h3>출결 <span class="hint">이번 달 출석 ${mA.filter(a=>PRESENT.has(a.status)).length}회${mA.filter(a=>a.status==="abs").length?` · 결석 ${mA.filter(a=>a.status==="abs").length}회`:""}${mA.filter(a=>a.status==="late").length?` · 지각 ${mA.filter(a=>a.status==="late").length}회`:""}</span></h3>${att.length?`<div class="ed-dots">${att.slice(0,30).map(a=>`<span class="ed-dot ${a.status}" title="${esc(a.class)} ${ATT[a.status][0]}">${md(a.date)} ${ATT[a.status][0]}${a.at?` ${a.at}`:""}</span>`).join("")}</div>`:`<div class="hint">아직 기록이 없습니다.</div>`}</div>`:""}
+  ${v.les&&v.les.length?`<div class="lk-sec"><h3>최근 수업</h3>${v.les.slice(0,8).map(l=>`<div class="ed-g-les"><span class="d">${md(l.date)} ${esc(l.class)}</span><div>${l.topic?`<b>${esc(l.topic)}</b>`:""}${l.hw?`<div class="hint">과제 · ${esc(l.hw)}</div>`:""}</div></div>`).join("")}</div>`:""}
+  ${v.bills?`<div class="lk-sec"><h3>수강료</h3>
+    ${issued.length?issued.map(b=>`<div class="ed-g-bill"><div class="lk-amt"><div class="l">${esc(b.title||"수강료")}</div><div class="v num">${fmtWon(b.total)}</div><div class="hint">${b.due?`납부 기한 ${fmtD(b.due)}`:""}${b.items.length>1?` · ${b.items.map(i=>`${esc(i.label)} ${fmtWon(i.amount)}`).join(" · ")}`:""}</div></div>${b.reported?`<div class="sp-box ok">보내셨다고 알려 주셨습니다. 확인되면 ‘납부’로 바뀝니다.</div>`:v.can.paid?`<button class="btn btn-pri" data-edg="paid" data-id="${esc(b.id)}">보냈어요</button>`:""}</div>`).join(""):`<div class="hint">지금 낼 수강료가 없습니다.</div>`}
+    ${issued.length&&(B.bank||B.pay)?`<div class="sp-box info">${B.bank?`<b>입금 계좌</b>${esc(B.bank)}`:""}${B.pay?`<a class="btn" href="${esc(B.pay)}" target="_blank" rel="noopener" style="margin-top:8px">카드로 결제 ↗</a>`:""}</div>`:""}
+    ${B.note&&issued.length?`<div class="hint">${esc(B.note)}</div>`:""}
+    ${(v.packs||[]).length?`<div class="ed-g-pk">${v.packs.map(p=>`<span>${esc(p.class)} <b>남은 ${p.left}회</b></span>`).join("")}</div>`:""}
+    ${paid.length?`<div class="ed-g-paid"><div class="hint" style="margin:10px 0 4px">낸 수강료</div>${paid.slice(0,8).map(b=>`<div class="pj-line" style="cursor:default"><span class="pj-nm">${esc(b.title||"")} <span class="hint">${md(b.paidAt)} · ${PAY[b.method]||""}</span></span><span class="mono">${fmtWon(b.paidAmt||b.total)}</span><button class="btn btn-sm btn-ghost" data-edg="receipt" data-id="${esc(b.id)}">영수증</button></div>`).join("")}${v.year&&v.year.paid?`<div class="hint" style="margin-top:6px">${v.year.y}년에 낸 교육비 ${fmtWon(v.year.paid)} <button class="linkbtn" data-edg="cert">납입 확인서</button></div>`:""}</div>`:""}
+  </div>`:""}
+  ${(v.reports||[]).length?`<div class="lk-sec"><h3>학습 리포트</h3>${v.reports.map((r,i)=>`<details class="ed-g-rep" ${i===0?"open":""}><summary><b>${esc(r.title||"")}</b> <span class="hint">${md(r.date)}</span></summary><div style="white-space:pre-wrap;line-height:1.8;margin-top:8px">${esc(r.body)}</div></details>`).join("")}</div>`:""}
+  ${v.can&&(v.can.absent||v.can.msg)?`<div class="lk-sec"><h3>선생님께 알리기</h3><div class="ed-g-form">
+    <div class="seg" role="group">${v.can.absent?`<button class="on" data-edg="mode" data-v="absent">결석 알리기</button><button data-edg="mode" data-v="late">늦음 알리기</button>`:""}${v.can.msg?`<button class="${v.can.absent?"":"on"}" data-edg="mode" data-v="msg">글 남기기</button>`:""}</div>
+    <div class="m-grid2" style="margin-top:10px"><div id="ed-g-dwrap" ${v.can.absent?"":'style="display:none"'}><label>날짜</label><input type="date" id="ed-g-date" value="${t}" min="${t}" max="${addDaysStr(t,30)}"></div><div><label>보내는 분</label><input id="ed-g-name" placeholder="예: 엄마" maxlength="30"></div><div style="grid-column:1/-1"><label>내용</label><textarea id="ed-g-note" style="min-height:80px" placeholder="예: 병원 진료로 결석합니다" maxlength="500"></textarea></div></div>
+    <button class="btn btn-pri" data-edg="send">보내기</button></div></div>`:""}
+  ${B.refund?`<div class="lk-sec"><h3>반환 규정</h3><div class="hint" style="white-space:pre-wrap">${esc(B.refund)}</div></div>`:""}
+  ${lkCta()}`;
+  U.gmode=v.can&&v.can.absent?"absent":"msg";
+}
+async function guardAct(action,extra){
+  try{await api("ed/guard",Object.assign({t:LINK.token,action},extra||{}));return true;}
+  catch(e){toast(e.code==="busy"?"오늘은 더 보낼 수 없습니다. 학원에 직접 연락해 주세요.":e.code==="bad-date"?"오늘부터 30일 안의 날짜를 골라 주세요.":e.code==="note-required"?"내용을 적어 주세요.":e.code==="closed"?"지금은 받지 않습니다.":e.code==="bad-state"?"이미 처리된 수강료입니다.":"보내지 못했습니다. 잠시 후 다시 해 보세요.");return false;}
+}
+document.addEventListener("click",async e=>{
+  const b=e.target.closest("[data-edg]");if(!b||!LINK||!LINK.view||LINK.view.kind!=="ed-guard")return;
+  const a=b.dataset.edg,v=LINK.view,B=v.biz||{};
+  if(a==="mode"){U.gmode=b.dataset.v;$$('[data-edg="mode"]').forEach(x=>x.classList.toggle("on",x===b));$("#ed-g-dwrap").style.display=U.gmode==="msg"?"none":"";$("#ed-g-note").placeholder=U.gmode==="absent"?"예: 병원 진료로 결석합니다":U.gmode==="late"?"예: 학교 행사로 30분쯤 늦습니다":"예: 다음 주부터 차량을 이용하고 싶어요";}
+  else if(a==="send"){const note=$("#ed-g-note").value.trim();if(!note){toast("내용을 적어 주세요.");return;}b.disabled=true;const ok=await guardAct(U.gmode,{date:$("#ed-g-date")?$("#ed-g-date").value:"",note,name:$("#ed-g-name").value.trim()});b.disabled=false;if(ok){$("#ed-g-note").value="";toast(U.gmode==="msg"?"글을 남겼습니다.":"선생님께 알렸습니다.");}}
+  else if(a==="paid"){const name=prompt("보내신 분 이름을 적어 주세요. (예: 김하늘 엄마)")||"";b.disabled=true;const ok=await guardAct("paid",{bill_id:b.dataset.id,name:name.trim()});if(ok){b.outerHTML=`<div class="sp-box ok">보내셨다고 알려 드렸습니다. 확인되면 ‘납부’로 바뀝니다.</div>`;}else b.disabled=false;}
+  else if(a==="receipt"){const x=(v.bills||[]).find(y=>y.id===b.dataset.id);if(x)printDoc("영수증",receiptHtml(x,v.student.name,B));}
+  else if(a==="cert"){const yr=v.year.y,rows=(v.bills||[]).filter(x=>x.status==="paid"&&(x.paidAt||"").startsWith(yr)).sort((p,q)=>p.paidAt.localeCompare(q.paidAt));printDoc("교육비 납입 확인서",certHtml(rows,v.student.name,B,yr));}
+});
+
+/* ── 홈 카드 · 주간 요약 ── */
+function fillDash(){
+  const box=$("#ed-dash-slot");if(!box||MODE!=="cloud"||!mgr())return;
+  if(!S.ready){if(!S.loading)load().then(fillDash).catch(()=>{box.innerHTML="";});return;}
+  const t=T(),cs=classesOn(t),n=cs.reduce((a,c)=>a+roster(c.id,t).filter(x=>!x.extra).length,0),dn=cs.reduce((a,c)=>a+roster(c.id,t).filter(x=>!x.extra&&attOf(t,c.id,x.s.id)).length,0),late=S.bills.filter(isLate),dr=S.bills.filter(b=>b.status==="draft").length;
+  box.innerHTML=`<div class="card ed-dash" data-nav="edu"><h2><span class="bars"></span>마이에듀 <span class="cnt">오늘</span><button class="btn btn-sm btn-ghost" style="margin-left:auto">열기 →</button></h2>
+    <div class="ed-dash-n"><div><b>${cs.length}</b><span>오늘 수업</span></div><div><b>${n?`${dn}/${n}`:"—"}</b><span>출석 체크</span></div><div class="${late.length?"warn":""}"><b>${late.length}</b><span>기한 지난 미납</span></div><div><b>${dr}</b><span>청구서 초안</span></div></div></div>`;
+}
+function weekText(from,to){
+  if(!S.ready)return"";
+  const A=S.atts.filter(a=>a.date>=from&&a.date<=to),L=new Set(A.map(a=>a.date+a.class_id)),nw=S.stus.filter(s=>(s.start_date||"")>=from&&(s.start_date||"")<=to).length,lf=S.stus.filter(s=>(s.end_date||"")>=from&&(s.end_date||"")<=to&&s.status==="left").length,pd=S.bills.filter(b=>b.status==="paid"&&b.paid_at>=from&&b.paid_at<=to);
+  if(!A.length&&!nw&&!lf&&!pd.length)return"";
+  return`\n[마이에듀] 수업 ${L.size}회 · 출석률 ${attRate(A)??"—"}%${nw?` · 새로 온 ${who()} ${nw}명`:""}${lf?` · 그만둔 ${who()} ${lf}명`:""}${pd.length?` · 수강료 ${pd.length}건 ${man(sumOf(pd,paidAmt))} 받음`:""}`;
+}
+
+/* ── 이벤트 ── */
+document.addEventListener("click",async e=>{
+  const b=e.target.closest("[data-ed]");if(!b)return;
+  if(b.tagName==="TR"&&e.target.closest('[data-stop="1"]'))return;
+  const a=b.dataset.ed,id=b.dataset.id;
+  switch(a){
+    case"go":{U.bst=b.dataset.bst!=null?b.dataset.bst:U.bst;const to=b.dataset.to||"";if(to!=="stu"){U.spack=false;U.sids=null;}const h="#/edu"+(to?"/"+to:"");if(location.hash===h)route();else go(h);break;}
+    case"setup-save":setupSave();break;
+    case"gen-ok":U.genSeen=S.gen&&S.gen.ym;route();break;
+    case"act":{const x=attention().find(y=>y.k===b.dataset.k);if(!x)break;if(x.bst!==undefined)U.bst=x.bst;if(x.pack){U.spack=true;U.sids=null;U.sst="on";}if(x.ids){U.sids=x.ids;U.spack=false;U.sst="all";}if(x.nsub){U.nsub=x.nsub;U.nkind=x.nkind||"";}if(x.gen){U.bym=x.gen;U.bst="";}go("#/edu/"+x.go);break;}
+    case"att":{const c=b.dataset.c,d=b.dataset.d||T();attModal(c,d,mgr()?null:M);break;}
+    case"att-go":attModal(b.dataset.c,b.dataset.d,U.att&&U.att.src?M:null);break;
+    case"att-day":{const d=$("#ed-att-d").value;if(!d)break;const cs=classesOn(d);if(!cs.length){toast(`${md(d)}에는 시간표에 수업이 없습니다.`);break;}if(cs.length===1)attModal(cs[0].id,d);else openModal(`<h2><span class="bars"></span>${fmtD(d)} ${DOW[dowOf(d)]}요일 수업</h2>${cs.map(c=>classLine(c,d)).join("")}<div class="m-foot"><button class="btn btn-ghost" data-g="modal-close">닫기</button></div>`);break;}
+    case"as":{const row=b.closest(".ed-att-row");if(row)attSet(row.dataset.sid,b.dataset.v);break;}
+    case"att-all":{attRead();for(const [sid,c] of Object.entries(U.att.cur)){if(!c.status&&!c.extra){const x=$(`#ed-a-body .ed-att-row[data-sid="${CSS.escape(sid)}"]`);if(x&&x.classList.contains("paused"))continue;c.status="in";}}$("#ed-a-body .ed-att-list").innerHTML=(U.att.src?roster(U.att.cid,U.att.date,M):roster(U.att.cid,U.att.date)).map(x=>attRow(x,U.att.date,U.att.src?M:null)).join("");break;}
+    case"att-extra":{const sel=$("#ed-a-extra"),sid=sel&&sel.value;if(!sid)break;attRead();U.att.cur[sid]={status:"make",note:"",at:"",extra:true};const s=U.att.src?(M.stus||[]).find(x=>x.id===sid):stuOf(sid);$("#ed-a-body .ed-att-list").insertAdjacentHTML("beforeend",attRow({s,e:null,extra:true},U.att.date,U.att.src?M:null));sel.querySelector(`option[value="${CSS.escape(sid)}"]`).remove();sel.value="";break;}
+    case"att-save":attSave();break;
+    case"att-msg":attMsg(b.dataset.sid);break;
+    case"sst":U.sst=b.dataset.v;U.sids=null;U.spack=false;route();break;
+    case"stu-clear":U.sids=null;U.spack=false;route();break;
+    case"stu-new":stuForm(null);break;
+    case"stu-edit":stuForm(id);break;
+    case"stu-save":stuSave(id);break;
+    case"stu-open":stuOpen(id);break;
+    case"stu-leave":stuLeave(id);break;
+    case"stu-leave-go":stuLeaveGo(id);break;
+    case"stu-back":try{const r=await call("stu/save",{id,status:"on"});upd(S.stus,r.stu);idx();route();stuOpen(id);toast("다시 다니는 것으로 바꿨습니다. 반은 ‘반 추가’로 넣어 주세요.");}catch(err){failToast(err);}break;
+    case"stu-del":stuDel(id);break;
+    case"stu-import":impModal();break;
+    case"imp-go":impGo();break;
+    case"stu-csv":dlCsv(`마이에듀_수강생_${T()}.csv`,["이름","학년","학교","상태","반","보호자","보호자 연락처","본인 연락처","시작한 날"],S.stus.map(s=>[s.name,s.grade,s.school,SST[s.status][0],stuClasses(s.id).map(c=>c.name).join(" / "),s.g_name,s.g_phone,s.phone,s.start_date]));break;
+    case"enr-new":enrModal({sid:b.dataset.sid});break;
+    case"enr-edit":enrModal({id});break;
+    case"enr-save":enrSave(id,b.dataset.sid);break;
+    case"enr-del":{const en=S.enrs.find(x=>x.id===id);if(!en||!await ask("이 수강 등록을 지웁니다. 출결 기록은 남습니다.","지우기"))break;try{await call("enr/del",{id});S.enrs=S.enrs.filter(x=>x.id!==id);idx();route();stuOpen(en.stu_id);}catch(err){failToast(err);}break;}
+    case"pack-buy":packBuy(id);break;
+    case"guard":{const s=stuOf(id);if(!s)break;try{const tok=await ensureLink(id),url=lkUrl(tok),l=S.links[id];
+      openModal(`<h2><span class="bars"></span>${esc(s.name)} 보호자 페이지</h2><div class="hint" style="margin-bottom:8px">가입 없이 열리는 주소입니다. 시간표·출결·진도·수강료·영수증이 보이고, 연락처와 상담 기록은 나가지 않습니다. ${l&&l.expiresAt?fmtD(l.expiresAt.slice(0,10))+"까지 열립니다.":""}${l&&l.views?` 지금까지 ${l.views}번 열어 봤습니다.`:""}</div>
+      <input value="${esc(url)}" readonly onclick="this.select()" style="font-family:var(--mono);font-size:13px">
+      <div class="m-foot"><button class="btn btn-ghost left" data-ed="guard-off" data-id="${esc(id)}">주소 닫기</button><a class="btn btn-ghost" href="${esc(url)}" target="_blank" rel="noopener">열어 보기 ↗</a><button class="btn" data-act="copy-text" data-text="${esc(url)}" data-msg="주소를 복사했습니다.">복사</button>${MSG.can()&&(s.g_phone||s.phone)?`<button class="btn btn-pri" data-ed="guard-msg" data-id="${esc(id)}">문자로 보내기</button>`:""}</div>`);}catch(err){failToast(err);}break;}
+    case"guard-msg":{const s=stuOf(id);if(!s)break;const tok=await ensureLink(id);MSG.compose({to:s.g_phone||s.phone,name:s.g_name||s.name,tpl:"link.ed-guard",fields:{이름:s.name,링크:lkUrl(tok),코드:tok},ref_kind:"ed-stu",ref_id:id});break;}
+    case"guard-off":{const l=S.links[id];if(!l||!await ask("이 주소를 닫습니다. 보호자가 더 볼 수 없고, 새로 만들면 다른 주소가 됩니다.","닫기"))break;try{await api("link/revoke",{token:l.token});delete S.links[id];closeModal();toast("주소를 닫았습니다.");route();}catch(err){failToast(err);}break;}
+    case"msg-free":{const s=stuOf(id);if(s)MSG.compose({to:s.g_phone||s.phone,name:s.g_name||s.name,tpl:"free",fields:{이름:s.name},ref_kind:"ed-stu",ref_id:id});break;}
+    case"yr-cert":{const s=stuOf(id);if(!s)break;const yr=T().slice(0,4),rows=billsOf(id).filter(x=>x.status==="paid"&&(x.paid_at||"").startsWith(yr)).map(x=>Object.assign({},x,{paidAt:x.paid_at,paidAmt:paidAmt(x),refund:D(x).refund})).sort((p,q)=>p.paidAt.localeCompare(q.paidAt));printDoc("교육비 납입 확인서",certHtml(rows,s.name,bizOf(),yr));break;}
+    case"receipt":{const x=S.bills.find(y=>y.id===id),s=x&&stuOf(x.stu_id);if(x)printDoc("영수증",receiptHtml(Object.assign({},x,{paidAt:x.paid_at,paidAmt:paidAmt(x),refund:D(x).refund}),s?s.name:"",bizOf()));break;}
+    case"class-new":classForm(null);break;
+    case"class-edit":classForm(id);break;
+    case"class-save":classSave(id);break;
+    case"class-del":classDel(id);break;
+    case"sc-add":$("#ed-sc").insertAdjacentHTML("beforeend",classForm.row({w:1,s:"16:00",e:""}));break;
+    case"sc-del":{const r=b.closest(".ed-sc-row");if(r&&$$("#ed-sc .ed-sc-row").length>1)r.remove();else if(r){r.querySelector(".ed-sc-s").value="";}break;}
+    case"bym":U.bym=b.dataset.v;U.bsel.clear();route();break;
+    case"bst":U.bst=b.dataset.v;route();break;
+    case"bsel":{if(b.checked)U.bsel.add(id);else U.bsel.delete(id);route();break;}
+    case"bsel-all":{const ym=U.bym||ymOf(),dr=S.bills.filter(x=>x.status==="draft"&&(x.ym===ym||U.bst==="draft"));if(b.checked)dr.forEach(x=>U.bsel.add(x.id));else U.bsel.clear();route();break;}
+    case"bill-gen":billGen(b.dataset.ym||U.bym||ymOf());break;
+    case"bill-gen-go":billGenGo(b.dataset.ym);break;
+    case"bill-issue":billIssue();break;
+    case"bill-new":billModal({sid:b.dataset.sid||""});break;
+    case"bill-open":billModal({id});break;
+    case"bill-save":billSave(id||"",!!b.dataset.issue);break;
+    case"it-add":$("#ed-its").insertAdjacentHTML("beforeend",billModal.itemRow({label:"",amount:"",qty:0,class_id:""}));break;
+    case"it-del":{const r=b.closest(".ed-it");if(r)r.remove();$("#ed-its").dispatchEvent(new Event("input"));break;}
+    case"bill-paid":paidModal(id);break;
+    case"paid-go":paidGo(id);break;
+    case"bill-unpaid":billUnpaid(id);break;
+    case"bill-void":billVoid(id);break;
+    case"bill-send":billSend(id);break;
+    case"refund":refundModal(id);break;
+    case"refund-go":refundGo(id);break;
+    case"bill-csv":{const ym=U.bym||ymOf();dlCsv(`마이에듀_수강료_${ym}.csv`,["청구 월","수강생","제목","금액","기한","상태","납부일","결제","받은 금액","반환"],S.bills.filter(x=>x.ym===ym).map(x=>[x.ym,(stuOf(x.stu_id)||{}).name||"",x.title,x.total,x.due||"",BST[x.status][0],x.paid_at||"",PAY[x.method]||"",x.status==="paid"?paidAmt(x):"",D(x).refund?D(x).refund.amt:""]));break;}
+    case"nsub":U.nsub=b.dataset.v;route();break;
+    case"nkind":U.nkind=b.dataset.v;route();break;
+    case"rym":U.rym=b.dataset.v;route();break;
+    case"rep-one":try{await repMake(b.dataset.sid,b.dataset.ym);}catch(err){failToast(err);}break;
+    case"rep-all":repAll(b.dataset.ym);break;
+    case"rep-ai":repAiPrompt(b.dataset.ym);break;
+    case"rep-send":repSend(id);break;
+    case"note-new":noteModal({sid:b.dataset.sid||""});break;
+    case"note-open":noteModal({id});break;
+    case"note-save":noteSave(id);break;
+    case"note-del":noteDel(id);break;
+    case"lead-new":leadModal(null);break;
+    case"lead-open":leadModal(id);break;
+    case"lead-save":leadSave(id);break;
+    case"lead-del":leadDel(id);break;
+    case"lead-conv":leadConv(id);break;
+    case"lead-conv-go":leadConvGo(id);break;
+    case"ck":{const k=b.dataset.k,cur=new Set(st().checks);if(b.checked)cur.add(k);else cur.delete(k);await saveSet({checks:[...cur]});route();break;}
+    case"crime-save":{const staff={};$$(".ed-ck-crime").forEach(x=>{staff[x.dataset.id]={crime:x.value};});if(await saveSet({staff},"조회일을 저장했습니다."))route();break;}
+    case"ins-save":if(await saveSet({ins:{name:$("#ed-ck-insn").value.trim(),until:$("#ed-ck-insu").value}},"저장했습니다."))route();break;
+    case"go-ids":U.sids=b.dataset.ids.split(",");U.spack=false;U.sst="all";go("#/edu/stu");break;
+    case"set-save":setSave();break;
+  }
+});
+document.addEventListener("input",e=>{
+  if(e.target.id==="ed-s-q"){U.sq=e.target.value;clearTimeout(U.qT);U.qT=setTimeout(()=>{const pos=e.target.selectionStart;route();const q=$("#ed-s-q");if(q){q.focus();try{q.setSelectionRange(pos,pos);}catch(x){}}},250);}
+});
+document.addEventListener("change",e=>{
+  if(e.target.id==="ed-s-cls"){U.scl=e.target.value;route();}
+  else if(e.target.id==="ed-n-cls"){U.ncl=e.target.value;route();}
+  else if(e.target.name==="ed-w-type"||e.target.name==="ed-s-type"){$$(`input[name="${e.target.name}"]`).forEach(x=>x.closest("label").classList.toggle("on",x.checked));}
+});
+
+/* ── 들어오는 곳 ── */
+function view(arg){
+  if(MODE!=="cloud"){$("#view").innerHTML=empty("서버에 연결된 마이웍스에서 씁니다","");return;}
+  if(!mgr()){if(M.ready)refresh();vMine();return;}
+  if(S.ready)refresh();   // 다른 화면에 있는 동안 바뀐 것이 있으면 뒤에서 다시 불러와 그립니다
+  if(!S.ready){shell(arg||"",`<div class="empty">불러오는 중…</div>`);load().then(()=>{if(onPage())view(location.hash.replace(/^#\/edu\/?/,""));}).catch(e=>{shell(arg||"",empty("불러오지 못했습니다",errMsg(e)));});return;}
+  const sub=String(arg||"").split("/")[0];
+  ({"":vToday,stu:vStu,class:vClass,bill:vBill,note:vNote,lead:vLead,check:vCheck,set:vSet,mine:vMine}[sub]||vToday)();
+}
+return{view,fillDash,onVersion,reset,refresh,weekText,linkPage,_t:{S,M,U,sessions,roster,packOf,refundCalc,repDraft,impParse,attention,checkAuto}};
+})();
+
 /* ═══════════ 시작 안내 — 하는 일에 맞춰 메뉴와 첫 단계를 준비합니다 ═══════════ */
 const START=(()=>{
 const KINDS={
@@ -13378,6 +14723,7 @@ const KINDS={
   store:["매장·공간을 운영해요","매장 · 파티룸 · 카페 · 숙박",["space"],["store","space","people","notify"]],
   sell:["물건을 팔아요","온라인 · 오프라인 판매",["commerce"],["seller","money","contact","notify"]],
   create:["콘텐츠를 만들어요","유튜브 · 인스타그램 · 블로그",["creator"],["chan","deal","kit","notify"]],
+  teach:["가르쳐요","학원 · 교습소 · 과외 · 레슨",["edu"],["edclass","edstu","edatt","edbill"]],
   multi:["여러 가지를 해요","필요한 것만 골라서 켭니다",[],["ext","project","money","notify"]]
 };
 const STEPS={   // [할 일, 설명, 버튼, 가는 곳, 스스로 끝났는지 알 수 있으면 확인]
@@ -13392,7 +14738,11 @@ const STEPS={   // [할 일, 설명, 버튼, 가는 곳, 스스로 끝났는지 
   chan:["채널 등록하기","유튜브·인스타그램 같은 채널과 이달 구독자 수를 적습니다.","채널 열기",()=>go("#/creator/chan")],
   deal:["협찬 건 올리기","문의부터 입금까지 단계별로 챙깁니다. 마감이 다가오면 알려 드립니다.","협찬 열기",()=>go("#/creator/deal")],
   kit:["미디어킷 열기","브랜드에게 보여 줄 소개 페이지를 만들고 문의를 받습니다.","미디어킷 열기",()=>go("#/creator/kit")],
-  ext:["쓸 확장판 고르기","매장 운영, 판매, 세금, 사람, 마케팅, 크리에이터 가운데 필요한 것만 켭니다.","확장판 열기",()=>go("#/ext"),()=>EXT_ROUTES.some(m=>modOn(m))],
+  edclass:["반 만들기","요일·시간·수강료를 정합니다. 오늘 수업과 청구서가 이 시간표를 따라갑니다.","마이에듀 열기",()=>go("#/edu/class")],
+  edstu:["수강생 넣기","엑셀 명단을 붙여 넣으면 한 번에 들어갑니다. 보호자 연락처가 있으면 문자 안내가 이어집니다.","수강생 열기",()=>go("#/edu/stu")],
+  edatt:["출석 체크 해 보기","오늘 수업에서 ‘출석 체크’를 누르고, 진도와 과제를 함께 적습니다.","오늘 수업 열기",()=>go("#/edu")],
+  edbill:["수강료 청구서 만들기","다니는 수강생마다 이번 달 초안을 만들고, 확인한 뒤 확정합니다.","수강료 열기",()=>go("#/edu/bill")],
+  ext:["쓸 확장판 고르기","매장 운영, 판매, 세금, 사람, 마케팅, 크리에이터, 교육 가운데 필요한 것만 켭니다.","확장판 열기",()=>go("#/ext"),()=>EXT_ROUTES.some(m=>modOn(m))],
   project:["프로젝트 하나 만들기","진행 중인 일을 프로젝트로 올리고 업무를 나눕니다.","프로젝트 만들기",()=>projectFormModal(null),()=>DB.projects.length>0],
   notify:["휴대폰에서 알림 받기","견적에 답이 오거나 마감이 다가오면 알려 드립니다. 휴대폰 홈 화면에 추가해 두면 앱처럼 씁니다.","알림 설정",()=>NT.settings(),()=>NT._t.pushState()==="on"]
 };
@@ -13594,7 +14944,7 @@ function vLog(){
 function vAuto(){
   if(!M.conn.on)return vConnect();
   const a=M.settings.auto,ad=isAdmin(),dis=ad?"":"disabled";
-  const row=(k,title,desc,extra)=>`<div class="mg-auto ${a[k].on?"on":""}"><label class="mg-sw"><input type="checkbox" class="mg-a-on" data-k="${k}" ${a[k].on?"checked":""} ${dis}><span><b>${title}</b><em>${desc}</em></span></label>${extra||""}<details class="mg-prev"><summary>보내는 문구 보기</summary><pre>${esc(fill(textOf("auto."+k),{상호:sign(),이름:"홍길동",제목:"브랜드 로고 디자인",금액:"1,100,000원",기한:"11/28",링크:location.origin+"/link/…",날짜:"11/28",시간:"19:00",지점:"홍대점",안내:a.resEve.note||"(안내 문구)"}))}</pre></details></div>`;
+  const row=(k,title,desc,extra,pf)=>`<div class="mg-auto ${a[k].on?"on":""}"><label class="mg-sw"><input type="checkbox" class="mg-a-on" data-k="${k}" ${a[k].on?"checked":""} ${dis}><span><b>${title}</b><em>${desc}</em></span></label>${extra||""}<details class="mg-prev"><summary>보내는 문구 보기</summary><pre>${esc(fill(textOf("auto."+k),{상호:sign(),이름:"홍길동",제목:"브랜드 로고 디자인",금액:"1,100,000원",기한:"11/28",링크:location.origin+"/link/…",날짜:"11/28",시간:"19:00",지점:"홍대점",안내:a.resEve.note||"(안내 문구)"},pf||{}))}</pre></details></div>`;
   const num=(id,v,min,max,unit)=>`<span class="mg-num"><input type="number" id="${id}" min="${min}" max="${max}" value="${v}" ${dis}>${unit}</span>`;
   return`<div class="mg-note"><b>자동 안내는 이렇게 보냅니다</b><span>오전 9시부터 오후 8시 사이에만 보냅니다. 보내기 직전에 상태를 다시 확인하므로, 그 사이 입금됐거나 답이 온 건에는 가지 않습니다. 같은 안내는 한 번만 보내고, 고객 연락처에 휴대폰 번호가 있어야 합니다.</span></div>
   <div class="card"><h2><span class="bars"></span>자동 안내</h2>
@@ -13602,13 +14952,15 @@ function vAuto(){
     ${row("invLate","입금 기한이 지나면 알려 주기",`기한이 ${a.invLate.days}일 지나도록 입금 확인이 없으면 한 번 보냅니다.`,`<div class="mg-opt">기한 뒤 ${num("mg-a-invLate",a.invLate.days,1,30,"일째")}</div>`)}
     ${row("quoteNudge","견적 회신 요청",`견적 링크를 보내고 ${a.quoteNudge.days}일 동안 답이 없으면 한 번 보냅니다.`,`<div class="mg-opt">보낸 뒤 ${num("mg-a-quoteNudge",a.quoteNudge.days,1,30,"일째")}</div>`)}
     ${modOn("space")?row("resEve","예약 전날 이용 안내 (마이스토어)",`내일 예약한 손님에게 전날 ${a.resEve.hour}시에 보냅니다. 예약에 휴대폰 번호가 있어야 합니다.`,`<div class="mg-opt">전날 ${num("mg-a-resEve",a.resEve.hour,9,19,"시")}</div><textarea id="mg-a-note" placeholder="안내 문구 — 예: 입실 10분 전부터 들어오실 수 있습니다. 주차는 건물 뒤편입니다." ${dis} style="min-height:70px;margin-top:8px">${esc(a.resEve.note||"")}</textarea>`):""}
+    ${modOn("edu")&&a.edDue?row("edDue","수강료 납부 기한 전에 알려 주기 (마이에듀)",`확정한 수강료의 납부 기한 ${a.edDue.days?a.edDue.days+"일 전":"당일"}에 보호자 페이지 링크와 함께 보냅니다.`,`<div class="mg-opt">기한 ${num("mg-a-edDue",a.edDue.days,0,14,"일 전 (0은 당일)")}</div>`,{이름:"김하늘",제목:"12월 수강료",금액:"280,000원"}):""}
+    ${modOn("edu")&&a.edLate?row("edLate","수강료 미납 안내 (마이에듀)",`기한이 ${a.edLate.days}일 지나도록 납부 확인이 없으면 한 번 보냅니다. 보호자가 보냈다고 알린 건에는 보내지 않습니다.`,`<div class="mg-opt">기한 뒤 ${num("mg-a-edLate",a.edLate.days,1,30,"일째")}</div>`,{이름:"김하늘",제목:"12월 수강료",금액:"280,000원"}):""}
     ${ad?`<div class="mg-row"><span class="hint">문구는 ‘연결·문구’ 탭에서 고칠 수 있습니다.</span><button class="btn btn-pri" data-msg="auto-save">저장</button></div>`:`<div class="hint" style="margin-top:12px">관리자만 바꿀 수 있습니다.</div>`}
   </div>`;
 }
 async function autoSave(){
   const on=k=>{const el=$(`.mg-a-on[data-k="${k}"]`);return el?el.checked:M.settings.auto[k].on;},n=(id,d)=>{const el=$("#"+id);return el?Number(el.value):d;};
   const cur=M.settings.auto;
-  try{const r=await api("msg/settings",{set:{auto:{invDue:{on:on("invDue"),days:n("mg-a-invDue",cur.invDue.days)},invLate:{on:on("invLate"),days:n("mg-a-invLate",cur.invLate.days)},quoteNudge:{on:on("quoteNudge"),days:n("mg-a-quoteNudge",cur.quoteNudge.days)},resEve:{on:on("resEve"),hour:n("mg-a-resEve",cur.resEve.hour),note:$("#mg-a-note")?$("#mg-a-note").value:cur.resEve.note}}}});M.settings=r.settings;toast("자동 안내를 저장했습니다.");nav("auto");}catch(e){failToast(e);}
+  try{const r=await api("msg/settings",{set:{auto:{invDue:{on:on("invDue"),days:n("mg-a-invDue",cur.invDue.days)},invLate:{on:on("invLate"),days:n("mg-a-invLate",cur.invLate.days)},quoteNudge:{on:on("quoteNudge"),days:n("mg-a-quoteNudge",cur.quoteNudge.days)},resEve:{on:on("resEve"),hour:n("mg-a-resEve",cur.resEve.hour),note:$("#mg-a-note")?$("#mg-a-note").value:cur.resEve.note},...(cur.edDue?{edDue:{on:on("edDue"),days:n("mg-a-edDue",cur.edDue.days)},edLate:{on:on("edLate"),days:n("mg-a-edLate",cur.edLate.days)}}:{})}}});M.settings=r.settings;toast("자동 안내를 저장했습니다.");nav("auto");}catch(e){failToast(e);}
 }
 
 /* ── 연결·문구 ── */
@@ -13616,7 +14968,7 @@ const SYN={이름:["이름","고객명","성함","수신자","받는분","담당
 const guess=v=>{const n=String(v||"").replace(/\s/g,"").toLowerCase();for(const[k,L]of Object.entries(SYN))if(L.some(x=>n===x.toLowerCase()))return k;return"";};
 function vSet(){
   if(!M.conn.on)return vConnect();
-  const s=M.settings,c=M.conn,ad=isAdmin(),dis=ad?"":"disabled",keys=Object.keys(M.tpl).filter(k=>k!=="free");
+  const s=M.settings,c=M.conn,ad=isAdmin(),dis=ad?"":"disabled",keys=Object.keys(M.tpl).filter(k=>k!=="free"&&(modOn("edu")||!/^(ed\.|link\.ed-|auto\.ed)/.test(k)));
   const tplRow=k=>`<div class="mg-tpl"><div class="mg-tpl-h"><b>${esc(M.tpl[k].name)}</b>${s.tpl[k]?`<button class="linkbtn" data-msg="tpl-reset" data-k="${k}">기본 문구로</button>`:""}</div><textarea class="mg-tpl-t" data-k="${k}" ${dis}>${esc(textOf(k))}</textarea></div>`;
   const km=s.kakao||{on:false,pfId:"",map:{}};
   const kRow=U.kRow=k=>{const km=M.settings.kakao||{map:{}},c=M.conn,dis=isAdmin()?"":"disabled";const m=km.map[k],t=m&&(c.templates||[]).find(x=>x.id===m.templateId);
