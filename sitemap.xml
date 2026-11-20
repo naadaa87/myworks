@@ -1,23 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://myworks.ai.kr/</loc><lastmod>2026-11-20</lastmod><priority>1.0</priority></url>
-  <url><loc>https://myworks.ai.kr/store</loc><lastmod>2026-11-20</lastmod><priority>0.8</priority></url>
-  <url><loc>https://myworks.ai.kr/building</loc><lastmod>2026-11-20</lastmod><priority>0.8</priority></url>
-  <url><loc>https://myworks.ai.kr/tax</loc><lastmod>2026-11-20</lastmod><priority>0.8</priority></url>
-  <url><loc>https://myworks.ai.kr/people</loc><lastmod>2026-11-20</lastmod><priority>0.8</priority></url>
-  <url><loc>https://myworks.ai.kr/seller</loc><lastmod>2026-11-20</lastmod><priority>0.8</priority></url>
-  <url><loc>https://myworks.ai.kr/marketing</loc><lastmod>2026-11-20</lastmod><priority>0.8</priority></url>
-  <url><loc>https://myworks.ai.kr/creator</loc><lastmod>2026-11-20</lastmod><priority>0.8</priority></url>
-  <url><loc>https://myworks.ai.kr/pricing</loc><lastmod>2026-11-20</lastmod><priority>0.8</priority></url>
-  <url><loc>https://myworks.ai.kr/guide</loc><lastmod>2026-11-20</lastmod><priority>0.8</priority></url>
+  <url><loc>https://myworks.ai.kr/</loc><lastmod>2026-11-21</lastmod><priority>1.0</priority></url>
+  <url><loc>https://myworks.ai.kr/store</loc><lastmod>2026-11-21</lastmod><priority>0.8</priority></url>
+  <url><loc>https://myworks.ai.kr/building</loc><lastmod>2026-11-21</lastmod><priority>0.8</priority></url>
+  <url><loc>https://myworks.ai.kr/tax</loc><lastmod>2026-11-21</lastmod><priority>0.8</priority></url>
+  <url><loc>https://myworks.ai.kr/people</loc><lastmod>2026-11-21</lastmod><priority>0.8</priority></url>
+  <url><loc>https://myworks.ai.kr/seller</loc><lastmod>2026-11-21</lastmod><priority>0.8</priority></url>
+  <url><loc>https://myworks.ai.kr/marketing</loc><lastmod>2026-11-21</lastmod><priority>0.8</priority></url>
+  <url><loc>https://myworks.ai.kr/creator</loc><lastmod>2026-11-21</lastmod><priority>0.8</priority></url>
+  <url><loc>https://myworks.ai.kr/edu</loc><lastmod>2026-11-21</lastmod><priority>0.8</priority></url>
+  <url><loc>https://myworks.ai.kr/pricing</loc><lastmod>2026-11-21</lastmod><priority>0.8</priority></url>
+  <url><loc>https://myworks.ai.kr/guide</loc><lastmod>2026-11-21</lastmod><priority>0.8</priority></url>
   <url><loc>https://myworks.ai.kr/notice</loc><lastmod>2026-11-20</lastmod><priority>0.8</priority></url>
-  <url><loc>https://myworks.ai.kr/start</loc><lastmod>2026-11-20</lastmod><priority>0.8</priority></url>
-  <url><loc>https://myworks.ai.kr/terms</loc><lastmod>2026-11-20</lastmod><priority>0.3</priority></url>
-  <url><loc>https://myworks.ai.kr/privacy</loc><lastmod>2026-11-20</lastmod><priority>0.3</priority></url>
+  <url><loc>https://myworks.ai.kr/start</loc><lastmod>2026-11-21</lastmod><priority>0.8</priority></url>
+  <url><loc>https://myworks.ai.kr/terms</loc><lastmod>2026-11-21</lastmod><priority>0.3</priority></url>
+  <url><loc>https://myworks.ai.kr/privacy</loc><lastmod>2026-11-21</lastmod><priority>0.3</priority></url>
   <url><loc>https://myworks.ai.kr/features</loc><lastmod>2026-11-20</lastmod><priority>0.8</priority></url>
   <url><loc>https://myworks.ai.kr/faq</loc><lastmod>2026-11-17</lastmod><priority>0.8</priority></url>
-  <url><loc>https://myworks.ai.kr/about</loc><lastmod>2026-11-20</lastmod><priority>0.8</priority></url>
-  <url><loc>https://myworks.ai.kr/blog/</loc><lastmod>2026-11-20</lastmod><priority>0.8</priority></url>
+  <url><loc>https://myworks.ai.kr/about</loc><lastmod>2026-11-21</lastmod><priority>0.8</priority></url>
+  <url><loc>https://myworks.ai.kr/blog/</loc><lastmod>2026-11-21</lastmod><priority>0.8</priority></url>
   <url><loc>https://myworks.ai.kr/blog/solo-business-work-management</loc><lastmod>2026-11-16</lastmod><priority>0.7</priority></url>
   <url><loc>https://myworks.ai.kr/blog/when-to-move-from-excel</loc><lastmod>2026-11-16</lastmod><priority>0.7</priority></url>
   <url><loc>https://myworks.ai.kr/blog/assign-work-without-kakao</loc><lastmod>2026-11-16</lastmod><priority>0.7</priority></url>

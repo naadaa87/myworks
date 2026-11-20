@@ -57,10 +57,15 @@ const PC = { width: 1280, height: 900 }, PHONE = { width: 390, height: 800 };
 let p = await open(A, PC);
 ok(await p.evaluate(() => document.querySelector('link[rel="manifest"]').getAttribute("href")) === "/app/manifest.webmanifest", "앱 설치 정보(manifest)가 파일로 걸려 있음");
 ok(await p.evaluate(async () => { const r = await navigator.serviceWorker.getRegistration("/app/"); return !!r; }), "서비스 워커 등록");
-ok((await txt(p, "#start-card")).includes("어떤 일을 하시나요?") && (await p.locator("[data-start=pick]").count()) === 5, "새 워크스페이스: 하는 일 고르기 다섯 가지");
+ok((await txt(p, "#start-card")).includes("어떤 일을 하시나요?") && (await p.locator("[data-start=pick]").count()) === 6, "새 워크스페이스: 하는 일 고르기 여섯 가지");
 await shot(p, "01-start-pick");
 await p.click('[data-start="pick"][data-k="create"]'); await p.waitForSelector(".start-steps");
 ok((await txt(p, "#start-card")).includes("콘텐츠를 만들어요") && (await p.locator(".start-step").count()) === 4 && (await txt(p, "#nav-side")).includes("마이크리에이터"), "‘콘텐츠를 만들어요’ → 4단계가 나오고 마이크리에이터가 켜짐");
+await p.click('[data-start="reset"]'); await p.waitForSelector("[data-start=pick]");
+await p.click('[data-start="pick"][data-k="teach"]'); await p.waitForSelector(".start-steps");
+ok((await txt(p, "#start-card")).includes("가르쳐요") && (await p.locator(".start-step").count()) === 4 && (await txt(p, "#nav-side")).includes("마이에듀"), "‘가르쳐요’ → 4단계가 나오고 마이에듀가 켜짐");
+const eduMods = on => p.evaluate(async on => { const cur = tier().modules.filter(m => EXT_ROUTES.includes(m) && m !== "edu"); const r = await api("ws/modules", { modules: on ? cur.concat("edu") : cur }); CLOUD.tier.modules = r.modules || []; persistMeta(); renderNav(); route(); }, on);
+await eduMods(false);   // 아래 시험은 마이에듀를 끈 상태를 기준으로 합니다
 await p.click('[data-start="reset"]'); await p.waitForSelector("[data-start=pick]");
 await p.click('[data-start="pick"][data-k="work"]'); await p.waitForSelector(".start-steps");
 ok((await txt(p, ".start-step:first-child")).includes("고객 한 명 적기") && (await txt(p, "#start-card h2")).includes("0/4"), "다른 일로 바꾸기 → ‘의뢰받아 일해요’ 0/4");
@@ -148,6 +153,9 @@ await p.fill("#mg-secret", "SECRETSECRET0001"); await p.click('[data-msg="connec
 ok((await p.evaluate(() => location.hash)) === "#/msg/set" && (await txt(p, ".mg-conn")).includes("연결되어 있습니다") && (await txt(p, ".mg-stat")).includes("010-1111-2222"), "연결 → 잔액·발신번호를 읽고 ‘연결·문구’로");
 await p.waitForFunction(() => document.querySelectorAll(".mg-k").length > 0);
 ok((await p.locator(".mg-tpl").count()) === 12 && (await p.locator(".mg-k").count()) === 12 && (await txt(p, "#mg-k-pf")).includes("하루 디자인"), "용도 12가지의 문구와 알림톡 연결, 카카오톡 채널 읽힘");
+await eduMods(true); await p.waitForFunction(() => document.querySelectorAll(".mg-tpl").length === 18);
+ok((await p.locator('.mg-tpl-t[data-k="link.ed-guard"]').count()) === 1 && (await p.locator('.mg-k[data-k="auto.edLate"]').count()) === 1, "마이에듀를 켜면 보호자·수강료 문구 6가지가 더 보임");
+await eduMods(false); await p.waitForFunction(() => document.querySelectorAll(".mg-tpl").length === 12);
 // 알림톡: 견적서 용도에 템플릿을 잇습니다
 await p.selectOption('.mg-k[data-k="link.quote"] .mg-k-sel', "KA01TP000000000000001"); await p.waitForSelector('.mg-k[data-k="link.quote"] .mg-k-var');
 const vars = await p.evaluate(() => [...document.querySelectorAll('.mg-k[data-k="link.quote"] .mg-k-var')].map(s => s.dataset.v + "=" + s.value));

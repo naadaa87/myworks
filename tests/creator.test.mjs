@@ -219,6 +219,11 @@ r = await call("ai/propose", { kind: "cr-deal", payload: { brand: "따숨", titl
 r = await call("ai/propose", { kind: "cr-deal", payload: { title: "브랜드 없음" } }, TK); ok(r.s === 400, "cr-deal needs brand");
 r = await call("proposal/decide", { id: pid, approve: true }, A2); ok(r.s === 200 && r.j.proposal.status === "approved" && r.j.proposal.applied.channel === "하루의 작업실", "approve cr-idea");
 r = await call("proposal/decide", { id: pid2, approve: true }, A2); ok(r.j.proposal.applied.brand === "따숨", "approve cr-deal");
+// D1은 LIKE 패턴을 50바이트까지만 받습니다 — 한글로 긴 채널 이름을 보내도 승인이 깨지지 않아야 합니다
+r = await call("ai/propose", { kind: "cr-idea", payload: { title: "긴 채널 이름 시험", channel: "하루의 작업실 메인 유튜브 채널 겨울 집 고치기 시리즈", format: "long" } }, TK);
+r = await call("proposal/decide", { id: r.j.proposal.id, approve: true }, A2); ok(r.s === 200 && r.j.proposal.status === "approved" && !r.j.proposal.applied.channel, "long Korean channel name: approved, no wrong channel picked");
+r = await call("ai/propose", { kind: "cr-idea", payload: { title: "영문 대소문자", channel: "하루의 작업실", format: "short" } }, TK);
+r = await call("proposal/decide", { id: r.j.proposal.id, approve: true }, A2); ok(r.j.proposal.applied.channel === "하루의 작업실", "exact channel name still found");
 r = await call("cr/data", null, A2);
 ok(r.j.conts.some(c => c.title === "겨울 결로 막는 법" && c.stage === "idea" && c.chan_id === ch1.id && c.d.memo.startsWith("창틀")), "ai idea added");
 x = r.j.deals.find(d => d.brand === "따숨"); ok(x && x.stage === "nego" && x.amount === 700000 && x.chan_id === ch1.id && x.d.src === "ai" && x.post_due === addDays(today, 20), "ai deal added");
