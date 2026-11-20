@@ -1626,7 +1626,7 @@ a.linkbtn{display:inline-block;margin-top:6px}
 .ht-act{display:flex;justify-content:flex-end;align-items:center;gap:12px;margin-top:10px;flex-wrap:wrap}
 
 /* ═══ 빠른 입력 · 찾기 / 시작 안내 / 전체 메뉴 ═══ */
-.side-tools .st-btn{padding:8px 9px;gap:7px;justify-content:flex-start}
+.side-tools .st-btn{flex:1 1 auto;padding:8px 9px;gap:7px;justify-content:flex-start;white-space:nowrap}
 .m-box.m-cmd{padding:0;width:min(600px,calc(100% - 24px));margin-top:9vh;overflow:hidden}
 .cmd-top{display:flex;align-items:center;gap:10px;padding:13px 14px 13px 18px;border-bottom:1px solid var(--line);color:var(--sub)}
 .cmd-top input{border:0;padding:6px 0;font-size:16px;flex:1;min-width:0;background:transparent}
@@ -1834,7 +1834,22 @@ function norm(s){return String(s||"").replace(/\s+/g,"").toLowerCase();}
 function cyrb53(str,seed=0){let h1=0xdeadbeef^seed,h2=0x41c6ce57^seed;for(let i=0,ch;i<str.length;i++){ch=str.charCodeAt(i);h1=Math.imul(h1^ch,2654435761);h2=Math.imul(h2^ch,1597334677);}h1=Math.imul(h1^(h1>>>16),2246822507);h1^=Math.imul(h2^(h2>>>13),3266489909);h2=Math.imul(h2^(h2>>>16),2246822507);h2^=Math.imul(h1^(h1>>>13),3266489909);return 4294967296*(2097151&h2)+(h1>>>0);}
 const hashPw=pw=>cyrb53("mw:"+pw,7).toString(36)+"."+cyrb53(pw+":mw",13).toString(36);
 let toastT=null;
-function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("show");clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove("show"),2400);}
+/* 조사 고르기 — "모노가구을(를)" → "모노가구를". 바로 앞 글자의 받침을 보고 고릅니다 */
+const JOSA = { "을(를)": ["을", "를"], "를(을)": ["을", "를"], "이(가)": ["이", "가"], "가(이)": ["이", "가"], "은(는)": ["은", "는"], "는(은)": ["은", "는"], "와(과)": ["과", "와"], "과(와)": ["과", "와"], "(으)로": ["으로", "로"], "(이)라": ["이라", "라"], "(이)나": ["이나", "나"] };
+const JOSA_RE = /([가-힣A-Za-z0-9])([^가-힣A-Za-z0-9\s]{0,3}|\s+)(을\(를\)|를\(을\)|이\(가\)|가\(이\)|은\(는\)|는\(은\)|와\(과\)|과\(와\)|\(으\)로|\(이\)라|\(이\)나)/g;
+function josa(text) {
+  return String(text == null ? "" : text).replace(JOSA_RE, (m, ch, mid, j) => {
+    const c = ch.charCodeAt(0);
+    let bat;
+    if (c >= 0xAC00 && c <= 0xD7A3) bat = (c - 0xAC00) % 28;
+    else if (c >= 48 && c <= 57) bat = [21, 8, 0, 16, 0, 0, 1, 8, 8, 0][c - 48];
+    else bat = "LMNRlmnr".includes(ch) ? ("LlRr".includes(ch) ? 8 : 4) : 0;
+    const pair = JOSA[j], pick = j === "(으)로" ? (bat === 0 || bat === 8 ? pair[1] : pair[0]) : (bat ? pair[0] : pair[1]);
+    return ch + (/^\s+$/.test(mid) ? "" : mid) + pick;
+  });
+}
+const confirm=m=>window.confirm(josa(m));
+function toast(m){const t=$("#toast");t.textContent=josa(m);t.classList.add("show");clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove("show"),2400);}
 function download(name,text){const b=new Blob([text],{type:"application/json;charset=utf-8"});const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},400);}
 
 /* ═══════════ 상수 ═══════════ */
@@ -2043,7 +2058,7 @@ function cloudSignOut(reason){
 function upsertLocal(kind,data){const ent=KINDS.find(x=>x[0]===kind);if(!ent||!data)return;const arr=DB[ent[1]];const i=arr.findIndex(x=>x.id===data.id);if(i>-1)arr[i]=data;else arr.push(data);SNAP[kname(kind,data.id)]=JSON.stringify(data);if(kind==="member"&&ME&&data.id===ME.id){ME=data;sideUser();}}
 function removeLocal(kind,id){const ent=KINDS.find(x=>x[0]===kind);if(!ent)return;DB[ent[1]]=DB[ent[1]].filter(x=>x.id!==id);delete SNAP[kname(kind,id)];}
 function saveDB(){if(!DB)return;DB.meta.updatedAt=new Date().toISOString();try{localStorage.setItem(MODE==="cloud"?CKEY:KEY,JSON.stringify(DB));}catch(e){toast("저장 공간이 부족합니다. 백업 후 오래된 데이터를 정리하세요.");}if(MODE==="cloud"){queuePush();NT.touch();}}
-function logAct(text){DB.activity.unshift({id:uid("a"),ts:nowHM(),who:ME?ME.name:"시스템",by:ME?ME.id:"",createdAt:new Date().toISOString(),text});if(DB.activity.length>300)DB.activity.length=300;}
+function logAct(text){text=josa(text);DB.activity.unshift({id:uid("a"),ts:nowHM(),who:ME?ME.name:"시스템",by:ME?ME.id:"",createdAt:new Date().toISOString(),text});if(DB.activity.length>300)DB.activity.length=300;}
 function memberById(id){return DB.members.find(m=>m.id===id)||null;}
 function memberName(id){const m=memberById(id);return m?m.name:"미배정";}
 function projectById(id){return DB.projects.find(p=>p.id===id)||null;}
@@ -2688,7 +2703,7 @@ function vDashboard(){
     </div>`:""}
     <div class="card">
       <h2>최근 활동</h2>
-      ${DB.activity.slice(0,10).map(a=>`<div class="act-line"><span class="a-ts">${esc(a.ts)}</span><span class="a-tx"><b>${esc(a.who)}</b> ${esc(a.text)}</span></div>`).join("")||`<div class="empty">아직 활동 기록이 없습니다.</div>`}
+      ${DB.activity.slice(0,10).map(a=>`<div class="act-line"><span class="a-ts">${esc(a.ts)}</span><span class="a-tx"><b>${esc(a.who)}</b> ${esc(josa(a.text))}</span></div>`).join("")||`<div class="empty">아직 활동 기록이 없습니다.</div>`}
     </div>
   </div>`;
 }
@@ -4447,7 +4462,7 @@ async function saveClean(payload){
 function modal(title,body,foot){openModal(`<h2><span class="bars"></span>${title}</h2>${body}${foot?`<div class="m-foot">${foot}</div>`:""}`);}
 function confirm2(msg,ok){
   return new Promise(res=>{
-    modal("확인",`<p style="font-size:14.5px;line-height:1.75">${msg}</p>`,`<button class="btn btn-ghost" id="cf-no">취소</button><button class="btn btn-pri" id="cf-yes">${ok||"확인"}</button>`);
+    modal("확인",`<p style="font-size:14.5px;line-height:1.75">${josa(msg)}</p>`,`<button class="btn btn-ghost" id="cf-no">취소</button><button class="btn btn-pri" id="cf-yes">${ok||"확인"}</button>`);
     $("#cf-no").onclick=()=>{closeModal();res(false);};
     $("#cf-yes").onclick=()=>{closeModal();res(true);};
   });

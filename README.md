@@ -922,7 +922,7 @@ blog/ features.html faq.html about.html 404.html   블로그 · 기본 기능 ·
 sitemap.xml rss.xml robots.txt favicon.ico          검색엔진용 파일과 아이콘
 sample-claude.json         클로드 연동 형식 예시 파일
 tests/                     화면 점검(site-layout-audit.js), 로컬 시험 서버(dev-server.mjs + d1-local.mjs), 바깥 서비스 흉내(mock-upstream.mjs — 솔라피·팝빌·푸시 서버),
-                           서버 시험(invite · admin-ops · store · seller · taxpeople · marketing · creator · notify · message · hometax .test.mjs — node tests/<이름>.test.mjs),
+                           서버 시험(invite · admin-ops · store · seller · taxpeople · marketing · creator · notify · message · hometax · josa .test.mjs — node tests/<이름>.test.mjs),
                            브라우저 시험(marketing.e2e.mjs · creator.e2e.mjs · upgrade.e2e.mjs — Playwright와 크롬이 있는 곳에서)
 README.md                  이 문서
 ```

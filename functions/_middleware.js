@@ -3001,7 +3001,21 @@ async function findEnt(db, ws, kind, key) {   // id 또는 이름으로 찾기
   const hit = rs.map(x => ({ id: x.id, d: parse(x.data) || {} })).sort((a, b) => (normNm(a.d[f]) === nk ? 0 : 1) - (normNm(b.d[f]) === nk ? 0 : 1))[0];
   return hit || null;
 }
-const actRow = (me, text) => { const now = new Date(); return { kind: "act", id: uid("a"), own: me.id, data: { id: uid("a"), ts: (now.getMonth() + 1) + "/" + now.getDate() + " " + String(now.getHours()).padStart(2, "0") + ":" + String(now.getMinutes()).padStart(2, "0"), who: "AI · " + me.name, by: me.id, createdAt: now.toISOString(), text } }; };
+/* 조사 고르기 — "모노가구을(를)" → "모노가구를", "‘프로’(으)로" → "‘프로’로". 바로 앞 글자의 받침을 보고 고릅니다 */
+const JOSA = { "을(를)": ["을", "를"], "를(을)": ["을", "를"], "이(가)": ["이", "가"], "가(이)": ["이", "가"], "은(는)": ["은", "는"], "는(은)": ["은", "는"], "와(과)": ["과", "와"], "과(와)": ["과", "와"], "(으)로": ["으로", "로"], "(이)라": ["이라", "라"], "(이)나": ["이나", "나"] };
+const JOSA_RE = /([가-힣A-Za-z0-9])([^가-힣A-Za-z0-9\s]{0,3}|\s+)(을\(를\)|를\(을\)|이\(가\)|가\(이\)|은\(는\)|는\(은\)|와\(과\)|과\(와\)|\(으\)로|\(이\)라|\(이\)나)/g;
+function josa(text) {
+  return String(text == null ? "" : text).replace(JOSA_RE, (m, ch, mid, j) => {
+    const c = ch.charCodeAt(0);
+    let bat;   // 받침: 0 없음 · 8 ㄹ · 그 밖은 있음
+    if (c >= 0xAC00 && c <= 0xD7A3) bat = (c - 0xAC00) % 28;
+    else if (c >= 48 && c <= 57) bat = [21, 8, 0, 16, 0, 0, 1, 8, 8, 0][c - 48];   // 영 일 이 삼 사 오 육 칠 팔 구
+    else bat = "LMNRlmnr".includes(ch) ? ("LlRr".includes(ch) ? 8 : 4) : 0;           // 엘 엠 엔 알
+    const pair = JOSA[j], pick = j === "(으)로" ? (bat === 0 || bat === 8 ? pair[1] : pair[0]) : (bat ? pair[0] : pair[1]);
+    return ch + (/^\s+$/.test(mid) ? "" : mid) + pick;
+  });
+}
+const actRow = (me, text) => { const now = new Date(); return { kind: "act", id: uid("a"), own: me.id, data: { id: uid("a"), ts: (now.getMonth() + 1) + "/" + now.getDate() + " " + String(now.getHours()).padStart(2, "0") + ":" + String(now.getMinutes()).padStart(2, "0"), who: "AI · " + me.name, by: me.id, createdAt: now.toISOString(), text: josa(text) } }; };
 async function propApply(db, me, prop) {   // 제안을 실제 데이터로 — 승인 때와 자동 반영 때 같은 길
   const p = prop.payload, now = iso(), items = [];
   if (prop.kind === "create-task") {
@@ -4841,7 +4855,7 @@ const LINK_KINDS = {
       const stmts = [db.prepare("UPDATE os_quote SET status=?3, reply_note=?4, approved_at=CASE WHEN ?3='approved' THEN ?5 ELSE approved_at END, replied_at=?5, replied_by=?6 WHERE ws=?1 AND id=?2").bind(l.ws, q.id, st, clip(note, 500), now, clip(by, 40))];
       const j = await spOneT(db, "os_job", l.ws, q.job_id);
       if (st === "approved") stmts.push(db.prepare("UPDATE os_job SET status=CASE WHEN status IN ('inquiry','quote') THEN 'active' ELSE status END, amount=CASE WHEN amount=0 THEN ?5 ELSE amount END, terms=?3, updated_at=?4 WHERE ws=?1 AND id=?2").bind(l.ws, q.job_id, JSON.stringify(osAccept(j, q, now, by)), now, q.total));
-      stmts.push(...upserts(db, l.ws, [{ kind: "act", id: uid("a"), own: l.created_by, data: { id: uid("a"), ts: now.slice(5, 16).replace("T", " ").replace("-", "/"), who: clip(by, 40) || "고객", by: "", createdAt: now, text: `견적 "${q.no || (j ? j.title : "")}"을(를) ${st === "approved" ? "승인했습니다" : "수정 요청했습니다"}.${note ? " — " + clip(note, 120) : ""}` } }], ts()));
+      stmts.push(...upserts(db, l.ws, [{ kind: "act", id: uid("a"), own: l.created_by, data: { id: uid("a"), ts: now.slice(5, 16).replace("T", " ").replace("-", "/"), who: clip(by, 40) || "고객", by: "", createdAt: now, text: josa(`견적 "${q.no || (j ? j.title : "")}"을(를) ${st === "approved" ? "승인했습니다" : "수정 요청했습니다"}.${note ? " — " + clip(note, 120) : ""}`) } }], ts()));
       stmts.push(db.prepare("UPDATE workspaces SET sp_ver=sp_ver+1 WHERE id=?1").bind(l.ws));
       await db.batch(stmts);
       return { ok: true, status: st };
@@ -4859,7 +4873,7 @@ const LINK_KINDS = {
       const t = await entData(db, l.ws, "task", l.target); if (!t) return { error: "not-found" };
       if (t.review === "approved" || (l.used_at && t.review !== "requested")) return { error: "bad-state" };   // 보낸 쪽이 다시 검수 요청해야 같은 링크로 또 답할 수 있습니다
       const now = iso(), d = { ...t, review: action === "approve" ? "approved" : "redo", reviewNote: clip(note, 500), reviewBy: clip(by, 40) || "고객", status: action === "approve" ? "완료" : (t.status === "완료" ? "완료" : "진행중"), updatedAt: now };
-      await db.batch([...upserts(db, l.ws, [{ kind: "task", id: t.id, data: d }, { kind: "act", id: uid("a"), own: l.created_by, data: { id: uid("a"), ts: now.slice(5, 16).replace("T", " ").replace("-", "/"), who: clip(by, 40) || "고객", by: "", createdAt: now, text: `납품 "${t.title}"을(를) ${action === "approve" ? "확인했습니다" : "수정 요청했습니다"}.${note ? " — " + clip(note, 120) : ""}` } }], ts())]);
+      await db.batch([...upserts(db, l.ws, [{ kind: "task", id: t.id, data: d }, { kind: "act", id: uid("a"), own: l.created_by, data: { id: uid("a"), ts: now.slice(5, 16).replace("T", " ").replace("-", "/"), who: clip(by, 40) || "고객", by: "", createdAt: now, text: josa(`납품 "${t.title}"을(를) ${action === "approve" ? "확인했습니다" : "수정 요청했습니다"}.${note ? " — " + clip(note, 120) : ""}`) } }], ts())]);
       return { ok: true, status: action === "approve" ? "approved" : "changed" };
     }
   },
